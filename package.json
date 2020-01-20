@@ -1,0 +1,37 @@
+{
+    "name": "funimation-downloader-nx",
+    "version": "4.5.0",
+    "description": "Download videos from Funimation via cli.",
+    "keywords": [
+        "download",
+        "downloader",
+        "funimation",
+        "funimationnow",
+        "util",
+        "utility",
+        "cli"
+    ],
+    "author": "AniDL",
+    "homepage": "https://github.com/anidl/funimation-downloader-nx",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/anidl/funimation-downloader-nx.git"
+    },
+    "bugs": {
+        "url": "https://github.com/anidl/funimation-downloader-nx/issues"
+    },
+    "license": "MIT",
+    "main": "funi.js",
+    "dependencies": {
+        "form-data": "^3.0.0",
+        "got": "^10.2.2",
+        "hls-download": "^2.3.1",
+        "lookpath": "^1.0.4",
+        "m3u8-parsed": "^1.2.0",
+        "proxy-agent": "^3.1.1",
+        "sei-helper": "^3.3.0",
+        "ttml2srt": "^1.1.0",
+        "yaml": "^1.7.2",
+        "yargs": "^15.1.0"
+    }
+}

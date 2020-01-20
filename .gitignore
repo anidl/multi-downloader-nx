@@ -1,0 +1,12 @@
+/node_modules/
+.DS_Store
+ffmpeg
+mkvmerge
+token.yml
+package-lock.json
+*.exe
+*.dll
+*.ts
+*.mkv
+*.mp4
+*.srt

@@ -1,0 +1,7 @@
+releaseGroup: Funimation
+videoLayer: 7
+fileSuffix: SIZEp
+nServer: 1
+mp4mux: false
+muxSubs: false
+noCleanUp: false
