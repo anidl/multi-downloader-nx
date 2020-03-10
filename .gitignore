@@ -1,4 +1,8 @@
+/bin/ff*
+/bin/mkv*
+/_builds/*
 /node_modules/
+/videos/*.json
 .DS_Store
 ffmpeg
 mkvmerge
@@ -10,3 +14,4 @@ package-lock.json
 *.mkv
 *.mp4
 *.srt
+*.resume

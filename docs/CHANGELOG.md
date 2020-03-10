@@ -1,5 +1,10 @@
 ## Change Log
 
+### 4.5.1 (2020/03/10)
+- Better binary files handling
+- Binary build for windows
+- Known bug: Proxy not working
+
 ### 4.5.0 (2020/01/21)
 - Resume downloading
 - Known bug: Proxy not working

@@ -6,7 +6,7 @@ const path = require('path');
 const url = require('url');
 
 // package json
-const packageJson = require(path.join(__dirname,'package.json'));
+const packageJson = require('./package.json');
 
 // program name
 console.log(`\n=== Funimation Downloader NX ${packageJson.version} ===\n`);
@@ -164,9 +164,6 @@ catch (e) {
     console.log('[ERROR] %s',e.messsage);
     process.exit();
 }
-
-// go to content folder (remove it in future version!)
-process.chdir(cfg.dir.content);
 
 // select mode
 if(argv.auth){
@@ -546,7 +543,7 @@ async function downloadStreams(){
         console.log('[INFO] Stream URL:',videoUrl);
         fnSuffix = argv.suffix.replace('SIZEp',plLayersRes[argv.q]);
         fnOutput = shlp.cleanupFilename(`[${argv.a}] ${fnTitle} - ${fnEpNum} [${fnSuffix}]`);
-        console.log(`[INFO] Output filename: ${fnOutput}`);
+        console.log(`[INFO] Output filename: ${fnOutput}.ts`);
     }
     else if(argv.x > plServerList.length){
         console.log('[ERROR] Server not selected!\n');
@@ -556,6 +553,8 @@ async function downloadStreams(){
         console.log('[ERROR] Layer not selected!\n');
         return;
     }
+    
+    let dlFailed = false;
     
     if (!argv.novids) {
         // download video
@@ -581,37 +580,24 @@ async function downloadStreams(){
             }
         }
         
-        let tsFile = `${fnOutput}.ts`;
-        let resumeFile = `${tsFile}.resume`;
-        let streamOffset = 0;
-        if(fs.existsSync(tsFile) && fs.existsSync(resumeFile)){
-            try{
-                let resume = JSON.parse(fs.readFileSync(resumeFile, 'utf-8'));
-                if(resume.total == chunkList.segments.length && resume.completed != resume.total){
-                    streamOffset = resume.completed;
-                }
-            }
-            catch(e){
-                console.log(e);
-            }
-        }
+        let tsFile = path.join(cfg.dir.content, fnOutput);
         
         let streamdlParams = {
-            fn: tsFile,
+            fn: tsFile + '.ts',
             m3u8json: chunkList,
             baseurl: chunkList.baseUrl,
             pcount: 10,
-            partsOffset: streamOffset,
             proxy: (proxyHLS ? proxyHLS : false)
         };
+        
         let dldata = await new streamdl(streamdlParams).download();
-        if (!dldata.ok) {
-            fs.writeFileSync(resumeFile, JSON.stringify(dldata.parts));
-            console.log(`[ERROR] ${dldata.error}\n`);
-            return;
+        if(!dldata.ok){
+            fs.writeFileSync(`${tsFile}.ts.resume`, JSON.stringify(dldata.parts));
+            console.log(`[ERROR] DL Stats: ${JSON.stringify(dldata.parts)}\n`);
+            dlFailed = true;
         }
-        else {
-            console.log('[INFO] Video downloaded!\n');
+        else if(fs.existsSync(`${tsFile}.ts.resume`) && dldata.ok){
+            fs.unlinkSync(`${tsFile}.ts.resume`);
         }
     }
     else{
@@ -628,7 +614,8 @@ async function downloadStreams(){
         });
         if(subsSrc.ok){
             let srtData = ttml2srt(subsSrc.res.body);
-            fs.writeFileSync(`${fnOutput}.srt`,srtData);
+            let srtFile = path.join(cfg.dir.content, fnOutput) + '.srt';
+            fs.writeFileSync(srtFile, srtData);
             console.log('[INFO] Subtitles downloaded!');
         }
         else{
@@ -637,7 +624,12 @@ async function downloadStreams(){
         }
     }
     
-    if(!fs.statSync(`${fnOutput}.ts`).isFile()){
+    if(dlFailed){
+        console.log('\n[INFO] TS file not fully downloaded, skip muxing video...\n');
+        return;
+    }
+    
+    if(!fs.statSync(`${path.join(cfg.dir.content, fnOutput)}.ts`).isFile()){
         console.log('\n[INFO] TS file not found, skip muxing video...\n');
         return;
     }
@@ -645,46 +637,55 @@ async function downloadStreams(){
     // add subs
     let addSubs = argv.mks && stDlPath ? true : false;
     
+    // usage
+    let usableMKVmerge = true;
+    let usableFFmpeg = true;
+    console.log(await lookpath(path.join(cfg.bin.ffmpeg + '.exe')));
+    
     // check exec path
     let mkvmergebinfile = await lookpath(path.join(cfg.bin.mkvmerge));
     let ffmpegbinfile   = await lookpath(path.join(cfg.bin.ffmpeg));
+    
     // check exec
     if( !argv.mp4 && !mkvmergebinfile ){
         console.log('[WARN] MKVMerge not found, skip using this...');
-        cfg.bin.mkvmerge = false;
+        usableMKVmerge = false;
     }
-    if( !mkvmergebinfile && !ffmpegbinfile || argv.mp4 && !ffmpegbinfile ){
+    if( !usableMKVmerge && !ffmpegbinfile || argv.mp4 && !ffmpegbinfile ){
         console.log('[WARN] FFmpeg not found, skip using this...');
-        cfg.bin.ffmpeg = false;
+        usableFFmpeg = false;
     }
     
     // ftag
     argv.ftag = argv.ftag ? argv.ftag : argv.a;
     argv.ftag = shlp.cleanupFilename(argv.ftag);
     
+    let muxTrg = path.join(cfg.dir.content, fnOutput);
+    let tshTrg = path.join(cfg.dir.trash, fnOutput);
+    
     // select muxer
-    if(!argv.mp4 && cfg.bin.mkvmerge){
+    if(!argv.mp4 && usableMKVmerge){
         // mux to mkv
         let mkvmux  = [];
-        mkvmux.push('-o',`${fnOutput}.mkv`);
+        mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
         mkvmux.push('--track-name',`0:[${argv.ftag}]`);
         mkvmux.push('--language',`1:${argv.sub?'jpn':'eng'}`);
         mkvmux.push('--video-tracks','0','--audio-tracks','1');
         mkvmux.push('--no-subtitles','--no-attachments');
-        mkvmux.push(`${fnOutput}.ts`);
+        mkvmux.push(`${muxTrg}.ts`);
         if(addSubs){
             mkvmux.push('--language','0:eng');
-            mkvmux.push(`${fnOutput}.srt`);
+            mkvmux.push(`${muxTrg}.srt`);
         }
-        fs.writeFileSync(`${fnOutput}.json`,JSON.stringify(mkvmux,null,'  '));
-        shlp.exec('mkvmerge',`"${cfg.bin.mkvmerge}"`,`@"${fnOutput}.json"`);
-        fs.unlinkSync(`${fnOutput}.json`);
+        fs.writeFileSync(`${muxTrg}.json`,JSON.stringify(mkvmux,null,'  '));
+        shlp.exec('mkvmerge',`"${mkvmergebinfile}"`,`@"${muxTrg}.json"`);
+        fs.unlinkSync(`${muxTrg}.json`);
     }
-    else if(cfg.bin.ffmpeg){
+    else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let ffmux = `-i "${fnOutput}.ts" `;
-        ffmux += addSubs ? `-i "${fnOutput}.srt" ` : '';
+        let ffmux = `-i "${muxTrg}.ts" `;
+        ffmux += addSubs ? `-i "${muxTrg}.srt" ` : '';
         ffmux += '-map 0 -c:v copy -c:a copy ';
         ffmux += addSubs ? '-map 1 ' : '';
         ffmux += addSubs && !argv.mp4 ? '-c:s srt ' : '';
@@ -692,24 +693,27 @@ async function downloadStreams(){
         ffmux += '-metadata encoding_tool="no_variable_data" ';
         ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:0 language=${argv.sub?'jpn':'eng'} `;
         ffmux += addSubs ? '-metadata:s:s:0 language=eng ' : '';
-        ffmux += `"${fnOutput}.${ffext}"`;
+        ffmux += `"${muxTrg}.${ffext}"`;
         // mux to mkv
-        shlp.exec('ffmpeg',`"${cfg.bin.ffmpeg}"`,ffmux);
+        shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,ffmux);
     }
     else{
         console.log('\n[INFO] Done!\n');
         return;
     }
-    if(argv.nocleanup){
-        fs.renameSync(fnOutput+'.ts', path.join(cfg.dir.trash,`/${fnOutput}.ts`));
+    if(argv.notrashfolder && argv.nocleanup){
+        // don't move or delete temp files
+    }
+    else if(argv.nocleanup){
+        fs.renameSync(muxTrg+'.ts', tshTrg + '.ts');
         if(stDlPath && argv.mks){
-            fs.renameSync(fnOutput+'.srt', path.join(cfg.dir.trash,`/${fnOutput}.srt`));
+            fs.renameSync(muxTrg+'.srt', tshTrg + '.srt');
         }
     }
     else{
-        fs.unlinkSync(fnOutput+'.ts', path.join(cfg.dir.trash,`/${fnOutput}.ts`));
+        fs.unlinkSync(muxTrg+'.ts');
         if(stDlPath && argv.mks){
-            fs.unlinkSync(fnOutput+'.srt', path.join(cfg.dir.trash,`/${fnOutput}.srt`));
+            fs.unlinkSync(muxTrg+'.srt');
         }
     }
     console.log('\n[INFO] Done!\n');
