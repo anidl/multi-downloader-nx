@@ -1,7 +1,7 @@
 {
     "name": "funimation-downloader-nx",
     "short_name": "funi",
-    "version": "4.5.1",
+    "version": "4.6.0",
     "description": "Download videos from Funimation via cli.",
     "keywords": [
         "download",
@@ -25,18 +25,18 @@
     "main": "funi.js",
     "dependencies": {
         "form-data": "^3.0.0",
-        "got": "^10.6.0",
-        "hls-download": "^2.3.2",
-        "lookpath": "^1.0.5",
-        "m3u8-parsed": "^1.2.0",
+        "got": "^11.2.0",
+        "hls-download": "^2.4.1",
+        "lookpath": "^1.0.6",
+        "m3u8-parsed": "^1.3.0",
         "proxy-agent": "^3.1.1",
         "sei-helper": "^3.3.0",
-        "ttml2srt": "^1.1.0",
-        "yaml": "^1.8.0",
-        "yargs": "^15.3.0"
+        "ttml2srt": "^1.2.0",
+        "yaml": "^1.10.0",
+        "yargs": "^15.3.1"
     },
     "devDependencies": {
-        "fs-extra": "^8.1.0",
+        "fs-extra": "^9.0.0",
         "nexe": "^3.3.2",
         "removeNPMAbsolutePaths": "^2.0.0"
     },
@@ -44,6 +44,8 @@
         "build-win64": "node modules/build win64",
         "build-linux64": "node modules/build linux64",
         "build-macos64": "node modules/build macos64",
+        "eslint": "eslint *.js modules",
+        "eslint-fix": "eslint *.js modules --fix",
         "test": "echo \"Error: no test specified\" && exit 1"
     }
 }

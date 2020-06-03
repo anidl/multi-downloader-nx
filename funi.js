@@ -13,9 +13,7 @@ console.log(`\n=== Funimation Downloader NX ${packageJson.version} ===\n`);
 const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 
 // request
-const got = require('got').extend({
-    headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0' },
-});
+const got = require('got');
 
 // modules extra
 const yaml = require('yaml');
@@ -492,7 +490,7 @@ async function downloadStreams(){
         plMaxLayer    = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
         // set urls and servers
         let plUrlDl  = s.uri;
-        let plServer = plUrlDl.split('/')[2];
+        let plServer = new URL(plUrlDl).host;
         if(!plServerList.includes(plServer)){
             plServerList.push(plServer);
         }
@@ -522,10 +520,14 @@ async function downloadStreams(){
     
     for(let s of mainServersList){
         if(plServerList.includes(s)){
-            plServerList.splice(plServerList.indexOf(s),1);
+            plServerList.splice(plServerList.indexOf(s), 1);
             plServerList.unshift(s);
             break;
         }
+    }
+    
+    if(typeof argv.q == 'object' && argv.q.length > 1){
+        argv.q = argv.q[argv.q.length-1];
     }
     
     argv.q = argv.q < 1 || argv.q > plMaxLayer ? plMaxLayer : argv.q;
@@ -571,7 +573,7 @@ async function downloadStreams(){
         if (argv.proxy && !argv.ssp) {
             try {
                 proxyHLS = {};
-                proxyHLS.url = buildProxyUrl(argv.proxy,argv['proxy-auth']);
+                proxyHLS.url = buildProxyUrl(argv.proxy, argv['proxy-auth']);
             }
             catch(e){
                 console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
@@ -629,7 +631,10 @@ async function downloadStreams(){
         return;
     }
     
-    if(!fs.statSync(`${path.join(cfg.dir.content, fnOutput)}.ts`).isFile()){
+    let muxTrg = path.join(cfg.dir.content, fnOutput);
+    let tshTrg = path.join(cfg.dir.trash, fnOutput);
+    
+    if(!fs.existsSync(`${muxTrg}.ts`) || !fs.statSync(`${muxTrg}.ts`).isFile()){
         console.log('\n[INFO] TS file not found, skip muxing video...\n');
         return;
     }
@@ -659,9 +664,6 @@ async function downloadStreams(){
     // ftag
     argv.ftag = argv.ftag ? argv.ftag : argv.a;
     argv.ftag = shlp.cleanupFilename(argv.ftag);
-    
-    let muxTrg = path.join(cfg.dir.content, fnOutput);
-    let tshTrg = path.join(cfg.dir.trash, fnOutput);
     
     // select muxer
     if(!argv.mp4 && usableMKVmerge){
@@ -721,7 +723,12 @@ async function downloadStreams(){
 
 // get data from url
 async function getData(options){
-    let gOptions = { url: options.url, headers: {} };
+    let gOptions = { 
+        url: options.url, 
+        headers: {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
+        }
+    };
     if(options.baseUrl){
         gOptions.prefixUrl = options.baseUrl;
         gOptions.url = gOptions.url.replace(/^\//,'');
@@ -741,6 +748,17 @@ async function getData(options){
     if(options.dinstid){
         gOptions.headers.devicetype = 'Android Phone';
     }
+    // debug
+    gOptions.hooks = {
+        beforeRequest: [
+            (options) => {
+                if(argv.debug){
+                    console.log('[DEBUG] GOT OPTIONS:');
+                    console.log(options);
+                }
+            }
+        ]
+    };
     if(options.useProxy && argv.proxy){
         try{
             const ProxyAgent = require('proxy-agent');

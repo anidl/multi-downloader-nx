@@ -1,13 +1,23 @@
 ## Change Log
 
+### 4.6.0 (2020/06/03)
+- Bug fixes and improvements
+
+#### Known issues:
+- Proxy not supported
+
 ### 4.5.1 (2020/03/10)
 - Better binary files handling
 - Binary build for windows
-- Known bug: Proxy not working
+
+#### Known issues:
+- Proxy not supported
 
 ### 4.5.0 (2020/01/21)
 - Resume downloading
-- Known bug: Proxy not working
+
+#### Known issues:
+- Proxy not supported
 
 ### 4.4.2 (2019/07/21)
 - Better proxy handling for stream download
