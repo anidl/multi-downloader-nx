@@ -1,7 +1,7 @@
 {
     "name": "funimation-downloader-nx",
     "short_name": "funi",
-    "version": "4.6.0",
+    "version": "4.6.1",
     "description": "Download videos from Funimation via cli.",
     "keywords": [
         "download",
@@ -26,7 +26,7 @@
     "dependencies": {
         "form-data": "^3.0.0",
         "got": "^11.2.0",
-        "hls-download": "^2.4.1",
+        "hls-download": "git+https://github.com/nijave/hls-download.git#6fc3c3f",
         "lookpath": "^1.0.6",
         "m3u8-parsed": "^1.3.0",
         "proxy-agent": "^3.1.1",
