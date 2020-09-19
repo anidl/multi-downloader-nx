@@ -1,5 +1,11 @@
 ## Change Log
 
+### 4.6.1 (2020/09/19)
+- Update modules
+
+#### Known issues:
+- Proxy not supported
+
 ### 4.6.0 (2020/06/03)
 - Bug fixes and improvements
 
