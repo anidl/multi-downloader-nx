@@ -13,5 +13,7 @@ package-lock.json
 *.ts
 *.mkv
 *.mp4
+*.ass
 *.srt
 *.resume
+*.user.yml

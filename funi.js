@@ -3,7 +3,6 @@
 // modules build-in
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
 
 // package json
 const packageJson = require('./package.json');
@@ -12,40 +11,26 @@ const packageJson = require('./package.json');
 console.log(`\n=== Funimation Downloader NX ${packageJson.version} ===\n`);
 const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 
-// request
-const got = require('got');
-
 // modules extra
 const yaml = require('yaml');
 const shlp = require('sei-helper');
 const yargs = require('yargs');
-const FormData = require('form-data');
 const { lookpath } = require('lookpath');
-
-// m3u8 and ttml
 const m3u8 = require('m3u8-parsed');
 const streamdl = require('hls-download');
-const { ttml2srt } = require('ttml2srt');
 
-// get cfg file
-function getYamlCfg(file){
-    let data = {};
-    if(fs.existsSync(file)){
-        try{
-            data = yaml.parse(fs.readFileSync(file, 'utf8'));
-            return data;
-        }
-        catch(e){}
-    }
-    return data;
-}
+// extra
+const modulesFolder = __dirname + '/modules';
+const getYamlCfg = require(modulesFolder+'/module.cfg-loader');
+const getData = require(modulesFolder + '/module.getdata.js');
+const vttConvert = require(modulesFolder + '/module.vttconvert');
 
 // new-cfg
 const cfgFolder = __dirname + '/config';
-const binCfgFile = path.join(cfgFolder,'bin-path.yml');
-const dirCfgFile = path.join(cfgFolder,'dir-path.yml');
-const cliCfgFile = path.join(cfgFolder,'cli-defaults.yml');
-const tokenFile  = path.join(cfgFolder,'token.yml');
+const binCfgFile = path.join(cfgFolder,'bin-path');
+const dirCfgFile = path.join(cfgFolder,'dir-path');
+const cliCfgFile = path.join(cfgFolder,'cli-defaults');
+const tokenFile  = path.join(cfgFolder,'token');
 
 // params
 let cfg = {
@@ -103,10 +88,10 @@ let argv = yargs
     .boolean('nosubs')
     
     // proxy
-    .describe('proxy','http(s)/socks proxy WHATWG url (ex. https://myproxyhost:1080/)')
-    .describe('proxy-auth','Colon-separated username and password for proxy')
-    .describe('ssp','Ignore proxy settings for stream downloading')
-    .boolean('ssp')
+    // .describe('proxy','http(s)/socks proxy WHATWG url (ex. https://myproxyhost:1080/)')
+    // .describe('proxy-auth','Colon-separated username and password for proxy')
+    // .describe('ssp','Ignore proxy settings for stream downloading')
+    // .boolean('ssp')
     
     .describe('mp4','Mux into mp4')
     .boolean('mp4')
@@ -153,16 +138,6 @@ let fnTitle = '',
     stDlPath = false,
     batchDL = false;
 
-// go to work folder
-try {
-    fs.accessSync(cfg.dir.content, fs.R_OK | fs.W_OK);
-}
-catch (e) {
-    console.log(e);
-    console.log('[ERROR] %s',e.messsage);
-    process.exit();
-}
-
 // select mode
 if(argv.auth){
     auth();
@@ -170,7 +145,7 @@ if(argv.auth){
 else if(argv.search){
     searchShow();
 }
-else if(argv.s && !isNaN(parseInt(argv.s,10)) && parseInt(argv.s,10) > 0){
+else if(argv.s && !isNaN(parseInt(argv.s, 10)) && parseInt(argv.s, 10) > 0){
     getShow();
 }
 else{
@@ -188,15 +163,16 @@ async function auth(){
         url: '/auth/login/',
         useProxy: true,
         auth: authOpts,
+        debug: argv.debug,
     });
     if(authData.ok){
         authData = JSON.parse(authData.res.body);
         if(authData.token){
             console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0,8),'*'.repeat(32));
-            fs.writeFileSync(tokenFile,yaml.stringify({'token':authData.token}));
+            fs.writeFileSync(tokenFile, yaml.stringify({'token': authData.token}));
         }
         else if(authData.error){
-            console.log('[ERROR]',authData.error,'\n');
+            console.log('[ERROR]%s\n', authData.error);
             process.exit(1);
         }
     }
@@ -209,8 +185,10 @@ async function searchShow(){
         baseUrl: api_host,
         url: '/source/funimation/search/auto/',
         querystring: qs,
+        token: token,
         useToken: true,
         useProxy: true,
+        debug: argv.debug,
     });
     if(!searchData.ok){return;}
     searchData = JSON.parse(searchData.res.body);
@@ -233,9 +211,11 @@ async function getShow(){
     // show main data
     let showData = await getData({
         baseUrl: api_host,
-        url: `/source/catalog/title/${parseInt(argv.s,10)}`,
+        url: `/source/catalog/title/${parseInt(argv.s, 10)}`,
+        token: token,
         useToken: true,
         useProxy: true,
+        debug: argv.debug,
     });
     // check errors
     if(!showData.ok){return;}
@@ -257,8 +237,10 @@ async function getShow(){
         baseUrl: api_host,
         url: '/funimation/episodes/',
         querystring: qs,
+        token: token,
         useToken: true,
         useProxy: true,
+        debug: argv.debug,
     });
     if(!episodesData.ok){return;}
     let eps = JSON.parse(episodesData.res.body).items, fnSlug = [], is_selected = false;
@@ -345,8 +327,10 @@ async function getEpisode(fnSlug){
     let episodeData = await getData({
         baseUrl: api_host,
         url: `/source/catalog/episode/${fnSlug.title}/${fnSlug.episode}/`,
+        token: token,
         useToken: true,
         useProxy: true,
+        debug: argv.debug,
     });
     if(!episodeData.ok){return;}
     let ep = JSON.parse(episodeData.res.body).items[0], streamId = 0;
@@ -357,23 +341,27 @@ async function getEpisode(fnSlug){
         ep.number = ep.number !== '' ? ep.mediaCategory+ep.number : ep.mediaCategory+'#'+ep.id;
     }
     fnEpNum = argv.ep && !batchDL ? ( parseInt(argv.ep, 10) < 10 ? '0' + argv.ep : argv.ep ) : ep.number;
+    
     // is uncut
     let uncut = {
         Japanese: false,
         English: false
     };
+    
     // end
     console.log(
         '[INFO] %s - S%sE%s - %s',
         ep.parent.title,
-        (ep.parent.seasonNumber?ep.parent.seasonNumber:'?'),
-        (ep.number?ep.number:'?'),
+        (ep.parent.seasonNumber ? ep.parent.seasonNumber : '?'),
+        (ep.number ? ep.number : '?'),
         ep.title
     );
+    
     console.log('[INFO] Available streams (Non-Encrypted):');
+    
     // map medias
     let media = ep.media.map(function(m){
-        if(m.mediaType=='experience'){
+        if(m.mediaType == 'experience'){
             if(m.version.match(/uncut/i)){
                 uncut[m.language] = true;
             }
@@ -389,6 +377,7 @@ async function getEpisode(fnSlug){
             return { id: 0, type: '' };
         }
     });
+    
     // select
     media = media.reverse();
     for(let m of media){
@@ -411,6 +400,7 @@ async function getEpisode(fnSlug){
             console.log(`[#${m.id}] ${dub_type} [${m.version}]`,(selected?'(selected)':''));
         }
     }
+    
     if(streamId<1){
         console.log('[ERROR] Track not selected\n');
         return;
@@ -419,9 +409,11 @@ async function getEpisode(fnSlug){
         let streamData = await getData({
             baseUrl: api_host,
             url: `/source/catalog/video/${streamId}/signed`,
+            token: token,
+            dinstid: 'uuid',
             useToken: true,
             useProxy: true,
-            dinstid: 'uuid',
+            debug: argv.debug,
         });
         if(!streamData.ok){return;}
         streamData = JSON.parse(streamData.res.body);
@@ -455,7 +447,7 @@ function getSubsUrl(m){
     for(let i in m){
         let fpp = m[i].filePath.split('.');
         let fpe = fpp[fpp.length-1];
-        if(fpe == 'dfxp'){ // dfxp, srt, vtt
+        if(fpe == 'vtt'){ // dfxp (TTML), srt, vtt
             return m[i].filePath;
         }
     }
@@ -468,14 +460,16 @@ async function downloadStreams(){
     let plQualityReq = await getData({
         url: tsDlPath,
         useProxy: (argv.ssp ? false : true),
+        debug: argv.debug,
     });
     if(!plQualityReq.ok){return;}
     
     let plQualityLinkList = m3u8(plQualityReq.res.body);
     
     let mainServersList = [
+        'vmfst-api.prd.funimationsvc.com',
         'd132fumi6di1wa.cloudfront.net',
-        'funiprod.akamaized.net'
+        'funiprod.akamaized.net',
     ];
     
     let plServerList = [],
@@ -486,7 +480,7 @@ async function downloadStreams(){
     
     for(let s of plQualityLinkList.playlists){
         // set layer and max layer
-        let plLayerId = parseInt(s.uri.match(/_Layer(\d+)\.m3u8$/)[1]);
+        let plLayerId = parseInt(s.uri.match(/_Layer(\d+)\.m3u8/)[1]);
         plMaxLayer    = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
         // set urls and servers
         let plUrlDl  = s.uri;
@@ -563,6 +557,7 @@ async function downloadStreams(){
         let reqVideo = await getData({
             url: videoUrl,
             useProxy: (argv.ssp ? false : true),
+            debug: argv.debug,
         });
         if (!reqVideo.ok) { return; }
         
@@ -606,23 +601,29 @@ async function downloadStreams(){
         console.log('[INFO] Skip video downloading...\n');
     }
     
+     // add subs
+    let subsUrl = stDlPath;
+    let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
+    let addSubs = argv.mks && subsUrl ? true : false;
+    
     // download subtitles
-    if(stDlPath){
+    if(subsUrl){
         console.log('[INFO] Downloading subtitles...');
-        console.log(stDlPath);
+        console.log(subsUrl);
         let subsSrc = await getData({
-            url: stDlPath,
+            url: subsUrl,
             useProxy: true,
+            debug: argv.debug,
         });
         if(subsSrc.ok){
-            let srtData = ttml2srt(subsSrc.res.body);
-            let srtFile = path.join(cfg.dir.content, fnOutput) + '.srt';
-            fs.writeFileSync(srtFile, srtData);
+            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false));
+            let assFile = path.join(cfg.dir.content, fnOutput) + subsExt;
+            fs.writeFileSync(assFile, assData);
             console.log('[INFO] Subtitles downloaded!');
         }
         else{
             console.log('[ERROR] Failed to download subtitles!');
-            argv.mks = false;
+            addSubs = false;
         }
     }
     
@@ -639,13 +640,9 @@ async function downloadStreams(){
         return;
     }
     
-    // add subs
-    let addSubs = argv.mks && stDlPath ? true : false;
-    
     // usage
     let usableMKVmerge = true;
     let usableFFmpeg = true;
-    console.log(await lookpath(path.join(cfg.bin.ffmpeg + '.exe')));
     
     // check exec path
     let mkvmergebinfile = await lookpath(path.join(cfg.bin.mkvmerge));
@@ -678,7 +675,7 @@ async function downloadStreams(){
         mkvmux.push(`${muxTrg}.ts`);
         if(addSubs){
             mkvmux.push('--language','0:eng');
-            mkvmux.push(`${muxTrg}.srt`);
+            mkvmux.push(`${muxTrg}${subsExt}`);
         }
         fs.writeFileSync(`${muxTrg}.json`,JSON.stringify(mkvmux,null,'  '));
         shlp.exec('mkvmerge',`"${mkvmergebinfile}"`,`@"${muxTrg}.json"`);
@@ -687,10 +684,10 @@ async function downloadStreams(){
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let ffmux = `-i "${muxTrg}.ts" `;
-        ffmux += addSubs ? `-i "${muxTrg}.srt" ` : '';
+        ffmux += addSubs ? `-i "${muxTrg}${subsExt}" ` : '';
         ffmux += '-map 0 -c:v copy -c:a copy ';
         ffmux += addSubs ? '-map 1 ' : '';
-        ffmux += addSubs && !argv.mp4 ? '-c:s srt ' : '';
+        ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
         ffmux += addSubs &&  argv.mp4 ? '-c:s mov_text ' : '';
         ffmux += '-metadata encoding_tool="no_variable_data" ';
         ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:0 language=${argv.sub?'jpn':'eng'} `;
@@ -708,116 +705,46 @@ async function downloadStreams(){
     }
     else if(argv.nocleanup){
         fs.renameSync(muxTrg+'.ts', tshTrg + '.ts');
-        if(stDlPath && argv.mks){
-            fs.renameSync(muxTrg+'.srt', tshTrg + '.srt');
+        if(subsUrl && addSubs){
+            fs.renameSync(muxTrg +subsExt, tshTrg +subsExt);
         }
     }
     else{
         fs.unlinkSync(muxTrg+'.ts');
-        if(stDlPath && argv.mks){
-            fs.unlinkSync(muxTrg+'.srt');
+        if(subsUrl && addSubs){
+            fs.unlinkSync(muxTrg +subsExt);
         }
     }
     console.log('\n[INFO] Done!\n');
 }
 
-// get data from url
-async function getData(options){
-    let gOptions = { 
-        url: options.url, 
-        headers: {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
-        }
-    };
-    if(options.baseUrl){
-        gOptions.prefixUrl = options.baseUrl;
-        gOptions.url = gOptions.url.replace(/^\//,'');
+// make proxy URL
+function buildProxy(proxyBaseUrl, proxyAuth){
+    if(!proxyBaseUrl.match(/^(https?|socks4|socks5):/)){
+        proxyBaseUrl = 'http://' + proxyBaseUrl;
     }
-    if(options.querystring){
-        gOptions.url += `?${new URLSearchParams(options.querystring).toString()}`;
-    }
-    if(options.auth){
-        gOptions.method = 'POST';
-        gOptions.body = new FormData();
-        gOptions.body.append('username', options.auth.user);
-        gOptions.body.append('password', options.auth.pass);
-    }
-    if(options.useToken && token){
-        gOptions.headers.Authorization = `Token ${token}`;
-    }
-    if(options.dinstid){
-        gOptions.headers.devicetype = 'Android Phone';
-    }
-    // debug
-    gOptions.hooks = {
-        beforeRequest: [
-            (options) => {
-                if(argv.debug){
-                    console.log('[DEBUG] GOT OPTIONS:');
-                    console.log(options);
-                }
-            }
-        ]
-    };
-    if(options.useProxy && argv.proxy){
-        try{
-            const ProxyAgent = require('proxy-agent');
-            let proxyUrl = buildProxyUrl(argv.proxy,argv['proxy-auth']);
-            gOptions.agent = new ProxyAgent(proxyUrl);
-            gOptions.timeout = 10000;
-        }
-        catch(e){
-            console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
-            console.log('[WARN] Skiping...');
-            argv.proxy = false;
-        }
-    }
-    try {
-        if(argv.debug){
-            console.log('[Debug] REQ:', gOptions);
-        }
-        let res = await got(gOptions);
-        if(res.body && res.body.match(/^</)){
-            throw { name: 'HTMLError', res };
-        }
-        return {
-            ok: true,
-            res,
-        };
-    }
-    catch(error){
-        if(argv.debug){
-            console.log(error);
-        }
-        if(error.response && error.response.statusCode && error.response.statusMessage){
-            console.log(`[ERROR] ${error.name} ${error.response.statusCode}: ${error.response.statusMessage}`);
-        }
-        else if(error.name && error.name == 'HTMLError' && error.res && error.res.body){
-            console.log(`[ERROR] ${error.name}:`);
-            console.log(error.res.body);
-        }
-        else{
-            console.log(`[ERROR] ${error.name}: ${error.code||error.message}`);
-        }
-        return {
-            ok: false,
-            error,
-        };
-    }
-}
-function buildProxyUrl(proxyBaseUrl,proxyAuth){
+    
     let proxyCfg = new URL(proxyBaseUrl);
-    if(!proxyCfg.hostname || !proxyCfg.port){
-        throw new Error();
+    let proxyStr = `${proxyCfg.protocol}//`;
+    
+    if(typeof proxyCfg.hostname != 'string' || proxyCfg.hostname == ''){
+        throw new Error('[ERROR] Hostname and port required for proxy!');
     }
-    if(proxyAuth && proxyAuth.match(':')){
-        proxyCfg.auth = proxyAuth;
+    
+    if(proxyAuth && typeof proxyAuth == 'string' && proxyAuth.match(':')){
+        proxyCfg.username = proxyAuth.split(':')[0];
+        proxyCfg.password = proxyAuth.split(':')[1];
+        proxyStr += `${proxyCfg.username}:${proxyCfg.password}@`;
     }
-    return url.format({
-        protocol: proxyCfg.protocol,
-        slashes: true,
-        auth: proxyCfg.auth,
-        hostname: proxyCfg.hostname,
-        port: proxyCfg.port,
-    });
+    
+    proxyStr += proxyCfg.hostname;
+    
+    if(!proxyCfg.port && proxyCfg.protocol == 'http:'){
+        proxyStr += ':80';
+    }
+    else if(!proxyCfg.port && proxyCfg.protocol == 'https:'){
+        proxyStr += ':443';
+    }
+    
+    return proxyStr;
 }

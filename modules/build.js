@@ -7,7 +7,7 @@ const modulesCleanup = require('removeNPMAbsolutePaths');
 const { compile } = require('nexe');
 
 const buildsDir = './_builds';
-const nodeVer = '-12.15.0';
+const nodeVer = '';
 
 // main
 (async function(){
@@ -33,6 +33,7 @@ const nodeVer = '-12.15.0';
     fs.mkdirSync(`${buildDir}/videos`);
     fs.mkdirSync(`${buildDir}/videos/_trash`);
     const buildConfig = {
+        loglevel: 'verbose',
         input: './crunchy.js',
         output: `${buildDir}/${pkg.short_name}`,
         target: getTarget(buildType) + nodeVer,
@@ -41,23 +42,19 @@ const nodeVer = '-12.15.0';
         ],
     };
     console.log(`[Build] Build configuration: ${buildFull}`);
-    await compile(buildConfig);
-    if(fs.existsSync('./bin/ffmpeg')){
-        // fs.copySync('./bin/ffmpeg', `${buildDir}/bin/ffmpeg`);
+    try {
+        await compile(buildConfig);
     }
-    if(fs.existsSync('./bin/ffmpeg.exe')){
-        // fs.copySync('./bin/ffmpeg.exe', `${buildDir}/bin/ffmpeg.exe`);
+    catch(e){
+        console.log(e);
+        process.exit();
     }
-    if(fs.existsSync('./bin/mkvmerge')){
-        // fs.copySync('./bin/mkvmerge', `${buildDir}/bin/mkvmerge`);
-    }
-    if(fs.existsSync('./bin/mkvmerge.exe')){
-        // fs.copySync('./bin/mkvmerge.exe', `${buildDir}/bin/mkvmerge.exe`);
-    }
+    fs.copySync('./bin/', `${buildDir}/bin/`);
     fs.copySync('./config/bin-path.yml', `${buildDir}/config/bin-path.yml`);
     fs.copySync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);
     fs.copySync('./config/dir-path.yml', `${buildDir}/config/dir-path.yml`);
     fs.copySync('./modules/cmd-here.bat', `${buildDir}/cmd-here.bat`);
+    fs.copySync('./modules/NotoSans-Regular.ttf', `${buildDir}/NotoSans-Regular.ttf`);
     fs.copySync('./docs/', `${buildDir}/docs/`);
     fs.copySync('./LICENSE.md', `${buildDir}/docs/LICENSE.md`);
     if(fs.existsSync(`${buildsDir}/${buildFull}.7z`)){
