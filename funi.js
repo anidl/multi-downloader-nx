@@ -14,13 +14,13 @@ const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 // modules extra
 const yaml = require('yaml');
 const shlp = require('sei-helper');
-const yargs = require('yargs');
 const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
 const streamdl = require('hls-download');
 
 // extra
 const modulesFolder = __dirname + '/modules';
+const appYargs = require(modulesFolder+'/module.app-args');
 const getYamlCfg = require(modulesFolder+'/module.cfg-loader');
 const getData = require(modulesFolder + '/module.getdata.js');
 const vttConvert = require(modulesFolder + '/module.vttconvert');
@@ -49,77 +49,7 @@ if(!token){
 }
 
 // cli
-let argv = yargs
-    .wrap(Math.min(100))
-    .usage('Usage: $0 [options]')
-    .help(false).version(false)
-    
-    // auth
-    .describe('auth','Enter auth mode')
-    
-    // search
-    .describe('search','Sets the show title for search')
-    
-    // params
-    .describe('s','Sets the show id')
-    .describe('e','Select episode ids (comma-separated, hyphen-sequence)')
-    
-    .describe('q','Video layer (0 is max)')
-    .choices('q', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-    .default('q', cfg.cli.videoLayer)
-    
-    .describe('alt','Alternative episode listing (if available)')
-    .boolean('alt')
-    
-    .describe('sub','Subtitles mode (Dub mode by default)')
-    .boolean('sub')
-    
-    .describe('simul','Forсe download simulcast version instead of uncut')
-    .boolean('simul')
-    
-    .describe('x','Select server')
-    .choices('x', [1, 2, 3, 4])
-    .default('x', cfg.cli.nServer)
-    
-    .describe('novids', 'Skip download videos')
-    .boolean('novids')
-    
-    .describe('nosubs','Skip download subtitles for Dub (if available)')
-    .boolean('nosubs')
-    
-    // proxy
-    // .describe('proxy','http(s)/socks proxy WHATWG url (ex. https://myproxyhost:1080/)')
-    // .describe('proxy-auth','Colon-separated username and password for proxy')
-    // .describe('ssp','Ignore proxy settings for stream downloading')
-    // .boolean('ssp')
-    
-    .describe('mp4','Mux into mp4')
-    .boolean('mp4')
-    .default('mp4',cfg.cli.mp4mux)
-    .describe('mks','Add subtitles to mkv or mp4 (if available)')
-    .boolean('mks')
-    .default('mks',cfg.cli.muxSubs)
-    
-    .describe('a','Filenaming: Release group')
-    .default('a',cfg.cli.releaseGroup)
-    .describe('t','Filenaming: Series title override')
-    .describe('ep','Filenaming: Episode number override (ignored in batch mode)')
-    .describe('suffix','Filenaming: Filename suffix override (first "SIZEp" will be replaced with actual video size)')
-    .default('suffix',cfg.cli.fileSuffix)
-    
-    // util
-    .describe('nocleanup','move temporary files to trash folder instead of deleting')
-    .boolean('nocleanup')
-    .default('nocleanup',cfg.cli.noCleanUp)
-    
-    // help
-    .describe('h','Show this help')
-    .alias('h','help')
-    .boolean('h')
-    
-    .version(false)
-    .help(false)
-    .argv;
+const argv = appYargs.appArgv(cfg.cli);
 
 // check page
 if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
@@ -149,7 +79,7 @@ else if(argv.s && !isNaN(parseInt(argv.s, 10)) && parseInt(argv.s, 10) > 0){
     getShow();
 }
 else{
-    yargs.showHelp();
+    appYargs.showHelp();
     process.exit();
 }
 
@@ -169,7 +99,7 @@ async function auth(){
         authData = JSON.parse(authData.res.body);
         if(authData.token){
             console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0,8),'*'.repeat(32));
-            fs.writeFileSync(tokenFile, yaml.stringify({'token': authData.token}));
+            fs.writeFileSync(tokenFile + '.yml', yaml.stringify({'token': authData.token}));
         }
         else if(authData.error){
             console.log('[ERROR]%s\n', authData.error);
@@ -629,6 +559,10 @@ async function downloadStreams(){
     
     if(dlFailed){
         console.log('\n[INFO] TS file not fully downloaded, skip muxing video...\n');
+        return;
+    }
+    
+    if(argv.skipmux){
         return;
     }
     

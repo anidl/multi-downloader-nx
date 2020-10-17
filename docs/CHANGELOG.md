@@ -1,5 +1,13 @@
 ## Change Log
 
+### 4.7.0 (unreleased)
+- Change subtitles parser from ttml to vtt
+- Improve help command
+- Update modules
+
+#### Known issues:
+- Proxy not supported
+
 ### 4.6.1 (2020/09/19)
 - Update modules
 
