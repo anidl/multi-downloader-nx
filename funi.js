@@ -180,10 +180,10 @@ async function getShow(){
     epSelList = epSelList.map((e)=>{
         if(e.match('-')){
             e = e.split('-');
-            if( e[0].match(/^(?:[A-Z]|)\d+$/i) && e[1].match(/^\d+$/) ){
-                e[0] = e[0].replace(/^(?:([A-Z])|)(0+)/i,'$1');
-                let letter = e[0].match(/^([A-Z])\d+$/i) ? e[0].match(/^([A-Z])\d+$/i)[1].toUpperCase() : '';
-                e[0] = e[0].replace(/^[A-Z](\d+)$/i,'$1');
+            if( e[0].match(/^(?:[A-Z]+|)\d+$/i) && e[1].match(/^\d+$/) ){
+                e[0] = e[0].replace(/^(?:([A-Z]+)|)(0+)/i,'$1');
+                let letter = e[0].match(/^([A-Z]+)\d+$/i) ? e[0].match(/^([A-Z]+)\d+$/i)[1].toUpperCase() : '';
+                e[0] = e[0].replace(/^[A-Z]+(\d+)$/i,'$1');
                 e[0] = parseInt(e[0]);
                 e[1] = parseInt(e[1]);
                 if(e[0] < e[1]){
@@ -200,8 +200,8 @@ async function getShow(){
                 return '';
             }
         }
-        else if(e.match(/^(?:[A-Z]|)\d+$/i)){
-            return e.replace(/^(?:([A-Z])|)(0+)/i,'$1').toUpperCase();
+        else if(e.match(/^(?:[A-Z]+|)\d+$/i)){
+            return e.replace(/^(?:([A-Z]+)|)(0+)/i,'$1').toUpperCase();
         }
         else{
             return '';
@@ -213,7 +213,7 @@ async function getShow(){
         let showStrId = eps[e].ids.externalShowId;
         let epStrId = eps[e].ids.externalEpisodeId.replace(new RegExp('^'+showStrId),'');
         // select
-        if(epSelList.includes(epStrId.replace(/^(?:([A-Z])|)(0+)/,'$1'))){
+        if(epSelList.includes(epStrId.replace(/^(?:([A-Z]+)|)(0+)/,'$1'))){
             fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
             epSelEps.push(epStrId);
             is_selected = true;
