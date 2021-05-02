@@ -1,0 +1,46 @@
+name: Release Builds
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [ linux64, macos64, win64 ]
+    steps:
+      - name: Set build type
+        run: |
+          echo BUILD_TYPE=${{ matrix.build_type }} >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          check-latest: true
+
+      - name: Install Node modules
+        run: npm install
+
+      - name: Get name and version from package.json
+        run: |
+          test -n $(node -p -e "require('./package.json').name") &&
+          test -n $(node -p -e "require('./package.json').version") &&
+          echo PACKAGE_NAME=$(node -p -e "require('./package.json').name") >> $GITHUB_ENV &&
+          echo PACKAGE_VERSION=$(node -p -e "require('./package.json').version") >> $GITHUB_ENV || exit 1
+      - name: Make build
+        run: npm run build-${{ env.BUILD_TYPE }}
+
+      - name: Upload release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_name: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ env.BUILD_TYPE }}.7z
+          asset_path: ./_builds/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ env.BUILD_TYPE }}.7z
+          asset_content_type: application/x-7z-compressed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
