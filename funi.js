@@ -566,7 +566,12 @@ async function downloadStreams(){
             }
             key = crypto.createDecipheriv('aes-128-cbc', key, iv);
             
-            let last = 0;
+            let progress, intervall;
+        
+            function logInfo() {
+                if (progress && progress.percent && progress.transferred)
+                    console.log(`[INFO] Downloaded ${progress.percent.toFixed(2) * 100}% (${(progress.transferred/1024).toFixed(0)}kb/${progress.total?(progress.total/1024).toFixed(0) + 'kb':'unknown'})`);
+            }
 
             let res = (await got({
                 url: chunk.uri,
@@ -575,12 +580,12 @@ async function downloadStreams(){
                 },
                 responseType: 'buffer'
             }).on("downloadProgress", (pro) => {
-                if (pro.percent.toFixed(2) * 100 > last + 5) {
-                    console.log(`[INFO] Downloaded ${pro.percent.toFixed(2) * 100}%`);
-                    last = pro.percent.toFixed(2) * 100;
-                }
+                progress = pro
+                if (intervall === undefined)
+                    intervall = setInterval(logInfo, 2500)
             })
             .catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
+            clearInterval(intervall)
 
             if (!res.body) { return; }
             let dec = key.update(res.body);
@@ -664,7 +669,12 @@ async function downloadStreams(){
         }
         key = crypto.createDecipheriv('aes-128-cbc', key, iv);
         
-        let last = 0;
+        let progress, intervall;
+        
+        function logInfo() {
+            if (progress && progress.percent && progress.transferred)
+                console.log(`[INFO] Downloaded ${progress.percent.toFixed(2) * 100}% (${(progress.transferred/1024).toFixed(0)}kb/${progress.total?(progress.total/1024).toFixed(0) + 'kb':'unknown'})`);
+        }
 
         let res = (await got({
             url: chunk.uri,
@@ -673,13 +683,12 @@ async function downloadStreams(){
             },
             responseType: 'buffer'
         }).on("downloadProgress", (pro) => {
-            if (pro.percent.toFixed(2) * 100 > last + 5) {
-                console.log(`[INFO] Downloaded ${pro.percent.toFixed(2) * 100}%`);
-                last = pro.percent.toFixed(2) * 100;
-            }
+            progress = pro
+            if (intervall === undefined)
+                intervall = setInterval(logInfo, 2500)
         })
         .catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
-
+        clearInterval(intervall)
         if (!res.body) { return; }
         let dec = key.update(res.body);
         dec = Buffer.concat([dec, key.final()]);
