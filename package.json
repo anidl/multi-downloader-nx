@@ -35,7 +35,7 @@
     },
     "devDependencies": {
         "fs-extra": "^9.0.1",
-        "nexe": "^3.3.7",
+        "pkg": "^4.4.9",
         "removeNPMAbsolutePaths": "^2.0.0"
     },
     "scripts": {

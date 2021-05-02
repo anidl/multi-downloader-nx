@@ -19,18 +19,17 @@ const m3u8 = require('m3u8-parsed');
 const streamdl = require('hls-download');
 
 // extra
-const modulesFolder = __dirname + '/modules';
-const appYargs = require(modulesFolder+'/module.app-args');
-const getYamlCfg = require(modulesFolder+'/module.cfg-loader');
-const getData = require(modulesFolder + '/module.getdata.js');
-const vttConvert = require(modulesFolder + '/module.vttconvert');
+const appYargs = require('./modules/module.app-args');
+const getYamlCfg = require('./modules/module.cfg-loader');
+const getData = require('./modules/module.getdata.js');
+const vttConvert = require('./modules/module.vttconvert');
 
 // new-cfg
-const cfgFolder = __dirname + '/config';
-const binCfgFile = path.join(cfgFolder,'bin-path');
-const dirCfgFile = path.join(cfgFolder,'dir-path');
-const cliCfgFile = path.join(cfgFolder,'cli-defaults');
-const tokenFile  = path.join(cfgFolder,'token');
+const cfgFolder  = path.join(__dirname, '/config');
+const binCfgFile = path.join(cfgFolder, 'bin-path');
+const dirCfgFile = path.join(cfgFolder, 'dir-path');
+const cliCfgFile = path.join(cfgFolder, 'cli-defaults');
+const tokenFile  = path.join(cfgFolder, 'token');
 
 // params
 let cfg = {

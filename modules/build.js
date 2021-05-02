@@ -4,10 +4,10 @@
 const pkg = require('../package.json');
 const fs = require('fs-extra');
 const modulesCleanup = require('removeNPMAbsolutePaths');
-const { compile } = require('nexe');
+const { exec } = require('pkg');
 
 const buildsDir = './_builds';
-const nodeVer = '';
+const nodeVer = 'node14-';
 
 // main
 (async function(){
@@ -28,27 +28,23 @@ const nodeVer = '';
         fs.removeSync(buildDir);
     }
     fs.mkdirSync(buildDir);
-    fs.mkdirSync(`${buildDir}/bin`);
-    fs.mkdirSync(`${buildDir}/config`);
-    fs.mkdirSync(`${buildDir}/videos`);
-    fs.mkdirSync(`${buildDir}/videos/_trash`);
-    const buildConfig = {
-        loglevel: 'verbose',
-        input: './crunchy.js',
-        output: `${buildDir}/${pkg.short_name}`,
-        target: getTarget(buildType) + nodeVer,
-        resources: [
-            './modules/module.*',
-        ],
-    };
+    const buildConfig = [
+        pkg.main,
+        '--target', nodeVer + getTarget(buildType),
+        '--output', `${buildDir}/${pkg.short_name}`,
+    ];
     console.log(`[Build] Build configuration: ${buildFull}`);
     try {
-        await compile(buildConfig);
+        await exec(buildConfig);
     }
     catch(e){
         console.log(e);
         process.exit(1);
     }
+    fs.mkdirSync(`${buildDir}/bin`);
+    fs.mkdirSync(`${buildDir}/config`);
+    fs.mkdirSync(`${buildDir}/videos`);
+    fs.mkdirSync(`${buildDir}/videos/_trash`);
     fs.copySync('./bin/', `${buildDir}/bin/`);
     fs.copySync('./config/bin-path.yml', `${buildDir}/config/bin-path.yml`);
     fs.copySync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);
