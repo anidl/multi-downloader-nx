@@ -17,6 +17,8 @@ const shlp = require('sei-helper');
 const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
 const streamdl = require('hls-download');
+const crypto = require("crypto");
+const got = require('got');
 
 // extra
 const modulesFolder = __dirname + '/modules';
@@ -524,6 +526,7 @@ async function downloadStreams(){
     let dlFailed = false;
     let dlFailedA = false;
     
+    
     if (!argv.novids) {
         // download video
         let reqVideo = await getData({
@@ -536,37 +539,86 @@ async function downloadStreams(){
         let chunkList = m3u8(reqVideo.res.body);
         chunkList.baseUrl = videoUrl.split('/').slice(0, -1).join('/') + '/';
         
-        let proxyHLS = false;
-        if (argv.proxy && !argv.ssp) {
-            try {
-                proxyHLS = {};
-                proxyHLS.url = buildProxyUrl(argv.proxy, argv['proxy-auth']);
-            }
-            catch(e){
-                console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
-                console.log('[WARN] Skiping...');
-                proxyHLS = false;
-            }
-        }
-        
         let tsFile = path.join(cfg.dir.content, fnOutput);
         
-        let streamdlParams = {
-            fn: tsFile + '.ts',
-            m3u8json: chunkList,
-            baseurl: chunkList.baseUrl,
-            pcount: 10,
-            proxy: (proxyHLS ? proxyHLS : false)
-        };
-        
-        let dldata = await new streamdl(streamdlParams).download();
-        if(!dldata.ok){
-            fs.writeFileSync(`${tsFile}.ts.resume`, JSON.stringify(dldata.parts));
-            console.log(`[ERROR] DL Stats: ${JSON.stringify(dldata.parts)}\n`);
-            dlFailed = true;
-        }
-        else if(fs.existsSync(`${tsFile}.ts.resume`) && dldata.ok){
-            fs.unlinkSync(`${tsFile}.ts.resume`);
+        if (chunkList.segments[0].uri.match(/streaming_video_(\d+)_(\d+)_(\d+)\.ts/)) {
+            if (fs.existsSync(tsFile + '.ts')) {
+                let rwts = await shlp.question(`[Q] File «${tsFile + '.ts'}» already exists! Rewrite? (y/N)`);
+                rwts = rwts || 'N';
+                if (!['Y', 'y'].includes(rwts[0])) {
+                    return;
+                }
+                fs.unlinkSync(tsFile + '.ts')
+            }
+
+            let chunk = chunkList.segments[0]
+            
+            let reqKey = await getData({
+                url: chunk.key.uri,
+                responseType: 'buffer'
+            })
+            if (!reqKey.ok) { return; }
+            let key = reqKey.res.body;
+            let iv = Buffer.alloc(16);
+            let ivs = chunk.key.iv ? chunk.key.iv : [0, 0, 0, 1];
+            for (let i in ivs) {
+                iv.writeUInt32BE(ivs[i], i * 4);
+            }
+            key = crypto.createDecipheriv('aes-128-cbc', key, iv);
+            
+            let last = 0;
+
+            let res = (await got({
+                url: chunk.uri,
+                headers: {
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
+                },
+                responseType: 'buffer'
+            }).on("downloadProgress", (pro) => {
+                if (pro.percent.toFixed(2) * 100 > last + 5) {
+                    console.log(`[INFO] Downloaded ${pro.percent.toFixed(2) * 100}%`);
+                    last = pro.percent.toFixed(2) * 100;
+                }
+            })
+            .catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
+
+            if (!res.body) { return; }
+            let dec = key.update(res.body);
+            dec = Buffer.concat([dec, key.final()]);
+            fs.writeFileSync(tsFile + '.ts', dec)
+
+            console.log(`[INFO] Finished ${tsFile}`)
+        } else {
+            let proxyHLS = false;
+            if (argv.proxy && !argv.ssp) {
+                try {
+                    proxyHLS = {};
+                    proxyHLS.url = buildProxyUrl(argv.proxy, argv['proxy-auth']);
+                }
+                catch(e){
+                    console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
+                    console.log('[WARN] Skiping...');
+                    proxyHLS = false;
+                }
+            }
+    
+            let streamdlParams = {
+                fn: tsFile + '.ts',
+                m3u8json: chunkList,
+                baseurl: chunkList.baseUrl,
+                pcount: 10,
+                proxy: (proxyHLS ? proxyHLS : false)
+            };
+            
+            let dldata = await new streamdl(streamdlParams).download();
+            if(!dldata.ok){
+                fs.writeFileSync(`${tsFile}.ts.resume`, JSON.stringify(dldata.parts));
+                console.log(`[ERROR] DL Stats: ${JSON.stringify(dldata.parts)}\n`);
+                dlFailed = true;
+            }
+            else if(fs.existsSync(`${tsFile}.ts.resume`) && dldata.ok){
+                fs.unlinkSync(`${tsFile}.ts.resume`);
+            }
         }
     }
     else{
@@ -584,39 +636,56 @@ async function downloadStreams(){
         
         let chunkListA = m3u8(reqAudio.res.body);
         chunkListA.baseUrl = plAud.uri.split('/').slice(0, -1).join('/') + '/';
-        
-        let proxyHLS = false;
-        if (argv.proxy && !argv.ssp) {
-            try {
-                proxyHLS = {};
-                proxyHLS.url = buildProxyUrl(argv.proxy, argv['proxy-auth']);
-            }
-            catch(e){
-                console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
-                console.log('[WARN] Skiping...');
-                proxyHLS = false;
-            }
-        }
-        
+
         let tsFileA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
-        
-        let streamdlParamsA = {
-            fn: tsFileA + '.ts',
-            m3u8json: chunkListA,
-            baseurl: chunkListA.baseUrl,
-            pcount: 10,
-            proxy: (proxyHLS ? proxyHLS : false)
-        };
-        
-        let dldataA = await new streamdl(streamdlParamsA).download();
-        if(!dldataA.ok){
-            fs.writeFileSync(`${tsFileA}.ts.resume`, JSON.stringify(dldataA.parts));
-            console.log(`[ERROR] DL Stats: ${JSON.stringify(dldataA.parts)}\n`);
-            dlFailedA = true;
+
+        if (fs.existsSync(tsFileA + '.ts')) {
+            let rwts = await shlp.question(`[Q] File «${tsFileA + '.ts'}» already exists! Rewrite? (y/N)`);
+            rwts = rwts || 'N';
+            if (!['Y', 'y'].includes(rwts[0])) {
+                return;
+            }
+            fs.unlinkSync(tsFileA + '.ts')
         }
-        else if(fs.existsSync(`${tsFileA}.ts.resume`) && dldataA.ok){
-            fs.unlinkSync(`${tsFileA}.ts.resume`);
+
+        let chunk = chunkListA.segments[0]
+        
+        let reqKey = await getData({
+            url: chunk.key.uri,
+            responseType: 'buffer'
+        })
+
+        if (!reqKey.ok) { return; }
+        let key = reqKey.res.body;
+        let iv = Buffer.alloc(16);
+        let ivs = chunk.key.iv ? chunk.key.iv : [0, 0, 0, 1];
+        for (let i in ivs) {
+            iv.writeUInt32BE(ivs[i], i * 4);
         }
+        key = crypto.createDecipheriv('aes-128-cbc', key, iv);
+        
+        let last = 0;
+
+        let res = (await got({
+            url: chunk.uri,
+            headers: {
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
+            },
+            responseType: 'buffer'
+        }).on("downloadProgress", (pro) => {
+            if (pro.percent.toFixed(2) * 100 > last + 5) {
+                console.log(`[INFO] Downloaded ${pro.percent.toFixed(2) * 100}%`);
+                last = pro.percent.toFixed(2) * 100;
+            }
+        })
+        .catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
+
+        if (!res.body) { return; }
+        let dec = key.update(res.body);
+        dec = Buffer.concat([dec, key.final()]);
+        fs.writeFileSync(tsFileA + '.ts', dec)
+
+        console.log(`[INFO] Finished ${tsFileA}`)
     }
     
      // add subs
