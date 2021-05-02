@@ -49,6 +49,13 @@ const appArgv = (cfg, langsData) => {
         type: 'boolean',
     })
     // switch to subs
+    .option('dub', {
+        group: 'Downloading:',
+        describe: 'Download non-Japanese Dub (English Dub mode by default)',
+        choices: [ 'enUS', 'esLA', 'ptBR' ],
+        default: cfg.dub || 'enUS',
+        type: 'string',
+    })
     .option('sub', {
         group: 'Downloading:',
         describe: 'Japanese Dub with subtitles mode (English Dub mode by default)',

@@ -308,6 +308,12 @@ async function getEpisode(fnSlug){
         }
     });
     
+    const dubType = {
+        'enUS': 'English',
+        'esLA': 'Spanish (Latin Am)',
+        'ptBR': 'Portuguese (Brazil)',
+    };
+    
     // select
     media = media.reverse();
     for(let m of media){
@@ -322,7 +328,7 @@ async function getEpisode(fnSlug){
                 stDlPath = m.subtitles;
                 selected = true;
             }
-            else if(dub_type == 'English' && !argv.sub && selUncut){
+            else if(dub_type == dubType[argv.dub] && !argv.sub && selUncut){
                 streamId = m.id;
                 stDlPath = m.subtitles;
                 selected = true;
@@ -407,38 +413,73 @@ async function downloadStreams(){
         plLayersStr  = [],
         plLayersRes  = {},
         plMaxLayer   = 1;
+        plNewIds     = 1;
+        plAud        = { uri: '' };
+    
+    // new uris
+    let vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
+    if(plQualityLinkList.playlists[0].uri.match(vplReg)){
+        if(plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128']){
+            let audioData = plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128'];
+            audioEl = Object.keys(audioData);
+            audioData = audioData[audioEl[0]];
+            plAud = { ...audioData, ...{ langStr: audioEl[0] } };
+        }
+        plQualityLinkList.playlists.sort((a, b) => {
+            let av = parseInt(a.uri.match(vplReg)[3]);
+            let bv = parseInt(b.uri.match(vplReg)[3]);
+            if(av  > bv){
+                return 1;
+            }
+            if (av < bv) {
+                return -1;
+            }
+            return 0;
+        })
+    }
     
     for(let s of plQualityLinkList.playlists){
-        // set layer and max layer
-        let plLayerId = parseInt(s.uri.match(/_Layer(\d+)\.m3u8/)[1]);
-        plMaxLayer    = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
-        // set urls and servers
-        let plUrlDl  = s.uri;
-        let plServer = new URL(plUrlDl).host;
-        if(!plServerList.includes(plServer)){
-            plServerList.push(plServer);
+        if(s.uri.match(/_Layer(\d+)\.m3u8/) || s.uri.match(vplReg)){
+            // set layer and max layer
+            let plLayerId = 0;
+            if(s.uri.match(/_Layer(\d+)\.m3u8/)){
+                plLayerId = parseInt(s.uri.match(/_Layer(\d+)\.m3u8/)[1]);
+            }
+            else{
+                plLayerId = plNewIds, plNewIds++;
+            }
+            plMaxLayer    = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
+            // set urls and servers
+            let plUrlDl  = s.uri;
+            let plServer = new URL(plUrlDl).host;
+            if(!plServerList.includes(plServer)){
+                plServerList.push(plServer);
+            }
+            if(!Object.keys(plStreams).includes(plServer)){
+                plStreams[plServer] = {};
+            }
+            if(plStreams[plServer][plLayerId] && plStreams[plServer][plLayerId] != plUrlDl){
+                console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
+            }
+            else{
+                plStreams[plServer][plLayerId] = plUrlDl;
+            }
+            // set plLayersStr
+            let plResolution = `${s.attributes.RESOLUTION.height}p`;
+            plLayersRes[plLayerId] = plResolution;
+            let plBandwidth  = Math.round(s.attributes.BANDWIDTH/1024);
+            if(plLayerId<10){
+                plLayerId = plLayerId.toString().padStart(2,' ');
+            }
+            let qualityStrAdd   = `${plLayerId}: ${plResolution} (${plBandwidth}KiB/s)`;
+            let qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g,'\\$1'),'m');
+            let qualityStrMatch = !plLayersStr.join('\r\n').match(qualityStrRegx);
+            if(qualityStrMatch){
+                plLayersStr.push(qualityStrAdd);
+            }
         }
-        if(!Object.keys(plStreams).includes(plServer)){
-            plStreams[plServer] = {};
-        }
-        if(plStreams[plServer][plLayerId] && plStreams[plServer][plLayerId] != plUrlDl){
-            console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
-        }
-        else{
-            plStreams[plServer][plLayerId] = plUrlDl;
-        }
-        // set plLayersStr
-        let plResolution = `${s.attributes.RESOLUTION.height}p`;
-        plLayersRes[plLayerId] = plResolution;
-        let plBandwidth  = Math.round(s.attributes.BANDWIDTH/1024);
-        if(plLayerId<10){
-            plLayerId = plLayerId.toString().padStart(2,' ');
-        }
-        let qualityStrAdd   = `${plLayerId}: ${plResolution} (${plBandwidth}KiB/s)`;
-        let qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g,'\\$1'),'m');
-        let qualityStrMatch = !plLayersStr.join('\r\n').match(qualityStrRegx);
-        if(qualityStrMatch){
-            plLayersStr.push(qualityStrAdd);
+        else {
+            console.log(s.uri);
         }
     }
     
@@ -481,6 +522,7 @@ async function downloadStreams(){
     }
     
     let dlFailed = false;
+    let dlFailedA = false;
     
     if (!argv.novids) {
         // download video
@@ -531,6 +573,52 @@ async function downloadStreams(){
         console.log('[INFO] Skip video downloading...\n');
     }
     
+    if (!argv.novids && plAud.uri) {
+        // download video
+        let reqAudio = await getData({
+            url: plAud.uri,
+            useProxy: (argv.ssp ? false : true),
+            debug: argv.debug,
+        });
+        if (!reqVideo.ok) { return; }
+        
+        let chunkListA = m3u8(reqAudio.res.body);
+        chunkListA.baseUrl = plAud.uri.split('/').slice(0, -1).join('/') + '/';
+        
+        let proxyHLS = false;
+        if (argv.proxy && !argv.ssp) {
+            try {
+                proxyHLS = {};
+                proxyHLS.url = buildProxyUrl(argv.proxy, argv['proxy-auth']);
+            }
+            catch(e){
+                console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
+                console.log('[WARN] Skiping...');
+                proxyHLS = false;
+            }
+        }
+        
+        let tsFileA = path.join(cfg.dir.content, fnOutput, `.${plAud.language}`);
+        
+        let streamdlParamsA = {
+            fn: tsFileA + '.ts',
+            m3u8json: chunkList,
+            baseurl: chunkList.baseUrl,
+            pcount: 10,
+            proxy: (proxyHLS ? proxyHLS : false)
+        };
+        
+        let dldataA = await new streamdl(streamdlParamsA).download();
+        if(!dldataA.ok){
+            fs.writeFileSync(`${tsFileA}.ts.resume`, JSON.stringify(dldataA.parts));
+            console.log(`[ERROR] DL Stats: ${JSON.stringify(dldataA.parts)}\n`);
+            dlFailedA = true;
+        }
+        else if(fs.existsSync(`${tsFileA}.ts.resume`) && dldataA.ok){
+            fs.unlinkSync(`${tsFileA}.ts.resume`);
+        }
+    }
+    
      // add subs
     let subsUrl = stDlPath;
     let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
@@ -557,7 +645,7 @@ async function downloadStreams(){
         }
     }
     
-    if(dlFailed){
+    if(dlFailed || dlFailedA){
         console.log('\n[INFO] TS file not fully downloaded, skip muxing video...\n');
         return;
     }
@@ -567,11 +655,20 @@ async function downloadStreams(){
     }
     
     let muxTrg = path.join(cfg.dir.content, fnOutput);
+    let muxTrgA = '';
     let tshTrg = path.join(cfg.dir.trash, fnOutput);
     
     if(!fs.existsSync(`${muxTrg}.ts`) || !fs.statSync(`${muxTrg}.ts`).isFile()){
         console.log('\n[INFO] TS file not found, skip muxing video...\n');
         return;
+    }
+    
+    if(plAud.uri){
+        muxTrgA = path.join(cfg.dir.content, fnOutput, `.${plAud.language}`);
+        if(!fs.existsSync(`${muxTrgA}.ts`) || !fs.statSync(`${muxTrgA}.ts`).isFile()){
+            console.log('\n[INFO] TS file not found, skip muxing video...\n');
+            return;
+        }
     }
     
     // usage
@@ -603,10 +700,20 @@ async function downloadStreams(){
         mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
         mkvmux.push('--track-name',`0:[${argv.ftag}]`);
-        mkvmux.push('--language',`1:${argv.sub?'jpn':'eng'}`);
-        mkvmux.push('--video-tracks','0','--audio-tracks','1');
-        mkvmux.push('--no-subtitles','--no-attachments');
-        mkvmux.push(`${muxTrg}.ts`);
+        mkvmux.push('--language',`1:${argv.sub?'jpn':''}`);
+        if(plAud.uri){
+            mkvmux.push('--video-tracks','0','--no-audio');
+            mkvmux.push('--no-subtitles','--no-attachments');
+            mkvmux.push(`${muxTrg}.ts`);
+            mkvmux.push('--no-video','--audio-tracks','0');
+            mkvmux.push('--no-subtitles','--no-attachments');
+            mkvmux.push(`${muxTrgA}.ts`);
+        }
+        else{
+            mkvmux.push('--video-tracks','0','--audio-tracks','1');
+            mkvmux.push('--no-subtitles','--no-attachments');
+            mkvmux.push(`${muxTrg}.ts`);
+        }
         if(addSubs){
             mkvmux.push('--language','0:eng');
             mkvmux.push(`${muxTrg}${subsExt}`);
@@ -618,13 +725,16 @@ async function downloadStreams(){
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let ffmux = `-i "${muxTrg}.ts" `;
+        if(plAud.uri){
+            ffmux += `-i "${muxTrgA}.ts" `;
+        }
         ffmux += addSubs ? `-i "${muxTrg}${subsExt}" ` : '';
         ffmux += '-map 0 -c:v copy -c:a copy ';
         ffmux += addSubs ? '-map 1 ' : '';
         ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
         ffmux += addSubs &&  argv.mp4 ? '-c:s mov_text ' : '';
         ffmux += '-metadata encoding_tool="no_variable_data" ';
-        ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:0 language=${argv.sub?'jpn':'eng'} `;
+        ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:0 language=${argv.sub?'jpn':''} `;
         ffmux += addSubs ? '-metadata:s:s:0 language=eng ' : '';
         ffmux += `"${muxTrg}.${ffext}"`;
         // mux to mkv
