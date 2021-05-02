@@ -574,13 +574,13 @@ async function downloadStreams(){
     }
     
     if (!argv.novids && plAud.uri) {
-        // download video
+        // download audio
         let reqAudio = await getData({
             url: plAud.uri,
             useProxy: (argv.ssp ? false : true),
             debug: argv.debug,
         });
-        if (!reqVideo.ok) { return; }
+        if (!reqAudio.ok) { return; }
         
         let chunkListA = m3u8(reqAudio.res.body);
         chunkListA.baseUrl = plAud.uri.split('/').slice(0, -1).join('/') + '/';
@@ -598,12 +598,12 @@ async function downloadStreams(){
             }
         }
         
-        let tsFileA = path.join(cfg.dir.content, fnOutput, `.${plAud.language}`);
+        let tsFileA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
         
         let streamdlParamsA = {
             fn: tsFileA + '.ts',
-            m3u8json: chunkList,
-            baseurl: chunkList.baseUrl,
+            m3u8json: chunkListA,
+            baseurl: chunkListA.baseUrl,
             pcount: 10,
             proxy: (proxyHLS ? proxyHLS : false)
         };
@@ -664,7 +664,7 @@ async function downloadStreams(){
     }
     
     if(plAud.uri){
-        muxTrgA = path.join(cfg.dir.content, fnOutput, `.${plAud.language}`);
+        muxTrgA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
         if(!fs.existsSync(`${muxTrgA}.ts`) || !fs.statSync(`${muxTrgA}.ts`).isFile()){
             console.log('\n[INFO] TS file not found, skip muxing video...\n');
             return;
