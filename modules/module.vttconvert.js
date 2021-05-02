@@ -161,7 +161,7 @@ function toSubsTime(str, srtFormat) {
     sx = sx.toFixed(msLen).split('.');
     
     
-    n.unshift(padTimeNum('.', sx[1], msLen));
+    n.unshift(padTimeNum((srtFormat ? ',' : '.'), sx[1], msLen));
     sx = Number(sx[0]);
     
     n.unshift(padTimeNum(':', sx%60, 2));
