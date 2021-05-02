@@ -16,7 +16,7 @@ const nodeVer = '';
     const buildType = process.argv[2];
     if(!acceptableBuilds.includes(buildType)){
         console.error('[ERROR] unknown build type!');
-        process.exit();
+        process.exit(1);
     }
     await modulesCleanup('.');
     if(!fs.existsSync(buildsDir)){
@@ -29,7 +29,7 @@ const nodeVer = '';
     }
     fs.mkdirSync(buildDir);
     fs.mkdirSync(`${buildDir}/bin`);
-    fs.mkdirSync(`${buildDir}/config`); 
+    fs.mkdirSync(`${buildDir}/config`);
     fs.mkdirSync(`${buildDir}/videos`);
     fs.mkdirSync(`${buildDir}/videos/_trash`);
     const buildConfig = {
@@ -47,7 +47,7 @@ const nodeVer = '';
     }
     catch(e){
         console.log(e);
-        process.exit();
+        process.exit(1);
     }
     fs.copySync('./bin/', `${buildDir}/bin/`);
     fs.copySync('./config/bin-path.yml', `${buildDir}/config/bin-path.yml`);
