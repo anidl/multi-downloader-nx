@@ -21,10 +21,11 @@ const crypto = require("crypto");
 const got = require('got');
 
 // extra
-const appYargs = require('./modules/module.app-args');
-const getYamlCfg = require('./modules/module.cfg-loader');
-const getData = require('./modules/module.getdata.js');
-const vttConvert = require('./modules/module.vttconvert');
+const moduleFolder = path.join(__dirname, "/modules")
+const appYargs     = require(path.join(moduleFolder, 'module.app-args'));
+const getYamlCfg   = require(path.join(moduleFolder, 'module.cfg-loader'));
+const getData      = require(path.join(moduleFolder, 'module.getdata.js'));
+const vttConvert   = require(path.join(moduleFolder, 'module.vttconvert'));
 
 // new-cfg
 const cfgFolder  = path.join(__dirname, '/config');
