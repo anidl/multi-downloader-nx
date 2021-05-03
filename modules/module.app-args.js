@@ -174,6 +174,13 @@ const appArgv = (cfg, langsData) => {
         describe: 'Show this help',
         type: 'boolean'
     })
+    .option('partsize', {
+        alias: 'p',
+        group: 'Downloading:',
+        describe: 'The amount of parts that should be downloaded in paralell',
+        type: 'number',
+        default: 10
+    })
     // usage
     .example([
         ['$0 --search "My Hero"', 'search "My Hero" in title'],

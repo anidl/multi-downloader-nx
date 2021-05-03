@@ -526,72 +526,21 @@ async function downloadStreams(){
     let dlFailedA = false;
     
     
-    if (!argv.novids) {
+    video: if (!argv.novids) {
         // download video
         let reqVideo = await getData({
             url: videoUrl,
             useProxy: (argv.ssp ? false : true),
             debug: argv.debug,
         });
-        if (!reqVideo.ok) { return; }
+        if (!reqVideo.ok) { break video; }
         
         let chunkList = m3u8(reqVideo.res.body);
-        chunkList.baseUrl = videoUrl.split('/').slice(0, -1).join('/') + '/';
         
         let tsFile = path.join(cfg.dir.content, fnOutput);
         
         if (chunkList.segments[0].uri.match(/streaming_video_(\d+)_(\d+)_(\d+)\.ts/)) {
-            if (fs.existsSync(tsFile + '.ts')) {
-                let rwts = await shlp.question(`[Q] File «${tsFile + '.ts'}» already exists! Rewrite? (y/N)`);
-                rwts = rwts || 'N';
-                if (!['Y', 'y'].includes(rwts[0])) {
-                    return;
-                }
-                fs.unlinkSync(tsFile + '.ts')
-            }
-
-            let chunk = chunkList.segments[0]
-            
-            let reqKey = await getData({
-                url: chunk.key.uri,
-                responseType: 'buffer'
-            })
-            if (!reqKey.ok) { return; }
-            let key = reqKey.res.body;
-            let iv = Buffer.alloc(16);
-            let ivs = chunk.key.iv ? chunk.key.iv : [0, 0, 0, 1];
-            for (let i in ivs) {
-                iv.writeUInt32BE(ivs[i], i * 4);
-            }
-            key = crypto.createDecipheriv('aes-128-cbc', key, iv);
-            
-            let progress, intervall;
-        
-            function logInfo() {
-                if (progress && progress.percent && progress.transferred)
-                    console.log(`[INFO] Downloaded ${progress.percent.toFixed(2) * 100}% (${(progress.transferred/1024).toFixed(0)}kb/${progress.total?(progress.total/1024).toFixed(0) + 'kb':'unknown'})`);
-            }
-
-            let res = (await got({
-                url: chunk.uri,
-                headers: {
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
-                },
-                responseType: 'buffer'
-            }).on("downloadProgress", (pro) => {
-                progress = pro
-                if (intervall === undefined)
-                    intervall = setInterval(logInfo, 2500)
-            })
-            .catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
-            clearInterval(intervall)
-
-            if (!res.body) { return; }
-            let dec = key.update(res.body);
-            dec = Buffer.concat([dec, key.final()]);
-            fs.writeFileSync(tsFile + '.ts', dec)
-
-            console.log(`[INFO] Finished ${tsFile}`)
+            await downloadFile(tsFile, chunkList)
         } else {
             let proxyHLS = false;
             if (argv.proxy && !argv.ssp) {
@@ -639,61 +588,10 @@ async function downloadStreams(){
         if (!reqAudio.ok) { return; }
         
         let chunkListA = m3u8(reqAudio.res.body);
-        chunkListA.baseUrl = plAud.uri.split('/').slice(0, -1).join('/') + '/';
 
         let tsFileA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
 
-        if (fs.existsSync(tsFileA + '.ts')) {
-            let rwts = await shlp.question(`[Q] File «${tsFileA + '.ts'}» already exists! Rewrite? (y/N)`);
-            rwts = rwts || 'N';
-            if (!['Y', 'y'].includes(rwts[0])) {
-                return;
-            }
-            fs.unlinkSync(tsFileA + '.ts')
-        }
-
-        let chunk = chunkListA.segments[0]
-        
-        let reqKey = await getData({
-            url: chunk.key.uri,
-            responseType: 'buffer'
-        })
-
-        if (!reqKey.ok) { return; }
-        let key = reqKey.res.body;
-        let iv = Buffer.alloc(16);
-        let ivs = chunk.key.iv ? chunk.key.iv : [0, 0, 0, 1];
-        for (let i in ivs) {
-            iv.writeUInt32BE(ivs[i], i * 4);
-        }
-        key = crypto.createDecipheriv('aes-128-cbc', key, iv);
-        
-        let progress, intervall;
-        
-        function logInfo() {
-            if (progress && progress.percent && progress.transferred)
-                console.log(`[INFO] Downloaded ${progress.percent.toFixed(2) * 100}% (${(progress.transferred/1024).toFixed(0)}kb/${progress.total?(progress.total/1024).toFixed(0) + 'kb':'unknown'})`);
-        }
-
-        let res = (await got({
-            url: chunk.uri,
-            headers: {
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
-            },
-            responseType: 'buffer'
-        }).on("downloadProgress", (pro) => {
-            progress = pro
-            if (intervall === undefined)
-                intervall = setInterval(logInfo, 2500)
-        })
-        .catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
-        clearInterval(intervall)
-        if (!res.body) { return; }
-        let dec = key.update(res.body);
-        dec = Buffer.concat([dec, key.final()]);
-        fs.writeFileSync(tsFileA + '.ts', dec)
-
-        console.log(`[INFO] Finished ${tsFileA}`)
+        await downloadFile(tsFileA, chunkListA)
     }
     
      // add subs
@@ -734,6 +632,7 @@ async function downloadStreams(){
     let muxTrg = path.join(cfg.dir.content, fnOutput);
     let muxTrgA = '';
     let tshTrg = path.join(cfg.dir.trash, fnOutput);
+    let tshTrgA = ''
     
     if(!fs.existsSync(`${muxTrg}.ts`) || !fs.statSync(`${muxTrg}.ts`).isFile()){
         console.log('\n[INFO] TS file not found, skip muxing video...\n');
@@ -742,6 +641,7 @@ async function downloadStreams(){
     
     if(plAud.uri){
         muxTrgA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
+        tshTrgA = path.join(cfg.dir.trash, fnOutput + `.${plAud.language}`)
         if(!fs.existsSync(`${muxTrgA}.ts`) || !fs.statSync(`${muxTrgA}.ts`).isFile()){
             console.log('\n[INFO] TS file not found, skip muxing video...\n');
             return;
@@ -800,13 +700,13 @@ async function downloadStreams(){
         fs.unlinkSync(`${muxTrg}.json`);
     }
     else if(usableFFmpeg){
-        let ffext = !argv.mp4 ? 'mkv' : 'mp4';
+        let ffext = 'mp4'//!argv.mp4 ? 'mkv' : 'mp4';
         let ffmux = `-i "${muxTrg}.ts" `;
         if(plAud.uri){
             ffmux += `-i "${muxTrgA}.ts" `;
         }
         ffmux += addSubs ? `-i "${muxTrg}${subsExt}" ` : '';
-        ffmux += '-map 0 -c:v copy -c:a copy ';
+        ffmux += '-map 0 -map 1:a -c:v copy -c:a copy ';
         ffmux += addSubs ? '-map 1 ' : '';
         ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
         ffmux += addSubs &&  argv.mp4 ? '-c:s mov_text ' : '';
@@ -826,17 +726,109 @@ async function downloadStreams(){
     }
     else if(argv.nocleanup){
         fs.renameSync(muxTrg+'.ts', tshTrg + '.ts');
+        if (plAud.uri)
+            fs.renameSync(muxTrgA+'.ts', tshTrgA + '.ts')
         if(subsUrl && addSubs){
             fs.renameSync(muxTrg +subsExt, tshTrg +subsExt);
         }
     }
     else{
         fs.unlinkSync(muxTrg+'.ts');
+        if (plAud.uri)
+            fs.unlinkSync(muxTrgA+'.ts')
         if(subsUrl && addSubs){
             fs.unlinkSync(muxTrg +subsExt);
         }
     }
     console.log('\n[INFO] Done!\n');
+}
+
+async function downloadFile(filename, chunkList) {
+    if (fs.existsSync(filename + '.ts')) {
+        let rwts = await shlp.question(`[Q] File «${filename + '.ts'}» already exists! Rewrite? (y/N)`);
+        rwts = rwts || 'N';
+        if (!['Y', 'y'].includes(rwts[0])) {
+            return;
+        }
+        fs.unlinkSync(filename + '.ts')
+    }
+
+    let parts = [], start = Date.now();
+
+    console.log(`[INFO] Started ${filename}.ts`)
+    for (let i = 0; i < chunkList.segments.length / argv.partsize; i++) {
+        let cur = []
+        for (let a = 0; a < Math.min(argv.partsize, chunkList.segments.length - (i * argv.partsize)); a++) {
+            cur.push(downloadPart(chunkList.segments[i * argv.partsize + a], i * argv.partsize + a, chunkList.segments.length))
+        }
+        parts = parts.concat(await Promise.all(cur));
+        logDownloadInfo(start, (i) * argv.partsize + Math.min(argv.partsize, chunkList.segments.length - (i * argv.partsize)),
+            chunkList.segments.length, (i) * argv.partsize + Math.min(argv.partsize, chunkList.segments.length - (i * argv.partsize)),
+            chunkList.segments.length)
+    }
+
+    if (parts.length !== chunkList.segments.length) {
+        console.log("[ERROR] Some parts are missing")
+        return;
+    }
+
+    for (let i = 0; i < chunkList.segments.length; i++) {
+        fs.writeFileSync(filename + '.ts', parts[i].content, { flag: 'a' })
+    }
+    
+    console.log(`[INFO] Finished ${filename}.ts`)
+}
+
+async function downloadPart(chunk, index) {
+
+    let key = await generateCrypto(chunk, index)
+    
+    let res = (await got({
+        url: chunk.uri,
+        headers: {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
+            'Range': `bytes=${chunk.byterange.offset}-${chunk.byterange.offset+chunk.byterange.length-1}`
+        },
+        responseType: 'buffer'
+    }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
+
+    if (!res.body) { return; }
+
+    let dec = key.update(res.body);
+    dec = Buffer.concat([dec, key.final()]);
+    return { content: dec, index: index}
+}
+
+let keys = {}
+async function generateCrypto(chunk, index) {
+    let key = keys[chunk.key.uri]
+    if (!key) {
+        let reqKey = await getData({
+            url: chunk.key.uri,
+            responseType: 'buffer'
+        })
+    
+        if (!reqKey.ok) { console.log("[ERROR] Can't get key"); return; }
+        key = reqKey.res.body;
+        keys[chunk.key.uri] = key;
+    }
+    let iv = Buffer.alloc(16);
+    let ivs = chunk.key.iv ? chunk.key.iv : [0, 0, 0, index];
+    for (let i in ivs) {
+        iv.writeUInt32BE(ivs[i], i * 4);
+    }
+    key = crypto.createDecipheriv('aes-128-cbc', key, iv);
+    return key;
+}
+
+/* Snacked from hls-download */
+function logDownloadInfo (dateStart, partsDL, partsTotal, partsDLRes, partsTotalRes) {
+    const dateElapsed = Date.now() - dateStart;
+    const percentFxd = (partsDL / partsTotal * 100).toFixed();
+    const percent = percentFxd < 100 ? percentFxd : (partsTotal == partsDL ? 100 : 99);
+    const revParts = parseInt(dateElapsed * (partsTotal / partsDL - 1));
+    const time = shlp.formatTime((revParts / 1000).toFixed());
+    console.log(`[INFO] ${partsDLRes} of ${partsTotalRes} parts downloaded [${percent}%] (${time})`);
 }
 
 // make proxy URL
