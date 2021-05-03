@@ -9,6 +9,9 @@ const getData = async (options) => {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
         }
     };
+    if(options.responseType) {
+        gOptions.responseType = options.responseType
+    }
     if(options.baseUrl){
         gOptions.prefixUrl = options.baseUrl;
         gOptions.url = gOptions.url.replace(/^\//,'');
@@ -41,7 +44,7 @@ const getData = async (options) => {
     };
     try {
         let res = await got(gOptions);
-        if(res.body && res.body.match(/^</)){
+        if(res.body && (options.responseType !== 'buffer' && res.body.match(/^</))){
             throw { name: 'HTMLError', res };
         }
         return {
