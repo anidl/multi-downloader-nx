@@ -745,7 +745,15 @@ async function downloadStreams(){
 }
 
 async function downloadFile(filename, chunkList) {
-    if (fs.existsSync(filename + '.ts')) {
+    let offset = 0;
+    fileCheck: if (fs.existsSync(filename + '.ts')) {
+        if (fs.existsSync(filename + '.ts.resume')) {
+            const resume = JSON.parse(fs.readFileSync(`${filename}.ts.resume`))
+            if (resume.total === chunkList.segments.length) {
+                offset = resume.downloaded
+                break fileCheck;
+            }
+        }
         let rwts = await shlp.question(`[Q] File «${filename + '.ts'}» already exists! Rewrite? (y/N)`);
         rwts = rwts || 'N';
         if (!['Y', 'y'].includes(rwts[0])) {
@@ -754,29 +762,36 @@ async function downloadFile(filename, chunkList) {
         fs.unlinkSync(filename + '.ts')
     }
 
-    let parts = [], start = Date.now();
+    start = Date.now();
 
     console.log(`[INFO] Started ${filename}.ts`)
-    for (let i = 0; i < chunkList.segments.length / argv.partsize; i++) {
+    for (let i = offset; i < chunkList.segments.length; i+=argv.partsize) {
         let cur = []
-        for (let a = 0; a < Math.min(argv.partsize, chunkList.segments.length - (i * argv.partsize)); a++) {
-            cur.push(downloadPart(chunkList.segments[i * argv.partsize + a], i * argv.partsize + a, chunkList.segments.length))
+        for (let a = 0; a < Math.min(argv.partsize, chunkList.segments.length - i); a++) {
+            cur.push(downloadPart(chunkList.segments[i + a], i + a, chunkList.segments.length)
+                .catch(e => e))
         }
-        parts = parts.concat(await Promise.all(cur));
-        logDownloadInfo(start, (i) * argv.partsize + Math.min(argv.partsize, chunkList.segments.length - (i * argv.partsize)),
-            chunkList.segments.length, (i) * argv.partsize + Math.min(argv.partsize, chunkList.segments.length - (i * argv.partsize)),
+
+        let p = await Promise.all(cur);
+        if (p.some(el => el instanceof Error)) {
+            console.log(`[ERROR] An error occured while downloading ${filename}.ts`)
+            return;
+        }
+
+        fs.writeFileSync(`${filename}.ts.resume`, JSON.stringify({ total: chunkList.segments.length, downloaded: i + argv.partsize }, null, 4))
+
+        for (let a = 0; a < p.length; a++) {
+            fs.writeFileSync(filename + '.ts', p[a].content, { flag: 'a' })
+        }
+
+        logDownloadInfo(start, i + Math.min(argv.partsize, chunkList.segments.length - i),
+            chunkList.segments.length, i + Math.min(argv.partsize, chunkList.segments.length - i),
             chunkList.segments.length)
     }
-
-    if (parts.length !== chunkList.segments.length) {
-        console.log("[ERROR] Some parts are missing")
-        return;
-    }
-
-    for (let i = 0; i < chunkList.segments.length; i++) {
-        fs.writeFileSync(filename + '.ts', parts[i].content, { flag: 'a' })
-    }
     
+    if (fs.existsSync(`${filename}.ts.resume`))
+        fs.unlinkSync(`${filename}.ts.resume`)
+
     console.log(`[INFO] Finished ${filename}.ts`)
 }
 
