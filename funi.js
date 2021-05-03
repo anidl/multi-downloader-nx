@@ -700,7 +700,7 @@ async function downloadStreams(){
         fs.unlinkSync(`${muxTrg}.json`);
     }
     else if(usableFFmpeg){
-        let ffext = 'mp4'//!argv.mp4 ? 'mkv' : 'mp4';
+        let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let ffmux = `-i "${muxTrg}.ts" `;
         if(plAud.uri){
             ffmux += `-i "${muxTrgA}.ts" `;
