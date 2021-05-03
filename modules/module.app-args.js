@@ -175,7 +175,6 @@ const appArgv = (cfg, langsData) => {
         type: 'boolean'
     })
     .option('partsize', {
-        alias: 'p',
         group: 'Downloading:',
         describe: 'The amount of parts that should be downloaded in paralell',
         type: 'number',
