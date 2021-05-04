@@ -783,11 +783,12 @@ async function downloadPart(chunk, index) {
         responseType: 'buffer'
     }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)));
 
-    if (!res.body) { return; }
-
-    let dec = key.update(res.body);
-    dec = Buffer.concat([dec, key.final()]);
-    return { content: dec, index: index};
+    if (!res.body) { return new Error("Invalid State"); }
+    try {
+        let dec = key.update(res.body);
+        dec = Buffer.concat([dec, key.final()]);
+        return { content: dec, index: index};
+    } catch (e) { return e }
 }
 
 let keys = {};
