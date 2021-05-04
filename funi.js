@@ -17,11 +17,11 @@ const shlp = require('sei-helper');
 const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
 const streamdl = require('hls-download');
-const crypto = require("crypto");
+const crypto = require('crypto');
 const got = require('got');
 
 // extra
-const moduleFolder = path.join(__dirname, "/modules")
+const moduleFolder = path.join(__dirname, '/modules');
 const appYargs     = require(path.join(moduleFolder, 'module.app-args'));
 const getYamlCfg   = require(path.join(moduleFolder, 'module.cfg-loader'));
 const getData      = require(path.join(moduleFolder, 'module.getdata.js'));
@@ -414,16 +414,16 @@ async function downloadStreams(){
         plStreams    = {},
         plLayersStr  = [],
         plLayersRes  = {},
-        plMaxLayer   = 1;
-        plNewIds     = 1;
+        plMaxLayer   = 1,
+        plNewIds     = 1,
         plAud        = { uri: '' };
     
     // new uris
     let vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
     if(plQualityLinkList.playlists[0].uri.match(vplReg)){
         if(plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128']){
-            let audioData = plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128'];
-            audioEl = Object.keys(audioData);
+            let audioData = plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128'],
+                audioEl = Object.keys(audioData);
             audioData = audioData[audioEl[0]];
             plAud = { ...audioData, ...{ langStr: audioEl[0] } };
         }
@@ -437,7 +437,7 @@ async function downloadStreams(){
                 return -1;
             }
             return 0;
-        })
+        });
     }
     
     for(let s of plQualityLinkList.playlists){
@@ -541,7 +541,7 @@ async function downloadStreams(){
         let tsFile = path.join(cfg.dir.content, fnOutput);
         
         if (chunkList.segments[0].uri.match(/streaming_video_(\d+)_(\d+)_(\d+)\.ts/)) {
-            await downloadFile(tsFile, chunkList)
+            await downloadFile(tsFile, chunkList);
         } else {
             let proxyHLS = false;
             if (argv.proxy && !argv.ssp) {
@@ -592,10 +592,10 @@ async function downloadStreams(){
 
         let tsFileA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
 
-        await downloadFile(tsFileA, chunkListA)
+        await downloadFile(tsFileA, chunkListA);
     }
     
-     // add subs
+    // add subs
     let subsUrl = stDlPath;
     let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
     let addSubs = argv.mks && subsUrl ? true : false;
@@ -633,7 +633,7 @@ async function downloadStreams(){
     let muxTrg = path.join(cfg.dir.content, fnOutput);
     let muxTrgA = '';
     let tshTrg = path.join(cfg.dir.trash, fnOutput);
-    let tshTrgA = ''
+    let tshTrgA = '';
     
     if(!fs.existsSync(`${muxTrg}.ts`) || !fs.statSync(`${muxTrg}.ts`).isFile()){
         console.log('\n[INFO] TS file not found, skip muxing video...\n');
@@ -642,7 +642,7 @@ async function downloadStreams(){
     
     if(plAud.uri){
         muxTrgA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
-        tshTrgA = path.join(cfg.dir.trash, fnOutput + `.${plAud.language}`)
+        tshTrgA = path.join(cfg.dir.trash, fnOutput + `.${plAud.language}`);
         if(!fs.existsSync(`${muxTrgA}.ts`) || !fs.statSync(`${muxTrgA}.ts`).isFile()){
             console.log('\n[INFO] TS file not found, skip muxing video...\n');
             return;
@@ -728,7 +728,7 @@ async function downloadStreams(){
     else if(argv.nocleanup){
         fs.renameSync(muxTrg+'.ts', tshTrg + '.ts');
         if (plAud.uri)
-            fs.renameSync(muxTrgA+'.ts', tshTrgA + '.ts')
+            fs.renameSync(muxTrgA+'.ts', tshTrgA + '.ts');
         if(subsUrl && addSubs){
             fs.renameSync(muxTrg +subsExt, tshTrg +subsExt);
         }
@@ -736,7 +736,7 @@ async function downloadStreams(){
     else{
         fs.unlinkSync(muxTrg+'.ts');
         if (plAud.uri)
-            fs.unlinkSync(muxTrgA+'.ts')
+            fs.unlinkSync(muxTrgA+'.ts');
         if(subsUrl && addSubs){
             fs.unlinkSync(muxTrg +subsExt);
         }
@@ -748,9 +748,9 @@ async function downloadFile(filename, chunkList) {
     let offset = 0;
     fileCheck: if (fs.existsSync(filename + '.ts')) {
         if (fs.existsSync(filename + '.ts.resume')) {
-            const resume = JSON.parse(fs.readFileSync(`${filename}.ts.resume`))
+            const resume = JSON.parse(fs.readFileSync(`${filename}.ts.resume`));
             if (resume.total === chunkList.segments.length) {
-                offset = resume.downloaded
+                offset = resume.downloaded;
                 break fileCheck;
             }
         }
@@ -759,45 +759,45 @@ async function downloadFile(filename, chunkList) {
         if (!['Y', 'y'].includes(rwts[0])) {
             return;
         }
-        fs.unlinkSync(filename + '.ts')
+        fs.unlinkSync(filename + '.ts');
     }
 
-    start = Date.now();
+    let start = Date.now();
 
-    console.log(`[INFO] Started ${filename}.ts`)
+    console.log(`[INFO] Started ${filename}.ts`);
     for (let i = offset; i < chunkList.segments.length; i+=argv.partsize) {
-        let cur = []
+        let cur = [];
         for (let a = 0; a < Math.min(argv.partsize, chunkList.segments.length - i); a++) {
             cur.push(downloadPart(chunkList.segments[i + a], i + a, chunkList.segments.length)
-                .catch(e => e))
+                .catch(e => e));
         }
 
         let p = await Promise.all(cur);
         if (p.some(el => el instanceof Error)) {
-            console.log(`[ERROR] An error occured while downloading ${filename}.ts`)
+            console.log(`[ERROR] An error occured while downloading ${filename}.ts`);
             return;
         }
 
-        fs.writeFileSync(`${filename}.ts.resume`, JSON.stringify({ total: chunkList.segments.length, downloaded: i + argv.partsize }, null, 4))
+        fs.writeFileSync(`${filename}.ts.resume`, JSON.stringify({ total: chunkList.segments.length, downloaded: i + argv.partsize }, null, 4));
 
         for (let a = 0; a < p.length; a++) {
-            fs.writeFileSync(filename + '.ts', p[a].content, { flag: 'a' })
+            fs.writeFileSync(filename + '.ts', p[a].content, { flag: 'a' });
         }
 
         logDownloadInfo(start, i + Math.min(argv.partsize, chunkList.segments.length - i),
             chunkList.segments.length, i + Math.min(argv.partsize, chunkList.segments.length - i),
-            chunkList.segments.length)
+            chunkList.segments.length);
     }
     
     if (fs.existsSync(`${filename}.ts.resume`))
-        fs.unlinkSync(`${filename}.ts.resume`)
+        fs.unlinkSync(`${filename}.ts.resume`);
 
-    console.log(`[INFO] Finished ${filename}.ts`)
+    console.log(`[INFO] Finished ${filename}.ts`);
 }
 
 async function downloadPart(chunk, index) {
 
-    let key = await generateCrypto(chunk, index)
+    let key = await generateCrypto(chunk, index);
     
     let res = (await got({
         url: chunk.uri,
@@ -806,25 +806,25 @@ async function downloadPart(chunk, index) {
             'Range': `bytes=${chunk.byterange.offset}-${chunk.byterange.offset+chunk.byterange.length-1}`
         },
         responseType: 'buffer'
-    }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)))
+    }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)));
 
     if (!res.body) { return; }
 
     let dec = key.update(res.body);
     dec = Buffer.concat([dec, key.final()]);
-    return { content: dec, index: index}
+    return { content: dec, index: index};
 }
 
-let keys = {}
+let keys = {};
 async function generateCrypto(chunk, index) {
-    let key = keys[chunk.key.uri]
+    let key = keys[chunk.key.uri];
     if (!key) {
         let reqKey = await getData({
             url: chunk.key.uri,
             responseType: 'buffer'
-        })
+        });
     
-        if (!reqKey.ok) { console.log("[ERROR] Can't get key"); return; }
+        if (!reqKey.ok) { console.log('[ERROR] Can\'t get key'); return; }
         key = reqKey.res.body;
         keys[chunk.key.uri] = key;
     }

@@ -141,7 +141,7 @@ function toSubsTime(str, srtFormat) {
     let hLen = srtFormat ? 2 : 1;
     
     x[3] = '0.' + ('' + x[3]).padStart(3, '0');
-    sx = x[0]*60*60 + x[1]*60 + x[2] + Number(x[3])
+    sx = x[0]*60*60 + x[1]*60 + x[2] + Number(x[3]);
     sx = sx.toFixed(msLen).split('.');
     
     
