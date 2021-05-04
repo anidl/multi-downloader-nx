@@ -33,6 +33,12 @@ const appArgv = (cfg) => {
             describe: 'Select episode ids (comma-separated, hyphen-sequence)',
             type: 'string',
         })
+        .option('all', {
+            group: 'Downloading:',
+            describe: 'Used to download all episodes from the show',
+            type: 'boolean',
+            default: false
+        })
     // quality
         .option('q', {
             group: 'Downloading:',

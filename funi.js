@@ -214,7 +214,12 @@ async function getShow(){
         let showStrId = eps[e].ids.externalShowId;
         let epStrId = eps[e].ids.externalEpisodeId.replace(new RegExp('^'+showStrId),'');
         // select
-        if(epSelList.includes(epStrId.replace(/^(?:([A-Z]+)|)(0+)/,'$1'))){
+        if (argv.all) {
+            fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug})
+            epSelEps.push(epStrId)
+            is_selected = true
+        }
+        else if(epSelList.includes(epStrId.replace(/^(?:([A-Z]+)|)(0+)/,'$1'))){
             fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
             epSelEps.push(epStrId);
             is_selected = true;
