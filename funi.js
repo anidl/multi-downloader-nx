@@ -42,11 +42,19 @@ let cfg = {
 
 // token
 let token = getYamlCfg(tokenFile);
-token = token.token ? token.token : false;
+let emptyToken = false;
+try{
+	token = token.token ? token.token : false;
+}
+catch(error){
+	token = false;
+	emptyToken = true;
+}
 
 // info if token not set
 if(!token){
-    console.log('[INFO] Token not set!\n');
+	if(emptyToken) console.log('[WARN] token.yml is empty!\n');
+    else console.log('[INFO] Token not set!\n');
 }
 
 // cli
