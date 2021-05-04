@@ -16,7 +16,6 @@ const yaml = require('yaml');
 const shlp = require('sei-helper');
 const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
-const streamdl = require('hls-download');
 const crypto = require('crypto');
 const got = require('got');
 
@@ -539,41 +538,7 @@ async function downloadStreams(){
         let chunkList = m3u8(reqVideo.res.body);
         
         let tsFile = path.join(cfg.dir.content, fnOutput);
-        
-        if (chunkList.segments[0].uri.match(/streaming_video_(\d+)_(\d+)_(\d+)\.ts/)) {
-            await downloadFile(tsFile, chunkList);
-        } else {
-            let proxyHLS = false;
-            if (argv.proxy && !argv.ssp) {
-                try {
-                    proxyHLS = {};
-                    proxyHLS.url = buildProxyUrl(argv.proxy, argv['proxy-auth']);
-                }
-                catch(e){
-                    console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
-                    console.log('[WARN] Skiping...');
-                    proxyHLS = false;
-                }
-            }
-    
-            let streamdlParams = {
-                fn: tsFile + '.ts',
-                m3u8json: chunkList,
-                baseurl: chunkList.baseUrl,
-                pcount: 10,
-                proxy: (proxyHLS ? proxyHLS : false)
-            };
-            
-            let dldata = await new streamdl(streamdlParams).download();
-            if(!dldata.ok){
-                fs.writeFileSync(`${tsFile}.ts.resume`, JSON.stringify(dldata.parts));
-                console.log(`[ERROR] DL Stats: ${JSON.stringify(dldata.parts)}\n`);
-                dlFailed = true;
-            }
-            else if(fs.existsSync(`${tsFile}.ts.resume`) && dldata.ok){
-                fs.unlinkSync(`${tsFile}.ts.resume`);
-            }
-        }
+        dlFailed = !await downloadFile(tsFile, chunkList);
     }
     else{
         console.log('[INFO] Skip video downloading...\n');
@@ -592,7 +557,7 @@ async function downloadStreams(){
 
         let tsFileA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
 
-        await downloadFile(tsFileA, chunkListA);
+        let dlFailedA =  !await downloadFile(tsFileA, chunkListA);
     }
     
     // add subs
@@ -757,7 +722,7 @@ async function downloadFile(filename, chunkList) {
         let rwts = await shlp.question(`[Q] File «${filename + '.ts'}» already exists! Rewrite? (y/N)`);
         rwts = rwts || 'N';
         if (!['Y', 'y'].includes(rwts[0])) {
-            return;
+            return false;
         }
         fs.unlinkSync(filename + '.ts');
     }
@@ -775,7 +740,7 @@ async function downloadFile(filename, chunkList) {
         let p = await Promise.all(cur);
         if (p.some(el => el instanceof Error)) {
             console.log(`[ERROR] An error occured while downloading ${filename}.ts`);
-            return;
+            return false;
         }
 
         fs.writeFileSync(`${filename}.ts.resume`, JSON.stringify({ total: chunkList.segments.length, downloaded: i + argv.partsize }, null, 4));
@@ -793,18 +758,23 @@ async function downloadFile(filename, chunkList) {
         fs.unlinkSync(`${filename}.ts.resume`);
 
     console.log(`[INFO] Finished ${filename}.ts`);
+    return true;
 }
 
 async function downloadPart(chunk, index) {
 
     let key = await generateCrypto(chunk, index);
     
+    let headers = {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0'
+    };
+
+    if (chunk.byterange)
+        headers.Range = `bytes=${chunk.byterange.offset}-${chunk.byterange.offset+chunk.byterange.length-1}`;
+
     let res = (await got({
         url: chunk.uri,
-        headers: {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
-            'Range': `bytes=${chunk.byterange.offset}-${chunk.byterange.offset+chunk.byterange.length-1}`
-        },
+        headers,
         responseType: 'buffer'
     }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)));
 
