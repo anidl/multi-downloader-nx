@@ -40,21 +40,42 @@ let cfg = {
     cli: getYamlCfg(cliCfgFile),
 };
 
+// make sure cfg params aren't empty
+if (cfg.bin === null){
+	cfg.bin = {};
+	console.log('[WARN] bin-path.yml is empty or does not exist!\n');
+}
+if (!cfg.bin.hasOwnProperty('ffmpeg')) cfg.bin.ffmpeg = './bin/ffmpeg';
+if (!cfg.bin.hasOwnProperty('mkvmerge')) cfg.bin.mkvmerge = './bin/mkvmerge';
+
+if (cfg.dir === null){
+	cfg.dir = {};
+	console.log('[WARN] dir-path.yml is empty or does not exist!\n');
+}
+if (!cfg.dir.hasOwnProperty('content')) cfg.dir.content = './videos/';
+if (!cfg.dir.hasOwnProperty('trash')) cfg.dir.trash = "./videos/_trash/";
+
+if (cfg.cli === null){
+	cfg.cli = {};
+	console.log('[WARN] cli-defaults.yml is empty or does not exist!\n');
+}
+if (!cfg.cli.hasOwnProperty('releaseGroup')) cfg.cli.releaseGroup = "Funimation";
+if (!cfg.cli.hasOwnProperty('videoLayer')) cfg.cli.videoLayer = 7;
+if (!cfg.cli.hasOwnProperty('fileSuffix')) cfg.cli.fileSuffix = "SIZEp";
+if (!cfg.cli.hasOwnProperty('nServer')) cfg.cli.nServer = 1;
+if (!cfg.cli.hasOwnProperty('mp4mux')) cfg.cli.mp4mux = false;
+if (!cfg.cli.hasOwnProperty('muxSubs')) cfg.cli.muxSubs = false;
+if (!cfg.cli.hasOwnProperty('noCleanUp')) cfg.cli.noCleanUp = false;
+
 // token
 let token = getYamlCfg(tokenFile);
-let emptyToken = false;
-try{
-	token = token.token ? token.token : false;
-}
-catch(error){
-	token = false;
-	emptyToken = true;
-}
+if (token === null) token = false;
+else if (token.token === null) token = false;
+else token = token.token;
 
 // info if token not set
 if(!token){
-	if(emptyToken) console.log('[WARN] token.yml is empty!\n');
-    else console.log('[INFO] Token not set!\n');
+    console.log('[INFO] Token not set!\n');
 }
 
 // cli
