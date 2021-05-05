@@ -627,6 +627,8 @@ async function downloadStreams(){
             langCode = langObj['639-2'];
         }
     }
+    if (!langCode)
+        langCode = argv.sub ? 'jpn' : 'eng'
 
     // usage
     let usableMKVmerge = true;
@@ -645,7 +647,7 @@ async function downloadStreams(){
         console.log('[WARN] FFmpeg not found, skip using this...');
         usableFFmpeg = false;
     }
-    
+
     // ftag
     argv.ftag = argv.ftag ? argv.ftag : argv.a;
     argv.ftag = shlp.cleanupFilename(argv.ftag);
@@ -656,16 +658,18 @@ async function downloadStreams(){
         mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
         mkvmux.push('--track-name',`0:[${argv.ftag}]`);
-        mkvmux.push('--language',`0:${langCode}`);
+        
         if(plAud.uri){
             mkvmux.push('--video-tracks','0','--no-audio');
             mkvmux.push('--no-subtitles','--no-attachments');
             mkvmux.push(`${muxTrg}.ts`);
+            mkvmux.push('--language',`0:${langCode}`);
             mkvmux.push('--no-video','--audio-tracks','0');
             mkvmux.push('--no-subtitles','--no-attachments');
             mkvmux.push(`${muxTrgA}.ts`);
         }
         else{
+            mkvmux.push('--language',`1:${langCode}`);
             mkvmux.push('--video-tracks','0','--audio-tracks','1');
             mkvmux.push('--no-subtitles','--no-attachments');
             mkvmux.push(`${muxTrg}.ts`);
