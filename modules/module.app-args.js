@@ -37,7 +37,13 @@ const appArgv = (cfg) => {
             group: 'Downloading:',
             describe: 'Used to download all episodes from the show',
             type: 'boolean',
-            default: false
+            default: cfg.all || false
+        })
+        .option('partsize', {
+            group: 'Downloading:',
+            describe: 'The amount of parts that should be downloaded in paralell',
+            type: 'number',
+            default: cfg.partsize || 10
         })
     // quality
         .option('q', {
@@ -179,12 +185,6 @@ const appArgv = (cfg) => {
             group: 'Help:',
             describe: 'Show this help',
             type: 'boolean'
-        })
-        .option('partsize', {
-            group: 'Downloading:',
-            describe: 'The amount of parts that should be downloaded in paralell',
-            type: 'number',
-            default: 10
         })
     // usage
         .example([
