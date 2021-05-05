@@ -18,6 +18,7 @@ const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
 const crypto = require('crypto');
 const got = require('got');
+const iso639 = require('iso-639');
 
 // extra
 const moduleFolder = path.join(__dirname, '/modules');
@@ -215,9 +216,9 @@ async function getShow(){
         let epStrId = eps[e].ids.externalEpisodeId.replace(new RegExp('^'+showStrId),'');
         // select
         if (argv.all) {
-            fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug})
-            epSelEps.push(epStrId)
-            is_selected = true
+            fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
+            epSelEps.push(epStrId);
+            is_selected = true;
         }
         else if(epSelList.includes(epStrId.replace(/^(?:([A-Z]+)|)(0+)/,'$1'))){
             fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
@@ -562,7 +563,7 @@ async function downloadStreams(){
 
         let tsFileA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
 
-        let dlFailedA =  !await downloadFile(tsFileA, chunkListA);
+        dlFailedA = !await downloadFile(tsFileA, chunkListA);
     }
     
     // add subs
@@ -618,7 +619,15 @@ async function downloadStreams(){
             return;
         }
     }
-    
+
+    let langCode;
+    for (let lang in iso639.iso_639_2) {
+        let langObj = iso639.iso_639_2[lang];
+        if (langObj.hasOwnProperty('639-1') && langObj['639-1'] === plAud['language']) {
+            langCode = langObj['639-2'];
+        }
+    }
+
     // usage
     let usableMKVmerge = true;
     let usableFFmpeg = true;
@@ -640,7 +649,6 @@ async function downloadStreams(){
     // ftag
     argv.ftag = argv.ftag ? argv.ftag : argv.a;
     argv.ftag = shlp.cleanupFilename(argv.ftag);
-    
     // select muxer
     if(!argv.mp4 && usableMKVmerge){
         // mux to mkv
@@ -648,7 +656,7 @@ async function downloadStreams(){
         mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
         mkvmux.push('--track-name',`0:[${argv.ftag}]`);
-        mkvmux.push('--language',`1:${argv.sub?'jpn':''}`);
+        mkvmux.push('--language',`1:${langCode}`);
         if(plAud.uri){
             mkvmux.push('--video-tracks','0','--no-audio');
             mkvmux.push('--no-subtitles','--no-attachments');
@@ -682,7 +690,7 @@ async function downloadStreams(){
         ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
         ffmux += addSubs &&  argv.mp4 ? '-c:s mov_text ' : '';
         ffmux += '-metadata encoding_tool="no_variable_data" ';
-        ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:0 language=${argv.sub?'jpn':''} `;
+        ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:0 language=${langCode} `;
         ffmux += addSubs ? '-metadata:s:s:0 language=eng ' : '';
         ffmux += `"${muxTrg}.${ffext}"`;
         // mux to mkv
@@ -783,12 +791,12 @@ async function downloadPart(chunk, index) {
         responseType: 'buffer'
     }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)));
 
-    if (!res.body) { return new Error("Invalid State"); }
+    if (!res.body) { return new Error('Invalid State'); }
     try {
         let dec = key.update(res.body);
         dec = Buffer.concat([dec, key.final()]);
         return { content: dec, index: index};
-    } catch (e) { return e }
+    } catch (e) { return e; }
 }
 
 let keys = {};
