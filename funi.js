@@ -21,11 +21,10 @@ const got = require('got');
 const iso639 = require('iso-639');
 
 // extra
-const moduleFolder = path.join(__dirname, '/modules');
-const appYargs     = require(path.join(moduleFolder, 'module.app-args'));
-const getYamlCfg   = require(path.join(moduleFolder, 'module.cfg-loader'));
-const getData      = require(path.join(moduleFolder, 'module.getdata.js'));
-const vttConvert   = require(path.join(moduleFolder, 'module.vttconvert'));
+const appYargs     = require('./modules/module.app-args');
+const getYamlCfg   = require('./modules/module.cfg-loader');
+const getData      = require('./modules/module.getdata.js');
+const vttConvert   = require('./modules/module.vttconvert');
 
 // new-cfg
 const cfgFolder  = path.join(__dirname, '/config');
