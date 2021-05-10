@@ -91,10 +91,15 @@ const appArgv = (cfg) => {
             type: 'number',
         })
     // skip
+        .option('noaudio', {
+            group: 'Downloading:',
+            describe: 'Skip downloading audio',
+            type: 'boolean'
+        })
         .option('novids', {
             group: 'Downloading:',
             alias: 'skipdl',
-            describe: 'Skip downloading video (for downloading subtitles only)',
+            describe: 'Skip downloading video',
             type: 'boolean',
         })
         .option('nosubs', {

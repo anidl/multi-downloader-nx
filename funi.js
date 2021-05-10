@@ -549,7 +549,7 @@ async function downloadStreams(){
         console.log('[INFO] Skip video downloading...\n');
     }
     
-    if (!argv.novids && plAud.uri) {
+    if (!argv.noaudio && plAud.uri) {
         // download audio
         let reqAudio = await getData({
             url: plAud.uri,
@@ -627,7 +627,7 @@ async function downloadStreams(){
         }
     }
     if (!langCode)
-        langCode = argv.sub ? 'jpn' : 'eng'
+        langCode = argv.sub ? 'jpn' : 'eng';
 
     // usage
     let usableMKVmerge = true;
@@ -645,6 +645,9 @@ async function downloadStreams(){
     if( !usableMKVmerge && !ffmpegbinfile || argv.mp4 && !ffmpegbinfile ){
         console.log('[WARN] FFmpeg not found, skip using this...');
         usableFFmpeg = false;
+    }
+    if ( argv.novids ){
+        console.log('[INFO] Video not downloaded. Skip muxing video.');
     }
 
     // ftag
@@ -686,10 +689,11 @@ async function downloadStreams(){
         let ffmux = `-i "${muxTrg}.ts" `;
         if(plAud.uri){
             ffmux += `-i "${muxTrgA}.ts" `;
+            ffmux += '-map 1:a ';
         }
         ffmux += addSubs ? `-i "${muxTrg}${subsExt}" ` : '';
-        ffmux += '-map 0 -map 1:a -c:v copy -c:a copy ';
-        ffmux += addSubs ? '-map 1 ' : '';
+        ffmux += '-map 0 -c:v copy -c:a copy ';
+        ffmux += addSubs ? `-map ${plAud.uri ? 2 : 1} ` : '';
         ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
         ffmux += addSubs &&  argv.mp4 ? '-c:s mov_text ' : '';
         ffmux += '-metadata encoding_tool="no_variable_data" ';
