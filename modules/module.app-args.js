@@ -64,7 +64,7 @@ const appArgv = (cfg) => {
         .option('dub', {
             group: 'Downloading:',
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
-            choices: [ 'enUS', 'esLA', 'ptBR' ],
+            choices: [ 'enUS', 'esLA', 'ptBR', 'zhMN' ],
             default: cfg.dub || 'enUS',
             type: 'string',
         })

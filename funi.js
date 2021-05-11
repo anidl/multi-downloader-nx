@@ -318,6 +318,7 @@ async function getEpisode(fnSlug){
         'enUS': 'English',
         'esLA': 'Spanish (Latin Am)',
         'ptBR': 'Portuguese (Brazil)',
+        'zhMN': 'Chinese (Mandarin, PRC)'
     };
     
     // select
@@ -697,7 +698,7 @@ async function downloadStreams(){
         ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
         ffmux += addSubs &&  argv.mp4 ? '-c:s mov_text ' : '';
         ffmux += '-metadata encoding_tool="no_variable_data" ';
-        ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:0 language=${langCode} `;
+        ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:${plAud.uri?1:0} language=${langCode} `;
         ffmux += addSubs ? '-metadata:s:s:0 language=eng ' : '';
         ffmux += `"${muxTrg}.${ffext}"`;
         // mux to mkv
