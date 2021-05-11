@@ -74,6 +74,13 @@ const appArgv = (cfg) => {
             default: cfg.subsMode || false,
             type: 'boolean',
         })
+        .option('subLang', {
+            group: 'Downloading:',
+            describe: 'Set the subtitle language (English is default and fallback)',
+            default: cfg.subLang || 'en',
+            choices: ['en','es','pt'],
+            type: 'string'
+        })
     // simulcast
         .option('simul', {
             group: 'Downloading:',

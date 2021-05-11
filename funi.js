@@ -387,10 +387,18 @@ function getSubsUrl(m){
     if(argv.nosubs && !argv.sub){
         return false;
     }
+
+    let subLangAvailable = m.some(a => a.ext == 'vtt' && a.languages && a.languages[0].code === argv.subLang);
+
+    if (!subLangAvailable) {
+        console.log(`[WARN] Unable to find subtitle language '${argv.subLang}'. Defaulting to English.`);
+        argv.subLang = 'en';
+    }
+
     for(let i in m){
         let fpp = m[i].filePath.split('.');
         let fpe = fpp[fpp.length-1];
-        if(fpe == 'vtt'){ // dfxp (TTML), srt, vtt
+        if(fpe == 'vtt' && (( !m[i].languages ) || (m[i].languages[0].code === argv.subLang))){ // dfxp (TTML), srt, vtt
             return m[i].filePath;
         }
     }
