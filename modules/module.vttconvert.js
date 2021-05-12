@@ -35,10 +35,10 @@ function loadVtt(vttStr) {
 }
 
 // ass specific
-function convertToAss(vttStr){
+function convertToAss(vttStr, lang){
     let ass = [
         '\ufeff[Script Info]',
-        'Title: English',
+        `Title: ${lang}`,
         'ScriptType: v4.00+',
         'PlayResX: 1280',
         'PlayResY: 720',
@@ -160,7 +160,7 @@ function padTimeNum(sep, input, pad){
 }
 
 // export module
-module.exports = (vttStr, toSrt) => {
+module.exports = (vttStr, toSrt, lang = 'English') => {
     const convert = toSrt ? convertToSrt : convertToAss;
-    return convert(vttStr);
+    return convert(vttStr, lang);
 };

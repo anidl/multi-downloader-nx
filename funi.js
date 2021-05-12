@@ -66,7 +66,7 @@ let fnTitle = '',
     fnSuffix = '',
     fnOutput = '',
     tsDlPath = false,
-    stDlPath = false,
+    stDlPath = undefined,
     batchDL = false;
 
 // select mode
@@ -399,7 +399,10 @@ function getSubsUrl(m){
         let fpp = m[i].filePath.split('.');
         let fpe = fpp[fpp.length-1];
         if(fpe == 'vtt' && (( !m[i].languages ) || (m[i].languages[0].code === argv.subLang))){ // dfxp (TTML), srt, vtt
-            return m[i].filePath;
+            return {
+                path: m[i].filePath,
+                ext: `.${(m[i].languages ? m[i].languages[0].code : 'en')}` 
+            };
         }
     }
     return false;
@@ -575,7 +578,7 @@ async function downloadStreams(){
     }
     
     // add subs
-    let subsUrl = stDlPath;
+    let subsUrl = stDlPath ? stDlPath.path : false;
     let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
     let addSubs = argv.mks && subsUrl ? true : false;
     
@@ -589,8 +592,9 @@ async function downloadStreams(){
             debug: argv.debug,
         });
         if(subsSrc.ok){
-            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false));
-            let assFile = path.join(cfg.dir.content, fnOutput) + subsExt;
+            let langName = iso639.iso_639_1[argv.subLang].name;
+            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), langName ? langName : undefined );
+            let assFile = path.join(cfg.dir.content, fnOutput) + stDlPath.ext + subsExt;
             fs.writeFileSync(assFile, assData);
             console.log('[INFO] Subtitles downloaded!');
         }
