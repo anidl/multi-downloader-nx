@@ -581,7 +581,9 @@ async function downloadStreams(){
     let subsUrl = stDlPath ? stDlPath.path : false;
     let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
     let addSubs = argv.mks && subsUrl ? true : false;
-    
+    let subFile;
+    let subTrashFile;
+
     // download subtitles
     if(subsUrl){
         console.log('[INFO] Downloading subtitles...');
@@ -594,8 +596,9 @@ async function downloadStreams(){
         if(subsSrc.ok){
             let langName = iso639.iso_639_1[argv.subLang].name;
             let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), langName ? langName : undefined );
-            let assFile = path.join(cfg.dir.content, fnOutput) + stDlPath.ext + subsExt;
-            fs.writeFileSync(assFile, assData);
+            subFile = path.join(cfg.dir.content, fnOutput) + stDlPath.ext + subsExt;
+            subTrashFile = path.join(cfg.dir.trash, fnOutput) + stDlPath.ext + subsExt;
+            fs.writeFileSync(subFile, assData);
             console.log('[INFO] Subtitles downloaded!');
         }
         else{
@@ -691,7 +694,7 @@ async function downloadStreams(){
         }
         if(addSubs){
             mkvmux.push('--language','0:eng');
-            mkvmux.push(`${muxTrg}${subsExt}`);
+            mkvmux.push(`${subFile ? subFile : muxTrg + subsExt}`);
         }
         fs.writeFileSync(`${muxTrg}.json`,JSON.stringify(mkvmux,null,'  '));
         shlp.exec('mkvmerge',`"${mkvmergebinfile}"`,`@"${muxTrg}.json"`);
@@ -700,11 +703,9 @@ async function downloadStreams(){
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let ffmux = `-i "${muxTrg}.ts" `;
-        if(plAud.uri){
-            ffmux += `-i "${muxTrgA}.ts" `;
-            ffmux += '-map 1:a ';
-        }
-        ffmux += addSubs ? `-i "${muxTrg}${subsExt}" ` : '';
+        ffmux += plAud.uri ? `-i "${muxTrgA}.ts" ` : '';
+        ffmux += addSubs ? `-i "${subFile ? subFile : muxTrg + subsExt}" ` : '';
+        ffmux += plAud.uri ? '-map 1:a ' : '';
         ffmux += '-map 0 -c:v copy -c:a copy ';
         ffmux += addSubs ? `-map ${plAud.uri ? 2 : 1} ` : '';
         ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
@@ -728,7 +729,7 @@ async function downloadStreams(){
         if (plAud.uri)
             fs.renameSync(muxTrgA+'.ts', tshTrgA + '.ts');
         if(subsUrl && addSubs){
-            fs.renameSync(muxTrg +subsExt, tshTrg +subsExt);
+            fs.renameSync(subFile ? subFile : muxTrg+subsExt, subTrashFile ? subTrashFile : tshTrg + subsExt);
         }
     }
     else{
@@ -736,7 +737,7 @@ async function downloadStreams(){
         if (plAud.uri)
             fs.unlinkSync(muxTrgA+'.ts');
         if(subsUrl && addSubs){
-            fs.unlinkSync(muxTrg +subsExt);
+            fs.unlinkSync(subFile ? subFile : muxTrg + subsExt);
         }
     }
     console.log('\n[INFO] Done!\n');
