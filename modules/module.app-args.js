@@ -77,7 +77,7 @@ const appArgv = (cfg) => {
         .option('subLang', {
             group: 'Downloading:',
             describe: 'Set the subtitle language (English is default and fallback)',
-            default: cfg.subLang || 'en',
+            default: cfg.subLang || 'enUS',
             choices: [ 'enUS', 'esLA', 'ptBR' ],
             type: 'string'
         })

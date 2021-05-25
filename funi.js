@@ -27,11 +27,10 @@ const getData      = require('./modules/module.getdata.js');
 const vttConvert   = require('./modules/module.vttconvert');
 
 // new-cfg
-const cfgFolder  = path.join(__dirname, '/config');
-const binCfgFile = path.join(cfgFolder, 'bin-path');
-const dirCfgFile = path.join(cfgFolder, 'dir-path');
-const cliCfgFile = path.join(cfgFolder, 'cli-defaults');
-const tokenFile  = path.join(cfgFolder, 'token');
+const binCfgFile = path.join('config', 'bin-path');
+const dirCfgFile = path.join('config', 'dir-path');
+const cliCfgFile = path.join('config', 'cli-defaults');
+const tokenFile  = path.join('config', 'token');
 
 // params
 let cfg = {
