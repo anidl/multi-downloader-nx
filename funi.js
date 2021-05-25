@@ -340,7 +340,7 @@ async function getEpisode(fnSlug){
                 stDlPath = m.subtitles;
                 selected = true;
             }
-            console.log(`[#${m.id}] ${dub_type} [${m.version}]`,(selected?'(selected)':''));
+            console.log(`[#${m.id}] ${dub_type} [${m.version}]`,(selected?'(selected)':''),(m.subtitles.subLangAvailable?'':'(defaulted to Englisch subtitles)'));
         }
     }
     
@@ -388,20 +388,31 @@ function getSubsUrl(m){
         return false;
     }
 
-    let subLangAvailable = m.some(a => a.ext == 'vtt' && a.languages && a.languages[0].code === argv.subLang);
+    let subLang = argv.subLang
+
+    const subType = {
+        'enUS': 'English',
+        'esLA': 'Spanish (Latin Am)',
+        'ptBR': 'Portuguese (Brazil)'
+    };
+    
+    let subLangAvailable = m.some(a => {
+        return a.ext == 'vtt' && a.language === subType[subLang]
+    });
 
     if (!subLangAvailable) {
-        console.log(`[WARN] Unable to find subtitle language '${argv.subLang}'. Defaulting to English.`);
-        argv.subLang = 'en';
+        subLang = 'enUS';
     }
-
+    
     for(let i in m){
         let fpp = m[i].filePath.split('.');
         let fpe = fpp[fpp.length-1];
-        if(fpe == 'vtt' && (( !m[i].languages ) || (m[i].languages[0].code === argv.subLang))){ // dfxp (TTML), srt, vtt
+        if(fpe == 'vtt' && m[i].language === subType[subLang]) {
             return {
                 path: m[i].filePath,
-                ext: `.${(m[i].languages ? m[i].languages[0].code : 'en')}` 
+                ext: `.${subLang}`,
+                langName: subType[subLang],
+                subLangAvailable: subLangAvailable
             };
         }
     }
@@ -594,8 +605,7 @@ async function downloadStreams(){
             debug: argv.debug,
         });
         if(subsSrc.ok){
-            let langName = iso639.iso_639_1[argv.subLang].name;
-            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), langName ? langName : undefined );
+            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), stDlPath.langName );
             subFile = path.join(cfg.dir.content, fnOutput) + stDlPath.ext + subsExt;
             subTrashFile = path.join(cfg.dir.trash, fnOutput) + stDlPath.ext + subsExt;
             fs.writeFileSync(subFile, assData);
