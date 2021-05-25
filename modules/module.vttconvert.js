@@ -35,7 +35,7 @@ function loadVtt(vttStr) {
 }
 
 // ass specific
-function convertToAss(vttStr, lang){
+function convertToAss(vttStr, lang, fontSize){
     let ass = [
         '\ufeff[Script Info]',
         `Title: ${lang}`,
@@ -49,8 +49,8 @@ function convertToAss(vttStr, lang){
         'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, '
             + 'Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, '
             + 'BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
-        'Style: Main,Noto Sans,55,&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,2,10,10,10,1',
-        'Style: MainTop,Noto Sans,55,&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,8,10,10,10,1',
+        `Style: Main,Noto Sans,${fontSize},&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,2,10,10,10,1`,
+        `Style: MainTop,Noto Sans,${fontSize},&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,8,10,10,10`,
         '',
         '[Events]',
         'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',
@@ -160,7 +160,7 @@ function padTimeNum(sep, input, pad){
 }
 
 // export module
-module.exports = (vttStr, toSrt, lang = 'English') => {
+module.exports = (vttStr, toSrt, lang = 'English', fontSize) => {
     const convert = toSrt ? convertToSrt : convertToAss;
-    return convert(vttStr, lang);
+    return convert(vttStr, lang, fontSize);
 };

@@ -81,6 +81,12 @@ const appArgv = (cfg) => {
             choices: [ 'enUS', 'esLA', 'ptBR' ],
             type: 'string'
         })
+        .option('fontSize', {
+            group: 'Downloading:',
+            describe: 'Used to set the fontsize of the subtitles',
+            default: cfg.fontSize || 55,
+            type: 'number'
+        })
     // simulcast
         .option('simul', {
             group: 'Downloading:',

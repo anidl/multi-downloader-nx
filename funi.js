@@ -395,7 +395,7 @@ function getSubsUrl(m){
         'esLA': 'Spanish (Latin Am)',
         'ptBR': 'Portuguese (Brazil)'
     };
-    
+
     let subLangAvailable = m.some(a => {
         return a.ext == 'vtt' && a.language === subType[subLang]
     });
@@ -605,7 +605,7 @@ async function downloadStreams(){
             debug: argv.debug,
         });
         if(subsSrc.ok){
-            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), stDlPath.langName );
+            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), stDlPath.langName, argv.fontSize);
             subFile = path.join(cfg.dir.content, fnOutput) + stDlPath.ext + subsExt;
             subTrashFile = path.join(cfg.dir.trash, fnOutput) + stDlPath.ext + subsExt;
             fs.writeFileSync(subFile, assData);
