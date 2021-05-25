@@ -340,7 +340,7 @@ async function getEpisode(fnSlug){
                 stDlPath = m.subtitles;
                 selected = true;
             }
-            console.log(`[#${m.id}] ${dub_type} [${m.version}]`,(selected?'(selected)':''),(m.subtitles.subLangAvailable?'':'(defaulted to Englisch subtitles)'));
+            console.log(`[#${m.id}] ${dub_type} [${m.version}]`,(selected?'(selected)':''),(m.subtitles.subLangAvailable?'':'(defaulted to English subtitles)'));
         }
     }
     
