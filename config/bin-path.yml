@@ -1,2 +1,2 @@
-ffmpeg: "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"
+ffmpeg: "./bin/ffmpeg/ffmpeg.exe"
 mkvmerge: "./bin/mkvtoolnix/mkvmerge.exe"
