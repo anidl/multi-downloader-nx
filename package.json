@@ -12,14 +12,14 @@
         "utility",
         "cli"
     ],
-    "author": "AniDL",
-    "homepage": "https://github.com/anidl/funimation-downloader-nx",
+    "author": "AniDL/Izu-co",
+    "homepage": "https://github.com/izu-co/funimation-downloader-nx",
     "repository": {
         "type": "git",
-        "url": "https://github.com/anidl/funimation-downloader-nx.git"
+        "url": "https://github.com/izu-co/funimation-downloader-nx.git"
     },
     "bugs": {
-        "url": "https://github.com/anidl/funimation-downloader-nx/issues"
+        "url": "https://github.com/izu-co/funimation-downloader-nx/issues"
     },
     "license": "MIT",
     "main": "funi.js",
