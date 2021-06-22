@@ -25,7 +25,6 @@ const appYargs     = require('./modules/module.app-args');
 const getYamlCfg   = require('./modules/module.cfg-loader');
 const getData      = require('./modules/module.getdata.js');
 const vttConvert   = require('./modules/module.vttconvert');
-
 // new-cfg
 
 const pathToFile = process.pkg ? '' : __dirname;
@@ -63,10 +62,12 @@ else{
 }
 
 // fn variables
-let fnTitle = '',
-    fnEpNum = '',
+let title = '',
+    showTitle = '',
+    fnEpNum = 0,
     fnSuffix = '',
     fnOutput = '',
+    season = 0,
     tsDlPath = false,
     stDlPath = undefined,
     batchDL = false;
@@ -273,12 +274,13 @@ async function getEpisode(fnSlug){
     if(!episodeData.ok){return;}
     let ep = JSON.parse(episodeData.res.body).items[0], streamId = 0;
     // build fn
-    fnTitle = argv.t ? argv.t : ep.parent.title;
-    ep.number = isNaN(ep.number) ? ep.number : ( parseInt(ep.number, 10) < 10 ? '0' + ep.number : ep.number );
+    showTitle = ep.parent.title;
+    title = ep.title;
+    season = parseInt(ep.parent.seasonNumber)
     if(ep.mediaCategory != 'Episode'){
         ep.number = ep.number !== '' ? ep.mediaCategory+ep.number : ep.mediaCategory+'#'+ep.id;
     }
-    fnEpNum = argv.ep && !batchDL ? ( parseInt(argv.ep, 10) < 10 ? '0' + argv.ep : argv.ep ) : ep.number;
+    fnEpNum = parseInt(ep.number);
     
     // is uncut
     let uncut = {
@@ -496,13 +498,13 @@ async function downloadStreams(){
                 plStreams[plServer][plLayerId] = plUrlDl;
             }
             // set plLayersStr
-            let plResolution = `${s.attributes.RESOLUTION.height}p`;
+            let plResolution = s.attributes.RESOLUTION;
             plLayersRes[plLayerId] = plResolution;
             let plBandwidth  = Math.round(s.attributes.BANDWIDTH/1024);
             if(plLayerId<10){
                 plLayerId = plLayerId.toString().padStart(2,' ');
             }
-            let qualityStrAdd   = `${plLayerId}: ${plResolution} (${plBandwidth}KiB/s)`;
+            let qualityStrAdd   = `${plLayerId}: ${plResolution.width}x${plResolution.height} (${plBandwidth}KiB/s)`;
             let qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g,'\\$1'),'m');
             let qualityStrMatch = !plLayersStr.join('\r\n').match(qualityStrRegx);
             if(qualityStrMatch){
@@ -537,10 +539,10 @@ async function downloadStreams(){
     console.log(`[INFO] Available qualities:\n\t${plLayersStr.join('\n\t')}`);
     
     if(videoUrl != ''){
-        console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q]}) @ ${plSelectedServer}`);
+        console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q].width}x${plLayersRes[argv.q].height}) @ ${plSelectedServer}`);
         console.log('[INFO] Stream URL:',videoUrl);
-        fnSuffix = argv.suffix.replace('SIZEp',plLayersRes[argv.q]);
-        fnOutput = shlp.cleanupFilename(`[${argv.a}] ${fnTitle} - ${fnEpNum} [${fnSuffix}]`);
+
+        fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height)
         console.log(`[INFO] Output filename: ${fnOutput}.ts`);
     }
     else if(argv.x > plServerList.length){
@@ -678,16 +680,13 @@ async function downloadStreams(){
         console.log('[INFO] Video not downloaded. Skip muxing video.');
     }
 
-    // ftag
-    argv.ftag = argv.ftag ? argv.ftag : argv.a;
-    argv.ftag = shlp.cleanupFilename(argv.ftag);
     // select muxer
     if(!argv.mp4 && usableMKVmerge){
         // mux to mkv
         let mkvmux  = [];
         mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
-        mkvmux.push('--track-name',`0:[${argv.ftag}]`);
+        mkvmux.push('--track-name',`0:[Funimation]`);
         
         if(plAud.uri){
             mkvmux.push('--video-tracks','0','--no-audio');
@@ -893,4 +892,47 @@ function buildProxy(proxyBaseUrl, proxyAuth){
     }
     
     return proxyStr;
+}
+
+/**
+ * @param {string} input 
+ * @param {string} title 
+ * @param {number} episode 
+ * @param {string} showTitle 
+ * @param {number} season 
+ * @param {number} width 
+ * @param {number} height 
+ * @returns {string}
+ */
+function parseFileName(input, title, episode, showTitle, season, width, height) {
+    const varRegex = /\${[A-Za-z1-9]+}/g
+    const vars = input.match(varRegex)
+    for (let i = 0; i < vars.length; i++) {
+        const type = vars[i]
+        switch (type.slice(2, -1).toLowerCase()) {
+            case "title":
+                input = input.replace(vars[i], title)
+                break;
+            case "episode":
+                let len = episode.toFixed(0).toString().length
+                input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + episode : episode)
+                break;
+            case "showtitle":
+                input = input.replace(vars[i], showTitle)
+                break;
+            case "season":
+                let len1 = season.toFixed(0).toString().length
+                input = input.replace(vars[i], len1 < argv.numbers ? '0'.repeat(argv.numbers - len1) + season : season)
+                break;
+            case "width":
+                input = input.replace(vars[i], width)
+                break;
+            case "height":
+                input = input.replace(vars[i], height)
+                break;
+            default:
+                break;
+        }
+    }
+    return shlp.cleanupFilename(input)
 }

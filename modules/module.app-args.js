@@ -1,5 +1,14 @@
 const yargs = require('yargs');
 
+const availableFilenameVars = [
+    'title',
+    'episode',
+    'showTitle',
+    'season',
+    'width',
+    'height'
+]
+
 const appArgv = (cfg) => {
     // init
     return yargs.parserConfiguration({
@@ -159,29 +168,19 @@ const appArgv = (cfg) => {
             type: 'boolean'
         })
     // filenaming
-        .option('a', {
-            alias: 'grouptag',
+        .option('fileName', {
             group: 'Filename Template:',
-            describe: 'Release group',
-            default: cfg.releaseGroup || 'Funimation',
-            type: 'string'
+            describe: `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
+                .map(a => `'${a}'`).join(', ')} as variables.`,
+            type: 'string',
+            default: cfg.fileName || '[Funimation] ${showTitle} - ${episode} [${height}p]'
         })
-        .option('t', {
-            alias: 'title',
+        .option('numbers', {
             group: 'Filename Template:',
-            describe: 'Series title override',
-            type: 'string'
-        })
-        .option('ep', {
-            group: 'Filename Template:',
-            describe: 'Episode number override (ignored in batch mode)',
-            type: 'string'
-        })
-        .option('suffix', {
-            group: 'Filename Template:',
-            describe: 'Filename suffix override (first "SIZEp" will be replaced with actual video size)',
-            default: cfg.fileSuffix || 'SIZEp',
-            type: 'string'
+            describe: `Set how long a number in the title should be at least.\n${[[3, 5, "005"], [2, 1, "01"], [1, 20, "20"]]
+                .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
+            type: 'number',
+            default: cfg.numbers || 2
         })
     // util
         .option('nocleanup', {
@@ -219,5 +218,6 @@ const showHelp = yargs.showHelp;
 
 module.exports = {
     appArgv,
-    showHelp
+    showHelp,
+    availableFilenameVars
 };
