@@ -7,7 +7,7 @@ const availableFilenameVars = [
     'season',
     'width',
     'height'
-]
+];
 
 const appArgv = (cfg) => {
     // init
@@ -177,7 +177,7 @@ const appArgv = (cfg) => {
         })
         .option('numbers', {
             group: 'Filename Template:',
-            describe: `Set how long a number in the title should be at least.\n${[[3, 5, "005"], [2, 1, "01"], [1, 20, "20"]]
+            describe: `Set how long a number in the title should be at least.\n${[[3, 5, '005'], [2, 1, '01'], [1, 20, '20']]
                 .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
             type: 'number',
             default: cfg.numbers || 2

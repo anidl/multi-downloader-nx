@@ -65,12 +65,10 @@ else{
 let title = '',
     showTitle = '',
     fnEpNum = 0,
-    fnSuffix = '',
     fnOutput = '',
     season = 0,
     tsDlPath = false,
-    stDlPath = undefined,
-    batchDL = false;
+    stDlPath = undefined;
 
 // select mode
 if(argv.auth){
@@ -247,9 +245,6 @@ async function getShow(){
         conOut += eps.length-1 == e ? '\n' : '';
         console.log(conOut);
     }
-    if(fnSlug.length>1){
-        batchDL = true;
-    }
     if(fnSlug.length<1){
         console.log('[INFO] Episodes not selected!\n');
         process.exit();
@@ -276,7 +271,7 @@ async function getEpisode(fnSlug){
     // build fn
     showTitle = ep.parent.title;
     title = ep.title;
-    season = parseInt(ep.parent.seasonNumber)
+    season = parseInt(ep.parent.seasonNumber);
     if(ep.mediaCategory != 'Episode'){
         ep.number = ep.number !== '' ? ep.mediaCategory+ep.number : ep.mediaCategory+'#'+ep.id;
     }
@@ -392,7 +387,7 @@ function getSubsUrl(m){
         return false;
     }
 
-    let subLang = argv.subLang
+    let subLang = argv.subLang;
 
     const subType = {
         'enUS': 'English',
@@ -401,7 +396,7 @@ function getSubsUrl(m){
     };
 
     let subLangAvailable = m.some(a => {
-        return a.ext == 'vtt' && a.language === subType[subLang]
+        return a.ext == 'vtt' && a.language === subType[subLang];
     });
 
     if (!subLangAvailable) {
@@ -542,7 +537,7 @@ async function downloadStreams(){
         console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q].width}x${plLayersRes[argv.q].height}) @ ${plSelectedServer}`);
         console.log('[INFO] Stream URL:',videoUrl);
 
-        fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height)
+        fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
         console.log(`[INFO] Output filename: ${fnOutput}.ts`);
     }
     else if(argv.x > plServerList.length){
@@ -686,7 +681,7 @@ async function downloadStreams(){
         let mkvmux  = [];
         mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
-        mkvmux.push('--track-name',`0:[Funimation]`);
+        mkvmux.push('--track-name','0:[Funimation]');
         
         if(plAud.uri){
             mkvmux.push('--video-tracks','0','--no-audio');
@@ -905,34 +900,36 @@ function buildProxy(proxyBaseUrl, proxyAuth){
  * @returns {string}
  */
 function parseFileName(input, title, episode, showTitle, season, width, height) {
-    const varRegex = /\${[A-Za-z1-9]+}/g
-    const vars = input.match(varRegex)
+    const varRegex = /\${[A-Za-z1-9]+}/g;
+    const vars = input.match(varRegex);
     for (let i = 0; i < vars.length; i++) {
-        const type = vars[i]
+        const type = vars[i];
         switch (type.slice(2, -1).toLowerCase()) {
-            case "title":
-                input = input.replace(vars[i], title)
+            case 'title':
+                input = input.replace(vars[i], title);
                 break;
-            case "episode":
-                let len = episode.toFixed(0).toString().length
-                input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + episode : episode)
+            case 'episode': {
+                let len = episode.toFixed(0).toString().length;
+                input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + episode : episode);
                 break;
-            case "showtitle":
-                input = input.replace(vars[i], showTitle)
+            }
+            case 'showtitle':
+                input = input.replace(vars[i], showTitle);
                 break;
-            case "season":
-                let len1 = season.toFixed(0).toString().length
-                input = input.replace(vars[i], len1 < argv.numbers ? '0'.repeat(argv.numbers - len1) + season : season)
+            case 'season': {
+                let len = season.toFixed(0).toString().length;
+                input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + season : season);
                 break;
-            case "width":
-                input = input.replace(vars[i], width)
+            }
+            case 'width':
+                input = input.replace(vars[i], width);
                 break;
-            case "height":
-                input = input.replace(vars[i], height)
+            case 'height':
+                input = input.replace(vars[i], height);
                 break;
             default:
                 break;
         }
     }
-    return shlp.cleanupFilename(input)
+    return shlp.cleanupFilename(input);
 }
