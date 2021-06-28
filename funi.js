@@ -26,20 +26,24 @@ const getYamlCfg   = require('./modules/module.cfg-loader');
 const getData      = require('./modules/module.getdata.js');
 const vttConvert   = require('./modules/module.vttconvert');
 // new-cfg
-
-const pathToFile = process.pkg ? '' : __dirname;
-
-const binCfgFile = path.join(pathToFile, 'config', 'bin-path');
-const dirCfgFile = path.join(pathToFile, 'config', 'dir-path');
-const cliCfgFile = path.join(pathToFile, 'config', 'cli-defaults');
-const tokenFile  = path.join(pathToFile, 'config', 'token');
-
+const workingDir = process.pkg ? path.dirname(process.execPath) : __dirname;
+const binCfgFile = path.join(workingDir, 'config', 'bin-path');
+const dirCfgFile = path.join(workingDir, 'config', 'dir-path');
+const cliCfgFile = path.join(workingDir, 'config', 'cli-defaults');
+const tokenFile  = path.join(workingDir, 'config', 'token');
 // params
 let cfg = {
     bin: getYamlCfg(binCfgFile),
     dir: getYamlCfg(dirCfgFile),
     cli: getYamlCfg(cliCfgFile),
 };
+
+/* Normalise paths for use outside the current directory */
+for (let key of Object.keys(cfg.dir)) {
+    if (!path.isAbsolute(cfg.dir[key])) {
+        cfg.dir[key] = path.join(workingDir, cfg.dir[key])
+    }
+}
 
 // token
 let token = getYamlCfg(tokenFile);
