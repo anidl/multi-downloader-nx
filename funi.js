@@ -45,6 +45,12 @@ for (let key of Object.keys(cfg.dir)) {
     }
 }
 
+for (let key of Object.keys(cfg.bin)) {
+    if (!path.isAbsolute(cfg.bin[key])) {
+        cfg.bin[key] = path.join(workingDir, cfg.bin[key])
+    }
+}
+
 // token
 let token = getYamlCfg(tokenFile);
 token = token.token ? token.token : false;
