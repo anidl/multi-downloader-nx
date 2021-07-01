@@ -76,7 +76,7 @@ const appArgv = (cfg) => {
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
             choices: [ 'enUS', 'esLA', 'ptBR', 'zhMN' ],
             default: cfg.dub || 'enUS',
-            type: 'string',
+            type: 'array',
         })
         .option('sub', {
             group: 'Downloading:',
@@ -89,7 +89,7 @@ const appArgv = (cfg) => {
             describe: 'Set the subtitle language (English is default and fallback)',
             default: cfg.subLang || 'enUS',
             choices: [ 'enUS', 'esLA', 'ptBR' ],
-            type: 'string'
+            type: 'array'
         })
         .option('fontSize', {
             group: 'Downloading:',
@@ -129,6 +129,7 @@ const appArgv = (cfg) => {
             group: 'Downloading:',
             describe: 'Skip downloading subtitles for English Dub (if available)',
             type: 'boolean',
+            default: false
         })
     // proxy
         .option('proxy', {
@@ -220,7 +221,6 @@ const appArgv = (cfg) => {
             argv[key] = argv[key].pop()
         }
     }
-
     return argv;
 };
 
