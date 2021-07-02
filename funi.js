@@ -737,7 +737,7 @@ async function downloadStreams(){
         return;
     
     audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path))
-    stDlPath.forEach(file => fs.unlinkSync(subObject.file))
+    stDlPath.forEach(subObject => fs.unlinkSync(subObject.file))
     console.log('\n[INFO] Done!\n');
 }
 
