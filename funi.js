@@ -601,10 +601,8 @@ async function downloadStreams(){
         
         video: if (!argv.novids) {
             if (plAud.uri && (purvideo.length > 1 || audioAndVideo.length > 1)) {
-                console.log("break 1")
                 break video;
             } else if (!plAud.uri && (audioAndVideo.some(a => a.lang === streamPath.lang) || puraudio.some(a => a.lang === streamPath.lang))) {
-                console.log("break 2")
                 break video;
             }
             // download video
@@ -701,8 +699,7 @@ async function downloadStreams(){
     }
 
     // usage
-    /* TODO MkvMerge */
-    let usableMKVmerge = false;
+    let usableMKVmerge = true;
     let usableFFmpeg = true;
     
     // check exec path
@@ -725,7 +722,6 @@ async function downloadStreams(){
     if(!argv.mp4 && usableMKVmerge){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let command = merger.buildCommandMkvMerge(audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
-        console.log(command);
         shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command);
     }
     else if(usableFFmpeg){
@@ -741,6 +737,7 @@ async function downloadStreams(){
         return;
     
     audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path))
+    stDlPath.forEach(file => fs.unlinkSync(subObject.file))
     console.log('\n[INFO] Done!\n');
 }
 

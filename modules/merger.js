@@ -4,12 +4,12 @@ const argv = require('../funi').argv;
 /**
  * @param {Array<object>} videoAndAudio 
  * @param {Array<object>} onlyVid 
- * @param {Array<object>} onlyAuido
+ * @param {Array<object>} onlyAudio
  * @param {Array<object>} subtitles 
  * @param {string} output
  * @returns {string}
  */
-const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAuido, subtitles, output) => {
+const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAudio, subtitles, output) => {
     let args = [];
     let metaData = [];
 
@@ -40,7 +40,7 @@ const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAuido, subtitles, output
         }
     }
 
-    for (let aud of onlyAuido) {
+    for (let aud of onlyAudio) {
         args.push(`-i "${aud.path}"`)
         metaData.push(`-map ${index}`)
         metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(aud.lang, aud.lang)}`)
@@ -71,41 +71,61 @@ const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAuido, subtitles, output
  * @param {Array<object>} subtitles 
  * @returns {string}
  */
-const buildCommandMkvMerge = (videoFile, audioSettings, subtitles, output) => {
+const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, output) => {
     let args = [];
+
+    let hasVideo = false;
+
     args.push(`-o "${output}"`);
     args.push(
         '--no-date',
         '--disable-track-statistics-tags',
         '--engage no_variable_data',
-        '--track-name 0:[Funimation]'
     );
 
-    if (audioSettings.uri) {
-        args.push(
-            '--video-tracks 0',
-            '--no-audio'
-        );
-        args.push(`"${videoFile}"`);
-        args.push(`--language 0:${getLanguageCode(audioSettings.language, argv.todo ? 'jpn' : 'eng')}`);
+    for (let vid of videoAndAudio) {
+        if (!hasVideo) {
+            args.push(
+                '--video-tracks 0',
+                '--audio-tracks 1'
+            )
+            args.push(`--track-name 0:[Funimation]`)
+            args.push(`--language 1:${getLanguageCode(vid.lang, argv.todo ? 'jpn' : 'eng')}`);
+            hasVideo = true
+        } else {
+            args.push(
+                '--no-video',
+                '--audio-tracks 1'
+            )
+            args.push(`--language 1:${getLanguageCode(vid.lang, argv.todo ? 'jpn' : 'eng')}`);
+        }
+        args.push(`"${vid.path}"`)
+    }
+
+    for (let vid of onlyVid) {
+        if (!hasVideo) {
+            args.push(
+                '--video-tracks 0',
+                '--no-audio'
+            )
+            args.push(`--track-name 0:[Funimation]`)
+            hasVideo = true
+            args.push(`${vid.path}"`)
+        }
+    }
+
+    for (let aud of onlyAudio) {
+        args.push(`--language 0:${getLanguageCode(aud.lang, argv.todo ? 'jpn' : 'eng')}`);
         args.push(
             '--no-video',
             '--audio-tracks 0'
         );
-        args.push(`"${audioSettings.uri}"`);
-    } else{
-        args.push(`--language 1:${argv.todo ? 'jpn' : 'eng'}`);
-        args.push(
-            '--video-tracks 0',
-            '--audio-tracks 1'
-        );
-        args.push(`"${videoFile}"`);
+        args.push(`"${aud.path}"`)
     }
 
     if(subtitles.length > 0){
-        for (let index in subtitles) {
-            let subObj = subtitles[index];
-            args.push('--language',`${/*parseInt(index) + (audioSettings.uri ? 2 : 1)*/0}:${getLanguageCode(subObj.language)}`);
+        for (let subObj of subtitles) {
+            args.push('--language',`0:${getLanguageCode(subObj.language)}`);
             args.push(`"${subObj.file}"`);
         }
     } else {
