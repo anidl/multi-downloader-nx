@@ -36,6 +36,59 @@ const buildCommandFFmpeg = (videoFile, audioSettings, subtitles, output) => {
     return args.join(" ")
 }
 
+/**
+ * @param {string} videoFile 
+ * @param {object} audioFile 
+ * @param {Array<object>} subtitles 
+ * @returns {string}
+ */
+const buildCommandMkvMerge = (videoFile, audioSettings, subtitles, output) => {
+    let args = []
+    args.push(`-o "${output}"`)
+    args.push(
+        '--no-date',
+        '--disable-track-statistics-tags',
+        '--engage no_variable_data',
+        '--track-name 0:[Funimation]'
+    )
+
+    if (audioSettings.uri) {
+        args.push(
+            '--video-tracks 0',
+            '--no-audio'
+        );
+        args.push(`"${videoFile}"`);
+        args.push(`--language 0:${getLanguageCode(audioSettings.language, argv.sub ? 'jpn' : 'eng')}`);
+        args.push(
+            '--no-video',
+            '--audio-tracks 0'
+        );
+        args.push(`"${audioSettings.uri}"`);
+    } else{
+        args.push(`--language 1:${argv.sub ? 'jpn' : 'eng'}`);
+        args.push(
+            '--video-tracks 0',
+            '--audio-tracks 1'
+        );
+        args.push(`"${videoFile}"`);
+    }
+
+    if(subtitles.length > 0){
+        for (let index in subtitles) {
+            subObj = subtitles[index]
+            args.push('--language',`${/*parseInt(index) + (audioSettings.uri ? 2 : 1)*/0}:${getLanguageCode(subObj.language)}`);
+            args.push(`"${subObj.file}"`);
+        }
+    } else {
+        args.push(
+            '--no-subtitles',
+            '--no-attachments'
+        )
+    }
+
+    return args.join(" ")
+}
+
 const getLanguageCode = (from, _default = 'eng') => {
     for (let lang in iso639.iso_639_2) {
         let langObj = iso639.iso_639_2[lang];
@@ -48,5 +101,6 @@ const getLanguageCode = (from, _default = 'eng') => {
 
 module.exports = {
     buildCommandFFmpeg,
-    getLanguageCode
+    getLanguageCode,
+    buildCommandMkvMerge
 }

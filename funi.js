@@ -618,7 +618,6 @@ async function downloadStreams(){
     if(stDlPath){
         console.log('[INFO] Downloading subtitles...');
         for (let subObject of stDlPath) {
-            console.log(subObject);
             let subsSrc = await getData({
                 url: subObject.path,
                 useProxy: true,
@@ -640,6 +639,7 @@ async function downloadStreams(){
             console.log('[INFO] Subtitles downloaded!');
     }
     
+    /* TODO Remove */
     if(false && (dlFailed || dlFailedA)){
         console.log('\n[INFO] TS file not fully downloaded, skip muxing video...\n');
         return;
@@ -699,42 +699,11 @@ async function downloadStreams(){
         console.log('[INFO] Video not downloaded. Skip muxing video.');
     }
 
-    // select muxer
-    usableMKVmerge = false
-    /* TODO Remake mkvmerge */
     if(!argv.mp4 && usableMKVmerge){
-        /*
-        // mux to mkv
-        let mkvmux  = [];
-        mkvmux.push('-o',`${muxTrg}.mkv`);
-        mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
-        mkvmux.push('--track-name','0:[Funimation]');
-        if(plAud.uri){
-            mkvmux.push('--video-tracks','0','--no-audio');
-            mkvmux.push(`${muxTrg}.ts`);
-            mkvmux.push('--language',`0:${langCode}`);
-            mkvmux.push('--no-video','--audio-tracks','0');
-            mkvmux.push(`${muxTrgA}.ts`);
-        }
-        else{
-            mkvmux.push('--language',`1:${langCode}`);
-            mkvmux.push('--video-tracks','0','--audio-tracks','1');
-            mkvmux.push(`${muxTrg}.ts`);
-        }
-        if(addSubs){
-            for (let index in stDlPath) {
-                subObj = stDlPath[index]
-                mkvmux.push('--language',`${parseInt(index) + 2}:${getLanguageCode(subObj.language)}`);
-                mkvmux.push(`${subObj.file ? subObj.file : muxTrg + subsExt}`);
-            }
-        } else {
-            mkvmux.push('--no-subtitles')
-            mkvmux.push('--no-attachments');
-        }
-        fs.writeFileSync(`${muxTrg}.json`,JSON.stringify(mkvmux,null,'  '));
-        shlp.exec('mkvmerge',`"${mkvmergebinfile}"`,`@"${muxTrg}.json"`);
-        // fs.unlinkSync(`${muxTrg}.json`);
-        */
+        let ffext = !argv.mp4 ? 'mkv' : 'mp4';
+        let command = merger.buildCommandMkvMerge(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`)
+        console.log(command)
+        shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command)
     }
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
@@ -745,6 +714,7 @@ async function downloadStreams(){
         console.log('\n[INFO] Done!\n');
         return;
     }
+    /* TODO Remove */
     if (argv.nocleanup)
         return;
     if(argv.notrashfolder && argv.nocleanup){
