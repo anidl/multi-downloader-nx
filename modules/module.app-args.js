@@ -13,7 +13,7 @@ const appArgv = (cfg) => {
     // init
     const argv = yargs.parserConfiguration({
         'duplicate-arguments-array': true,
-        "camel-case-expansion": false
+        'camel-case-expansion': false
     })
     // main
         .wrap(Math.min(120)) // yargs.terminalWidth()
@@ -217,8 +217,8 @@ const appArgv = (cfg) => {
 
     // Resolve unwanted arrays
     for (let key in argv) {
-        if (argv[key] instanceof Array && !(key === "subLang" || key === "dub")) {
-            argv[key] = argv[key].pop()
+        if (argv[key] instanceof Array && !(key === 'subLang' || key === 'dub')) {
+            argv[key] = argv[key].pop();
         }
     }
     return argv;

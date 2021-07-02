@@ -18,7 +18,6 @@ const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
 const crypto = require('crypto');
 const got = require('got');
-const iso639 = require('iso-639');
 
 // extra
 const appYargs     = require('./modules/module.app-args');
@@ -41,13 +40,13 @@ let cfg = {
 /* Normalise paths for use outside the current directory */
 for (let key of Object.keys(cfg.dir)) {
     if (!path.isAbsolute(cfg.dir[key])) {
-        cfg.dir[key] = path.join(workingDir, cfg.dir[key])
+        cfg.dir[key] = path.join(workingDir, cfg.dir[key]);
     }
 }
 
 for (let key of Object.keys(cfg.bin)) {
     if (!path.isAbsolute(cfg.bin[key])) {
-        cfg.bin[key] = path.join(workingDir, cfg.bin[key])
+        cfg.bin[key] = path.join(workingDir, cfg.bin[key]);
     }
 }
 
@@ -65,11 +64,11 @@ const argv = appYargs.appArgv(cfg.cli);
 module.exports = {
     argv,
     cfg
-}
+};
 
 // Import merger after argv has been exported
 
-const merger = require('./modules/merger')
+const merger = require('./modules/merger');
 
 // check page
 if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
@@ -421,7 +420,7 @@ function getSubsUrl(m){
         subLangs = [ 'enUS' ];
     }
     
-    let found = []
+    let found = [];
 
     for(let i in m){
         let fpp = m[i].filePath.split('.');
@@ -432,7 +431,7 @@ function getSubsUrl(m){
                     path: m[i].filePath,
                     ext: `.${lang}`,
                     langName: subType[lang],
-                    language: m[i]?.languages[0]?.code ?? lang.slice(0, 2)
+                    language: m[i].languages[0].code ?? lang.slice(0, 2)
                 });
             }
         }
@@ -668,16 +667,6 @@ async function downloadStreams(){
         }
     }
 
-    let langCode;
-    for (let lang in iso639.iso_639_2) {
-        let langObj = iso639.iso_639_2[lang];
-        if (langObj.hasOwnProperty('639-1') && langObj['639-1'] === plAud['language']) {
-            langCode = langObj['639-2'];
-        }
-    }
-    if (!langCode)
-        langCode = argv.sub ? 'jpn' : 'eng';
-
     // usage
     let usableMKVmerge = true;
     let usableFFmpeg = true;
@@ -701,14 +690,14 @@ async function downloadStreams(){
 
     if(!argv.mp4 && usableMKVmerge){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandMkvMerge(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`)
-        console.log(command)
-        shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command)
+        let command = merger.buildCommandMkvMerge(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`);
+        console.log(command);
+        shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command);
     }
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandFFmpeg(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`)
-        shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,command)
+        let command = merger.buildCommandFFmpeg(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`);
+        shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,command);
     }
     else{
         console.log('\n[INFO] Done!\n');
