@@ -421,7 +421,7 @@ async function getEpisode(fnSlug){
 
 function getSubsUrl(m){
     if(argv.nosubs && !argv.sub){
-        return false;
+        return [];
     }
 
     let subLangs = argv.subLang;
