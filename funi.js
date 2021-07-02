@@ -62,6 +62,14 @@ if(!token){
 
 // cli
 const argv = appYargs.appArgv(cfg.cli);
+module.exports = {
+    argv,
+    cfg
+}
+
+// Import merger after argv has been exported
+
+const merger = require('./modules/merger')
 
 // check page
 if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
@@ -349,7 +357,9 @@ async function getEpisode(fnSlug){
                 stDlPath = m.subtitles;
                 selected = true;
             }
-            console.log(`[#${m.id}] ${dub_type} [${m.version}]`,(selected?'(selected)':''),(m.subtitles.subLangAvailable?'':'(defaulted to English subtitles)'));
+            console.log(`[#${m.id}] ${dub_type} [${m.version}]${(selected?' (selected)':'')}${
+                stDlPath && selected ? ` (using ${stDlPath.map(a => `'${a.langName}'`).join(', ')} for subtitles)` : ''
+            }`);
         }
     }
     
@@ -397,7 +407,7 @@ function getSubsUrl(m){
         return false;
     }
 
-    let subLang = argv.subLang;
+    let subLangs = argv.subLang;
 
     const subType = {
         'enUS': 'English',
@@ -405,27 +415,30 @@ function getSubsUrl(m){
         'ptBR': 'Portuguese (Brazil)'
     };
 
-    let subLangAvailable = m.some(a => {
-        return a.ext == 'vtt' && a.language === subType[subLang];
-    });
+    let subLangAvailable = m.some(a => subLangs.some(subLang => a.ext == 'vtt' && a.language === subType[subLang]));
 
     if (!subLangAvailable) {
-        subLang = 'enUS';
+        subLangs = [ 'enUS' ];
     }
     
+    let found = []
+
     for(let i in m){
         let fpp = m[i].filePath.split('.');
         let fpe = fpp[fpp.length-1];
-        if(fpe == 'vtt' && m[i].language === subType[subLang]) {
-            return {
-                path: m[i].filePath,
-                ext: `.${subLang}`,
-                langName: subType[subLang],
-                subLangAvailable: subLangAvailable
-            };
+        for (let lang of subLangs) {
+            if(fpe == 'vtt' && m[i].language === subType[lang]) {
+                found.push({
+                    path: m[i].filePath,
+                    ext: `.${lang}`,
+                    langName: subType[lang],
+                    language: m[i]?.languages[0]?.code ?? lang.slice(0, 2)
+                });
+            }
         }
     }
-    return false;
+
+    return found;
 }
 
 async function downloadStreams(){
@@ -598,35 +611,36 @@ async function downloadStreams(){
     }
     
     // add subs
-    let subsUrl = stDlPath ? stDlPath.path : false;
     let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
-    let addSubs = argv.mks && subsUrl ? true : false;
-    let subFile;
-    let subTrashFile;
+    let addSubs = argv.mks && tsDlPath ? true : false;
 
     // download subtitles
-    if(subsUrl){
+    if(stDlPath){
         console.log('[INFO] Downloading subtitles...');
-        console.log(subsUrl);
-        let subsSrc = await getData({
-            url: subsUrl,
-            useProxy: true,
-            debug: argv.debug,
-        });
-        if(subsSrc.ok){
-            let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), stDlPath.langName, argv.fontSize);
-            subFile = path.join(cfg.dir.content, fnOutput) + stDlPath.ext + subsExt;
-            subTrashFile = path.join(cfg.dir.trash, fnOutput) + stDlPath.ext + subsExt;
-            fs.writeFileSync(subFile, assData);
+        for (let subObject of stDlPath) {
+            console.log(subObject);
+            let subsSrc = await getData({
+                url: subObject.path,
+                useProxy: true,
+                debug: argv.debug,
+            });
+            if(subsSrc.ok){
+                let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
+                subObject.file = path.join(cfg.dir.content, fnOutput) + subObject.ext + subsExt;
+                subObject.trashFile = path.join(cfg.dir.trash, fnOutput) + subObject.ext + subsExt;
+                fs.writeFileSync(subObject.file, assData);
+            }
+            else{
+                console.log('[ERROR] Failed to download subtitles!');
+                addSubs = false;
+                break;
+            }
+        }
+        if (addSubs)
             console.log('[INFO] Subtitles downloaded!');
-        }
-        else{
-            console.log('[ERROR] Failed to download subtitles!');
-            addSubs = false;
-        }
     }
     
-    if(dlFailed || dlFailedA){
+    if(false && (dlFailed || dlFailedA)){
         console.log('\n[INFO] TS file not fully downloaded, skip muxing video...\n');
         return;
     }
@@ -671,7 +685,7 @@ async function downloadStreams(){
     // check exec path
     let mkvmergebinfile = await lookpath(path.join(cfg.bin.mkvmerge));
     let ffmpegbinfile   = await lookpath(path.join(cfg.bin.ffmpeg));
-    
+
     // check exec
     if( !argv.mp4 && !mkvmergebinfile ){
         console.log('[WARN] MKVMerge not found, skip using this...');
@@ -686,57 +700,53 @@ async function downloadStreams(){
     }
 
     // select muxer
+    usableMKVmerge = false
+    /* TODO Remake mkvmerge */
     if(!argv.mp4 && usableMKVmerge){
+        /*
         // mux to mkv
         let mkvmux  = [];
         mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
         mkvmux.push('--track-name','0:[Funimation]');
-        
         if(plAud.uri){
             mkvmux.push('--video-tracks','0','--no-audio');
-            mkvmux.push('--no-subtitles','--no-attachments');
             mkvmux.push(`${muxTrg}.ts`);
             mkvmux.push('--language',`0:${langCode}`);
             mkvmux.push('--no-video','--audio-tracks','0');
-            mkvmux.push('--no-subtitles','--no-attachments');
             mkvmux.push(`${muxTrgA}.ts`);
         }
         else{
             mkvmux.push('--language',`1:${langCode}`);
             mkvmux.push('--video-tracks','0','--audio-tracks','1');
-            mkvmux.push('--no-subtitles','--no-attachments');
             mkvmux.push(`${muxTrg}.ts`);
         }
         if(addSubs){
-            mkvmux.push('--language','0:eng');
-            mkvmux.push(`${subFile ? subFile : muxTrg + subsExt}`);
+            for (let index in stDlPath) {
+                subObj = stDlPath[index]
+                mkvmux.push('--language',`${parseInt(index) + 2}:${getLanguageCode(subObj.language)}`);
+                mkvmux.push(`${subObj.file ? subObj.file : muxTrg + subsExt}`);
+            }
+        } else {
+            mkvmux.push('--no-subtitles')
+            mkvmux.push('--no-attachments');
         }
         fs.writeFileSync(`${muxTrg}.json`,JSON.stringify(mkvmux,null,'  '));
         shlp.exec('mkvmerge',`"${mkvmergebinfile}"`,`@"${muxTrg}.json"`);
-        fs.unlinkSync(`${muxTrg}.json`);
+        // fs.unlinkSync(`${muxTrg}.json`);
+        */
     }
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let ffmux = `-i "${muxTrg}.ts" `;
-        ffmux += plAud.uri ? `-i "${muxTrgA}.ts" ` : '';
-        ffmux += addSubs ? `-i "${subFile ? subFile : muxTrg + subsExt}" ` : '';
-        ffmux += plAud.uri ? '-map 1:a ' : '';
-        ffmux += '-map 0 -c:v copy -c:a copy ';
-        ffmux += addSubs ? `-map ${plAud.uri ? 2 : 1} ` : '';
-        ffmux += addSubs && !argv.mp4 ? '-c:s ass ' : '';
-        ffmux += addSubs &&  argv.mp4 ? '-c:s mov_text ' : '';
-        ffmux += '-metadata encoding_tool="no_variable_data" ';
-        ffmux += `-metadata:s:v:0 title="[${argv.a}]" -metadata:s:a:${plAud.uri?1:0} language=${langCode} `;
-        ffmux += addSubs ? '-metadata:s:s:0 language=eng ' : '';
-        ffmux += `"${muxTrg}.${ffext}"`;
-        // mux to mkv
-        shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,ffmux);
+        let command = merger.buildCommandFFmpeg(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`)
+        shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,command)
     }
     else{
         console.log('\n[INFO] Done!\n');
         return;
     }
+    if (argv.nocleanup)
+        return;
     if(argv.notrashfolder && argv.nocleanup){
         // don't move or delete temp files
     }
@@ -744,16 +754,19 @@ async function downloadStreams(){
         fs.renameSync(muxTrg+'.ts', tshTrg + '.ts');
         if (plAud.uri)
             fs.renameSync(muxTrgA+'.ts', tshTrgA + '.ts');
-        if(subsUrl && addSubs){
-            fs.renameSync(subFile ? subFile : muxTrg+subsExt, subTrashFile ? subTrashFile : tshTrg + subsExt);
+        if(addSubs){
+            for (let subObj of stDlPath) {
+                fs.renameSync(subObj.file ? subObj.file : muxTrg+subsExt, subObj.trashFile ? subObj.trashFile : tshTrg + subsExt);
+            }
         }
     }
     else{
         fs.unlinkSync(muxTrg+'.ts');
         if (plAud.uri)
             fs.unlinkSync(muxTrgA+'.ts');
-        if(subsUrl && addSubs){
-            fs.unlinkSync(subFile ? subFile : muxTrg + subsExt);
+        if(addSubs){
+            for (let subObj of stDlPath) 
+                fs.unlinkSync(subObj.file ? subObj.file : muxTrg + subsExt);
         }
     }
     console.log('\n[INFO] Done!\n');
