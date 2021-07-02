@@ -70,7 +70,7 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 
 ### Utility
 
-* `--nocleanup` move unnecessary files to trash folder after completion instead of deleting
+* `--nocleanup` don't delete the input files after the muxing
 * `-h`, `--help` show all options
 
 ## Filename Template

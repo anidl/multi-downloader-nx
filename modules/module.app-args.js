@@ -13,7 +13,7 @@ const appArgv = (cfg) => {
     // init
     const argv = yargs.parserConfiguration({
         'duplicate-arguments-array': true,
-        'camel-case-expansion': false
+        "camel-case-expansion": false
     })
     // main
         .wrap(Math.min(120)) // yargs.terminalWidth()
@@ -74,15 +74,9 @@ const appArgv = (cfg) => {
         .option('dub', {
             group: 'Downloading:',
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
-            choices: [ 'enUS', 'esLA', 'ptBR', 'zhMN' ],
+            choices: [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jpJP' ],
             default: cfg.dub || 'enUS',
             type: 'array',
-        })
-        .option('sub', {
-            group: 'Downloading:',
-            describe: 'Japanese Dub with subtitles mode (English Dub mode by default)',
-            default: cfg.subsMode || false,
-            type: 'boolean',
         })
         .option('subLang', {
             group: 'Downloading:',
@@ -187,15 +181,8 @@ const appArgv = (cfg) => {
     // util
         .option('nocleanup', {
             group: 'Utilities:',
-            describe: 'Move temporary files to trash folder instead of deleting',
+            describe: 'Dont\'t delete the input files after muxing',
             default: cfg.noCleanUp || false,
-            type: 'boolean'
-        })
-        .option('notrashfolder', {
-            implies: ['nocleanup'],
-            group: 'Utilities:',
-            describe: 'Don\'t move temporary files to trash folder (Used with --nocleanup)',
-            default: cfg.noTrashFolder || false,
             type: 'boolean'
         })
     // help
@@ -217,8 +204,8 @@ const appArgv = (cfg) => {
 
     // Resolve unwanted arrays
     for (let key in argv) {
-        if (argv[key] instanceof Array && !(key === 'subLang' || key === 'dub')) {
-            argv[key] = argv[key].pop();
+        if (argv[key] instanceof Array && !(key === "subLang" || key === "dub")) {
+            argv[key] = argv[key].pop()
         }
     }
     return argv;

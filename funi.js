@@ -84,8 +84,8 @@ let title = '',
     fnEpNum = 0,
     fnOutput = '',
     season = 0,
-    tsDlPath = false,
-    stDlPath = undefined;
+    tsDlPath = [],
+    stDlPath = [];
 
 // select mode
 if(argv.auth){
@@ -284,7 +284,7 @@ async function getEpisode(fnSlug){
         debug: argv.debug,
     });
     if(!episodeData.ok){return;}
-    let ep = JSON.parse(episodeData.res.body).items[0], streamId = 0;
+    let ep = JSON.parse(episodeData.res.body).items[0], streamIds = [];
     // build fn
     showTitle = ep.parent.title;
     title = ep.title;
@@ -334,7 +334,8 @@ async function getEpisode(fnSlug){
         'enUS': 'English',
         'esLA': 'Spanish (Latin Am)',
         'ptBR': 'Portuguese (Brazil)',
-        'zhMN': 'Chinese (Mandarin, PRC)'
+        'zhMN': 'Chinese (Mandarin, PRC)',
+        'jpJP': 'Japanese'
     };
     
     // select
@@ -343,55 +344,72 @@ async function getEpisode(fnSlug){
         let selected = false;
         if(m.id > 0 && m.type == 'Non-Encrypted'){
             let dub_type = m.language;
+            let localSubs = []
             let selUncut = !argv.simul && uncut[dub_type] && m.version.match(/uncut/i) 
                 ? true 
                 : (!uncut[dub_type] || argv.simul && m.version.match(/simulcast/i) ? true : false);
-            if(dub_type == 'Japanese' && argv.sub && selUncut){
-                streamId = m.id;
-                stDlPath = m.subtitles;
-                selected = true;
-            }
-            else if(dub_type == dubType[argv.dub] && !argv.sub && selUncut){
-                streamId = m.id;
-                stDlPath = m.subtitles;
-                selected = true;
+            for (let curDub of argv.dub) {
+                if(dub_type == dubType[curDub] && selUncut){
+                    streamIds.push({
+                        id: m.id,
+                        lang: merger.getLanguageCode(dubType[curDub], curDub.slice(0, -2))
+                    });
+                    stDlPath.push(...m.subtitles);
+                    localSubs = m.subtitles
+                    selected = true;
+                }
             }
             console.log(`[#${m.id}] ${dub_type} [${m.version}]${(selected?' (selected)':'')}${
-                stDlPath && selected ? ` (using ${stDlPath.map(a => `'${a.langName}'`).join(', ')} for subtitles)` : ''
+                localSubs && localSubs.length > 0 && selected ? ` (using ${localSubs.map(a => `'${a.langName}'`).join(', ')} for subtitles)` : ''
             }`);
         }
     }
+
+    let already = []
+    stDlPath = stDlPath.filter(a => {
+        if (already.includes(a.language)) {
+            return false;
+        } else {
+            already.push(a.language)
+            return true;
+        }
+    })
     
-    if(streamId<1){
+    if(streamIds.length <1){
         console.log('[ERROR] Track not selected\n');
         return;
     }
     else{
-        let streamData = await getData({
-            baseUrl: api_host,
-            url: `/source/catalog/video/${streamId}/signed`,
-            token: token,
-            dinstid: 'uuid',
-            useToken: true,
-            useProxy: true,
-            debug: argv.debug,
-        });
-        if(!streamData.ok){return;}
-        streamData = JSON.parse(streamData.res.body);
-        tsDlPath = false;
-        if(streamData.errors){
-            console.log('[ERROR] Error #%s: %s\n',streamData.errors[0].code,streamData.errors[0].detail);
-            return;
-        }
-        else{
-            for(let u in streamData.items){
-                if(streamData.items[u].videoType == 'm3u8'){
-                    tsDlPath = streamData.items[u].src;
-                    break;
+        tsDlPath = [];
+        for (let streamId of streamIds) {
+            let streamData = await getData({
+                baseUrl: api_host,
+                url: `/source/catalog/video/${streamId.id}/signed`,
+                token: token,
+                dinstid: 'uuid',
+                useToken: true,
+                useProxy: true,
+                debug: argv.debug,
+            });
+            if(!streamData.ok){return;}
+            streamData = JSON.parse(streamData.res.body);
+            if(streamData.errors){
+                console.log('[ERROR] Error #%s: %s\n',streamData.errors[0].code,streamData.errors[0].detail);
+                return;
+            }
+            else{
+                for(let u in streamData.items){
+                    if(streamData.items[u].videoType == 'm3u8'){
+                        tsDlPath.push({
+                            path: streamData.items[u].src,
+                            lang: streamId.lang
+                        });
+                        break;
+                    }
                 }
             }
         }
-        if(!tsDlPath){
+        if(tsDlPath.length < 1){
             console.log('[ERROR] Unknown error\n');
             return;
         }
@@ -443,178 +461,213 @@ function getSubsUrl(m){
 async function downloadStreams(){
     
     // req playlist
-    let plQualityReq = await getData({
-        url: tsDlPath,
-        useProxy: (argv.ssp ? false : true),
-        debug: argv.debug,
-    });
-    if(!plQualityReq.ok){return;}
-    
-    let plQualityLinkList = m3u8(plQualityReq.res.body);
-    
-    let mainServersList = [
-        'vmfst-api.prd.funimationsvc.com',
-        'd132fumi6di1wa.cloudfront.net',
-        'funiprod.akamaized.net',
-    ];
-    
-    let plServerList = [],
-        plStreams    = {},
-        plLayersStr  = [],
-        plLayersRes  = {},
-        plMaxLayer   = 1,
-        plNewIds     = 1,
-        plAud        = { uri: '' };
-    
-    // new uris
-    let vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
-    if(plQualityLinkList.playlists[0].uri.match(vplReg)){
-        if(plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128']){
-            let audioData = plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128'],
-                audioEl = Object.keys(audioData);
-            audioData = audioData[audioEl[0]];
-            plAud = { ...audioData, ...{ langStr: audioEl[0] } };
-        }
-        plQualityLinkList.playlists.sort((a, b) => {
-            let av = parseInt(a.uri.match(vplReg)[3]);
-            let bv = parseInt(b.uri.match(vplReg)[3]);
-            if(av  > bv){
-                return 1;
-            }
-            if (av < bv) {
-                return -1;
-            }
-            return 0;
-        });
-    }
-    
-    for(let s of plQualityLinkList.playlists){
-        if(s.uri.match(/_Layer(\d+)\.m3u8/) || s.uri.match(vplReg)){
-            // set layer and max layer
-            let plLayerId = 0;
-            if(s.uri.match(/_Layer(\d+)\.m3u8/)){
-                plLayerId = parseInt(s.uri.match(/_Layer(\d+)\.m3u8/)[1]);
-            }
-            else{
-                plLayerId = plNewIds, plNewIds++;
-            }
-            plMaxLayer    = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
-            // set urls and servers
-            let plUrlDl  = s.uri;
-            let plServer = new URL(plUrlDl).host;
-            if(!plServerList.includes(plServer)){
-                plServerList.push(plServer);
-            }
-            if(!Object.keys(plStreams).includes(plServer)){
-                plStreams[plServer] = {};
-            }
-            if(plStreams[plServer][plLayerId] && plStreams[plServer][plLayerId] != plUrlDl){
-                console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
-            }
-            else{
-                plStreams[plServer][plLayerId] = plUrlDl;
-            }
-            // set plLayersStr
-            let plResolution = s.attributes.RESOLUTION;
-            plLayersRes[plLayerId] = plResolution;
-            let plBandwidth  = Math.round(s.attributes.BANDWIDTH/1024);
-            if(plLayerId<10){
-                plLayerId = plLayerId.toString().padStart(2,' ');
-            }
-            let qualityStrAdd   = `${plLayerId}: ${plResolution.width}x${plResolution.height} (${plBandwidth}KiB/s)`;
-            let qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g,'\\$1'),'m');
-            let qualityStrMatch = !plLayersStr.join('\r\n').match(qualityStrRegx);
-            if(qualityStrMatch){
-                plLayersStr.push(qualityStrAdd);
-            }
-        }
-        else {
-            console.log(s.uri);
-        }
-    }
-    
-    for(let s of mainServersList){
-        if(plServerList.includes(s)){
-            plServerList.splice(plServerList.indexOf(s), 1);
-            plServerList.unshift(s);
-            break;
-        }
-    }
-    
-    if(typeof argv.q == 'object' && argv.q.length > 1){
-        argv.q = argv.q[argv.q.length-1];
-    }
-    
-    argv.q = argv.q < 1 || argv.q > plMaxLayer ? plMaxLayer : argv.q;
-    
-    let plSelectedServer = plServerList[argv.x-1];
-    let plSelectedList   = plStreams[plSelectedServer];
-    let videoUrl = argv.x < plServerList.length+1 && plSelectedList[argv.q] ? plSelectedList[argv.q] : '';
-    
-    plLayersStr.sort();
-    console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
-    console.log(`[INFO] Available qualities:\n\t${plLayersStr.join('\n\t')}`);
-    
-    if(videoUrl != ''){
-        console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q].width}x${plLayersRes[argv.q].height}) @ ${plSelectedServer}`);
-        console.log('[INFO] Stream URL:',videoUrl);
 
-        fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
-        console.log(`[INFO] Output filename: ${fnOutput}.ts`);
-    }
-    else if(argv.x > plServerList.length){
-        console.log('[ERROR] Server not selected!\n');
-        return;
-    }
-    else{
-        console.log('[ERROR] Layer not selected!\n');
-        return;
-    }
-    
-    let dlFailed = false;
-    let dlFailedA = false;
-    
-    
-    video: if (!argv.novids) {
-        // download video
-        let reqVideo = await getData({
-            url: videoUrl,
+    let purvideo = []
+    let puraudio = []
+    let audioAndVideo = [] 
+    let outName;
+    for (let streamPath of tsDlPath) {
+        let plQualityReq = await getData({
+            url: streamPath.path,
             useProxy: (argv.ssp ? false : true),
             debug: argv.debug,
         });
-        if (!reqVideo.ok) { break video; }
+        if(!plQualityReq.ok){return;}
         
-        let chunkList = m3u8(reqVideo.res.body);
+        let plQualityLinkList = m3u8(plQualityReq.res.body);
         
-        let tsFile = path.join(cfg.dir.content, fnOutput);
-        dlFailed = !await downloadFile(tsFile, chunkList);
-    }
-    else{
-        console.log('[INFO] Skip video downloading...\n');
+        let mainServersList = [
+            'vmfst-api.prd.funimationsvc.com',
+            'd132fumi6di1wa.cloudfront.net',
+            'funiprod.akamaized.net',
+        ];
+        
+        let plServerList = [],
+            plStreams    = {},
+            plLayersStr  = [],
+            plLayersRes  = {},
+            plMaxLayer   = 1,
+            plNewIds     = 1,
+            plAud        = { uri: '' };
+        
+        // new uris
+        let vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
+        if(plQualityLinkList.playlists[0].uri.match(vplReg)){
+            if(plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128']){
+                let audioData = plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128'],
+                    audioEl = Object.keys(audioData);
+                audioData = audioData[audioEl[0]];
+                plAud = { ...audioData, ...{ langStr: audioEl[0] } };
+            }
+            plQualityLinkList.playlists.sort((a, b) => {
+                let av = parseInt(a.uri.match(vplReg)[3]);
+                let bv = parseInt(b.uri.match(vplReg)[3]);
+                if(av  > bv){
+                    return 1;
+                }
+                if (av < bv) {
+                    return -1;
+                }
+                return 0;
+            });
+        }
+        
+        for(let s of plQualityLinkList.playlists){
+            if(s.uri.match(/_Layer(\d+)\.m3u8/) || s.uri.match(vplReg)){
+                // set layer and max layer
+                let plLayerId = 0;
+                if(s.uri.match(/_Layer(\d+)\.m3u8/)){
+                    plLayerId = parseInt(s.uri.match(/_Layer(\d+)\.m3u8/)[1]);
+                }
+                else{
+                    plLayerId = plNewIds, plNewIds++;
+                }
+                plMaxLayer    = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
+                // set urls and servers
+                let plUrlDl  = s.uri;
+                let plServer = new URL(plUrlDl).host;
+                if(!plServerList.includes(plServer)){
+                    plServerList.push(plServer);
+                }
+                if(!Object.keys(plStreams).includes(plServer)){
+                    plStreams[plServer] = {};
+                }
+                if(plStreams[plServer][plLayerId] && plStreams[plServer][plLayerId] != plUrlDl){
+                    console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
+                }
+                else{
+                    plStreams[plServer][plLayerId] = plUrlDl;
+                }
+                // set plLayersStr
+                let plResolution = s.attributes.RESOLUTION;
+                plLayersRes[plLayerId] = plResolution;
+                let plBandwidth  = Math.round(s.attributes.BANDWIDTH/1024);
+                if(plLayerId<10){
+                    plLayerId = plLayerId.toString().padStart(2,' ');
+                }
+                let qualityStrAdd   = `${plLayerId}: ${plResolution.width}x${plResolution.height} (${plBandwidth}KiB/s)`;
+                let qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g,'\\$1'),'m');
+                let qualityStrMatch = !plLayersStr.join('\r\n').match(qualityStrRegx);
+                if(qualityStrMatch){
+                    plLayersStr.push(qualityStrAdd);
+                }
+            }
+            else {
+                console.log(s.uri);
+            }
+        }
+
+        for(let s of mainServersList){
+            if(plServerList.includes(s)){
+                plServerList.splice(plServerList.indexOf(s), 1);
+                plServerList.unshift(s);
+                break;
+            }
+        }
+        
+        if(typeof argv.q == 'object' && argv.q.length > 1){
+            argv.q = argv.q[argv.q.length-1];
+        }
+        
+        argv.q = argv.q < 1 || argv.q > plMaxLayer ? plMaxLayer : argv.q;
+        
+        let plSelectedServer = plServerList[argv.x-1];
+        let plSelectedList   = plStreams[plSelectedServer];
+        let videoUrl = argv.x < plServerList.length+1 && plSelectedList[argv.q] ? plSelectedList[argv.q] : '';
+        
+        plLayersStr.sort();
+        console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
+        console.log(`[INFO] Available qualities:\n\t${plLayersStr.join('\n\t')}`);
+        
+        if(videoUrl != ''){
+            console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q].width}x${plLayersRes[argv.q].height}) @ ${plSelectedServer}`);
+            console.log('[INFO] Stream URL:',videoUrl);
+    
+            fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
+            outName = fnOutput;
+            console.log(`[INFO] Output filename: ${fnOutput}.ts`);
+        }
+        else if(argv.x > plServerList.length){
+            console.log('[ERROR] Server not selected!\n');
+            return;
+        }
+        else{
+            console.log('[ERROR] Layer not selected!\n');
+            return;
+        }
+        
+        let dlFailed = false;
+        let dlFailedA = false;
+        
+        video: if (!argv.novids) {
+            if (plAud.uri && (purvideo.length > 1 || audioAndVideo.length > 1)) {
+                console.log("break 1")
+                break video;
+            } else if (!plAud.uri && (audioAndVideo.some(a => a.lang === streamPath.lang) || puraudio.some(a => a.lang === streamPath.lang))) {
+                console.log("break 2")
+                break video;
+            }
+            // download video
+            let reqVideo = await getData({
+                url: videoUrl,
+                useProxy: (argv.ssp ? false : true),
+                debug: argv.debug,
+            });
+            if (!reqVideo.ok) { break video; }
+            
+            let chunkList = m3u8(reqVideo.res.body);
+            
+            let tsFile = path.join(cfg.dir.content, `${fnOutput}.video${(plAud.uri ? '' : '.' + streamPath.lang )}`);
+            dlFailed = !await downloadFile(tsFile, chunkList);
+            if (!dlFailed) {
+                if (plAud.uri) {
+                    purvideo.push({
+                        path: `${tsFile}.ts`,
+                        lang: plAud.language
+                    })
+                } else {
+                    audioAndVideo.push({
+                        path: `${tsFile}.ts`,
+                        lang: streamPath.lang
+                    })
+                }
+            }
+        }
+        else{
+            console.log('[INFO] Skip video downloading...\n');
+        }
+        if (!argv.noaudio && plAud.uri) {
+            // download audio
+            if (audioAndVideo.some(a => a.lang === plAud.language) || puraudio.some(a => a.lang === plAud.language))
+                return;
+            let reqAudio = await getData({
+                url: plAud.uri,
+                useProxy: (argv.ssp ? false : true),
+                debug: argv.debug,
+            });
+            if (!reqAudio.ok) { return; }
+            
+            let chunkListA = m3u8(reqAudio.res.body);
+    
+            let tsFileA = path.join(cfg.dir.content, fnOutput + `.audio.${plAud.language}`);
+    
+            dlFailedA = !await downloadFile(tsFileA, chunkListA);
+            if (!dlFailedA)
+                puraudio.push({
+                    path: `${tsFileA}.ts`,
+                    lang: plAud.language
+                })
+
+        }
     }
     
-    if (!argv.noaudio && plAud.uri) {
-        // download audio
-        let reqAudio = await getData({
-            url: plAud.uri,
-            useProxy: (argv.ssp ? false : true),
-            debug: argv.debug,
-        });
-        if (!reqAudio.ok) { return; }
-        
-        let chunkListA = m3u8(reqAudio.res.body);
-
-        let tsFileA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
-
-        dlFailedA = !await downloadFile(tsFileA, chunkListA);
-    }
     
     // add subs
     let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
     let addSubs = argv.mks && tsDlPath ? true : false;
 
     // download subtitles
-    if(stDlPath){
+    if(stDlPath.length > 0){
         console.log('[INFO] Downloading subtitles...');
         for (let subObject of stDlPath) {
             let subsSrc = await getData({
@@ -625,7 +678,6 @@ async function downloadStreams(){
             if(subsSrc.ok){
                 let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
                 subObject.file = path.join(cfg.dir.content, fnOutput) + subObject.ext + subsExt;
-                subObject.trashFile = path.join(cfg.dir.trash, fnOutput) + subObject.ext + subsExt;
                 fs.writeFileSync(subObject.file, assData);
             }
             else{
@@ -638,37 +690,19 @@ async function downloadStreams(){
             console.log('[INFO] Subtitles downloaded!');
     }
     
-    /* TODO Remove */
-    if(false && (dlFailed || dlFailedA)){
-        console.log('\n[INFO] TS file not fully downloaded, skip muxing video...\n');
+    if((puraudio.length < 1 && audioAndVideo.length < 1) || (purvideo.length < 1 && audioAndVideo.length < 1)){
+        console.log('\n[INFO] Unable to locate a video AND audio file\n');
         return;
     }
     
     if(argv.skipmux){
+        console.log("[INFO] Skipping muxing...")
         return;
-    }
-    
-    let muxTrg = path.join(cfg.dir.content, fnOutput);
-    let muxTrgA = '';
-    let tshTrg = path.join(cfg.dir.trash, fnOutput);
-    let tshTrgA = '';
-    
-    if(!fs.existsSync(`${muxTrg}.ts`) || !fs.statSync(`${muxTrg}.ts`).isFile()){
-        console.log('\n[INFO] TS file not found, skip muxing video...\n');
-        return;
-    }
-    
-    if(plAud.uri){
-        muxTrgA = path.join(cfg.dir.content, fnOutput + `.${plAud.language}`);
-        tshTrgA = path.join(cfg.dir.trash, fnOutput + `.${plAud.language}`);
-        if(!fs.existsSync(`${muxTrgA}.ts`) || !fs.statSync(`${muxTrgA}.ts`).isFile()){
-            console.log('\n[INFO] TS file not found, skip muxing video...\n');
-            return;
-        }
     }
 
     // usage
-    let usableMKVmerge = true;
+    /* TODO MkvMerge */
+    let usableMKVmerge = false;
     let usableFFmpeg = true;
     
     // check exec path
@@ -690,44 +724,23 @@ async function downloadStreams(){
 
     if(!argv.mp4 && usableMKVmerge){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandMkvMerge(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`);
+        let command = merger.buildCommandMkvMerge(audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
         console.log(command);
         shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command);
     }
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandFFmpeg(`${muxTrg}.ts`, plAud, stDlPath, `${muxTrg}.${ffext}`);
+        let command = merger.buildCommandFFmpeg(audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
         shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,command);
     }
     else{
         console.log('\n[INFO] Done!\n');
         return;
     }
-    /* TODO Remove */
     if (argv.nocleanup)
         return;
-    if(argv.notrashfolder && argv.nocleanup){
-        // don't move or delete temp files
-    }
-    else if(argv.nocleanup){
-        fs.renameSync(muxTrg+'.ts', tshTrg + '.ts');
-        if (plAud.uri)
-            fs.renameSync(muxTrgA+'.ts', tshTrgA + '.ts');
-        if(addSubs){
-            for (let subObj of stDlPath) {
-                fs.renameSync(subObj.file ? subObj.file : muxTrg+subsExt, subObj.trashFile ? subObj.trashFile : tshTrg + subsExt);
-            }
-        }
-    }
-    else{
-        fs.unlinkSync(muxTrg+'.ts');
-        if (plAud.uri)
-            fs.unlinkSync(muxTrgA+'.ts');
-        if(addSubs){
-            for (let subObj of stDlPath) 
-                fs.unlinkSync(subObj.file ? subObj.file : muxTrg + subsExt);
-        }
-    }
+    
+    audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path))
     console.log('\n[INFO] Done!\n');
 }
 

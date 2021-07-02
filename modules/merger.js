@@ -2,30 +2,59 @@ const iso639 = require('iso-639');
 const argv = require('../funi').argv;
 
 /**
- * @param {string} videoFile 
- * @param {object} audioFile 
+ * @param {Array<object>} videoAndAudio 
+ * @param {Array<object>} onlyVid 
+ * @param {Array<object>} onlyAuido
  * @param {Array<object>} subtitles 
+ * @param {string} output
  * @returns {string}
  */
-const buildCommandFFmpeg = (videoFile, audioSettings, subtitles, output) => {
+const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAuido, subtitles, output) => {
     let args = [];
-    args.push(`-i "${videoFile}"`);
+    let metaData = [];
 
-    if (audioSettings.uri)
-        args.push(`-i "${audioSettings.uri}"`);
+    let index = 0;
+    let hasVideo = false;
+    for (let vid of videoAndAudio) {
+        args.push(`-i "${vid.path}"`)
+        if (!hasVideo) {
+            metaData.push(`-map ${index}`)
+            metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(vid.lang, vid.lang)}`)
+            metaData.push(`-metadata:s:v:${index} title="[Funimation]"`)
+            hasVideo = true
+        } else {
+            metaData.push(`-map ${index}:a`)
+            metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(vid.lang, vid.lang)}`)
+        }
+        index++;
+    }
+
+    for (let vid of onlyVid) {
+        if (!hasVideo) {
+            args.push(`-i "${vid.path}"`)
+            metaData.push(`-map ${index}`)
+            metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(vid.lang, vid.lang)}`)
+            metaData.push(`-metadata:s:v:${index} title="[Funimation]"`)
+            hasVideo = true
+            index++;
+        }
+    }
+
+    for (let aud of onlyAuido) {
+        args.push(`-i "${aud.path}"`)
+        metaData.push(`-map ${index}`)
+        metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(aud.lang, aud.lang)}`)
+        index++;
+    }
+
     for (let index in subtitles) {
         let sub = subtitles[index];
         args.push(`-i "${sub.file}"`);
     }
 
-    args.push('-map 0');
-    if (audioSettings.uri)
-        args.push( '-map 1');
-
-    args.push(...subtitles.map((_, index) => `-map ${index + (audioSettings.uri ? 2 : 1)}`));
+    args.push(...subtitles.map((_, subIndex) => `-map ${subIndex + index}`));
+    args.push(...metaData)
     args.push(
-        '-metadata:s:v:0 title="[Funimation]"',
-        `-metadata:s:a:0 language=${getLanguageCode(audioSettings.language, argv.sub ? 'jpn' : 'eng')}`,
         '-c:v copy',
         '-c:a copy',
         '-c:s mov_text',
@@ -58,14 +87,14 @@ const buildCommandMkvMerge = (videoFile, audioSettings, subtitles, output) => {
             '--no-audio'
         );
         args.push(`"${videoFile}"`);
-        args.push(`--language 0:${getLanguageCode(audioSettings.language, argv.sub ? 'jpn' : 'eng')}`);
+        args.push(`--language 0:${getLanguageCode(audioSettings.language, argv.todo ? 'jpn' : 'eng')}`);
         args.push(
             '--no-video',
             '--audio-tracks 0'
         );
         args.push(`"${audioSettings.uri}"`);
     } else{
-        args.push(`--language 1:${argv.sub ? 'jpn' : 'eng'}`);
+        args.push(`--language 1:${argv.todo ? 'jpn' : 'eng'}`);
         args.push(
             '--video-tracks 0',
             '--audio-tracks 1'
