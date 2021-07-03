@@ -493,8 +493,9 @@ async function downloadStreams(){
         // new uris
         let vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
         if(plQualityLinkList.playlists[0].uri.match(vplReg)){
-            if(plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128']){
-                let audioData = plQualityLinkList.mediaGroups.AUDIO['audio-aacl-128'],
+            let audioKey = Object.keys(plQualityLinkList.mediaGroups.AUDIO).pop()
+            if(plQualityLinkList.mediaGroups.AUDIO[audioKey]){
+                let audioData = plQualityLinkList.mediaGroups.AUDIO[audioKey],
                     audioEl = Object.keys(audioData);
                 audioData = audioData[audioEl[0]];
                 plAud = { ...audioData, ...{ langStr: audioEl[0] } };
