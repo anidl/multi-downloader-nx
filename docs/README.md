@@ -42,14 +42,19 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 
 * `-s <i> -e <s>` sets the show id and episode ids (comma-separated, hyphen-sequence)
 * `-q <i>` sets the video layer quality [1...10] (optional, 0 is max)
+* `--all` download all videos at once
 * `--alt` alternative episode listing (if available)
-* `--sub` switch from English dub to Japanese dub with subtitles
+* `--sub` select one or more subtile language
+* `--dub` select one or more dub languages
 * `--simul` force select simulcast version instead of uncut version
 * `-x` select server
-* `--novids` skip download videos  (for downloading subtitles only)
+* `--novids` skip download videos
 * `--nosubs` skip download subtitles for Dub (if available)
+* `--noaudio` skip downloading audio
 
 ### Proxy
+
+The proxy is currently unmainted. Use at your on risk.
 
 * `--proxy <s>` http(s)/socks proxy WHATWG url (ex. https://myproxyhost:1080)
 * `--proxy-auth <s>` Colon-separated username and password for proxy
@@ -63,10 +68,8 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 
 ### Filenaming (optional)
 
-* `-a <s>` release group ("Funimation" by default)
-* `-t <s>` show title override
-* `--ep <s>` episode number override (ignored in batch mode)
-* `--suffix <s>` filename suffix override (first "SIZEp" will be replaced with actual video size, "SIZEp" by default)
+* `--fileName`  Set the filename template. Use ${variable_name} to insert variables.
+                You may use 'title', 'episode', 'showTitle', 'season', 'width', 'height' as variables.
 
 ### Utility
 
@@ -75,7 +78,7 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 
 ## Filename Template
 
-[`release group`] `title` - `episode` [`suffix`].`extension`
+[Funimation] ${showTitle} - ${episode} [${height}p]"]
 
 ## CLI Examples
 
