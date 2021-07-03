@@ -157,12 +157,6 @@ const appArgv = (cfg) => {
             default: cfg.mp4mux || false,
             type: 'boolean'
         })
-        .option('mks', {
-            group: 'Muxing:',
-            describe: 'Add subtitles to mkv/mp4 (if available)',
-            default: cfg.muxSubs || false,
-            type: 'boolean'
-        })
     // filenaming
         .option('fileName', {
             group: 'Filename Template:',

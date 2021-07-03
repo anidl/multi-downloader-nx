@@ -52,14 +52,13 @@ const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAudio, subtitles, output
         args.push(`-i "${sub.file}"`);
     }
 
-    args.push(...subtitles.map((_, subIndex) => `-map ${subIndex + index}`));
     args.push(...metaData)
+    args.push(...subtitles.map((_, subIndex) => `-map ${subIndex + index}`));
     args.push(
         '-c:v copy',
-        '-c:a copy',
-        '-c:s mov_text',
-        '-c:s ass'
+        '-c:a copy'
     );
+    args.push(output.split('.').pop().toLowerCase() === "mp4" ? '-c:s mov_text' : '*c:s ass')
     args.push(...subtitles.map((sub, index) => `-metadata:s:${index + 2} language=${getLanguageCode(sub.language)}`));
     args.push(`"${output}"`);
     return args.join(' ');

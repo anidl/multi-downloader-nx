@@ -464,7 +464,6 @@ async function downloadStreams(){
     let puraudio = []
     let audioAndVideo = [] 
     let outName;
-    console.log(tsDlPath)
     for (let streamPath of tsDlPath) {
         let plQualityReq = await getData({
             url: streamPath.path,
@@ -600,7 +599,7 @@ async function downloadStreams(){
         let dlFailedA = false;
         
         video: if (!argv.novids) {
-            if (plAud.uri && (purvideo.length > 1 || audioAndVideo.length > 1)) {
+            if (plAud.uri && (purvideo.length > 0 || audioAndVideo.length > 0)) {
                 break video;
             } else if (!plAud.uri && (audioAndVideo.some(a => a.lang === streamPath.lang) || puraudio.some(a => a.lang === streamPath.lang))) {
                 break video;
@@ -634,10 +633,10 @@ async function downloadStreams(){
         else{
             console.log('[INFO] Skip video downloading...\n');
         }
-        if (!argv.noaudio && plAud.uri) {
+        audio: if (!argv.noaudio && plAud.uri) {
             // download audio
             if (audioAndVideo.some(a => a.lang === plAud.language) || puraudio.some(a => a.lang === plAud.language))
-                return;
+                break audio;
             let reqAudio = await getData({
                 url: plAud.uri,
                 useProxy: (argv.ssp ? false : true),
@@ -659,10 +658,9 @@ async function downloadStreams(){
         }
     }
     
-    
     // add subs
-    let subsExt = !argv.mp4 || argv.mp4 && !argv.mks && argv.ass ? '.ass' : '.srt';
-    let addSubs = argv.mks && tsDlPath ? true : false;
+    let subsExt = !argv.mp4 || argv.mp4 && argv.ass ? '.ass' : '.srt';
+    let addSubs = true;
 
     // download subtitles
     if(stDlPath.length > 0){
@@ -675,7 +673,7 @@ async function downloadStreams(){
             });
             if(subsSrc.ok){
                 let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
-                subObject.file =  path.join(cfg.dir.content, `${fnOutput}.subtitle.${subObject.ext}${subsExt}`)
+                subObject.file =  path.join(cfg.dir.content, `${fnOutput}.subtitle${subObject.ext}${subsExt}`)
                 fs.writeFileSync(subObject.file, assData);
             }
             else{
@@ -722,6 +720,7 @@ async function downloadStreams(){
     if(!argv.mp4 && usableMKVmerge){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let command = merger.buildCommandMkvMerge(audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
+        console.log(command, audioAndVideo, puraudio, purvideo)
         shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command);
     }
     else if(usableFFmpeg){
