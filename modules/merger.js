@@ -110,7 +110,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
             )
             args.push(`--track-name 0:[Funimation]`)
             hasVideo = true
-            args.push(`${vid.path}"`)
+            args.push(`"${vid.path}"`)
         }
     }
 

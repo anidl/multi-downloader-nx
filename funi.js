@@ -339,7 +339,6 @@ async function getEpisode(fnSlug){
     };
     
     // select
-    media = media.reverse();
     for(let m of media){
         let selected = false;
         if(m.id > 0 && m.type == 'Non-Encrypted'){
@@ -352,7 +351,7 @@ async function getEpisode(fnSlug){
                 if(dub_type == dubType[curDub] && selUncut){
                     streamIds.push({
                         id: m.id,
-                        lang: merger.getLanguageCode(dubType[curDub], curDub.slice(0, -2))
+                        lang: merger.getLanguageCode(curDub, curDub.slice(0, -2))
                     });
                     stDlPath.push(...m.subtitles);
                     localSubs = m.subtitles
@@ -374,7 +373,6 @@ async function getEpisode(fnSlug){
             return true;
         }
     })
-    
     if(streamIds.length <1){
         console.log('[ERROR] Track not selected\n');
         return;
@@ -466,6 +464,7 @@ async function downloadStreams(){
     let puraudio = []
     let audioAndVideo = [] 
     let outName;
+    console.log(tsDlPath)
     for (let streamPath of tsDlPath) {
         let plQualityReq = await getData({
             url: streamPath.path,
@@ -676,7 +675,7 @@ async function downloadStreams(){
             });
             if(subsSrc.ok){
                 let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
-                subObject.file = path.join(cfg.dir.content, fnOutput) + subObject.ext + subsExt;
+                subObject.file =  path.join(cfg.dir.content, `${fnOutput}.subtitle.${subObject.ext}${subsExt}`)
                 fs.writeFileSync(subObject.file, assData);
             }
             else{
