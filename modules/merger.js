@@ -58,7 +58,7 @@ const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAudio, subtitles, output
         '-c:v copy',
         '-c:a copy'
     );
-    args.push(output.split('.').pop().toLowerCase() === "mp4" ? '-c:s mov_text' : '*c:s ass')
+    args.push(output.split('.').pop().toLowerCase() === "mp4" ? '-c:s mov_text' : '-c:s ass')
     args.push(...subtitles.map((sub, index) => `-metadata:s:${index + 2} language=${getLanguageCode(sub.language)}`));
     args.push(`"${output}"`);
     return args.join(' ');
