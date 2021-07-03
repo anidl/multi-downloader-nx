@@ -11,8 +11,9 @@ const availableFilenameVars = [
 
 const appArgv = (cfg) => {
     // init
-    return yargs.parserConfiguration({
-        'duplicate-arguments-array': false,
+    const argv = yargs.parserConfiguration({
+        'duplicate-arguments-array': true,
+        "camel-case-expansion": false
     })
     // main
         .wrap(Math.min(120)) // yargs.terminalWidth()
@@ -73,22 +74,16 @@ const appArgv = (cfg) => {
         .option('dub', {
             group: 'Downloading:',
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
-            choices: [ 'enUS', 'esLA', 'ptBR', 'zhMN' ],
+            choices: [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jpJP' ],
             default: cfg.dub || 'enUS',
-            type: 'string',
-        })
-        .option('sub', {
-            group: 'Downloading:',
-            describe: 'Japanese Dub with subtitles mode (English Dub mode by default)',
-            default: cfg.subsMode || false,
-            type: 'boolean',
+            type: 'array',
         })
         .option('subLang', {
             group: 'Downloading:',
             describe: 'Set the subtitle language (English is default and fallback)',
             default: cfg.subLang || 'enUS',
             choices: [ 'enUS', 'esLA', 'ptBR' ],
-            type: 'string'
+            type: 'array'
         })
         .option('fontSize', {
             group: 'Downloading:',
@@ -128,6 +123,7 @@ const appArgv = (cfg) => {
             group: 'Downloading:',
             describe: 'Skip downloading subtitles for English Dub (if available)',
             type: 'boolean',
+            default: false
         })
     // proxy
         .option('proxy', {
@@ -161,12 +157,6 @@ const appArgv = (cfg) => {
             default: cfg.mp4mux || false,
             type: 'boolean'
         })
-        .option('mks', {
-            group: 'Muxing:',
-            describe: 'Add subtitles to mkv/mp4 (if available)',
-            default: cfg.muxSubs || false,
-            type: 'boolean'
-        })
     // filenaming
         .option('fileName', {
             group: 'Filename Template:',
@@ -185,15 +175,8 @@ const appArgv = (cfg) => {
     // util
         .option('nocleanup', {
             group: 'Utilities:',
-            describe: 'Move temporary files to trash folder instead of deleting',
+            describe: 'Dont\'t delete the input files after muxing',
             default: cfg.noCleanUp || false,
-            type: 'boolean'
-        })
-        .option('notrashfolder', {
-            implies: ['nocleanup'],
-            group: 'Utilities:',
-            describe: 'Don\'t move temporary files to trash folder (Used with --nocleanup)',
-            default: cfg.noTrashFolder || false,
             type: 'boolean'
         })
     // help
@@ -212,6 +195,14 @@ const appArgv = (cfg) => {
     
     // --
         .argv;
+
+    // Resolve unwanted arrays
+    for (let key in argv) {
+        if (argv[key] instanceof Array && !(key === "subLang" || key === "dub")) {
+            argv[key] = argv[key].pop()
+        }
+    }
+    return argv;
 };
 
 const showHelp = yargs.showHelp;
