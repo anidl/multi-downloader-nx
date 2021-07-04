@@ -343,7 +343,7 @@ async function getEpisode(fnSlug){
         let selected = false;
         if(m.id > 0 && m.type == 'Non-Encrypted'){
             let dub_type = m.language;
-            let localSubs = []
+            let localSubs = [];
             let selUncut = !argv.simul && uncut[dub_type] && m.version.match(/uncut/i) 
                 ? true 
                 : (!uncut[dub_type] || argv.simul && m.version.match(/simulcast/i) ? true : false);
@@ -354,7 +354,7 @@ async function getEpisode(fnSlug){
                         lang: merger.getLanguageCode(curDub, curDub.slice(0, -2))
                     });
                     stDlPath.push(...m.subtitles);
-                    localSubs = m.subtitles
+                    localSubs = m.subtitles;
                     selected = true;
                 }
             }
@@ -364,15 +364,15 @@ async function getEpisode(fnSlug){
         }
     }
 
-    let already = []
+    let already = [];
     stDlPath = stDlPath.filter(a => {
         if (already.includes(a.language)) {
             return false;
         } else {
-            already.push(a.language)
+            already.push(a.language);
             return true;
         }
-    })
+    });
     if(streamIds.length <1){
         console.log('[ERROR] Track not selected\n');
         return;
@@ -460,9 +460,9 @@ async function downloadStreams(){
     
     // req playlist
 
-    let purvideo = []
-    let puraudio = []
-    let audioAndVideo = [] 
+    let purvideo = [];
+    let puraudio = [];
+    let audioAndVideo = []; 
     let outName;
     for (let streamPath of tsDlPath) {
         let plQualityReq = await getData({
@@ -491,7 +491,7 @@ async function downloadStreams(){
         // new uris
         let vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
         if(plQualityLinkList.playlists[0].uri.match(vplReg)){
-            let audioKey = Object.keys(plQualityLinkList.mediaGroups.AUDIO).pop()
+            let audioKey = Object.keys(plQualityLinkList.mediaGroups.AUDIO).pop();
             if(plQualityLinkList.mediaGroups.AUDIO[audioKey]){
                 let audioData = plQualityLinkList.mediaGroups.AUDIO[audioKey],
                     audioEl = Object.keys(audioData);
@@ -621,12 +621,12 @@ async function downloadStreams(){
                     purvideo.push({
                         path: `${tsFile}.ts`,
                         lang: plAud.language
-                    })
+                    });
                 } else {
                     audioAndVideo.push({
                         path: `${tsFile}.ts`,
                         lang: streamPath.lang
-                    })
+                    });
                 }
             }
         }
@@ -653,7 +653,7 @@ async function downloadStreams(){
                 puraudio.push({
                     path: `${tsFileA}.ts`,
                     lang: plAud.language
-                })
+                });
 
         }
     }
@@ -673,7 +673,7 @@ async function downloadStreams(){
             });
             if(subsSrc.ok){
                 let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
-                subObject.file =  path.join(cfg.dir.content, `${fnOutput}.subtitle${subObject.ext}${subsExt}`)
+                subObject.file =  path.join(cfg.dir.content, `${fnOutput}.subtitle${subObject.ext}${subsExt}`);
                 fs.writeFileSync(subObject.file, assData);
             }
             else{
@@ -692,7 +692,7 @@ async function downloadStreams(){
     }
     
     if(argv.skipmux){
-        console.log("[INFO] Skipping muxing...")
+        console.log('[INFO] Skipping muxing...');
         return;
     }
 
@@ -734,8 +734,8 @@ async function downloadStreams(){
     if (argv.nocleanup)
         return;
     
-    audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path))
-    stDlPath.forEach(subObject => fs.unlinkSync(subObject.file))
+    audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path));
+    stDlPath.forEach(subObject => fs.unlinkSync(subObject.file));
     console.log('\n[INFO] Done!\n');
 }
 
