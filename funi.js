@@ -335,7 +335,7 @@ async function getEpisode(fnSlug){
         'esLA': 'Spanish (Latin Am)',
         'ptBR': 'Portuguese (Brazil)',
         'zhMN': 'Chinese (Mandarin, PRC)',
-        'jpJP': 'Japanese'
+        'jaJP': 'Japanese'
     };
     
     // select

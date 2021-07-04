@@ -82,25 +82,6 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
         '--engage no_variable_data',
     );
 
-    for (let vid of videoAndAudio) {
-        if (!hasVideo) {
-            args.push(
-                '--video-tracks 0',
-                '--audio-tracks 1'
-            )
-            args.push(`--track-name 0:[Funimation]`)
-            args.push(`--language 1:${getLanguageCode(vid.lang, argv.todo ? 'jpn' : 'eng')}`);
-            hasVideo = true
-        } else {
-            args.push(
-                '--no-video',
-                '--audio-tracks 1'
-            )
-            args.push(`--language 1:${getLanguageCode(vid.lang, argv.todo ? 'jpn' : 'eng')}`);
-        }
-        args.push(`"${vid.path}"`)
-    }
-
     for (let vid of onlyVid) {
         if (!hasVideo) {
             args.push(
@@ -113,8 +94,28 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
         }
     }
 
+    for (let vid of videoAndAudio) {
+        console.log(vid, vid.lang)
+        if (!hasVideo) {
+            args.push(
+                '--video-tracks 0',
+                '--audio-tracks 1'
+            )
+            args.push(`--track-name 0:[Funimation]`)
+            args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
+            hasVideo = true
+        } else {
+            args.push(
+                '--no-video',
+                '--audio-tracks 1'
+            )
+            args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
+        }
+        args.push(`"${vid.path}"`)
+    }
+
     for (let aud of onlyAudio) {
-        args.push(`--language 0:${getLanguageCode(aud.lang, argv.todo ? 'jpn' : 'eng')}`);
+        args.push(`--language 0:${getLanguageCode(aud.lang, aud.lang)}`);
         args.push(
             '--no-video',
             '--audio-tracks 0'
