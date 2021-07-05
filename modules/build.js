@@ -44,7 +44,6 @@ const nodeVer = 'node14-';
     fs.mkdirSync(`${buildDir}/bin`);
     fs.mkdirSync(`${buildDir}/config`);
     fs.mkdirSync(`${buildDir}/videos`);
-    fs.mkdirSync(`${buildDir}/videos/_trash`);
     fs.copySync('./bin/', `${buildDir}/bin/`);
     fs.copySync('./config/bin-path.yml', `${buildDir}/config/bin-path.yml`);
     fs.copySync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);

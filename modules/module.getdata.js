@@ -10,7 +10,7 @@ const getData = async (options) => {
         }
     };
     if(options.responseType) {
-        gOptions.responseType = options.responseType
+        gOptions.responseType = options.responseType;
     }
     if(options.baseUrl){
         gOptions.prefixUrl = options.baseUrl;
@@ -71,6 +71,6 @@ const getData = async (options) => {
             error,
         };
     }
-}
+};
 
 module.exports = getData;
