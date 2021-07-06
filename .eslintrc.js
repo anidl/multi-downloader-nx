@@ -18,7 +18,7 @@ module.exports = {
             4,
             { 'SwitchCase': 1 }
         ],
-        'linebreak-style': "off",
+        'linebreak-style': 'off',
         'quotes': [
             'error',
             'single'
