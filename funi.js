@@ -37,6 +37,24 @@ let cfg = {
     cli: getYamlCfg(cliCfgFile),
 };
 
+// make sure cfg params aren't null
+if (cfg.bin === null){
+    cfg.bin = {};
+    console.log('[WARN] bin-path.yml is empty or does not exist!\n');
+}
+
+if (cfg.dir === null){
+    cfg.dir = {};
+    console.log('[WARN] dir-path.yml is empty or does not exist!\n');
+}
+
+if (!Object.prototype.hasOwnProperty.call(cfg.dir, 'content')) cfg.dir.content = './videos/';
+
+if (cfg.cli === null){
+    cfg.cli = {};
+    console.log('[WARN] cli-defaults.yml is empty or does not exist!\n');
+}
+
 /* Normalise paths for use outside the current directory */
 for (let key of Object.keys(cfg.dir)) {
     if (!path.isAbsolute(cfg.dir[key])) {
@@ -52,7 +70,9 @@ for (let key of Object.keys(cfg.bin)) {
 
 // token
 let token = getYamlCfg(tokenFile);
-token = token.token ? token.token : false;
+if (token === null) token = false;
+else if (token.token === null) token = false;
+else token = token.token;
 
 // info if token not set
 if(!token){
