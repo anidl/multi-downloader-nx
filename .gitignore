@@ -7,7 +7,6 @@
 ffmpeg
 mkvmerge
 token.yml
-package-lock.json
 *.exe
 *.dll
 *.ts
