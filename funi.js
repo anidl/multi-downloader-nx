@@ -447,7 +447,7 @@ function getSubsUrl(m){
                     path: m[i].filePath,
                     ext: `.${lang}`,
                     langName: subType[lang],
-                    language: m[i].languages[0].code ?? lang.slice(0, 2)
+                    language: m[i].languages[0].code || lang.slice(0, 2)
                 });
             }
         }
@@ -846,37 +846,6 @@ function logDownloadInfo (dateStart, partsDL, partsTotal, partsDLRes, partsTotal
     const revParts = parseInt(dateElapsed * (partsTotal / partsDL - 1));
     const time = shlp.formatTime((revParts / 1000).toFixed());
     console.log(`[INFO] ${partsDLRes} of ${partsTotalRes} parts downloaded [${percent}%] (${time})`);
-}
-
-// make proxy URL
-function buildProxy(proxyBaseUrl, proxyAuth){
-    if(!proxyBaseUrl.match(/^(https?|socks4|socks5):/)){
-        proxyBaseUrl = 'http://' + proxyBaseUrl;
-    }
-    
-    let proxyCfg = new URL(proxyBaseUrl);
-    let proxyStr = `${proxyCfg.protocol}//`;
-    
-    if(typeof proxyCfg.hostname != 'string' || proxyCfg.hostname == ''){
-        throw new Error('[ERROR] Hostname and port required for proxy!');
-    }
-    
-    if(proxyAuth && typeof proxyAuth == 'string' && proxyAuth.match(':')){
-        proxyCfg.username = proxyAuth.split(':')[0];
-        proxyCfg.password = proxyAuth.split(':')[1];
-        proxyStr += `${proxyCfg.username}:${proxyCfg.password}@`;
-    }
-    
-    proxyStr += proxyCfg.hostname;
-    
-    if(!proxyCfg.port && proxyCfg.protocol == 'http:'){
-        proxyStr += ':80';
-    }
-    else if(!proxyCfg.port && proxyCfg.protocol == 'https:'){
-        proxyStr += ':443';
-    }
-    
-    return proxyStr;
 }
 
 /**

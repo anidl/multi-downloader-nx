@@ -1,5 +1,4 @@
 const iso639 = require('iso-639');
-const argv = require('../funi').argv;
 
 /**
  * @param {Array<object>} videoAndAudio 

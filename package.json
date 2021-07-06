@@ -34,6 +34,7 @@
         "yargs": "^16.1.0"
     },
     "devDependencies": {
+        "eslint": "^7.30.0",
         "fs-extra": "^9.0.1",
         "pkg": "^4.4.9",
         "removeNPMAbsolutePaths": "^2.0.0"
