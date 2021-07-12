@@ -9,8 +9,8 @@ const availableFilenameVars = [
     'height'
 ];
 
-const subLang = [ 'enUS', 'esLA', 'ptBR' ]
-const dubLang = [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP' ]
+const subLang = [ 'enUS', 'esLA', 'ptBR' ];
+const dubLang = [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP' ];
 
 const appArgv = (cfg) => {
     // init
@@ -212,9 +212,9 @@ const appArgv = (cfg) => {
         .argv;
     // Resolve unwanted arrays
     if (argv.allDubs)
-        argv.dub = dubLang
+        argv.dub = dubLang;
     if (argv.allSubs)
-        argv.subLang = subLang
+        argv.subLang = subLang;
     for (let key in argv) {
         if (argv[key] instanceof Array && !(key === 'subLang' || key === 'dub')) {
             argv[key] = argv[key].pop();
