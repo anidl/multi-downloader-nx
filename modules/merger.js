@@ -94,7 +94,6 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
     }
 
     for (let vid of videoAndAudio) {
-        console.log(vid, vid.lang);
         if (!hasVideo) {
             args.push(
                 '--video-tracks 0',

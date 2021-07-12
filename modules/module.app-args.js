@@ -9,6 +9,9 @@ const availableFilenameVars = [
     'height'
 ];
 
+const subLang = [ 'enUS', 'esLA', 'ptBR' ]
+const dubLang = [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP' ]
+
 const appArgv = (cfg) => {
     // init
     const argv = yargs.parserConfiguration({
@@ -74,7 +77,7 @@ const appArgv = (cfg) => {
         .option('dub', {
             group: 'Downloading:',
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
-            choices: [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP' ],
+            choices: dubLang,
             default: cfg.dub || 'enUS',
             type: 'array',
         })
@@ -82,7 +85,7 @@ const appArgv = (cfg) => {
             group: 'Downloading:',
             describe: 'Set the subtitle language (English is default and fallback)',
             default: cfg.subLang || 'enUS',
-            choices: [ 'enUS', 'esLA', 'ptBR' ],
+            choices: subLang,
             type: 'array'
         })
         .option('fontSize', {
@@ -90,6 +93,18 @@ const appArgv = (cfg) => {
             describe: 'Used to set the fontsize of the subtitles',
             default: cfg.fontSize || 55,
             type: 'number'
+        })
+        .option('allSubs', {
+            group: 'Downloading:',
+            describe: 'If set to true, all available subs will get downloaded',
+            default: false,
+            type: 'boolean'
+        })
+        .option('allDubs', {
+            group: 'Downloading:',
+            describe: 'If set to true, all available dubs will get downloaded',
+            default: false,
+            type: 'boolean'
         })
     // simulcast
         .option('simul', {
@@ -195,8 +210,11 @@ const appArgv = (cfg) => {
     
     // --
         .argv;
-
     // Resolve unwanted arrays
+    if (argv.allDubs)
+        argv.dub = dubLang
+    if (argv.allSubs)
+        argv.subLang = subLang
     for (let key in argv) {
         if (argv[key] instanceof Array && !(key === 'subLang' || key === 'dub')) {
             argv[key] = argv[key].pop();
