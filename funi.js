@@ -312,7 +312,7 @@ async function getEpisode(fnSlug){
     if(ep.mediaCategory != 'Episode'){
         ep.number = ep.number !== '' ? ep.mediaCategory+ep.number : ep.mediaCategory+'#'+ep.id;
     }
-    fnEpNum = parseInt(ep.number);
+    fnEpNum = isNaN(parseInt(ep.number)) ? ep.number : parseInt(ep.number);
     
     // is uncut
     let uncut = {
@@ -871,7 +871,7 @@ function logDownloadInfo (dateStart, partsDL, partsTotal, partsDLRes, partsTotal
 /**
  * @param {string} input 
  * @param {string} title 
- * @param {number} episode 
+ * @param {number|string} episode 
  * @param {string} showTitle 
  * @param {number} season 
  * @param {number} width 
@@ -888,8 +888,12 @@ function parseFileName(input, title, episode, showTitle, season, width, height) 
                 input = input.replace(vars[i], title);
                 break;
             case 'episode': {
-                let len = episode.toFixed(0).toString().length;
-                input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + episode : episode);
+                if (typeof episode === 'number') {
+                    let len = episode.toFixed(0).toString().length;
+                    input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + episode : episode);
+                } else {
+                    input = input.replace(vars[i], episode);
+                }
                 break;
             }
             case 'showtitle':
