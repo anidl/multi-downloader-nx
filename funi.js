@@ -777,7 +777,8 @@ async function downloadStreams(){
         mkvmux.push('-o',`${muxTrg}.mkv`);
         mkvmux.push('--no-date','--disable-track-statistics-tags','--engage','no_variable_data');
         mkvmux.push('--track-name',`0:[${argv.ftag}]`);
-        mkvmux.push('--language',`1:${argv.sub?'jpn':''}`);
+        if(argv.sub)
+            mkvmux.push('--language','1:jpn');
         if(plAud.uri){
             mkvmux.push('--video-tracks','0','--no-audio');
             mkvmux.push('--no-subtitles','--no-attachments');
