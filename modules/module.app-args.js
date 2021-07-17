@@ -16,10 +16,10 @@ const appArgv = (cfg) => {
     // init
     const parseDefault = (key, _default) => {
         if (Object.prototype.hasOwnProperty.call(cfg, key)) {
-            return cfg[key]
+            return cfg[key];
         } else
-            return _default
-    }
+            return _default;
+    };
 
     const argv = yargs.parserConfiguration({
         'duplicate-arguments-array': true,
