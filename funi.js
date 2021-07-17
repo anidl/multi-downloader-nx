@@ -769,12 +769,15 @@ async function downloadFile(filename, chunkList) {
                 break fileCheck;
             }
         }
-        let rwts = await shlp.question(`[Q] File «${filename + '.ts'}» already exists! Rewrite? (y/N)`);
+        let rwts = await shlp.question(`[Q] File «${filename + '.ts'}» already exists! Rewrite or continue? (y/N/c)`);
         rwts = rwts || 'N';
-        if (!['Y', 'y'].includes(rwts[0])) {
+        if (['N', 'n'].includes(rwts[0])) {
             return false;
+        } else if (['C', 'c'].includes(rwts[0])) {
+            return true;
+        } else {
+            fs.unlinkSync(filename + '.ts');
         }
-        fs.unlinkSync(filename + '.ts');
     }
 
     let start = Date.now();
