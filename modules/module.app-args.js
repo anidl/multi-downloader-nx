@@ -14,6 +14,13 @@ const dubLang = [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP' ];
 
 const appArgv = (cfg) => {
     // init
+    const parseDefault = (key, _default) => {
+        if (Object.prototype.hasOwnProperty.call(cfg, key)) {
+            return cfg[key]
+        } else
+            return _default
+    }
+
     const argv = yargs.parserConfiguration({
         'duplicate-arguments-array': true,
         'camel-case-expansion': false
@@ -50,27 +57,27 @@ const appArgv = (cfg) => {
             group: 'Downloading:',
             describe: 'Used to download all episodes from the show',
             type: 'boolean',
-            default: cfg.all || false
+            default: parseDefault('all', false)
         })
         .option('partsize', {
             group: 'Downloading:',
             describe: 'The amount of parts that should be downloaded in paralell',
             type: 'number',
-            default: cfg.partsize || 10
+            default: parseDefault('partsize', 10)
         })
     // quality
         .option('q', {
             group: 'Downloading:',
             describe: 'Select video layer (0 is max)',
             choices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            default: cfg.videoLayer || 7,
+            default: parseDefault('videoLayer', 7),
             type: 'number',
         })
     // alt listing
         .option('alt', {
             group: 'Downloading:',
             describe: 'Alternative episode listing (if available)',
-            default: cfg.altList || false,
+            default: parseDefault('altList', false),
             type: 'boolean',
         })
     // switch to subs
@@ -78,20 +85,20 @@ const appArgv = (cfg) => {
             group: 'Downloading:',
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
             choices: dubLang,
-            default: cfg.dub || 'enUS',
+            default: parseDefault('dub', 'enUS'),
             type: 'array',
         })
         .option('subLang', {
             group: 'Downloading:',
             describe: 'Set the subtitle language (English is default and fallback)',
-            default: cfg.subLang || 'enUS',
+            default: parseDefault('subLang', 'enUS'),
             choices: subLang,
             type: 'array'
         })
         .option('fontSize', {
             group: 'Downloading:',
             describe: 'Used to set the fontsize of the subtitles',
-            default: cfg.fontSize || 55,
+            default: parseDefault('fontSize', 55),
             type: 'number'
         })
         .option('allSubs', {
@@ -110,7 +117,7 @@ const appArgv = (cfg) => {
         .option('simul', {
             group: 'Downloading:',
             describe: 'Force downloading simulcast ver. instead of uncut ver. (if uncut ver. available)',
-            default: cfg.forceSimul || false,
+            default: parseDefault('forceSimul', false),
             type: 'boolean',
         })
     // server number
@@ -119,7 +126,7 @@ const appArgv = (cfg) => {
             group: 'Downloading:',
             describe: 'Select server',
             choices: [1, 2, 3, 4],
-            default: cfg.nServer || 1,
+            default: parseDefault('nServer', 1),
             type: 'number',
         })
     // skip
@@ -144,19 +151,19 @@ const appArgv = (cfg) => {
         .option('proxy', {
             group: 'Proxy:',
             describe: 'Set http(s)/socks proxy WHATWG url',
-            default: cfg.proxy || false,
+            default: parseDefault('proxy', false),
             hidden: true,
         })
         .option('proxy-auth', {
             group: 'Proxy:',
             describe: 'Colon-separated username and password for proxy',
-            default: cfg.proxy_auth || false,
+            default: parseDefault('proxy_auth', false),
             hidden: true,
         })
         .option('ssp', {
             group: 'Proxy:',
             describe: 'Don\'t use proxy for stream and subtitles downloading',
-            default: cfg.proxy_ssp || false,
+            default: parseDefault('proxy_ssp', false),
             hidden: true,
             type: 'boolean',
         })
@@ -169,7 +176,7 @@ const appArgv = (cfg) => {
         .option('mp4', {
             group: 'Muxing:',
             describe: 'Mux into mp4',
-            default: cfg.mp4mux || false,
+            default: parseDefault('mp4mux', false),
             type: 'boolean'
         })
     // filenaming
@@ -178,20 +185,20 @@ const appArgv = (cfg) => {
             describe: `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
                 .map(a => `'${a}'`).join(', ')} as variables.`,
             type: 'string',
-            default: cfg.fileName || '[Funimation] ${showTitle} - ${episode} [${height}p]'
+            default: parseDefault('fileName', '[Funimation] ${showTitle} - ${episode} [${height}p]')
         })
         .option('numbers', {
             group: 'Filename Template:',
             describe: `Set how long a number in the title should be at least.\n${[[3, 5, '005'], [2, 1, '01'], [1, 20, '20']]
                 .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
             type: 'number',
-            default: cfg.numbers || 2
+            default: parseDefault('numbers', 2)
         })
     // util
         .option('nocleanup', {
             group: 'Utilities:',
             describe: 'Dont\'t delete the input files after muxing',
-            default: cfg.noCleanUp || false,
+            default: parseDefault('noCleanUp', false),
             type: 'boolean'
         })
     // help
