@@ -76,7 +76,9 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
 
     args.push(`-o "${output}"`);
     args.push(
-        '--global-tags "./tag.xml"',
+        '--no-date',
+        '--disable-track-statistics-tags',
+        '--engage no_variable_data',
     );
 
     for (let vid of onlyVid) {
@@ -85,7 +87,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--video-tracks 0',
                 '--no-audio'
             );
-            args.push('--track-name 0:[Funimation]');
+            args.push('--track-name 0:[Uncut]');
             hasVideo = true;
             args.push(`"${vid.path}"`);
         }
@@ -97,9 +99,9 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--video-tracks 0',
                 '--audio-tracks 1'
             );
-            args.push('--track-name 0:[Funimation]');
+            args.push('--track-name 0:[Uncut]');
             let trackName = subDict[vid.lang];
-            args.push('--track-name',`1:"${trackName}"`);
+            args.push('--track-name', `1:"${trackName}"`);
             args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
             hasVideo = true;
         } else {
@@ -108,7 +110,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--audio-tracks 1'
             );
             let trackName = subDict[vid.lang];
-            args.push('--track-name',`1:"${trackName}"`);
+            args.push('--track-name', `1:"${trackName}"`);
             args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
         }
         args.push(`"${vid.path}"`);
@@ -116,7 +118,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
 
     for (let aud of onlyAudio) {
         let trackName = subDict[aud.lang];
-        args.push('--track-name',`0:"${trackName}"`);
+        args.push('--track-name', `0:"${trackName}"`);
         args.push(`--language 0:${getLanguageCode(aud.lang, aud.lang)}`);
         args.push(
             '--no-video',
@@ -125,13 +127,13 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
         args.push(`"${aud.path}"`);
     }
 
-    if(subtitles.length > 0){
+    if (subtitles.length > 0) {
         for (let subObj of subtitles) {
-    let trackName = subDict[subObj.language];
-    args.push('--track-name',`0:"${trackName}"`);
-    args.push('--language',`0:${getLanguageCode(subObj.language)}`);
-    args.push(`"${subObj.file}"`);
-}
+            let trackName = subDict[subObj.language];
+            args.push('--track-name', `0:"${trackName}"`);
+            args.push('--language', `0:${getLanguageCode(subObj.language)}`);
+            args.push(`"${subObj.file}"`);
+        }
     } else {
         args.push(
             '--no-subtitles',
