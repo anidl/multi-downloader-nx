@@ -9,8 +9,8 @@ const availableFilenameVars = [
     'height'
 ];
 
-const subLang = [ 'enUS', 'esLA', 'ptBR' ];
-const dubLang = [ 'enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP' ];
+const subLang = ['enUS', 'esLA', 'ptBR'];
+const dubLang = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
 
 const appArgv = (cfg) => {
     // init
@@ -25,24 +25,24 @@ const appArgv = (cfg) => {
         'duplicate-arguments-array': true,
         'camel-case-expansion': false
     })
-    // main
+        // main
         .wrap(Math.min(120)) // yargs.terminalWidth()
         .help(false).version(false)
         .usage('Usage: $0 [options]')
-    // auth
+        // auth
         .option('auth', {
             group: 'Authentication:',
             describe: 'Enter authentication mode',
             type: 'boolean',
         })
-    // search
+        // search
         .option('search', {
             alias: 'f',
             group: 'Search:',
             describe: 'Search show ids',
             type: 'string',
         })
-    // select show and eps
+        // select show and eps
         .option('s', {
             group: 'Downloading:',
             describe: 'Sets the show id',
@@ -65,7 +65,7 @@ const appArgv = (cfg) => {
             type: 'number',
             default: parseDefault('partsize', 10)
         })
-    // quality
+        // quality
         .option('q', {
             group: 'Downloading:',
             describe: 'Select video layer (0 is max)',
@@ -73,14 +73,14 @@ const appArgv = (cfg) => {
             default: parseDefault('videoLayer', 7),
             type: 'number',
         })
-    // alt listing
+        // alt listing
         .option('alt', {
             group: 'Downloading:',
             describe: 'Alternative episode listing (if available)',
             default: parseDefault('altList', false),
             type: 'boolean',
         })
-    // switch to subs
+        // switch to subs
         .option('dub', {
             group: 'Downloading:',
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
@@ -113,14 +113,14 @@ const appArgv = (cfg) => {
             default: false,
             type: 'boolean'
         })
-    // simulcast
+        // simulcast
         .option('simul', {
             group: 'Downloading:',
             describe: 'Force downloading simulcast ver. instead of uncut ver. (if uncut ver. available)',
             default: parseDefault('forceSimul', false),
             type: 'boolean',
         })
-    // server number
+        // server number
         .option('x', {
             alias: 'server',
             group: 'Downloading:',
@@ -129,7 +129,7 @@ const appArgv = (cfg) => {
             default: parseDefault('nServer', 1),
             type: 'number',
         })
-    // skip
+        // skip
         .option('noaudio', {
             group: 'Downloading:',
             describe: 'Skip downloading audio',
@@ -147,7 +147,7 @@ const appArgv = (cfg) => {
             type: 'boolean',
             default: false
         })
-    // proxy
+        // proxy
         .option('proxy', {
             group: 'Proxy:',
             describe: 'Set http(s)/socks proxy WHATWG url',
@@ -167,7 +167,7 @@ const appArgv = (cfg) => {
             hidden: true,
             type: 'boolean',
         })
-    // muxing
+        // muxing
         .option('skipmux', {
             group: 'Muxing:',
             describe: 'Skip muxing video and subtitles',
@@ -179,7 +179,7 @@ const appArgv = (cfg) => {
             default: parseDefault('mp4mux', false),
             type: 'boolean'
         })
-    // filenaming
+        // filenaming
         .option('fileName', {
             group: 'Filename Template:',
             describe: `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
@@ -194,28 +194,28 @@ const appArgv = (cfg) => {
             type: 'number',
             default: parseDefault('numbers', 2)
         })
-    // util
+        // util
         .option('nocleanup', {
             group: 'Utilities:',
             describe: 'Dont\'t delete the input files after muxing',
             default: parseDefault('noCleanUp', false),
             type: 'boolean'
         })
-    // help
+        // help
         .option('help', {
             alias: 'h',
             group: 'Help:',
             describe: 'Show this help',
             type: 'boolean'
         })
-    // usage
+        // usage
         .example([
             ['$0 --search "My Hero"', 'search "My Hero" in title'],
             ['$0 -s 124389 -e 1,2,3', 'download episodes 1-3 from show with id 124389'],
             ['$0 -s 124389 -e 1-3,2-7,s1-2', 'download episodes 1-7 and "S"-episodes 1-2 from show with id 124389'],
         ])
-    
-    // --
+
+        // --
         .argv;
     // Resolve unwanted arrays
     if (argv.allDubs)
