@@ -87,7 +87,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--video-tracks 0',
                 '--no-audio'
             );
-            args.push('--track-name 0:[Uncut]');
+            args.push('--track-name 0:[Funimation]');
             hasVideo = true;
             args.push(`"${vid.path}"`);
         }
@@ -99,7 +99,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--video-tracks 0',
                 '--audio-tracks 1'
             );
-            args.push('--track-name 0:[Uncut]');
+            args.push('--track-name 0:[Funimation]');
             let trackName = subDict[vid.lang];
             args.push('--track-name', `1:"${trackName}"`);
             args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
