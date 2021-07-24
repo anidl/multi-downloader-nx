@@ -359,7 +359,7 @@ async function getEpisode(fnSlug){
     };
     
     // select
-    stDlPath = []
+    stDlPath = [];
     for(let m of media){
         let selected = false;
         if(m.id > 0 && m.type == 'Non-Encrypted'){
