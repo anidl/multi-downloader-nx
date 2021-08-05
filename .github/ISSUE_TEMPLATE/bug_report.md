@@ -1,9 +1,9 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Found a Bug? That report it here :)
 title: "[BUG] "
 labels: bug
-assignees: ''
+assignees: izu-co
 
 ---
 
@@ -14,5 +14,6 @@ assignees: ''
 Script version: 
 Show ID: 
 Episode ID: 
+Command used:
 
 ** Additional Info: **
