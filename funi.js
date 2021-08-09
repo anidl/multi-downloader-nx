@@ -20,16 +20,16 @@ const crypto = require('crypto');
 const got = require('got');
 
 // extra
-const appYargs     = require('./modules/module.app-args');
-const getYamlCfg   = require('./modules/module.cfg-loader');
-const getData      = require('./modules/module.getdata.js');
-const vttConvert   = require('./modules/module.vttconvert');
+const appYargs = require('./modules/module.app-args');
+const getYamlCfg = require('./modules/module.cfg-loader');
+const getData = require('./modules/module.getdata.js');
+const vttConvert = require('./modules/module.vttconvert');
 // new-cfg
 const workingDir = process.pkg ? path.dirname(process.execPath) : __dirname;
 const binCfgFile = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile = path.join(workingDir, 'config', 'dir-path');
 const cliCfgFile = path.join(workingDir, 'config', 'cli-defaults');
-const tokenFile  = path.join(workingDir, 'config', 'token');
+const tokenFile = path.join(workingDir, 'config', 'token');
 // params
 let cfg = {
     bin: getYamlCfg(binCfgFile),
@@ -38,19 +38,19 @@ let cfg = {
 };
 
 // make sure cfg params aren't null
-if (cfg.bin === null){
+if (cfg.bin === null) {
     cfg.bin = {};
     console.log('[WARN] bin-path.yml is empty or does not exist!\n');
 }
 
-if (cfg.dir === null){
+if (cfg.dir === null) {
     cfg.dir = {};
     console.log('[WARN] dir-path.yml is empty or does not exist!\n');
 }
 
 if (!Object.prototype.hasOwnProperty.call(cfg.dir, 'content')) cfg.dir.content = './videos/';
 
-if (cfg.cli === null){
+if (cfg.cli === null) {
     cfg.cli = {};
     console.log('[WARN] cli-defaults.yml is empty or does not exist!\n');
 }
@@ -75,7 +75,7 @@ else if (token.token === null) token = false;
 else token = token.token;
 
 // info if token not set
-if(!token){
+if (!token) {
     console.log('[INFO] Token not set!\n');
 }
 
@@ -91,10 +91,10 @@ module.exports = {
 const merger = require('./modules/merger');
 
 // check page
-if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
+if (!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0) {
     argv.p = parseInt(argv.p, 10);
 }
-else{
+else {
     argv.p = 1;
 }
 
@@ -108,39 +108,39 @@ let title = '',
     stDlPath = [];
 
 // select mode
-if(argv.auth){
+if (argv.auth) {
     auth();
 }
-else if(argv.search){
+else if (argv.search) {
     searchShow();
 }
-else if(argv.s && !isNaN(parseInt(argv.s, 10)) && parseInt(argv.s, 10) > 0){
+else if (argv.s && !isNaN(parseInt(argv.s, 10)) && parseInt(argv.s, 10) > 0) {
     getShow();
 }
-else{
+else {
     appYargs.showHelp();
     process.exit();
 }
 
 // auth
-async function auth(){
+async function auth() {
     let authOpts = {};
     authOpts.user = await shlp.question('[Q] LOGIN/EMAIL');
     authOpts.pass = await shlp.question('[Q] PASSWORD   ');
-    let authData =  await getData({
+    let authData = await getData({
         baseUrl: api_host,
         url: '/auth/login/',
         useProxy: true,
         auth: authOpts,
         debug: argv.debug,
     });
-    if(authData.ok){
+    if (authData.ok) {
         authData = JSON.parse(authData.res.body);
-        if(authData.token){
-            console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0,8),'*'.repeat(32));
-            fs.writeFileSync(tokenFile + '.yml', yaml.stringify({'token': authData.token}));
+        if (authData.token) {
+            console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0, 8), '*'.repeat(32));
+            fs.writeFileSync(tokenFile + '.yml', yaml.stringify({ 'token': authData.token }));
         }
-        else if(authData.error){
+        else if (authData.error) {
             console.log('[ERROR]%s\n', authData.error);
             process.exit(1);
         }
@@ -148,8 +148,8 @@ async function auth(){
 }
 
 // search show
-async function searchShow(){
-    let qs = {unique: true, limit: 100, q: argv.search, offset: (argv.p-1)*1000 };
+async function searchShow() {
+    let qs = { unique: true, limit: 100, q: argv.search, offset: (argv.p - 1) * 1000 };
     let searchData = await getData({
         baseUrl: api_host,
         url: '/source/funimation/search/auto/',
@@ -159,24 +159,24 @@ async function searchShow(){
         useProxy: true,
         debug: argv.debug,
     });
-    if(!searchData.ok){return;}
+    if (!searchData.ok) { return; }
     searchData = JSON.parse(searchData.res.body);
-    if(searchData.detail){
+    if (searchData.detail) {
         console.log(`[ERROR] ${searchData.detail}`);
         return;
     }
-    if(searchData.items && searchData.items.hits){
+    if (searchData.items && searchData.items.hits) {
         let shows = searchData.items.hits;
         console.log('[INFO] Search Results:');
-        for(let ssn in shows){
-            console.log(`[#${shows[ssn].id}] ${shows[ssn].title}` + (shows[ssn].tx_date?` (${shows[ssn].tx_date})`:''));
+        for (let ssn in shows) {
+            console.log(`[#${shows[ssn].id}] ${shows[ssn].title}` + (shows[ssn].tx_date ? ` (${shows[ssn].tx_date})` : ''));
         }
     }
-    console.log('[INFO] Total shows found: %s\n',searchData.count);
+    console.log('[INFO] Total shows found: %s\n', searchData.count);
 }
 
 // get show
-async function getShow(){
+async function getShow() {
     // show main data
     let showData = await getData({
         baseUrl: api_host,
@@ -187,21 +187,21 @@ async function getShow(){
         debug: argv.debug,
     });
     // check errors
-    if(!showData.ok){return;}
+    if (!showData.ok) { return; }
     showData = JSON.parse(showData.res.body);
-    if(showData.status){
+    if (showData.status) {
         console.log('[ERROR] Error #%d: %s\n', showData.status, showData.data.errors[0].detail);
         process.exit(1);
     }
-    else if(!showData.items || showData.items.length<1){
+    else if (!showData.items || showData.items.length < 1) {
         console.log('[ERROR] Show not found\n');
         process.exit(0);
     }
     showData = showData.items[0];
-    console.log('[#%s] %s (%s)',showData.id,showData.title,showData.releaseYear);
+    console.log('[#%s] %s (%s)', showData.id, showData.title, showData.releaseYear);
     // show episodes
-    let qs = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: parseInt(argv.s,10) };
-    if(argv.alt){ qs.language = 'English'; }
+    let qs = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: parseInt(argv.s, 10) };
+    if (argv.alt) { qs.language = 'English'; }
     let episodesData = await getData({
         baseUrl: api_host,
         url: '/funimation/episodes/',
@@ -211,90 +211,90 @@ async function getShow(){
         useProxy: true,
         debug: argv.debug,
     });
-    if(!episodesData.ok){return;}
+    if (!episodesData.ok) { return; }
     let eps = JSON.parse(episodesData.res.body).items, fnSlug = [], is_selected = false;
     argv.e = typeof argv.e == 'number' || typeof argv.e == 'string' ? argv.e.toString() : '';
     argv.e = argv.e.match(',') ? argv.e.split(',') : [argv.e];
     let epSelList = argv.e, epSelRanges = [], epSelEps = [];
-    epSelList = epSelList.map((e)=>{
-        if(e.match('-')){
+    epSelList = epSelList.map((e) => {
+        if (e.match('-')) {
             e = e.split('-');
-            if( e[0].match(/^(?:[A-Z]+|)\d+$/i) && e[1].match(/^\d+$/) ){
-                e[0] = e[0].replace(/^(?:([A-Z]+)|)(0+)/i,'$1');
+            if (e[0].match(/^(?:[A-Z]+|)\d+$/i) && e[1].match(/^\d+$/)) {
+                e[0] = e[0].replace(/^(?:([A-Z]+)|)(0+)/i, '$1');
                 let letter = e[0].match(/^([A-Z]+)\d+$/i) ? e[0].match(/^([A-Z]+)\d+$/i)[1].toUpperCase() : '';
-                e[0] = e[0].replace(/^[A-Z]+(\d+)$/i,'$1');
+                e[0] = e[0].replace(/^[A-Z]+(\d+)$/i, '$1');
                 e[0] = parseInt(e[0]);
                 e[1] = parseInt(e[1]);
-                if(e[0] < e[1]){
-                    for(let i=e[0];i<e[1]+1;i++){
-                        epSelRanges.push(letter+i);
+                if (e[0] < e[1]) {
+                    for (let i = e[0]; i < e[1] + 1; i++) {
+                        epSelRanges.push(letter + i);
                     }
                     return '';
                 }
-                else{
-                    return (letter+e[0]);
+                else {
+                    return (letter + e[0]);
                 }
             }
-            else{
+            else {
                 return '';
             }
         }
-        else if(e.match(/^(?:[A-Z]+|)\d+$/i)){
-            return e.replace(/^(?:([A-Z]+)|)(0+)/i,'$1').toUpperCase();
+        else if (e.match(/^(?:[A-Z]+|)\d+$/i)) {
+            return e.replace(/^(?:([A-Z]+)|)(0+)/i, '$1').toUpperCase();
         }
-        else{
+        else {
             return '';
         }
     });
     epSelList = [...new Set(epSelList.concat(epSelRanges))];
     // parse episodes list
-    for(let e in eps){
+    for (let e in eps) {
         let showStrId = eps[e].ids.externalShowId;
-        let epStrId = eps[e].ids.externalEpisodeId.replace(new RegExp('^'+showStrId),'');
+        let epStrId = eps[e].ids.externalEpisodeId.replace(new RegExp('^' + showStrId), '');
         // select
         if (argv.all) {
-            fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
+            fnSlug.push({ title: eps[e].item.titleSlug, episode: eps[e].item.episodeSlug });
             epSelEps.push(epStrId);
             is_selected = true;
         }
-        else if(epSelList.includes(epStrId.replace(/^(?:([A-Z]+)|)(0+)/,'$1'))){
-            fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
+        else if (epSelList.includes(epStrId.replace(/^(?:([A-Z]+)|)(0+)/, '$1'))) {
+            fnSlug.push({ title: eps[e].item.titleSlug, episode: eps[e].item.episodeSlug });
             epSelEps.push(epStrId);
             is_selected = true;
         }
-        else{
+        else {
             is_selected = false;
         }
         // console vars
-        let tx_snum = eps[e].item.seasonNum==1?'':` S${eps[e].item.seasonNum}`;
+        let tx_snum = eps[e].item.seasonNum == 1 ? '' : ` S${eps[e].item.seasonNum}`;
         let tx_type = eps[e].mediaCategory != 'episode' ? eps[e].mediaCategory : '';
         let tx_enum = eps[e].item.episodeNum !== '' ?
-            `#${(eps[e].item.episodeNum < 10 ? '0' : '')+eps[e].item.episodeNum}` : '#'+eps[e].item.episodeId;
+            `#${(eps[e].item.episodeNum < 10 ? '0' : '') + eps[e].item.episodeNum}` : '#' + eps[e].item.episodeId;
         let qua_str = eps[e].quality.height ? eps[e].quality.quality + eps[e].quality.height : 'UNK';
         let aud_str = eps[e].audio.length > 0 ? `, ${eps[e].audio.join(', ')}` : '';
         let rtm_str = eps[e].item.runtime !== '' ? eps[e].item.runtime : '??:??';
         // console string
         let episodeIdStr = epStrId;
-        let conOut  = `[${episodeIdStr}] `;
-        conOut += `${eps[e].item.titleName+tx_snum} - ${tx_type+tx_enum} ${eps[e].item.episodeName} `;
-        conOut += `(${rtm_str}) [${qua_str+aud_str}]`;
+        let conOut = `[${episodeIdStr}] `;
+        conOut += `${eps[e].item.titleName + tx_snum} - ${tx_type + tx_enum} ${eps[e].item.episodeName} `;
+        conOut += `(${rtm_str}) [${qua_str + aud_str}]`;
         conOut += is_selected ? ' (selected)' : '';
-        conOut += eps.length-1 == e ? '\n' : '';
+        conOut += eps.length - 1 == e ? '\n' : '';
         console.log(conOut);
     }
-    if(fnSlug.length<1){
+    if (fnSlug.length < 1) {
         console.log('[INFO] Episodes not selected!\n');
         process.exit();
     }
-    else{
-        console.log('[INFO] Selected Episodes: %s\n',epSelEps.join(', '));
-        for(let fnEp=0;fnEp<fnSlug.length;fnEp++){
+    else {
+        console.log('[INFO] Selected Episodes: %s\n', epSelEps.join(', '));
+        for (let fnEp = 0; fnEp < fnSlug.length; fnEp++) {
             await getEpisode(fnSlug[fnEp]);
         }
     }
 }
 
-async function getEpisode(fnSlug){
+async function getEpisode(fnSlug) {
     let episodeData = await getData({
         baseUrl: api_host,
         url: `/source/catalog/episode/${fnSlug.title}/${fnSlug.episode}/`,
@@ -303,23 +303,23 @@ async function getEpisode(fnSlug){
         useProxy: true,
         debug: argv.debug,
     });
-    if(!episodeData.ok){return;}
+    if (!episodeData.ok) { return; }
     let ep = JSON.parse(episodeData.res.body).items[0], streamIds = [];
     // build fn
     showTitle = ep.parent.title;
     title = ep.title;
     season = parseInt(ep.parent.seasonNumber);
-    if(ep.mediaCategory != 'Episode'){
-        ep.number = ep.number !== '' ? ep.mediaCategory+ep.number : ep.mediaCategory+'#'+ep.id;
+    if (ep.mediaCategory != 'Episode') {
+        ep.number = ep.number !== '' ? ep.mediaCategory + ep.number : ep.mediaCategory + '#' + ep.id;
     }
     fnEpNum = isNaN(parseInt(ep.number)) ? ep.number : parseInt(ep.number);
-    
+
     // is uncut
     let uncut = {
         Japanese: false,
         English: false
     };
-    
+
     // end
     console.log(
         '[INFO] %s - S%sE%s - %s',
@@ -328,13 +328,13 @@ async function getEpisode(fnSlug){
         (ep.number ? ep.number : '?'),
         ep.title
     );
-    
+
     console.log('[INFO] Available streams (Non-Encrypted):');
-    
+
     // map medias
-    let media = ep.media.map(function(m){
-        if(m.mediaType == 'experience'){
-            if(m.version.match(/uncut/i)){
+    let media = ep.media.map(function (m) {
+        if (m.mediaType == 'experience') {
+            if (m.version.match(/uncut/i)) {
                 uncut[m.language] = true;
             }
             return {
@@ -345,11 +345,11 @@ async function getEpisode(fnSlug){
                 subtitles: getSubsUrl(m.mediaChildren),
             };
         }
-        else{
+        else {
             return { id: 0, type: '' };
         }
     });
-    
+
     const dubType = {
         'enUS': 'English',
         'esLA': 'Spanish (Latin Am)',
@@ -357,19 +357,19 @@ async function getEpisode(fnSlug){
         'zhMN': 'Chinese (Mandarin, PRC)',
         'jaJP': 'Japanese'
     };
-    
+
     // select
     stDlPath = [];
-    for(let m of media){
+    for (let m of media) {
         let selected = false;
-        if(m.id > 0 && m.type == 'Non-Encrypted'){
+        if (m.id > 0 && m.type == 'Non-Encrypted') {
             let dub_type = m.language;
             let localSubs = [];
-            let selUncut = !argv.simul && uncut[dub_type] && m.version.match(/uncut/i) 
-                ? true 
+            let selUncut = !argv.simul && uncut[dub_type] && m.version.match(/uncut/i)
+                ? true
                 : (!uncut[dub_type] || argv.simul && m.version.match(/simulcast/i) ? true : false);
             for (let curDub of argv.dub) {
-                if(dub_type == dubType[curDub] && selUncut){
+                if (dub_type == dubType[curDub] && selUncut) {
                     streamIds.push({
                         id: m.id,
                         lang: merger.getLanguageCode(curDub, curDub.slice(0, -2))
@@ -379,9 +379,7 @@ async function getEpisode(fnSlug){
                     selected = true;
                 }
             }
-            console.log(`[#${m.id}] ${dub_type} [${m.version}]${(selected?' (selected)':'')}${
-                localSubs && localSubs.length > 0 && selected ? ` (using ${localSubs.map(a => `'${a.langName}'`).join(', ')} for subtitles)` : ''
-            }`);
+            console.log(`[#${m.id}] ${dub_type} [${m.version}]${(selected ? ' (selected)' : '')}${localSubs && localSubs.length > 0 && selected ? ` (using ${localSubs.map(a => `'${a.langName}'`).join(', ')} for subtitles)` : ''}`);
         }
     }
 
@@ -394,11 +392,11 @@ async function getEpisode(fnSlug){
             return true;
         }
     });
-    if(streamIds.length <1){
+    if (streamIds.length < 1) {
         console.log('[ERROR] Track not selected\n');
         return;
     }
-    else{
+    else {
         tsDlPath = [];
         for (let streamId of streamIds) {
             let streamData = await getData({
@@ -410,15 +408,15 @@ async function getEpisode(fnSlug){
                 useProxy: true,
                 debug: argv.debug,
             });
-            if(!streamData.ok){return;}
+            if (!streamData.ok) { return; }
             streamData = JSON.parse(streamData.res.body);
-            if(streamData.errors){
-                console.log('[ERROR] Error #%s: %s\n',streamData.errors[0].code,streamData.errors[0].detail);
+            if (streamData.errors) {
+                console.log('[ERROR] Error #%s: %s\n', streamData.errors[0].code, streamData.errors[0].detail);
                 return;
             }
-            else{
-                for(let u in streamData.items){
-                    if(streamData.items[u].videoType == 'm3u8'){
+            else {
+                for (let u in streamData.items) {
+                    if (streamData.items[u].videoType == 'm3u8') {
                         tsDlPath.push({
                             path: streamData.items[u].src,
                             lang: streamId.lang
@@ -428,18 +426,18 @@ async function getEpisode(fnSlug){
                 }
             }
         }
-        if(tsDlPath.length < 1){
+        if (tsDlPath.length < 1) {
             console.log('[ERROR] Unknown error\n');
             return;
         }
-        else{
+        else {
             await downloadStreams();
         }
     }
 }
 
-function getSubsUrl(m){
-    if(argv.nosubs && !argv.sub){
+function getSubsUrl(m) {
+    if (argv.nosubs && !argv.sub) {
         return [];
     }
 
@@ -454,16 +452,16 @@ function getSubsUrl(m){
     let subLangAvailable = m.some(a => subLangs.some(subLang => a.ext == 'vtt' && a.language === subType[subLang]));
 
     if (!subLangAvailable) {
-        subLangs = [ 'enUS' ];
+        subLangs = ['enUS'];
     }
-    
+
     let found = [];
 
-    for(let i in m){
+    for (let i in m) {
         let fpp = m[i].filePath.split('.');
-        let fpe = fpp[fpp.length-1];
+        let fpe = fpp[fpp.length - 1];
         for (let lang of subLangs) {
-            if(fpe == 'vtt' && m[i].language === subType[lang]) {
+            if (fpe == 'vtt' && m[i].language === subType[lang]) {
                 found.push({
                     path: m[i].filePath,
                     ext: `.${lang}`,
@@ -477,13 +475,13 @@ function getSubsUrl(m){
     return found;
 }
 
-async function downloadStreams(){
-    
+async function downloadStreams() {
+
     // req playlist
 
     let purvideo = [];
     let puraudio = [];
-    let audioAndVideo = []; 
+    let audioAndVideo = [];
     let outName;
     for (let streamPath of tsDlPath) {
         let plQualityReq = await getData({
@@ -491,29 +489,29 @@ async function downloadStreams(){
             useProxy: (argv.ssp ? false : true),
             debug: argv.debug,
         });
-        if(!plQualityReq.ok){return;}
-        
+        if (!plQualityReq.ok) { return; }
+
         let plQualityLinkList = m3u8(plQualityReq.res.body);
-        
+
         let mainServersList = [
             'vmfst-api.prd.funimationsvc.com',
             'd132fumi6di1wa.cloudfront.net',
             'funiprod.akamaized.net',
         ];
-        
+
         let plServerList = [],
-            plStreams    = {},
-            plLayersStr  = [],
-            plLayersRes  = {},
-            plMaxLayer   = 1,
-            plNewIds     = 1,
-            plAud        = { uri: '' };
-        
+            plStreams = {},
+            plLayersStr = [],
+            plLayersRes = {},
+            plMaxLayer = 1,
+            plNewIds = 1,
+            plAud = { uri: '' };
+
         // new uris
         let vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
-        if(plQualityLinkList.playlists[0].uri.match(vplReg)){
+        if (plQualityLinkList.playlists[0].uri.match(vplReg)) {
             let audioKey = Object.keys(plQualityLinkList.mediaGroups.AUDIO).pop();
-            if(plQualityLinkList.mediaGroups.AUDIO[audioKey]){
+            if (plQualityLinkList.mediaGroups.AUDIO[audioKey]) {
                 let audioData = plQualityLinkList.mediaGroups.AUDIO[audioKey],
                     audioEl = Object.keys(audioData);
                 audioData = audioData[audioEl[0]];
@@ -522,7 +520,7 @@ async function downloadStreams(){
             plQualityLinkList.playlists.sort((a, b) => {
                 let av = parseInt(a.uri.match(vplReg)[3]);
                 let bv = parseInt(b.uri.match(vplReg)[3]);
-                if(av  > bv){
+                if (av > bv) {
                     return 1;
                 }
                 if (av < bv) {
@@ -531,44 +529,44 @@ async function downloadStreams(){
                 return 0;
             });
         }
-        
-        for(let s of plQualityLinkList.playlists){
-            if(s.uri.match(/_Layer(\d+)\.m3u8/) || s.uri.match(vplReg)){
+
+        for (let s of plQualityLinkList.playlists) {
+            if (s.uri.match(/_Layer(\d+)\.m3u8/) || s.uri.match(vplReg)) {
                 // set layer and max layer
                 let plLayerId = 0;
-                if(s.uri.match(/_Layer(\d+)\.m3u8/)){
+                if (s.uri.match(/_Layer(\d+)\.m3u8/)) {
                     plLayerId = parseInt(s.uri.match(/_Layer(\d+)\.m3u8/)[1]);
                 }
-                else{
+                else {
                     plLayerId = plNewIds, plNewIds++;
                 }
-                plMaxLayer    = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
+                plMaxLayer = plMaxLayer < plLayerId ? plLayerId : plMaxLayer;
                 // set urls and servers
-                let plUrlDl  = s.uri;
+                let plUrlDl = s.uri;
                 let plServer = new URL(plUrlDl).host;
-                if(!plServerList.includes(plServer)){
+                if (!plServerList.includes(plServer)) {
                     plServerList.push(plServer);
                 }
-                if(!Object.keys(plStreams).includes(plServer)){
+                if (!Object.keys(plStreams).includes(plServer)) {
                     plStreams[plServer] = {};
                 }
-                if(plStreams[plServer][plLayerId] && plStreams[plServer][plLayerId] != plUrlDl){
+                if (plStreams[plServer][plLayerId] && plStreams[plServer][plLayerId] != plUrlDl) {
                     console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
                 }
-                else{
+                else {
                     plStreams[plServer][plLayerId] = plUrlDl;
                 }
                 // set plLayersStr
                 let plResolution = s.attributes.RESOLUTION;
                 plLayersRes[plLayerId] = plResolution;
-                let plBandwidth  = Math.round(s.attributes.BANDWIDTH/1024);
-                if(plLayerId<10){
-                    plLayerId = plLayerId.toString().padStart(2,' ');
+                let plBandwidth = Math.round(s.attributes.BANDWIDTH / 1024);
+                if (plLayerId < 10) {
+                    plLayerId = plLayerId.toString().padStart(2, ' ');
                 }
-                let qualityStrAdd   = `${plLayerId}: ${plResolution.width}x${plResolution.height} (${plBandwidth}KiB/s)`;
-                let qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g,'\\$1'),'m');
+                let qualityStrAdd = `${plLayerId}: ${plResolution.width}x${plResolution.height} (${plBandwidth}KiB/s)`;
+                let qualityStrRegx = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
                 let qualityStrMatch = !plLayersStr.join('\r\n').match(qualityStrRegx);
-                if(qualityStrMatch){
+                if (qualityStrMatch) {
                     plLayersStr.push(qualityStrAdd);
                 }
             }
@@ -577,48 +575,48 @@ async function downloadStreams(){
             }
         }
 
-        for(let s of mainServersList){
-            if(plServerList.includes(s)){
+        for (let s of mainServersList) {
+            if (plServerList.includes(s)) {
                 plServerList.splice(plServerList.indexOf(s), 1);
                 plServerList.unshift(s);
                 break;
             }
         }
-        
-        if(typeof argv.q == 'object' && argv.q.length > 1){
-            argv.q = argv.q[argv.q.length-1];
+
+        if (typeof argv.q == 'object' && argv.q.length > 1) {
+            argv.q = argv.q[argv.q.length - 1];
         }
-        
+
         argv.q = argv.q < 1 || argv.q > plMaxLayer ? plMaxLayer : argv.q;
-        
-        let plSelectedServer = plServerList[argv.x-1];
-        let plSelectedList   = plStreams[plSelectedServer];
-        let videoUrl = argv.x < plServerList.length+1 && plSelectedList[argv.q] ? plSelectedList[argv.q] : '';
-        
+
+        let plSelectedServer = plServerList[argv.x - 1];
+        let plSelectedList = plStreams[plSelectedServer];
+        let videoUrl = argv.x < plServerList.length + 1 && plSelectedList[argv.q] ? plSelectedList[argv.q] : '';
+
         plLayersStr.sort();
         console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
         console.log(`[INFO] Available qualities:\n\t${plLayersStr.join('\n\t')}`);
-        
-        if(videoUrl != ''){
+
+        if (videoUrl != '') {
             console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q].width}x${plLayersRes[argv.q].height}) @ ${plSelectedServer}`);
-            console.log('[INFO] Stream URL:',videoUrl);
-    
+            console.log('[INFO] Stream URL:', videoUrl);
+
             fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
             outName = fnOutput;
             console.log(`[INFO] Output filename: ${fnOutput}.ts`);
         }
-        else if(argv.x > plServerList.length){
+        else if (argv.x > plServerList.length) {
             console.log('[ERROR] Server not selected!\n');
             return;
         }
-        else{
+        else {
             console.log('[ERROR] Layer not selected!\n');
             return;
         }
-        
+
         let dlFailed = false;
         let dlFailedA = false;
-        
+
         video: if (!argv.novids) {
             if (plAud.uri && (purvideo.length > 0 || audioAndVideo.length > 0)) {
                 break video;
@@ -632,10 +630,10 @@ async function downloadStreams(){
                 debug: argv.debug,
             });
             if (!reqVideo.ok) { break video; }
-            
+
             let chunkList = m3u8(reqVideo.res.body);
-            
-            let tsFile = path.join(cfg.dir.content, `${fnOutput}.video${(plAud.uri ? '' : '.' + streamPath.lang )}`);
+
+            let tsFile = path.join(cfg.dir.content, `${fnOutput}.video${(plAud.uri ? '' : '.' + streamPath.lang)}`);
             dlFailed = !await downloadFile(tsFile, chunkList);
             if (!dlFailed) {
                 if (plAud.uri) {
@@ -651,7 +649,7 @@ async function downloadStreams(){
                 }
             }
         }
-        else{
+        else {
             console.log('[INFO] Skip video downloading...\n');
         }
         audio: if (!argv.noaudio && plAud.uri) {
@@ -664,11 +662,11 @@ async function downloadStreams(){
                 debug: argv.debug,
             });
             if (!reqAudio.ok) { return; }
-            
+
             let chunkListA = m3u8(reqAudio.res.body);
-    
+
             let tsFileA = path.join(cfg.dir.content, fnOutput + `.audio.${plAud.language}`);
-    
+
             dlFailedA = !await downloadFile(tsFileA, chunkListA);
             if (!dlFailedA)
                 puraudio.push({
@@ -678,13 +676,13 @@ async function downloadStreams(){
 
         }
     }
-    
+
     // add subs
     let subsExt = !argv.mp4 || argv.mp4 && argv.ass ? '.ass' : '.srt';
     let addSubs = true;
 
     // download subtitles
-    if(stDlPath.length > 0){
+    if (stDlPath.length > 0) {
         console.log('[INFO] Downloading subtitles...');
         for (let subObject of stDlPath) {
             let subsSrc = await getData({
@@ -692,12 +690,12 @@ async function downloadStreams(){
                 useProxy: true,
                 debug: argv.debug,
             });
-            if(subsSrc.ok){
+            if (subsSrc.ok) {
                 let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
-                subObject.file =  path.join(cfg.dir.content, `${fnOutput}.subtitle${subObject.ext}${subsExt}`);
+                subObject.file = path.join(cfg.dir.content, `${fnOutput}.subtitle${subObject.ext}${subsExt}`);
                 fs.writeFileSync(subObject.file, assData);
             }
-            else{
+            else {
                 console.log('[ERROR] Failed to download subtitles!');
                 addSubs = false;
                 break;
@@ -706,13 +704,13 @@ async function downloadStreams(){
         if (addSubs)
             console.log('[INFO] Subtitles downloaded!');
     }
-    
-    if((puraudio.length < 1 && audioAndVideo.length < 1) || (purvideo.length < 1 && audioAndVideo.length < 1)){
+
+    if ((puraudio.length < 1 && audioAndVideo.length < 1) || (purvideo.length < 1 && audioAndVideo.length < 1)) {
         console.log('\n[INFO] Unable to locate a video AND audio file\n');
         return;
     }
-    
-    if(argv.skipmux){
+
+    if (argv.skipmux) {
         console.log('[INFO] Skipping muxing...');
         return;
     }
@@ -720,41 +718,41 @@ async function downloadStreams(){
     // usage
     let usableMKVmerge = true;
     let usableFFmpeg = true;
-    
+
     // check exec path
     let mkvmergebinfile = await lookpath(path.join(cfg.bin.mkvmerge));
-    let ffmpegbinfile   = await lookpath(path.join(cfg.bin.ffmpeg));
+    let ffmpegbinfile = await lookpath(path.join(cfg.bin.ffmpeg));
 
     // check exec
-    if( !argv.mp4 && !mkvmergebinfile ){
+    if (!argv.mp4 && !mkvmergebinfile) {
         console.log('[WARN] MKVMerge not found, skip using this...');
         usableMKVmerge = false;
     }
-    if( !usableMKVmerge && !ffmpegbinfile || argv.mp4 && !ffmpegbinfile ){
+    if (!usableMKVmerge && !ffmpegbinfile || argv.mp4 && !ffmpegbinfile) {
         console.log('[WARN] FFmpeg not found, skip using this...');
         usableFFmpeg = false;
     }
-    if ( argv.novids ){
+    if (argv.novids) {
         console.log('[INFO] Video not downloaded. Skip muxing video.');
     }
 
-    if(!argv.mp4 && usableMKVmerge){
+    if (!argv.mp4 && usableMKVmerge) {
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandMkvMerge(audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
+        let command = merger.buildCommandMkvMerge(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
         shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command);
     }
-    else if(usableFFmpeg){
+    else if (usableFFmpeg) {
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandFFmpeg(audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
-        shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,command);
+        let command = merger.buildCommandFFmpeg(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
+        shlp.exec('ffmpeg', `"${ffmpegbinfile}"`, command);
     }
-    else{
+    else {
         console.log('\n[INFO] Done!\n');
         return;
     }
     if (argv.nocleanup)
         return;
-    
+
     audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path));
     stDlPath.forEach(subObject => fs.unlinkSync(subObject.file));
     console.log('\n[INFO] Done!\n');
@@ -784,7 +782,7 @@ async function downloadFile(filename, chunkList) {
     let start = Date.now();
 
     console.log(`[INFO] Started ${filename}.ts`);
-    for (let i = offset; i < chunkList.segments.length; i+=argv.partsize) {
+    for (let i = offset; i < chunkList.segments.length; i += argv.partsize) {
         let cur = [];
         for (let a = 0; a < Math.min(argv.partsize, chunkList.segments.length - i); a++) {
             cur.push(downloadPart(chunkList.segments[i + a], i + a, chunkList.segments.length)
@@ -807,7 +805,7 @@ async function downloadFile(filename, chunkList) {
             chunkList.segments.length, i + Math.min(argv.partsize, chunkList.segments.length - i),
             chunkList.segments.length);
     }
-    
+
     if (fs.existsSync(`${filename}.ts.resume`))
         fs.unlinkSync(`${filename}.ts.resume`);
 
@@ -818,25 +816,25 @@ async function downloadFile(filename, chunkList) {
 async function downloadPart(chunk, index) {
 
     let key = await generateCrypto(chunk, index);
-    
+
     let headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0'
     };
 
     if (chunk.byterange)
-        headers.Range = `bytes=${chunk.byterange.offset}-${chunk.byterange.offset+chunk.byterange.length-1}`;
+        headers.Range = `bytes=${chunk.byterange.offset}-${chunk.byterange.offset + chunk.byterange.length - 1}`;
 
     let res = (await got({
         url: chunk.uri,
         headers,
         responseType: 'buffer'
-    }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)));
+    }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code || error.message}`)));
 
     if (!res.body) { return new Error('Invalid State'); }
     try {
         let dec = key.update(res.body);
         dec = Buffer.concat([dec, key.final()]);
-        return { content: dec, index: index};
+        return { content: dec, index: index };
     } catch (e) { return e; }
 }
 
@@ -848,7 +846,7 @@ async function generateCrypto(chunk, index) {
             url: chunk.key.uri,
             responseType: 'buffer'
         });
-    
+
         if (!reqKey.ok) { console.log('[ERROR] Can\'t get key'); return; }
         key = reqKey.res.body;
         keys[chunk.key.uri] = key;
@@ -863,7 +861,7 @@ async function generateCrypto(chunk, index) {
 }
 
 /* Snacked from hls-download */
-function logDownloadInfo (dateStart, partsDL, partsTotal, partsDLRes, partsTotalRes) {
+function logDownloadInfo(dateStart, partsDL, partsTotal, partsDLRes, partsTotalRes) {
     const dateElapsed = Date.now() - dateStart;
     const percentFxd = (partsDL / partsTotal * 100).toFixed();
     const percent = percentFxd < 100 ? percentFxd : (partsTotal == partsDL ? 100 : 99);
