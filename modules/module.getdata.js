@@ -1,5 +1,6 @@
 const got = require('got');
 
+// Used for future updates
 // const argv = require('../funi').argv;
 // 
 // const lang = {
@@ -15,9 +16,6 @@ const got = require('got');
 
 // do req
 const getData = async (options) => {
-    // let regionHeaders = ((argv.region !== undefined) && false) ? {
-    // 'Accept-Language': lang[argv.region].langCode,
-    // } : {};
     let regionHeaders = {};
 
 
@@ -48,10 +46,6 @@ const getData = async (options) => {
         gOptions.headers['Accept-Encoding'] = 'gzip, deflate, br';
         gOptions.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0';
         gOptions.body = `username=${encodeURIComponent(options.auth.user)}&password=${encodeURIComponent(options.auth.pass)}`;
-        // if (argv.region !== undefined) {
-        // gOptions.headers["Territory"] = lang[argv.region].regionCode
-        // gOptions.headers["Accept-Language"] = `${lang[argv.region].langCode},en;q=0.5`
-        // }
     }
     if(options.useToken && options.token){
         gOptions.headers.Authorization = `Token ${options.token}`;
