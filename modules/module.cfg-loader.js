@@ -4,7 +4,7 @@ const existsFile = fs.existsSync;
 
 const loadYamlFile = (file) => {
     return yaml.parse(fs.readFileSync(file, 'utf8'));
-}
+};
 
 const loadYamlCfg = (file) => {
     if(existsFile(`${file}.user.yml`)){
@@ -21,6 +21,6 @@ const loadYamlCfg = (file) => {
         }
     }
     return {};
-}
+};
 
 module.exports = loadYamlCfg;

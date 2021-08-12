@@ -1,5 +1,7 @@
 ## Change Log
 
+This changelog is out of date and wont be continued. Please see the releases comments, or if not present the commit comments.
+
 ### 4.7.0 (unreleased)
 - Change subtitles parser from ttml to vtt
 - Improve help command
