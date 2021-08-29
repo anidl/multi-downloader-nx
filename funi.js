@@ -22,7 +22,6 @@ const got = require('got');
 // extra
 const appYargs = require('./modules/module.app-args');
 const getYamlCfg = require('./modules/module.cfg-loader');
-const getData = require('./modules/module.getdata.js');
 const vttConvert = require('./modules/module.vttconvert');
 // new-cfg
 const workingDir = process.pkg ? path.dirname(process.execPath) : __dirname;
@@ -86,8 +85,8 @@ module.exports = {
     cfg
 };
 
-// Import merger after argv has been exported
-
+// Import modules after argv has been exported
+const getData = require('./modules/module.getdata.js');
 const merger = require('./modules/merger');
 
 // check page

@@ -10,21 +10,21 @@ const buildsDir = './_builds';
 const nodeVer = 'node14-';
 
 // main
-(async function(){
+(async function () {
     const buildStr = `${pkg.name}-${pkg.version}`;
-    const acceptableBuilds = ['win64','linux64','macos64'];
+    const acceptableBuilds = ['win64', 'linux64', 'macos64'];
     const buildType = process.argv[2];
-    if(!acceptableBuilds.includes(buildType)){
+    if (!acceptableBuilds.includes(buildType)) {
         console.error('[ERROR] unknown build type!');
         process.exit(1);
     }
     await modulesCleanup('.');
-    if(!fs.existsSync(buildsDir)){
+    if (!fs.existsSync(buildsDir)) {
         fs.mkdirSync(buildsDir);
     }
     const buildFull = `${buildStr}-${buildType}`;
     const buildDir = `${buildsDir}/${buildFull}`;
-    if(fs.existsSync(buildDir)){
+    if (fs.existsSync(buildDir)) {
         fs.removeSync(buildDir);
     }
     fs.mkdirSync(buildDir);
@@ -37,7 +37,7 @@ const nodeVer = 'node14-';
     try {
         await exec(buildConfig);
     }
-    catch(e){
+    catch (e) {
         console.log(e);
         process.exit(1);
     }
@@ -52,14 +52,14 @@ const nodeVer = 'node14-';
     fs.copySync('./modules/NotoSans-Regular.ttf', `${buildDir}/NotoSans-Regular.ttf`);
     fs.copySync('./docs/', `${buildDir}/docs/`);
     fs.copySync('./LICENSE.md', `${buildDir}/docs/LICENSE.md`);
-    if(fs.existsSync(`${buildsDir}/${buildFull}.7z`)){
+    if (fs.existsSync(`${buildsDir}/${buildFull}.7z`)) {
         fs.removeSync(`${buildsDir}/${buildFull}.7z`);
     }
-    require('child_process').execSync(`7z a -t7z "${buildsDir}/${buildFull}.7z" "${buildDir}"`,{stdio:[0,1,2]});
+    require('child_process').execSync(`7z a -t7z "${buildsDir}/${buildFull}.7z" "${buildDir}"`, { stdio: [0, 1, 2] });
 }());
 
-function getTarget(bt){
-    switch(bt){
+function getTarget(bt) {
+    switch (bt) {
         case 'win64':
             return 'windows-x64';
         case 'linux64':

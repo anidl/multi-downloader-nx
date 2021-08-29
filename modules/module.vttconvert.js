@@ -35,7 +35,7 @@ function loadVtt(vttStr) {
 }
 
 // ass specific
-function convertToAss(vttStr, lang, fontSize){
+function convertToAss(vttStr, lang, fontSize) {
     let ass = [
         '\ufeff[Script Info]',
         `Title: ${lang}`,
@@ -47,21 +47,21 @@ function convertToAss(vttStr, lang, fontSize){
         '',
         '[V4+ Styles]',
         'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, '
-            + 'Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, '
-            + 'BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
+        + 'Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, '
+        + 'BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
         `Style: Main,Noto Sans,${fontSize},&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,2,10,10,10,1`,
         `Style: MainTop,Noto Sans,${fontSize},&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,8,10,10,10`,
         '',
         '[Events]',
         'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',
     ];
-    
+
     let vttData = loadVtt(vttStr);
     for (let l of vttData) {
         l = convertToAssLine(l, 'Main');
         ass = ass.concat(l);
     }
-    
+
     return ass.join('\r\n') + '\r\n';
 }
 
@@ -69,17 +69,17 @@ function convertToAssLine(l, style) {
     let start = convertTime(l.time_start);
     let end = convertTime(l.time_end);
     let text = convertToAssText(l.text);
-    
+
     // debugger 
     if (l.ext_param.line === '7%') {
         style = 'MainTop';
     }
-      
+
     if (l.ext_param.line === '10%') {
         style = 'MainTop';
     }
-    
-    return  `Dialogue: 0,${start},${end},${style},,0,0,0,,${text}`;
+
+    return `Dialogue: 0,${start},${end},${style},,0,0,0,,${text}`;
 }
 
 function convertToAssText(text) {
@@ -102,16 +102,16 @@ function convertToAssText(text) {
 }
 
 // srt specific
-function convertToSrt(vttStr){
+function convertToSrt(vttStr) {
     let srt = [], srtLineIdx = 0;
-    
+
     let vttData = loadVtt(vttStr);
     for (let l of vttData) {
         srtLineIdx++;
         l = convertToSrtLine(l, srtLineIdx);
         srt = srt.concat(l);
     }
-    
+
     return srt.join('\r\n') + '\r\n';
 }
 
@@ -126,36 +126,36 @@ function convertToSrtLine(l, idx) {
 // time parser
 function convertTime(time, srtFormat) {
     let mTime = time.match(/([\d:]*)\.?(\d*)/);
-    if (!mTime){
+    if (!mTime) {
         return srtFormat ? '00:00:00,000' : '0:00:00.00';
     }
     return toSubsTime(mTime[0], srtFormat);
 }
 
 function toSubsTime(str, srtFormat) {
-    
+
     let n = [], x, sx;
     x = str.split(/[:.]/).map(x => Number(x));
-    
+
     let msLen = srtFormat ? 3 : 2;
     let hLen = srtFormat ? 2 : 1;
-    
+
     x[3] = '0.' + ('' + x[3]).padStart(3, '0');
-    sx = x[0]*60*60 + x[1]*60 + x[2] + Number(x[3]);
+    sx = x[0] * 60 * 60 + x[1] * 60 + x[2] + Number(x[3]);
     sx = sx.toFixed(msLen).split('.');
-    
-    
+
+
     n.unshift(padTimeNum((srtFormat ? ',' : '.'), sx[1], msLen));
     sx = Number(sx[0]);
-    
-    n.unshift(padTimeNum(':', sx%60, 2));
-    n.unshift(padTimeNum(':', Math.floor(sx/60)%60, 2));
-    n.unshift(padTimeNum('',  Math.floor(sx/3600)%60, hLen));
-    
+
+    n.unshift(padTimeNum(':', sx % 60, 2));
+    n.unshift(padTimeNum(':', Math.floor(sx / 60) % 60, 2));
+    n.unshift(padTimeNum('', Math.floor(sx / 3600) % 60, hLen));
+
     return n.join('');
 }
 
-function padTimeNum(sep, input, pad){
+function padTimeNum(sep, input, pad) {
     return sep + ('' + input).padStart(pad, '0');
 }
 

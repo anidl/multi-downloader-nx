@@ -7,16 +7,16 @@ const loadYamlFile = (file) => {
 };
 
 const loadYamlCfg = (file) => {
-    if(existsFile(`${file}.user.yml`)){
+    if (existsFile(`${file}.user.yml`)) {
         file += '.user';
     }
     file += '.yml';
-    if(fs.existsSync(file)){
-        
-        try{
+    if (fs.existsSync(file)) {
+
+        try {
             return loadYamlFile(file, 'utf8');
         }
-        catch(e){
+        catch (e) {
             return {};
         }
     }

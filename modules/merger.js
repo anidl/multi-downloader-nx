@@ -76,7 +76,9 @@ const buildCommandMkvMerge = (simul, videoAndAudio, onlyVid, onlyAudio, subtitle
 
     args.push(`-o "${output}"`);
     args.push(
-        '--global-tags "./tag.xml"',
+        '--no-date',
+        '--disable-track-statistics-tags',
+        '--engage no_variable_data',
     );
 
     for (let vid of onlyVid) {
@@ -99,8 +101,8 @@ const buildCommandMkvMerge = (simul, videoAndAudio, onlyVid, onlyAudio, subtitle
                 '--video-tracks 0',
                 '--audio-tracks 1'
             );
-            args.push('--track-name 0:[Funimation]');
             let trackName = subDict[vid.lang] + (simul ? ' [Simulcast]' : ' [Uncut]');
+            args.push('--track-name', `0:"${trackName}"`);
             args.push('--track-name', `1:"${trackName}"`);
             args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
             hasVideo = true;
@@ -109,7 +111,7 @@ const buildCommandMkvMerge = (simul, videoAndAudio, onlyVid, onlyAudio, subtitle
                 '--no-video',
                 '--audio-tracks 1'
             );
-            let trackName = subDict[vid.lang];
+            let trackName = subDict[vid.lang] + (simul ? ' [Simulcast]' : ' [Uncut]');
             args.push('--track-name', `1:"${trackName}"`);
             args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
         }
