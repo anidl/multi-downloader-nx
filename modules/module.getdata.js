@@ -19,8 +19,8 @@ const getData = async (options) => {
     let regionHeaders = {};
 
 
-    let gOptions = {
-        url: options.url,
+    let gOptions = { 
+        url: options.url, 
         headers: {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0',
             'devicetype': 'Android Phone',
