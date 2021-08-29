@@ -42,7 +42,7 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 * `-q <i>` sets the video layer quality [1...10] (optional, 0 is max)
 * `--all` download all videos at once
 * `--alt` alternative episode listing (if available)
-* `--sub` select one or more subtile language
+* `--subLang` select one or more subtile language
 * `--dub` select one or more dub languages
 * `--simul` force select simulcast version instead of uncut version
 * `-x` select server
