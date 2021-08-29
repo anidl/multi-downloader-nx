@@ -43,6 +43,7 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 * `--all` download all videos at once
 * `--alt` alternative episode listing (if available)
 * `--subLang` select one or more subtile language
+* `--allSubs` If set to true, all available subs will get downloaded
 * `--dub` select one or more dub languages
 * `--allDubs` If set to true, all available dubs will get downloaded
 * `--simul` force select simulcast version instead of uncut version
