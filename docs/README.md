@@ -85,3 +85,5 @@ The proxy is currently unmainted. Use at your on risk.
 * `node funi --search "My Hero"` search "My Hero" in title
 * `node funi -s 124389 -e 1,2,3` download episodes 1-3 from show with id 124389
 * `node funi -s 124389 -e 1-3,2-7,s1-2` download episodes 1-7 and "S"-episodes 1-2 from show with id 124389
+* `node funi -s 19373 -e 28-47 -q 7 --allSubs --dub jaJP ptBR` download episodes 28 to 47 with Portuguese (Brazil) and Japanese audio in 720p(HD) resolution with all subtitles available
+* `node funi -s 19373 -e 15-30 -q 10 --subLang ptBR enUS --dub jaJP` download episodes 15 to 30 with Japanese audio in 1080p resolution (Full HD) with Portuguese (Brazil) and English subtitles
