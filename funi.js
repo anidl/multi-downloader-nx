@@ -20,9 +20,9 @@ const crypto = require('crypto');
 const got = require('got');
 
 // extra
-const appYargs      = require('./modules/module.app-args');
-const getYamlCfg    = require('./modules/module.cfg-loader');
-const vttConvert    = require('./modules/module.vttconvert');
+const appYargs     = require('./modules/module.app-args');
+const getYamlCfg   = require('./modules/module.cfg-loader');
+const vttConvert   = require('./modules/module.vttconvert');
 // new-cfg
 const workingDir = process.pkg ? path.dirname(process.execPath) : __dirname;
 const binCfgFile = path.join(workingDir, 'config', 'bin-path');
