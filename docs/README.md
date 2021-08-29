@@ -16,8 +16,8 @@ This application is not endorsed by or affiliated with *Funimation*. This applic
 ### Paths Configuration
 
 By default this application uses the following paths to programs (main executables):
-* `./bin/mkvmerge`
-* `./bin/ffmpeg`
+* `./bin/ffmpeg.exe`
+* `./bin/mkvmerge.exe`
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
@@ -34,7 +34,7 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 
 ### Get Show ID
 
-* `--search <s>` sets the show title for search
+* `-f`, `--search <s>` sets the show title for search
 
 ### Download Video
 
@@ -43,9 +43,11 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 * `--all` download all videos at once
 * `--alt` alternative episode listing (if available)
 * `--subLang` select one or more subtile language
+* `--allSubs` If set to true, all available subs will get downloaded
 * `--dub` select one or more dub languages
+* `--allDubs` If set to true, all available dubs will get downloaded
 * `--simul` force select simulcast version instead of uncut version
-* `-x` select server
+* `-x`, `--server` select server
 * `--novids` skip download videos
 * `--nosubs` skip download subtitles for Dub (if available)
 * `--noaudio` skip downloading audio
