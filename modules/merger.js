@@ -8,7 +8,7 @@ const iso639 = require('iso-639');
  * @param {string} output
  * @returns {string}
  */
-const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAudio, subtitles, output) => {
+const buildCommandFFmpeg = (simul, videoAndAudio, onlyVid, onlyAudio, subtitles, output) => {
     let args = [];
     let metaData = [];
 
@@ -69,7 +69,7 @@ const buildCommandFFmpeg = (videoAndAudio, onlyVid, onlyAudio, subtitles, output
  * @param {Array<object>} subtitles 
  * @returns {string}
  */
-const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, output) => {
+const buildCommandMkvMerge = (simul, videoAndAudio, onlyVid, onlyAudio, subtitles, output) => {
     let args = [];
 
     let hasVideo = false;
@@ -87,7 +87,9 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--video-tracks 0',
                 '--no-audio'
             );
-            args.push('--track-name 0:[Funimation]');
+            let trackName = subDict[vid.lang] + (simul ? ' [Simulcast]' : ' [Uncut]');
+            args.push('--track-name', `0:"${trackName}"`);
+            args.push(`--language 0:${getLanguageCode(vid.lang, vid.lang)}`);
             hasVideo = true;
             args.push(`"${vid.path}"`);
         }
@@ -99,8 +101,8 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--video-tracks 0',
                 '--audio-tracks 1'
             );
-            args.push('--track-name 0:[Funimation]');
-            let trackName = subDict[vid.lang];
+            let trackName = subDict[vid.lang] + (simul ? ' [Simulcast]' : ' [Uncut]');
+            args.push('--track-name', `0:"${trackName}"`);
             args.push('--track-name', `1:"${trackName}"`);
             args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
             hasVideo = true;
@@ -109,7 +111,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
                 '--no-video',
                 '--audio-tracks 1'
             );
-            let trackName = subDict[vid.lang];
+            let trackName = subDict[vid.lang] + (simul ? ' [Simulcast]' : ' [Uncut]');
             args.push('--track-name', `1:"${trackName}"`);
             args.push(`--language 1:${getLanguageCode(vid.lang, vid.lang)}`);
         }
@@ -117,7 +119,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
     }
 
     for (let aud of onlyAudio) {
-        let trackName = subDict[aud.lang];
+        let trackName = subDict[aud.lang] + (simul ? ' [Simulcast]' : ' [Uncut]');
         args.push('--track-name', `0:"${trackName}"`);
         args.push(`--language 0:${getLanguageCode(aud.lang, aud.lang)}`);
         args.push(
@@ -129,7 +131,7 @@ const buildCommandMkvMerge = (videoAndAudio, onlyVid, onlyAudio, subtitles, outp
 
     if (subtitles.length > 0) {
         for (let subObj of subtitles) {
-            let trackName = subDict[subObj.language];
+            let trackName = subDict[subObj.language] + (simul ? ' [Simulcast]' : ' [Uncut]');
             args.push('--track-name', `0:"${trackName}"`);
             args.push('--language', `0:${getLanguageCode(subObj.language)}`);
             args.push(`"${subObj.file}"`);
@@ -147,9 +149,11 @@ const subDict = {
     'en': 'English (United State)',
     'es': 'Español (Latinoamericano)',
     'pt': 'Português (Brasil)',
-    'ja': '日本語'
+    'ja': '日本語',
+    'cmn': '官話'
 };
 const getLanguageCode = (from, _default = 'eng') => {
+    if (from === 'cmn') return 'chi';
     for (let lang in iso639.iso_639_2) {
         let langObj = iso639.iso_639_2[lang];
         if (Object.prototype.hasOwnProperty.call(langObj, '639-1') && langObj['639-1'] === from) {
