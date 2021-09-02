@@ -496,6 +496,7 @@ async function downloadStreams(){
         
         let mainServersList = [
             'vmfst-api.prd.funimationsvc.com',
+            'd33et77evd9bgg.cloudfront.net',
             'd132fumi6di1wa.cloudfront.net',
             'funiprod.akamaized.net',
         ];
