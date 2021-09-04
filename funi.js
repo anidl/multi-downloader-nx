@@ -101,7 +101,7 @@ else{
 let title = '',
     showTitle = '',
     fnEpNum = 0,
-    fnOutput = '',
+    fnOutput = [],
     season = 0,
     tsDlPath = [],
     stDlPath = [];
@@ -604,8 +604,10 @@ async function downloadStreams(){
             console.log('[INFO] Stream URL:',videoUrl);
     
             fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
-            outName = fnOutput;
-            console.log(`[INFO] Output filename: ${fnOutput}.ts`);
+            if (fnOutput.length < 1)
+                throw new Error('Invalid path', fnOutput);
+            outName = fnOutput.slice(-1);
+            console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
         }
         else if(argv.x > plServerList.length){
             console.log('[ERROR] Server not selected!\n');
@@ -619,6 +621,8 @@ async function downloadStreams(){
         let dlFailed = false;
         let dlFailedA = false;
         
+        await fs.promises.mkdir(path.join(cfg.dir.content, ...fnOutput.slice(0, -1)), { recursive: true });
+
         video: if (!argv.novids) {
             if (plAud.uri && (purvideo.length > 0 || audioAndVideo.length > 0)) {
                 break video;
@@ -635,7 +639,7 @@ async function downloadStreams(){
             
             let chunkList = m3u8(reqVideo.res.body);
             
-            let tsFile = path.join(cfg.dir.content, `${fnOutput}.video${(plAud.uri ? '' : '.' + streamPath.lang )}`);
+            let tsFile = path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.video${(plAud.uri ? '' : '.' + streamPath.lang )}`);
             dlFailed = !await downloadFile(tsFile, chunkList);
             if (!dlFailed) {
                 if (plAud.uri) {
@@ -667,7 +671,7 @@ async function downloadStreams(){
             
             let chunkListA = m3u8(reqAudio.res.body);
     
-            let tsFileA = path.join(cfg.dir.content, fnOutput + `.audio.${plAud.language}`);
+            let tsFileA = path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.audio.${plAud.language}`);
     
             dlFailedA = !await downloadFile(tsFileA, chunkListA);
             if (!dlFailedA)
@@ -694,7 +698,7 @@ async function downloadStreams(){
             });
             if(subsSrc.ok){
                 let assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
-                subObject.file =  path.join(cfg.dir.content, `${fnOutput}.subtitle${subObject.ext}${subsExt}`);
+                subObject.file =  path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.subtitle${subObject.ext}${subsExt}`);
                 fs.writeFileSync(subObject.file, assData);
             }
             else{
@@ -880,7 +884,7 @@ function logDownloadInfo (dateStart, partsDL, partsTotal, partsDLRes, partsTotal
  * @param {number} season 
  * @param {number} width 
  * @param {number} height 
- * @returns {string}
+ * @returns {Array<string>}
  */
 function parseFileName(input, title, episode, showTitle, season, width, height) {
     const varRegex = /\${[A-Za-z1-9]+}/g;
@@ -918,5 +922,5 @@ function parseFileName(input, title, episode, showTitle, season, width, height) 
                 break;
         }
     }
-    return shlp.cleanupFilename(input);
+    return input.split(path.sep).map(a => shlp.cleanupFilename(a));
 }
