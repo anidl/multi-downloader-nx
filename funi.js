@@ -606,7 +606,7 @@ async function downloadStreams(){
             fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
             if (fnOutput.length < 1)
                 throw new Error('Invalid path', fnOutput);
-            outName = fnOutput.slice(-1);
+            outName = fnOutput.slice(-1)[0];
             console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
         }
         else if(argv.x > plServerList.length){
