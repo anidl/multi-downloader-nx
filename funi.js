@@ -483,7 +483,6 @@ async function downloadStreams(){
     let purvideo = [];
     let puraudio = [];
     let audioAndVideo = []; 
-    let outName;
     for (let streamPath of tsDlPath) {
         let plQualityReq = await getData({
             url: streamPath.path,
@@ -606,7 +605,6 @@ async function downloadStreams(){
             fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
             if (fnOutput.length < 1)
                 throw new Error('Invalid path', fnOutput);
-            outName = fnOutput.slice(-1)[0];
             console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
         }
         else if(argv.x > plServerList.length){
@@ -744,12 +742,14 @@ async function downloadStreams(){
 
     if(!argv.mp4 && usableMKVmerge){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandMkvMerge(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
+        let command = merger.buildCommandMkvMerge(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, 
+            ...fnOutput)}.${ffext}`);
         shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command);
     }
     else if(usableFFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
-        let command = merger.buildCommandFFmpeg(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, outName)}.${ffext}`);
+        let command = merger.buildCommandFFmpeg(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content,
+            ...fnOutput)}.${ffext}`);
         shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,command);
     }
     else{
