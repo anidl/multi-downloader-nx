@@ -20,63 +20,23 @@ const crypto = require('crypto');
 const got = require('got');
 
 // extra
-const appYargs     = require('./modules/module.app-args');
-const getYamlCfg   = require('./modules/module.cfg-loader');
-const vttConvert   = require('./modules/module.vttconvert');
+const appYargs    = require('./modules/module.app-args');
+const yamlCfg     = require('./modules/module.cfg-loader');
+const vttConvert  = require('./modules/module.vttconvert');
+
 // new-cfg
 const workingDir = process.pkg ? path.dirname(process.execPath) : __dirname;
 const binCfgFile = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile = path.join(workingDir, 'config', 'dir-path');
 const cliCfgFile = path.join(workingDir, 'config', 'cli-defaults');
 const tokenFile  = path.join(workingDir, 'config', 'token');
+
 // params
-let cfg = {
-    bin: getYamlCfg(binCfgFile),
-    dir: getYamlCfg(dirCfgFile),
-    cli: getYamlCfg(cliCfgFile),
-};
-
-// make sure cfg params aren't null
-if (cfg.bin === null){
-    cfg.bin = {};
-    console.log('[WARN] bin-path.yml is empty or does not exist!\n');
-}
-
-if (cfg.dir === null){
-    cfg.dir = {};
-    console.log('[WARN] dir-path.yml is empty or does not exist!\n');
-}
-
-if (!Object.prototype.hasOwnProperty.call(cfg.dir, 'content')) cfg.dir.content = './videos/';
-
-if (cfg.cli === null){
-    cfg.cli = {};
-    console.log('[WARN] cli-defaults.yml is empty or does not exist!\n');
-}
-
-/* Normalise paths for use outside the current directory */
-for (let key of Object.keys(cfg.dir)) {
-    if (!path.isAbsolute(cfg.dir[key])) {
-        cfg.dir[key] = path.join(workingDir, cfg.dir[key]);
-    }
-}
-
-for (let key of Object.keys(cfg.bin)) {
-    if (!path.isAbsolute(cfg.bin[key])) {
-        cfg.bin[key] = path.join(workingDir, cfg.bin[key]);
-    }
-}
+const cfg = yamlCfg.loadCfg(workingDir, binCfgFile, dirCfgFile, cliCfgFile);
+let token = yamlCfg.loadFuniToken(tokenFile);
 
 // token
 let token = getYamlCfg(tokenFile);
-if (token === null) token = false;
-else if (token.token === null) token = false;
-else token = token.token;
-
-// info if token not set
-if(!token){
-    console.log('[INFO] Token not set!\n');
-}
 
 // cli
 const argv = appYargs.appArgv(cfg.cli);
@@ -137,7 +97,7 @@ async function auth(){
         authData = JSON.parse(authData.res.body);
         if(authData.token){
             console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0,8),'*'.repeat(32));
-            fs.writeFileSync(tokenFile + '.yml', yaml.stringify({'token': authData.token}));
+            saveFuniToken(tokenFile, {'token': authData.token});
         }
         else if(authData.error){
             console.log('[ERROR]%s\n', authData.error);
@@ -199,7 +159,7 @@ async function getShow(){
     showData = showData.items[0];
     console.log('[#%s] %s (%s)',showData.id,showData.title,showData.releaseYear);
     // show episodes
-    let qs = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: parseInt(argv.s,10) };
+    let qs = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: parseInt(argv.s, 10) };
     if(argv.alt){ qs.language = 'English'; }
     let episodesData = await getData({
         baseUrl: api_host,
@@ -211,54 +171,95 @@ async function getShow(){
         debug: argv.debug,
     });
     if(!episodesData.ok){return;}
-    let eps = JSON.parse(episodesData.res.body).items, fnSlug = [], is_selected = false;
-    argv.e = typeof argv.e == 'number' || typeof argv.e == 'string' ? argv.e.toString() : '';
-    argv.e = argv.e.match(',') ? argv.e.split(',') : [argv.e];
-    let epSelList = argv.e, epSelRanges = [], epSelEps = [];
-    epSelList = epSelList.map((e)=>{
-        if(e.match('-')){
-            e = e.split('-');
-            if( e[0].match(/^(?:[A-Z]+|)\d+$/i) && e[1].match(/^\d+$/) ){
-                e[0] = e[0].replace(/^(?:([A-Z]+)|)(0+)/i,'$1');
-                let letter = e[0].match(/^([A-Z]+)\d+$/i) ? e[0].match(/^([A-Z]+)\d+$/i)[1].toUpperCase() : '';
-                e[0] = e[0].replace(/^[A-Z]+(\d+)$/i,'$1');
-                e[0] = parseInt(e[0]);
-                e[1] = parseInt(e[1]);
-                if(e[0] < e[1]){
-                    for(let i=e[0];i<e[1]+1;i++){
-                        epSelRanges.push(letter+i);
-                    }
-                    return '';
-                }
-                else{
-                    return (letter+e[0]);
-                }
-            }
-            else{
-                return '';
-            }
+    
+    
+    let selEps = typeof argv.e == 'string' ? argv.e.split(',') : [];
+    let epsDataArr = JSON.parse(episodesData.res.body).items;
+    let epNumRegex = /^([A-Z0-9]*[A-Z])?(\d+)$/i;
+    let epSelEpsTxt = [], epSelList = [], typeIdLen = 0, epIdLen = 4;
+    
+    const parseEpStr = (epStr) => {
+        epStr = epStr.match(epNumRegex);
+        if(epStr.length > 2){
+            epStr = [...epStr].splice(1);
+            epStr[0] = epStr[0] ? epStr[0] : '';
+            return epStr;
         }
-        else if(e.match(/^(?:[A-Z]+|)\d+$/i)){
-            return e.replace(/^(?:([A-Z]+)|)(0+)/i,'$1').toUpperCase();
+        else return [ '', epStr[0] ];
+    }
+    
+    epsDataArr = epsDataArr.map(e => {
+        const baseId = e.ids.externalAsianId ? e.ids.externalAsianId : e.ids.externalEpisodeId;
+        e.id = baseId.replace(new RegExp('^' + e.ids.externalShowId), '');
+        if(e.id.match(epNumRegex)){
+            const epMatch = parseEpStr(e.id);
+            epIdLen = epMatch[1].length > epIdLen ? epMatch[1].length : epIdLen;
+            typeIdLen = epMatch[0].length > typeIdLen ? epMatch[0].length : typeIdLen;
+            e.id_split = epMatch;
         }
         else{
-            return '';
+            typeIdLen = 3 > typeIdLen? 3 : typeIdLen;
+            console.log('[ERROR] FAILED TO PARSE: ', e.id);
+            e.id_split = [ 'ZZZ', 9999 ];
+        }
+        return e;
+    });
+    
+    let maxEp = Math.pow(10, epIdLen) - 1;
+    
+    selEps.map( (e) => {
+        if(e.match('-')) {
+            e = e.split('-');
+            if( e[0].match(epNumRegex) && e[1].match(/^\d+$/) ){
+                e[0] = parseEpStr(e[0]);
+                const letter = e[0][0];
+                e[0] = parseInt(e[0][1]);
+                e[0] = maxEp > e[0] ? e[0] : maxEp;
+                e[1] = parseInt(e[1]);
+                if(e[0] < e[1]){
+                    const rangeLength = e[1] - e[0] + 1;
+                    for(const i in Array(rangeLength).fill(0)){
+                        epSelList.push((letter + (i.toString()).padStart(epIdLen, '0')).toUpperCase());
+                    }
+                }
+                else{
+                    epSelList.push((letter + (e[0].toString()).padStart(epIdLen, '0')).toUpperCase());
+                }
+            }
+        }
+        else if(e.match(epNumRegex)){
+            e = parseEpStr(e);
+            e[1] = parseInt(e[1]);
+            e[1] = maxEp > e[1] ? e[1] : maxEp;
+            epSelList.push((e[0] + (e[1].toString()).padStart(epIdLen, '0')).toUpperCase());
         }
     });
-    epSelList = [...new Set(epSelList.concat(epSelRanges))];
-    // parse episodes list
+    
+    let fnSlug = [], is_selected = false;
+    
+    let eps = epsDataArr;
+    epsDataArr.sort((a, b) => {
+        if (a.id < b.id) {
+            return -1;
+        }
+        if (a.id > b.id) {
+            return 1;
+        }
+        return 0;
+    });
+    
     for(let e in eps){
-        let showStrId = eps[e].ids.externalShowId;
-        let epStrId = eps[e].ids.externalEpisodeId.replace(new RegExp('^'+showStrId),'');
+        eps[e].id_split[1] = parseInt(eps[e].id_split[1]).toString().padStart(epIdLen, '0');
+        let epStrId = eps[e].id_split.join('');
         // select
         if (argv.all) {
             fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
-            epSelEps.push(epStrId);
+            epSelEpsTxt.push(epStrId);
             is_selected = true;
         }
-        else if(epSelList.includes(epStrId.replace(/^(?:([A-Z]+)|)(0+)/,'$1'))){
+        else if(epSelList.includes(epStrId)){
             fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
-            epSelEps.push(epStrId);
+            epSelEpsTxt.push(epStrId);
             is_selected = true;
         }
         else{
@@ -273,24 +274,26 @@ async function getShow(){
         let aud_str = eps[e].audio.length > 0 ? `, ${eps[e].audio.join(', ')}` : '';
         let rtm_str = eps[e].item.runtime !== '' ? eps[e].item.runtime : '??:??';
         // console string
-        let episodeIdStr = epStrId;
-        let conOut  = `[${episodeIdStr}] `;
+        eps[e].id_split[0] = eps[e].id_split[0].padStart(typeIdLen, ' ');
+        epStrId = eps[e].id_split.join('');
+        let conOut  = `[${epStrId}] `;
         conOut += `${eps[e].item.titleName+tx_snum} - ${tx_type+tx_enum} ${eps[e].item.episodeName} `;
         conOut += `(${rtm_str}) [${qua_str+aud_str}]`;
         conOut += is_selected ? ' (selected)' : '';
         conOut += eps.length-1 == e ? '\n' : '';
         console.log(conOut);
     }
-    if(fnSlug.length<1){
+    if(fnSlug.length < 1){
         console.log('[INFO] Episodes not selected!\n');
         process.exit();
     }
     else{
-        console.log('[INFO] Selected Episodes: %s\n',epSelEps.join(', '));
+        console.log('[INFO] Selected Episodes: %s\n',epSelEpsTxt.join(', '));
         for(let fnEp=0;fnEp<fnSlug.length;fnEp++){
             await getEpisode(fnSlug[fnEp]);
         }
     }
+    
 }
 
 async function getEpisode(fnSlug){
