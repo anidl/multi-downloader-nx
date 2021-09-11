@@ -12,7 +12,6 @@ console.log(`\n=== Funimation Downloader NX ${packageJson.version} ===\n`);
 const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 
 // modules extra
-const yaml = require('yaml');
 const shlp = require('sei-helper');
 const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
@@ -34,9 +33,6 @@ const tokenFile  = path.join(workingDir, 'config', 'token');
 // params
 const cfg = yamlCfg.loadCfg(workingDir, binCfgFile, dirCfgFile, cliCfgFile);
 let token = yamlCfg.loadFuniToken(tokenFile);
-
-// token
-let token = getYamlCfg(tokenFile);
 
 // cli
 const argv = appYargs.appArgv(cfg.cli);
@@ -97,7 +93,7 @@ async function auth(){
         authData = JSON.parse(authData.res.body);
         if(authData.token){
             console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0,8),'*'.repeat(32));
-            saveFuniToken(tokenFile, {'token': authData.token});
+            yamlCfg.saveFuniToken(tokenFile, {'token': authData.token});
         }
         else if(authData.error){
             console.log('[ERROR]%s\n', authData.error);
@@ -186,7 +182,7 @@ async function getShow(){
             return epStr;
         }
         else return [ '', epStr[0] ];
-    }
+    };
     
     epsDataArr = epsDataArr.map(e => {
         const baseId = e.ids.externalAsianId ? e.ids.externalAsianId : e.ids.externalEpisodeId;
