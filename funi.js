@@ -235,10 +235,10 @@ async function getShow(){
     
     let eps = epsDataArr;
     epsDataArr.sort((a, b) => {
-        if (a.id < b.id) {
+        if (a.item.seasonOrder < b.item.seasonOrder && a.id < b.id) {
             return -1;
         }
-        if (a.id > b.id) {
+        if (a.item.seasonOrder > b.item.seasonOrder && a.id > b.id) {
             return 1;
         }
         return 0;
@@ -248,12 +248,8 @@ async function getShow(){
         eps[e].id_split[1] = parseInt(eps[e].id_split[1]).toString().padStart(epIdLen, '0');
         let epStrId = eps[e].id_split.join('');
         // select
-        if (argv.all) {
-            fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
-            epSelEpsTxt.push(epStrId);
-            is_selected = true;
-        }
-        else if(epSelList.includes(epStrId)){
+        is_selected = false;
+        if (argv.all || epSelList.includes(epStrId)) {
             fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
             epSelEpsTxt.push(epStrId);
             is_selected = true;
