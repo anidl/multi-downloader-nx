@@ -15,7 +15,7 @@ const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 const shlp = require('sei-helper');
 const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
-const hlsDownload = require("hls-download")
+const hlsDownload = require('hls-download');
 
 // extra
 const appYargs    = require('./modules/module.app-args');
@@ -43,9 +43,9 @@ module.exports = {
 // Import modules after argv has been exported
 const getData = require('./modules/module.getdata.js');
 const merger = require('./modules/merger');
-const parseSelect = require('./modules/module.parseSelect')
+const parseSelect = require('./modules/module.parseSelect');
 
-parseSelect(argv.e)
+parseSelect(argv.e);
 
 // check page
 if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
@@ -171,7 +171,6 @@ async function getShow(){
     if(!episodesData.ok){return;}
     
     
-    let selEps = typeof argv.e == 'string' ? argv.e.split(',') : [];
     let epsDataArr = JSON.parse(episodesData.res.body).items;
     let epNumRegex = /^([A-Z0-9]*[A-Z])?(\d+)$/i;
     let epSelEpsTxt = [], epSelList, typeIdLen = 0, epIdLen = 4;
@@ -739,7 +738,7 @@ async function downloadFile(filename, chunkList) {
         output: `${filename + '.ts'}`,
         timeout: argv.timeout,
         pcount: argv.partsize
-    }).download()
+    }).download();
     
     return downloadStatus.ok;
 }

@@ -15,7 +15,7 @@ const buildCommandFFmpeg = (simul, videoAndAudio, onlyVid, onlyAudio, subtitles,
     let index = 0;
     let audioIndex = 0;
     let hasVideo = false;
-    console.log(videoAndAudio, onlyAudio, onlyVid)
+    console.log(videoAndAudio, onlyAudio, onlyVid);
     for (let vid of videoAndAudio) {
         args.push(`-i "${vid.path}"`);
         if (!hasVideo) {
