@@ -15,8 +15,7 @@ const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 const shlp = require('sei-helper');
 const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
-const crypto = require('crypto');
-const got = require('got');
+const hlsDownload = require("hls-download")
 
 // extra
 const appYargs    = require('./modules/module.app-args');
@@ -44,6 +43,9 @@ module.exports = {
 // Import modules after argv has been exported
 const getData = require('./modules/module.getdata.js');
 const merger = require('./modules/merger');
+const parseSelect = require('./modules/module.parseSelect')
+
+parseSelect(argv.e)
 
 // check page
 if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
@@ -172,7 +174,7 @@ async function getShow(){
     let selEps = typeof argv.e == 'string' ? argv.e.split(',') : [];
     let epsDataArr = JSON.parse(episodesData.res.body).items;
     let epNumRegex = /^([A-Z0-9]*[A-Z])?(\d+)$/i;
-    let epSelEpsTxt = [], epSelList = [], typeIdLen = 0, epIdLen = 4;
+    let epSelEpsTxt = [], epSelList, typeIdLen = 0, epIdLen = 4;
     
     const parseEpStr = (epStr) => {
         epStr = epStr.match(epNumRegex);
@@ -201,36 +203,8 @@ async function getShow(){
         return e;
     });
     
-    let maxEp = Math.pow(10, epIdLen) - 1;
-    
-    selEps.map( (e) => {
-        if(e.match('-')) {
-            e = e.split('-');
-            if( e[0].match(epNumRegex) && e[1].match(/^\d+$/) ){
-                e[0] = parseEpStr(e[0]);
-                const letter = e[0][0];
-                e[0] = parseInt(e[0][1]);
-                e[0] = maxEp > e[0] ? e[0] : maxEp;
-                e[1] = parseInt(e[1]);
-                if(e[0] < e[1]){
-                    const rangeLength = e[1] - e[0] + 1;
-                    for(const i in Array(rangeLength).fill(0)){
-                        epSelList.push((letter + (i.toString()).padStart(epIdLen, '0')).toUpperCase());
-                    }
-                }
-                else{
-                    epSelList.push((letter + (e[0].toString()).padStart(epIdLen, '0')).toUpperCase());
-                }
-            }
-        }
-        else if(e.match(epNumRegex)){
-            e = parseEpStr(e);
-            e[1] = parseInt(e[1]);
-            e[1] = maxEp > e[1] ? e[1] : maxEp;
-            epSelList.push((e[0] + (e[1].toString()).padStart(epIdLen, '0')).toUpperCase());
-        }
-    });
-    
+    epSelList = parseSelect(argv.e);
+
     let fnSlug = [], is_selected = false;
     
     let eps = epsDataArr;
@@ -249,7 +223,7 @@ async function getShow(){
         let epStrId = eps[e].id_split.join('');
         // select
         is_selected = false;
-        if (argv.all || epSelList.includes(epStrId)) {
+        if (argv.all || epSelList.isSelected(epStrId)) {
             fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
             epSelEpsTxt.push(epStrId);
             is_selected = true;
@@ -760,115 +734,13 @@ async function downloadStreams(){
 }
 
 async function downloadFile(filename, chunkList) {
-    let offset = 0;
-    fileCheck: if (fs.existsSync(filename + '.ts')) {
-        if (fs.existsSync(filename + '.ts.resume')) {
-            const resume = JSON.parse(fs.readFileSync(`${filename}.ts.resume`));
-            if (resume.total === chunkList.segments.length) {
-                offset = resume.downloaded;
-                break fileCheck;
-            }
-        }
-        let rwts = await shlp.question(`[Q] File «${filename + '.ts'}» already exists! Rewrite or continue? (y/N/c)`);
-        rwts = rwts || 'N';
-        if (['N', 'n'].includes(rwts[0])) {
-            return false;
-        } else if (['C', 'c'].includes(rwts[0])) {
-            return true;
-        } else {
-            fs.unlinkSync(filename + '.ts');
-        }
-    }
-
-    let start = Date.now();
-
-    console.log(`[INFO] Started ${filename}.ts`);
-    for (let i = offset; i < chunkList.segments.length; i+=argv.partsize) {
-        let cur = [];
-        for (let a = 0; a < Math.min(argv.partsize, chunkList.segments.length - i); a++) {
-            cur.push(downloadPart(chunkList.segments[i + a], i + a, chunkList.segments.length)
-                .catch(e => e));
-        }
-
-        let p = await Promise.all(cur);
-        if (p.some(el => el instanceof Error)) {
-            console.log(`[ERROR] An error occured while downloading ${filename}.ts`);
-            return false;
-        }
-
-        fs.writeFileSync(`${filename}.ts.resume`, JSON.stringify({ total: chunkList.segments.length, downloaded: i + argv.partsize }, null, 4));
-
-        for (let a = 0; a < p.length; a++) {
-            fs.writeFileSync(filename + '.ts', p[a].content, { flag: 'a' });
-        }
-
-        logDownloadInfo(start, i + Math.min(argv.partsize, chunkList.segments.length - i),
-            chunkList.segments.length, i + Math.min(argv.partsize, chunkList.segments.length - i),
-            chunkList.segments.length);
-    }
+    const downloadStatus = await new hlsDownload({
+        m3u8json: chunkList,
+        output: `${filename + '.ts'}`,
+        timeout: argv.timeout
+    }).download()
     
-    if (fs.existsSync(`${filename}.ts.resume`))
-        fs.unlinkSync(`${filename}.ts.resume`);
-
-    console.log(`[INFO] Finished ${filename}.ts`);
-    return true;
-}
-
-async function downloadPart(chunk, index) {
-
-    let key = await generateCrypto(chunk, index);
-    
-    let headers = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0'
-    };
-
-    if (chunk.byterange)
-        headers.Range = `bytes=${chunk.byterange.offset}-${chunk.byterange.offset+chunk.byterange.length-1}`;
-
-    let res = (await got({
-        url: chunk.uri,
-        headers,
-        responseType: 'buffer'
-    }).catch(error => console.log(`[ERROR] ${error.name}: ${error.code||error.message}`)));
-
-    if (!res.body) { return new Error('Invalid State'); }
-    try {
-        let dec = key.update(res.body);
-        dec = Buffer.concat([dec, key.final()]);
-        return { content: dec, index: index};
-    } catch (e) { return e; }
-}
-
-let keys = {};
-async function generateCrypto(chunk, index) {
-    let key = keys[chunk.key.uri];
-    if (!key) {
-        let reqKey = await getData({
-            url: chunk.key.uri,
-            responseType: 'buffer'
-        });
-    
-        if (!reqKey.ok) { console.log('[ERROR] Can\'t get key'); return; }
-        key = reqKey.res.body;
-        keys[chunk.key.uri] = key;
-    }
-    let iv = Buffer.alloc(16);
-    let ivs = chunk.key.iv ? chunk.key.iv : [0, 0, 0, index];
-    for (let i in ivs) {
-        iv.writeUInt32BE(ivs[i], i * 4);
-    }
-    key = crypto.createDecipheriv('aes-128-cbc', key, iv);
-    return key;
-}
-
-/* Snacked from hls-download */
-function logDownloadInfo (dateStart, partsDL, partsTotal, partsDLRes, partsTotalRes) {
-    const dateElapsed = Date.now() - dateStart;
-    const percentFxd = (partsDL / partsTotal * 100).toFixed();
-    const percent = percentFxd < 100 ? percentFxd : (partsTotal == partsDL ? 100 : 99);
-    const revParts = parseInt(dateElapsed * (partsTotal / partsDL - 1));
-    const time = shlp.formatTime((revParts / 1000).toFixed());
-    console.log(`[INFO] ${partsDLRes} of ${partsTotalRes} parts downloaded [${percent}%] (${time})`);
+    return downloadStatus.ok;
 }
 
 /**
