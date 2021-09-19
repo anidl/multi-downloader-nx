@@ -13,26 +13,28 @@ const buildCommandFFmpeg = (simul, videoAndAudio, onlyVid, onlyAudio, subtitles,
     let metaData = [];
 
     let index = 0;
+    let audioIndex = 0;
     let hasVideo = false;
+    console.log(videoAndAudio, onlyAudio, onlyVid);
     for (let vid of videoAndAudio) {
         args.push(`-i "${vid.path}"`);
         if (!hasVideo) {
             metaData.push(`-map ${index}`);
-            metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(vid.lang, vid.lang)}`);
+            metaData.push(`-metadata:s:a:${audioIndex} language=${getLanguageCode(vid.lang, vid.lang)}`);
             metaData.push(`-metadata:s:v:${index} title="[Funimation]"`);
             hasVideo = true;
         } else {
             metaData.push(`-map ${index}:a`);
-            metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(vid.lang, vid.lang)}`);
+            metaData.push(`-metadata:s:a:${audioIndex} language=${getLanguageCode(vid.lang, vid.lang)}`);
         }
+        audioIndex++;
         index++;
     }
 
     for (let vid of onlyVid) {
         if (!hasVideo) {
             args.push(`-i "${vid.path}"`);
-            metaData.push(`-map ${index}`);
-            metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(vid.lang, vid.lang)}`);
+            metaData.push(`-map ${index} -map -${index}:a`);
             metaData.push(`-metadata:s:v:${index} title="[Funimation]"`);
             hasVideo = true;
             index++;
@@ -42,8 +44,9 @@ const buildCommandFFmpeg = (simul, videoAndAudio, onlyVid, onlyAudio, subtitles,
     for (let aud of onlyAudio) {
         args.push(`-i "${aud.path}"`);
         metaData.push(`-map ${index}`);
-        metaData.push(`-metadata:s:a:${index} language=${getLanguageCode(aud.lang, aud.lang)}`);
+        metaData.push(`-metadata:s:a:${audioIndex} language=${getLanguageCode(aud.lang, aud.lang)}`);
         index++;
+        audioIndex++;
     }
 
     for (let index in subtitles) {
@@ -58,7 +61,7 @@ const buildCommandFFmpeg = (simul, videoAndAudio, onlyVid, onlyAudio, subtitles,
         '-c:a copy'
     );
     args.push(output.split('.').pop().toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass');
-    args.push(...subtitles.map((sub, index) => `-metadata:s:${index + 2} language=${getLanguageCode(sub.language)}`));
+    args.push(...subtitles.map((sub, subindex) => `-metadata:s:${index + subindex} language=${getLanguageCode(sub.language)}`));
     args.push(`"${output}"`);
     return args.join(' ');
 };

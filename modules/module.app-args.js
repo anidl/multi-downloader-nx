@@ -201,6 +201,12 @@ const appArgv = (cfg) => {
             default: parseDefault('noCleanUp', false),
             type: 'boolean'
         })
+        .option('timeout', {
+            group: 'Downloading:',
+            describe: 'Set the timeout of all download reqests. Set in millisecods',
+            type: 'number',
+            default: parseDefault('timeout', 60 * 1000)
+        })
         // help
         .option('help', {
             alias: 'h',
@@ -235,5 +241,7 @@ const showHelp = yargs.showHelp;
 module.exports = {
     appArgv,
     showHelp,
-    availableFilenameVars
+    availableFilenameVars,
+    dubLang,
+    subLang
 };
