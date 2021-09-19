@@ -42,7 +42,7 @@ module.exports = {
 
 // Import modules after argv has been exported
 const getData = require('./modules/module.getdata.js');
-const merger = require('./modules/merger');
+const merger = require('./modules/module.merger');
 const parseSelect = require('./modules/module.parseSelect');
 
 parseSelect(argv.e);
