@@ -6,8 +6,14 @@
  * }} 
  */
 module.exports = (selectString) => {
+    if (!selectString)
+        return {
+            values: [],
+            isSelected: () => false
+        };
     let parts = selectString.split(',');
     let select = [];
+
 
     parts.forEach(part => {
         if (part.includes('-')) {
