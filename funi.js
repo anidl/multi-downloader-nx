@@ -45,8 +45,6 @@ const getData = require('./modules/module.getdata.js');
 const merger = require('./modules/module.merger');
 const parseSelect = require('./modules/module.parseSelect');
 
-parseSelect(argv.e);
-
 // check page
 if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
     argv.p = parseInt(argv.p, 10);
