@@ -241,5 +241,7 @@ const showHelp = yargs.showHelp;
 module.exports = {
     appArgv,
     showHelp,
-    availableFilenameVars
+    availableFilenameVars,
+    dubLang,
+    subLang
 };

@@ -737,7 +737,8 @@ async function downloadFile(filename, chunkList) {
     const downloadStatus = await new hlsDownload({
         m3u8json: chunkList,
         output: `${filename + '.ts'}`,
-        timeout: argv.timeout
+        timeout: argv.timeout,
+        pcount: argv.partsize
     }).download()
     
     return downloadStatus.ok;
