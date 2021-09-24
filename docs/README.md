@@ -16,8 +16,8 @@ This application is not endorsed by or affiliated with *Funimation*. This applic
 ### Paths Configuration
 
 By default this application uses the following paths to programs (main executables):
-* `./bin/ffmpeg.exe`
-* `./bin/mkvmerge.exe`
+* `./bin/ffmpeg/ffmpeg.exe`
+* `./bin/mkvtoolnix/mkvmerge.exe`
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
