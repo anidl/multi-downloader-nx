@@ -54,7 +54,22 @@ module.exports = (selectString) => {
             }
 
         } else {
-            select.push(part);
+            let match = part.match(/[A-Za-z]+/);
+            if (match && match.length > 0) {
+                if (match.index && match.index !== 0) {
+                    console.log(`[WARN] Unable to parse input "${part}"`);
+                    return;
+                }
+                let letters = part.substring(0, match[0].length);
+                let number = parseInt(part.substring(match[0].length));
+                if (isNaN(number)) {
+                    console.log(`[WARN] Unable to parse input "${part}"`);
+                    return;
+                }
+                select.push(`${letters}${number}`);
+            } else {
+                select.push(`${parseInt(part)}`);
+            }
         }
     });
 
