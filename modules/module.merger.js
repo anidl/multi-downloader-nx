@@ -1,6 +1,28 @@
 const iso639 = require('iso-639');
 
 /**
+ * @param {Array<object>} bin config paths 
+ * @param {boolean} use mp4 format
+ * @returns {Array<object>}
+ */
+// check mergers programs
+const checkMerger = (bin, useMP4format) => {
+    const merger = {
+        MKVmerge: bin.mkvmerge,
+        FFmpeg: bin.ffmpeg,
+    };
+    if( !useMP4format && !merger.MKVmerge ){
+        console.log('[WARN] MKVMerge not found, skip using this...');
+        merger.MKVmerge = false;
+    }
+    if( !merger.MKVmerge && !merger.FFmpeg || useMP4format && !merger.FFmpeg ){
+        console.log('[WARN] FFmpeg not found, skip using this...');
+        merger.FFmpeg = false;
+    }
+    return merger;
+};
+
+/**
  * @param {Array<object>} videoAndAudio 
  * @param {Array<object>} onlyVid 
  * @param {Array<object>} onlyAudio
@@ -166,7 +188,8 @@ const getLanguageCode = (from, _default = 'eng') => {
 };
 
 module.exports = {
-    buildCommandFFmpeg,
+    checkMerger,
     getLanguageCode,
+    buildCommandFFmpeg,
     buildCommandMkvMerge
 };

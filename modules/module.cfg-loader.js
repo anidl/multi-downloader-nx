@@ -1,6 +1,14 @@
 const path = require('path');
 const yaml = require('yaml');
 const fs = require('fs-extra');
+const { lookpath } = require('lookpath');
+
+// new-cfg
+const workingDir = process.pkg ? path.dirname(process.execPath) : path.join(__dirname, '/..');
+const binCfgFile = path.join(workingDir, 'config', 'bin-path');
+const dirCfgFile = path.join(workingDir, 'config', 'dir-path');
+const cliCfgFile = path.join(workingDir, 'config', 'cli-defaults');
+const tokenFile  = path.join(workingDir, 'config', 'token');
 
 const loadYamlCfgFile = (file, isSess) => {
     if(fs.existsSync(`${file}.user.yml`) && !isSess){
@@ -19,10 +27,10 @@ const loadYamlCfgFile = (file, isSess) => {
     return {};
 };
 
-const loadCfg = (workingDir, binCfgFile, dirCfgFile, cliCfgFile) => {
+const loadCfg = () => {
     // load cfgs
     const cfg = {
-        bin: loadYamlCfgFile(binCfgFile),
+        bin: '',
         dir: loadYamlCfgFile(dirCfgFile),
         cli: loadYamlCfgFile(cliCfgFile),
     };
@@ -30,20 +38,6 @@ const loadCfg = (workingDir, binCfgFile, dirCfgFile, cliCfgFile) => {
     for(const ctype of Object.keys(cfg)){
         if(typeof cfg[ctype] !== 'object' || cfg[ctype] === null || Array.isArray(cfg[ctype])){
             cfg[ctype] = {};
-        }
-    }
-    // binaries
-    const defaultBin = {
-        ffmpeg: '${wdir}/bin/ffmpeg/ffmpeg',
-        mkvmerge: '${wdir}/bin/mkvtoolnix/mkvmerge',
-    };
-    for(const dir of ['ffmpeg', 'mkvmerge']){
-        if(!Object.prototype.hasOwnProperty.call(cfg.bin, dir) || typeof cfg.bin[dir] != 'string'){
-            cfg.bin[dir] = defaultBin[dir];
-        }
-        if (!path.isAbsolute(cfg.bin[dir]) && cfg.bin[dir].match(/^\${wdir}/)){
-            cfg.bin[dir] = cfg.bin[dir].replace(/^\${wdir}/, '');
-            cfg.bin[dir] = path.join(workingDir, cfg.bin[dir]);
         }
     }
     // set defaults for dirs
@@ -79,8 +73,33 @@ const loadCfg = (workingDir, binCfgFile, dirCfgFile, cliCfgFile) => {
     return cfg;
 };
 
-const loadFuniToken = (tokenCfgFile) => {
-    let token = loadYamlCfgFile(tokenCfgFile, true);
+const loadBinCfg = async () => {
+    let binCfg = loadYamlCfgFile(binCfgFile);
+    // binaries
+    const defaultBin = {
+        ffmpeg: '${wdir}/bin/ffmpeg/ffmpeg',
+        mkvmerge: '${wdir}/bin/mkvtoolnix/mkvmerge',
+    };
+    for(const dir of Object.keys(defaultBin)){
+        if(!Object.prototype.hasOwnProperty.call(binCfg, dir) || typeof binCfg[dir] != 'string'){
+            binCfg[dir] = defaultBin[dir];
+        }
+        if (!path.isAbsolute(binCfg[dir]) && binCfg[dir].match(/^\${wdir}/)){
+            binCfg[dir] = binCfg[dir].replace(/^\${wdir}/, '');
+            binCfg[dir] = path.join(workingDir, binCfg[dir]);
+        }
+        binCfg[dir] = await lookpath(binCfg[dir]);
+        binCfg[dir] = binCfg[dir] ? binCfg[dir] : false;
+        if(!binCfg[dir]){
+            const binFile = await lookpath(path.basename(defaultBin[dir]));
+            binCfg[dir] = binFile ? binFile : binCfg[dir];
+        }
+    }
+    return binCfg;
+};
+
+const loadFuniToken = () => {
+    let token = loadYamlCfgFile(tokenFile, true);
     if (token === null) token = false;
     else if (token.token === null) token = false;
     else token = token.token;
@@ -91,11 +110,11 @@ const loadFuniToken = (tokenCfgFile) => {
     return token;
 };
 
-const saveFuniToken = (tokenCfgFile, data) => {
-    const cfgFolder = path.dirname(tokenCfgFile);
+const saveFuniToken = (data) => {
+    const cfgFolder = path.dirname(tokenFile);
     try{
         fs.ensureDirSync(cfgFolder);
-        fs.writeFileSync(`${tokenCfgFile}.yml`, yaml.stringify(data));
+        fs.writeFileSync(`${tokenFile}.yml`, yaml.stringify(data));
     }
     catch(e){
         console.log('[ERROR] Can\'t save token file to disk!');
@@ -104,6 +123,7 @@ const saveFuniToken = (tokenCfgFile, data) => {
 
 module.exports = {
     loadCfg,
+    loadBinCfg,
     loadFuniToken,
     saveFuniToken,
 };

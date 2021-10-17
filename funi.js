@@ -13,7 +13,6 @@ const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 
 // modules extra
 const shlp = require('sei-helper');
-const { lookpath } = require('lookpath');
 const m3u8 = require('m3u8-parsed');
 const hlsDownload = require('hls-download');
 
@@ -22,23 +21,12 @@ const appYargs    = require('./modules/module.app-args');
 const yamlCfg     = require('./modules/module.cfg-loader');
 const vttConvert  = require('./modules/module.vttconvert');
 
-// new-cfg
-const workingDir = process.pkg ? path.dirname(process.execPath) : __dirname;
-const binCfgFile = path.join(workingDir, 'config', 'bin-path');
-const dirCfgFile = path.join(workingDir, 'config', 'dir-path');
-const cliCfgFile = path.join(workingDir, 'config', 'cli-defaults');
-const tokenFile  = path.join(workingDir, 'config', 'token');
-
 // params
-const cfg = yamlCfg.loadCfg(workingDir, binCfgFile, dirCfgFile, cliCfgFile);
-let token = yamlCfg.loadFuniToken(tokenFile);
+const cfg = yamlCfg.loadCfg();
+let token = yamlCfg.loadFuniToken();
 
 // cli
 const argv = appYargs.appArgv(cfg.cli);
-module.exports = {
-    argv,
-    cfg
-};
 
 // Import modules after argv has been exported
 const getData = require('./modules/module.getdata.js');
@@ -62,20 +50,24 @@ let title = '',
     tsDlPath = [],
     stDlPath = [];
 
-// select mode
-if(argv.auth){
-    auth();
-}
-else if(argv.search){
-    searchShow();
-}
-else if(argv.s && !isNaN(parseInt(argv.s, 10)) && parseInt(argv.s, 10) > 0){
-    getShow();
-}
-else{
-    appYargs.showHelp();
-    process.exit();
-}
+// main
+(async () => {
+    // load binaries
+    cfg.bin = await yamlCfg.loadBinCfg();
+    // select mode
+    if(argv.auth){
+        auth();
+    }
+    else if(argv.search){
+        searchShow();
+    }
+    else if(argv.s && !isNaN(parseInt(argv.s, 10)) && parseInt(argv.s, 10) > 0){
+        getShow();
+    }
+    else{
+        appYargs.showHelp();
+    }
+})();
 
 // auth
 async function auth(){
@@ -93,7 +85,7 @@ async function auth(){
         authData = JSON.parse(authData.res.body);
         if(authData.token){
             console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0,8),'*'.repeat(32));
-            yamlCfg.saveFuniToken(tokenFile, {'token': authData.token});
+            yamlCfg.saveFuniToken({'token': authData.token});
         }
         else if(authData.error){
             console.log('[ERROR]%s\n', authData.error);
@@ -231,7 +223,7 @@ async function getShow(){
         // console vars
         let tx_snum = eps[e].item.seasonNum==1?'':` S${eps[e].item.seasonNum}`;
         let tx_type = eps[e].mediaCategory != 'episode' ? eps[e].mediaCategory : '';
-        let tx_enum = eps[e].item.episodeNum !== '' ?
+        let tx_enum = eps[e].item.episodeNum && eps[e].item.episodeNum !== '' ?
             `#${(eps[e].item.episodeNum < 10 ? '0' : '')+eps[e].item.episodeNum}` : '#'+eps[e].item.episodeId;
         let qua_str = eps[e].quality.height ? eps[e].quality.quality + eps[e].quality.height : 'UNK';
         let aud_str = eps[e].audio.length > 0 ? `, ${eps[e].audio.join(', ')}` : '';
@@ -684,39 +676,33 @@ async function downloadStreams(){
         console.log('[INFO] Skipping muxing...');
         return;
     }
-
-    // usage
-    let usableMKVmerge = true;
-    let usableFFmpeg = true;
     
-    // check exec path
-    let mkvmergebinfile = await lookpath(path.join(cfg.bin.mkvmerge));
-    let ffmpegbinfile   = await lookpath(path.join(cfg.bin.ffmpeg));
-
     // check exec
-    if( !argv.mp4 && !mkvmergebinfile ){
-        console.log('[WARN] MKVMerge not found, skip using this...');
-        usableMKVmerge = false;
-    }
-    if( !usableMKVmerge && !ffmpegbinfile || argv.mp4 && !ffmpegbinfile ){
-        console.log('[WARN] FFmpeg not found, skip using this...');
-        usableFFmpeg = false;
-    }
+    const mergerBin = await merger.checkMerger(cfg.bin, argv.mp4);
+    
     if ( argv.novids ){
         console.log('[INFO] Video not downloaded. Skip muxing video.');
     }
+    
+    // mergers
+    if(!argv.mp4 && !mergerBin.MKVmerge){
+        console.log('[WARN] MKVMerge not found...');
+    }
+    if(!mergerBin.MKVmerge && !mergerBin.FFmpeg || argv.mp4 && !mergerBin.MKVmerge){
+        console.log('[WARN] FFmpeg not found...');
+    }
 
-    if(!argv.mp4 && usableMKVmerge){
+    if(!argv.mp4 && mergerBin.MKVmerge){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let command = merger.buildCommandMkvMerge(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content, 
             ...fnOutput)}.${ffext}`);
-        shlp.exec('mkvmerge', `"${mkvmergebinfile}"`, command);
+        shlp.exec('mkvmerge', `"${mergerBin.MKVmerge}"`, command);
     }
-    else if(usableFFmpeg){
+    else if(mergerBin.FFmpeg){
         let ffext = !argv.mp4 ? 'mkv' : 'mp4';
         let command = merger.buildCommandFFmpeg(argv.simul, audioAndVideo, purvideo, puraudio, stDlPath, `${path.join(cfg.dir.content,
             ...fnOutput)}.${ffext}`);
-        shlp.exec('ffmpeg',`"${ffmpegbinfile}"`,command);
+        shlp.exec('ffmpeg',`"${mergerBin.FFmpeg}"`,command);
     }
     else{
         console.log('\n[INFO] Done!\n');
