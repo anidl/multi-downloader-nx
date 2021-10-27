@@ -1,45 +1,42 @@
 #!/usr/bin/env node
 
 // modules build-in
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // package json
-const packageJson = require('./package.json');
+const packageJson = JSON.parse(fs.readFileSync('./package.json').toString())
 
 // program name
 console.log(`\n=== Funimation Downloader NX ${packageJson.version} ===\n`);
 const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 
 // modules extra
-const shlp = require('sei-helper');
-const m3u8 = require('m3u8-parsed');
-const hlsDownload = require('hls-download');
+import * as shlp from 'sei-helper';
+import m3u8 from 'm3u8-parsed';
+import hlsDownload from 'hls-download';
 
 // extra
-const appYargs    = require('./modules/module.app-args');
-const yamlCfg     = require('./modules/module.cfg-loader');
-const vttConvert  = require('./modules/module.vttconvert');
+import * as appYargs from './modules/module.app-args';
+import * as yamlCfg from './modules/module.cfg-loader';
+import vttConvert from './modules/module.vttconvert';
+
+// types
+import { Item } from "./@types/items";
 
 // params
 const cfg = yamlCfg.loadCfg();
 let token = yamlCfg.loadFuniToken();
-
 // cli
 const argv = appYargs.appArgv(cfg.cli);
 
 // Import modules after argv has been exported
-const getData = require('./modules/module.getdata.js');
-const merger = require('./modules/module.merger');
-const parseSelect = require('./modules/module.parseSelect');
+import getData from './modules/module.getdata.js';
+import merger from './modules/module.merger';
+import parseSelect from './modules/module.parseSelect';
 
 // check page
-if(!isNaN(parseInt(argv.p, 10)) && parseInt(argv.p, 10) > 0){
-    argv.p = parseInt(argv.p, 10);
-}
-else{
-    argv.p = 1;
-}
+argv.p = 1;
 
 // fn variables
 let title = '',
@@ -61,7 +58,7 @@ let title = '',
     else if(argv.search){
         searchShow();
     }
-    else if(argv.s && !isNaN(parseInt(argv.s, 10)) && parseInt(argv.s, 10) > 0){
+    else if(argv.s && argv.s > 0){
         getShow();
     }
     else{
@@ -71,24 +68,26 @@ let title = '',
 
 // auth
 async function auth(){
-    let authOpts = {};
-    authOpts.user = await shlp.question('[Q] LOGIN/EMAIL');
-    authOpts.pass = await shlp.question('[Q] PASSWORD   ');
+    let authOpts = {
+        user: await shlp.question('[Q] LOGIN/EMAIL'),
+        pass: await shlp.question('[Q] PASSWORD   ')
+    };
     let authData =  await getData({
         baseUrl: api_host,
         url: '/auth/login/',
-        useProxy: true,
         auth: authOpts,
         debug: argv.debug,
     });
-    if(authData.ok){
-        authData = JSON.parse(authData.res.body);
-        if(authData.token){
+    if(authData.ok && authData.res){
+        const resJSON = JSON.parse(authData.res.body);
+        if(resJSON.token){
             console.log('[INFO] Authentication success, your token: %s%s\n', authData.token.slice(0,8),'*'.repeat(32));
-            yamlCfg.saveFuniToken({'token': authData.token});
-        }
-        else if(authData.error){
-            console.log('[ERROR]%s\n', authData.error);
+            yamlCfg.saveFuniToken({'token': resJSON.token});
+        } else {
+            console.log('[ERROR]%s\n', ' No token found');
+            if (argv.debug) {
+                console.log(resJSON);
+            }
             process.exit(1);
         }
     }
@@ -96,30 +95,29 @@ async function auth(){
 
 // search show
 async function searchShow(){
-    let qs = {unique: true, limit: 100, q: argv.search, offset: (argv.p-1)*1000 };
+    let qs = {unique: true, limit: 100, q: argv.search, offset: 0 };
     let searchData = await getData({
         baseUrl: api_host,
         url: '/source/funimation/search/auto/',
         querystring: qs,
         token: token,
         useToken: true,
-        useProxy: true,
         debug: argv.debug,
     });
-    if(!searchData.ok){return;}
-    searchData = JSON.parse(searchData.res.body);
-    if(searchData.detail){
-        console.log(`[ERROR] ${searchData.detail}`);
+    if(!searchData.ok || !searchData.res){return;}
+    const searchDataJSON = JSON.parse(searchData.res.body);
+    if(searchDataJSON.detail){
+        console.log(`[ERROR] ${searchDataJSON.detail}`);
         return;
     }
-    if(searchData.items && searchData.items.hits){
-        let shows = searchData.items.hits;
+    if(searchDataJSON.items && searchDataJSON.items.hits){
+        let shows = searchDataJSON.items.hits;
         console.log('[INFO] Search Results:');
         for(let ssn in shows){
             console.log(`[#${shows[ssn].id}] ${shows[ssn].title}` + (shows[ssn].tx_date?` (${shows[ssn].tx_date})`:''));
         }
     }
-    console.log('[INFO] Total shows found: %s\n',searchData.count);
+    console.log('[INFO] Total shows found: %s\n',searchDataJSON.count);
 }
 
 // get show
@@ -127,27 +125,32 @@ async function getShow(){
     // show main data
     let showData = await getData({
         baseUrl: api_host,
-        url: `/source/catalog/title/${parseInt(argv.s, 10)}`,
+        url: `/source/catalog/title/${argv.s}`,
         token: token,
         useToken: true,
-        useProxy: true,
         debug: argv.debug,
     });
     // check errors
-    if(!showData.ok){return;}
-    showData = JSON.parse(showData.res.body);
-    if(showData.status){
-        console.log('[ERROR] Error #%d: %s\n', showData.status, showData.data.errors[0].detail);
+    if(!showData.ok || !showData.res){return;}
+    const showDataJSON = JSON.parse(showData.res.body);
+    if(showDataJSON.status){
+        console.log('[ERROR] Error #%d: %s\n', showDataJSON.status, showDataJSON.data.errors[0].detail);
         process.exit(1);
     }
-    else if(!showData.items || showData.items.length<1){
+    else if(!showDataJSON.items || showDataJSON.items.length<1){
         console.log('[ERROR] Show not found\n');
         process.exit(0);
     }
-    showData = showData.items[0];
-    console.log('[#%s] %s (%s)',showData.id,showData.title,showData.releaseYear);
+    const showDataItem = showDataJSON.items[0];
+    console.log('[#%s] %s (%s)',showDataItem.id,showDataItem.title,showDataItem.releaseYear);
     // show episodes
-    let qs = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: parseInt(argv.s, 10) };
+    let qs: {
+        limit: number,
+        sort: string,
+        sort_direction: string,
+        title_id: number,
+        language?: string
+    } = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: argv.s as number };
     if(argv.alt){ qs.language = 'English'; }
     let episodesData = await getData({
         baseUrl: api_host,
@@ -155,24 +158,26 @@ async function getShow(){
         querystring: qs,
         token: token,
         useToken: true,
-        useProxy: true,
         debug: argv.debug,
     });
-    if(!episodesData.ok){return;}
+    if(!episodesData.ok || !episodesData.res){return;}
     
-    
-    let epsDataArr = JSON.parse(episodesData.res.body).items;
+    let epsDataArr: Item[] = JSON.parse(episodesData.res.body).items;
     let epNumRegex = /^([A-Z0-9]*[A-Z])?(\d+)$/i;
     let epSelEpsTxt = [], epSelList, typeIdLen = 0, epIdLen = 4;
     
-    const parseEpStr = (epStr) => {
-        epStr = epStr.match(epNumRegex);
-        if(epStr.length > 2){
-            epStr = [...epStr].splice(1);
-            epStr[0] = epStr[0] ? epStr[0] : '';
-            return epStr;
+    const parseEpStr = (epStr: string) => {
+        const match = epStr.match(epNumRegex);
+        if (!match) {
+            console.error('[ERROR] No match found')
+            return ['', '']
         }
-        else return [ '', epStr[0] ];
+        if(match.length > 2){
+            const spliced = [...match].splice(1);
+            spliced[0] = spliced[0] ? spliced[0] : '';
+            return spliced;
+        }
+        else return [ '', match[0] ];
     };
     
     epsDataArr = epsDataArr.map(e => {
@@ -192,23 +197,23 @@ async function getShow(){
         return e;
     });
     
-    epSelList = parseSelect(argv.e);
+    epSelList = parseSelect(argv.e as string);
 
     let fnSlug = [], is_selected = false;
     
     let eps = epsDataArr;
     epsDataArr.sort((a, b) => {
-        if (a.item.seasonOrder < b.item.seasonOrder && a.id < b.id) {
+        if (a.item.seasonOrder < b.item.seasonOrder && a.id.localeCompare(b.id) < 0) {
             return -1;
         }
-        if (a.item.seasonOrder > b.item.seasonOrder && a.id > b.id) {
+        if (a.item.seasonOrder > b.item.seasonOrder && a.id.localeCompare(b.id) > 0) {
             return 1;
         }
         return 0;
     });
     
     for(let e in eps){
-        eps[e].id_split[1] = parseInt(eps[e].id_split[1]).toString().padStart(epIdLen, '0');
+        eps[e].id_split[1] = parseInt(eps[e].id_split[1].toString()).toString().padStart(epIdLen, '0');
         let epStrId = eps[e].id_split.join('');
         // select
         is_selected = false;

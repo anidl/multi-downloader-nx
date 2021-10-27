@@ -1,4 +1,4 @@
-const yargs = require('yargs');
+import yargs from 'yargs';
 
 const availableFilenameVars = [
     'title',
@@ -12,9 +12,11 @@ const availableFilenameVars = [
 const subLang = ['enUS', 'esLA', 'ptBR'];
 const dubLang = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
 
-const appArgv = (cfg) => {
+const appArgv = (cfg: {
+    [key: string]: unknown
+}) => {
     // init
-    const parseDefault = (key, _default) => {
+    const parseDefault = (key: string, _default: unknown) => {
         if (Object.prototype.hasOwnProperty.call(cfg, key)) {
             return cfg[key];
         } else
@@ -207,6 +209,13 @@ const appArgv = (cfg) => {
             type: 'number',
             default: parseDefault('timeout', 60 * 1000)
         })
+        .option('debug', {
+            group: 'Utilities:',
+            describe: 'Used to enter debug mode. Please use this flag when opening an issue to get more information'
+                + '\n!Be careful! - Your token might be exposed so make sure to delete it!',
+            type: 'boolean',
+            default: false
+        })
         // help
         .option('help', {
             alias: 'h',
@@ -222,7 +231,7 @@ const appArgv = (cfg) => {
         ])
 
         // --
-        .argv;
+        .parseSync();
     // Resolve unwanted arrays
     if (argv.allDubs)
         argv.dub = dubLang;
@@ -230,7 +239,7 @@ const appArgv = (cfg) => {
         argv.subLang = subLang;
     for (let key in argv) {
         if (argv[key] instanceof Array && !(key === 'subLang' || key === 'dub')) {
-            argv[key] = argv[key].pop();
+            argv[key] = (argv[key] as Array<unknown>).pop();
         }
     }
     return argv;
@@ -238,7 +247,7 @@ const appArgv = (cfg) => {
 
 const showHelp = yargs.showHelp;
 
-module.exports = {
+export {
     appArgv,
     showHelp,
     availableFilenameVars,

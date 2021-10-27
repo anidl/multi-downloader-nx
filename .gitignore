@@ -3,13 +3,13 @@
 /_builds/*
 /node_modules/
 /videos/*.json
+/videos/*.ts
 .DS_Store
 ffmpeg
 mkvmerge
 token.yml
 *.exe
 *.dll
-*.ts
 *.mkv
 *.mp4
 *.ass
