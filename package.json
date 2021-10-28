@@ -51,7 +51,7 @@
         "tsc": "ts-node tsc.ts",
         "prebuild-win64": "npm run tsc",
         "prebuild-linux64": "npm run tsc",
-        "prebuild-maxos64": "npm run tsc",
+        "prebuild-macos64": "npm run tsc",
         "build-win64": "cd lib && node modules/build win64",
         "build-linux64": "cd lib && node modules/build linux64",
         "build-macos64": "cd lib && node modules/build macos64",
