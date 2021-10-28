@@ -1,4 +1,4 @@
-name: eslint
+name: Style and build test
 
 on:
   push:
