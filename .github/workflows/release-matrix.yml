@@ -40,7 +40,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_name: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ env.BUILD_TYPE }}.7z
-          asset_path: ./_builds/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ env.BUILD_TYPE }}.7z
+          asset_path: ./lib/_builds/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ env.BUILD_TYPE }}.7z
           asset_content_type: application/x-7z-compressed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

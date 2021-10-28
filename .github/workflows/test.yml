@@ -1,0 +1,33 @@
+name: Style and build test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+        cache: 'npm'
+    - run: npm i 
+    - run: npx eslint .
+  test: 
+    needs: eslint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 14
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+        cache: 'npm'
+    - run: npm i 
+    - run: npm run test
+
