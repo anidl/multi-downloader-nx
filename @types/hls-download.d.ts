@@ -2,9 +2,7 @@ declare module 'hls-download' {
   export default class hlsDownload {
     constructor(options: {
       m3u8json: {
-        segments: {
-
-        }[],
+        segments: {}[],
         mediaSequence?: number,
       },
       output?: string,
@@ -16,13 +14,13 @@ declare module 'hls-download' {
       skipInit?: boolean,
       timeout?: number
     })
-    async download() : {
+    async download() : Promise<{
       ok: boolean,
       parts: {
         first: number,
         total: number,
         compleated: number
       }
-    }
+    }>
   }
 }

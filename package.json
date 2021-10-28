@@ -44,12 +44,17 @@
         "eslint": "^7.30.0",
         "pkg": "^5.3.3",
         "removeNPMAbsolutePaths": "^2.0.0",
+        "ts-node": "^10.4.0",
         "typescript": "^4.4.4"
     },
     "scripts": {
-        "build-win64": "node modules/build win64",
-        "build-linux64": "node modules/build linux64",
-        "build-macos64": "node modules/build macos64",
+        "tsc": "ts-node tsc.ts",
+        "prebuild-win64": "npm run tsc",
+        "prebuild-linux64": "npm run tsc",
+        "prebuild-maxos64": "npm run tsc",
+        "build-win64": "cd lib && node modules/build win64",
+        "build-linux64": "cd lib && node modules/build linux64",
+        "build-macos64": "cd lib && node modules/build macos64",
         "eslint": "eslint *.js modules",
         "eslint-fix": "eslint *.js modules --fix",
         "test": "echo \"Error: no test specified\" && exit 1"

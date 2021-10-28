@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 // build requirements
-const pkg = require('../package.json');
-const fs = require('fs-extra');
-const modulesCleanup = require('removeNPMAbsolutePaths');
-const { exec } = require('pkg');
+import fs from 'fs-extra';
+import pkg from '../package.json';
+import modulesCleanup from 'removeNPMAbsolutePaths';
+import { exec } from 'pkg';
 
 const buildsDir = './_builds';
 const nodeVer = 'node14-';
@@ -50,6 +50,7 @@ const nodeVer = 'node14-';
     fs.copySync('./config/dir-path.yml', `${buildDir}/config/dir-path.yml`);
     fs.copySync('./modules/cmd-here.bat', `${buildDir}/cmd-here.bat`);
     fs.copySync('./modules/NotoSans-Regular.ttf', `${buildDir}/NotoSans-Regular.ttf`);
+    fs.copySync('./package.json', `${buildDir}/package.json`)
     fs.copySync('./docs/', `${buildDir}/docs/`);
     fs.copySync('./LICENSE.md', `${buildDir}/docs/LICENSE.md`);
     if(fs.existsSync(`${buildsDir}/${buildFull}.7z`)){
@@ -58,7 +59,7 @@ const nodeVer = 'node14-';
     require('child_process').execSync(`7z a -t7z "${buildsDir}/${buildFull}.7z" "${buildDir}"`,{stdio:[0,1,2]});
 }());
 
-function getTarget(bt){
+function getTarget(bt: string) : string {
     switch(bt){
         case 'win64':
             return 'windows-x64';

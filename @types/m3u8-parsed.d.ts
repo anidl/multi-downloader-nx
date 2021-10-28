@@ -16,7 +16,7 @@ declare module 'm3u8-parsed' {
       timeline: number
     }[],
     version: number,
-    mediaGroups?: {
+    mediaGroups: {
       [type: string]: {
         [index: string]: {
           [language: string]: {
@@ -28,7 +28,7 @@ declare module 'm3u8-parsed' {
         }
       }
     },
-    playlists?: {
+    playlists: {
       uri: string,
       timeline: number,
       attributes: {

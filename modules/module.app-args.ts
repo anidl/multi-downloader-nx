@@ -9,20 +9,26 @@ const availableFilenameVars = [
     'height'
 ];
 
-const subLang = ['enUS', 'esLA', 'ptBR'];
-const dubLang = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
+export type possibleDubs = (
+    'enUS' | 'esLA' | 'ptBR' | 'zhMN' | 'jaJP'
+)[]; 
+export type possibleSubs = (
+    'enUS' | 'esLA' | 'ptBR'
+)[];
+const subLang: possibleSubs = ['enUS', 'esLA', 'ptBR'];
+const dubLang: possibleDubs = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
+
 
 const appArgv = (cfg: {
     [key: string]: unknown
 }) => {
     // init
-    const parseDefault = (key: string, _default: unknown) => {
+    const parseDefault = <T = unknown>(key: string, _default: T) : T=> {
         if (Object.prototype.hasOwnProperty.call(cfg, key)) {
-            return cfg[key];
+            return cfg[key] as T;
         } else
             return _default;
     };
-
     const argv = yargs.parserConfiguration({
         'duplicate-arguments-array': true,
         'camel-case-expansion': false
@@ -59,27 +65,27 @@ const appArgv = (cfg: {
             group: 'Downloading:',
             describe: 'Used to download all episodes from the show',
             type: 'boolean',
-            default: parseDefault('all', false)
+            default: parseDefault<boolean>('all', false)
         })
         .option('partsize', {
             group: 'Downloading:',
             describe: 'The amount of parts that should be downloaded in paralell',
             type: 'number',
-            default: parseDefault('partsize', 10)
+            default: parseDefault<number>('partsize', 10)
         })
         // quality
         .option('q', {
             group: 'Downloading:',
             describe: 'Select video layer (0 is max)',
             choices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            default: parseDefault('videoLayer', 7),
+            default: parseDefault<number>('videoLayer', 7),
             type: 'number',
         })
         // alt listing
         .option('alt', {
             group: 'Downloading:',
             describe: 'Alternative episode listing (if available)',
-            default: parseDefault('altList', false),
+            default: parseDefault<boolean>('altList', false),
             type: 'boolean',
         })
         // switch to subs
@@ -87,20 +93,20 @@ const appArgv = (cfg: {
             group: 'Downloading:',
             describe: 'Download non-Japanese Dub (English Dub mode by default)',
             choices: dubLang,
-            default: parseDefault('dub', 'enUS'),
+            default: parseDefault<possibleDubs>('dub', ['enUS']),
             type: 'array',
         })
         .option('subLang', {
             group: 'Downloading:',
             describe: 'Set the subtitle language (English is default and fallback)',
-            default: parseDefault('subLang', 'enUS'),
+            default: parseDefault<possibleSubs>('subLang', ['enUS']),
             choices: subLang,
             type: 'array'
         })
         .option('fontSize', {
             group: 'Downloading:',
             describe: 'Used to set the fontsize of the subtitles',
-            default: parseDefault('fontSize', 55),
+            default: parseDefault<number>('fontSize', 55),
             type: 'number'
         })
         .option('allSubs', {
@@ -119,7 +125,7 @@ const appArgv = (cfg: {
         .option('simul', {
             group: 'Downloading:',
             describe: 'Force downloading simulcast ver. instead of uncut ver. (if uncut ver. available)',
-            default: parseDefault('forceSimul', false),
+            default: parseDefault<boolean>('forceSimul', false),
             type: 'boolean',
         })
         // server number
@@ -128,7 +134,7 @@ const appArgv = (cfg: {
             group: 'Downloading:',
             describe: 'Select server',
             choices: [1, 2, 3, 4],
-            default: parseDefault('nServer', 1),
+            default: parseDefault<number>('nServer', 1),
             type: 'number',
         })
         // skip
@@ -153,19 +159,19 @@ const appArgv = (cfg: {
         .option('proxy', {
             group: 'Proxy:',
             describe: 'Set http(s)/socks proxy WHATWG url',
-            default: parseDefault('proxy', false),
+            default: parseDefault<boolean>('proxy', false),
             hidden: true,
         })
         .option('proxy-auth', {
             group: 'Proxy:',
             describe: 'Colon-separated username and password for proxy',
-            default: parseDefault('proxy_auth', false),
+            default: parseDefault<string|boolean>('proxy_auth', false),
             hidden: true,
         })
         .option('ssp', {
             group: 'Proxy:',
             describe: 'Don\'t use proxy for stream and subtitles downloading',
-            default: parseDefault('proxy_ssp', false),
+            default: parseDefault<boolean>('proxy_ssp', false),
             hidden: true,
             type: 'boolean',
         })
@@ -178,7 +184,7 @@ const appArgv = (cfg: {
         .option('mp4', {
             group: 'Muxing:',
             describe: 'Mux into mp4',
-            default: parseDefault('mp4mux', false),
+            default: parseDefault<boolean>('mp4mux', false),
             type: 'boolean'
         })
         // filenaming
@@ -187,20 +193,20 @@ const appArgv = (cfg: {
             describe: `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
                 .map(a => `'${a}'`).join(', ')} as variables.`,
             type: 'string',
-            default: parseDefault('fileName', '[Funimation] ${showTitle} - ${episode} [${height}p]')
+            default: parseDefault<string>('fileName', '[Funimation] ${showTitle} - ${episode} [${height}p]')
         })
         .option('numbers', {
             group: 'Filename Template:',
             describe: `Set how long a number in the title should be at least.\n${[[3, 5, '005'], [2, 1, '01'], [1, 20, '20']]
                 .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
             type: 'number',
-            default: parseDefault('numbers', 2)
+            default: parseDefault<number>('numbers', 2)
         })
         // util
         .option('nocleanup', {
             group: 'Utilities:',
             describe: 'Dont\'t delete the input files after muxing',
-            default: parseDefault('noCleanUp', false),
+            default: parseDefault<boolean>('noCleanUp', false),
             type: 'boolean'
         })
         .option('timeout', {

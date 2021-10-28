@@ -38,35 +38,9 @@ export interface Item {
   mostRecentAvod:                         MostRecent;
 }
 
-export enum Access {
-  AVODSimulcastEnglish = "A-VOD_Simulcast_English",
-  AVODUncutEnglish = "A-VOD_Uncut_English",
-  SVODSimulcastEnglish = "SVOD_Simulcast_English",
-  SVODUncutEnglish = "SVOD_Uncut_English",
-}
-
-export enum AltAvail {
-  MostRecentSvodJpnUs = "most_recent_svod_jpn_us",
-}
-
-export enum Audio {
-  English = "English",
-}
-
 export enum ContentType {
   Episode = "episode",
   Ova = "ova",
-}
-
-export enum EngAllTerritoryAvail {
-  MostRecentSvodEngAllTerr = "most_recent_svod_eng_all_terr",
-}
-
-export enum Genre {
-  ActionAdventure = "Action/Adventure",
-  Comedy = "Comedy",
-  Drama = "Drama",
-  Fantasy = "Fantasy",
 }
 
 export interface IDs {
@@ -76,47 +50,26 @@ export interface IDs {
   externalAsianId?: string
 }
 
-export enum ExternalSeasonID {
-  TrsS11 = "TRS-S1-1",
-  TrsS22 = "TRS-S2-2",
-}
-
-export enum ID {
-  Trs = "TRS",
-}
-
 export interface Item {
-  seasonTitle:     SeasonTitle;
+  seasonTitle:     string;
   seasonId:        number;
   episodeOrder:    number;
   episodeSlug:     string;
   created:         Date;
-  titleSlug:       TitleSlug;
+  titleSlug:       string;
   episodeNum:      string;
   episodeId:       number;
   titleId:         number;
   seasonNum:       string;
   ratings:         Array<string[]>;
   showImage:       string;
-  titleName:       TitleName;
+  titleName:       string;
   runtime:         string;
   episodeName:     string;
   seasonOrder:     number;
-  titleExternalId: ID;
+  titleExternalId: string;
 }
 
-export enum SeasonTitle {
-  Season1 = "Season 1",
-  Season2 = "Season 2",
-}
-
-export enum TitleName {
-  ThatTimeIGotReincarnatedAsASlime = "That Time I Got Reincarnated as a Slime",
-}
-
-export enum TitleSlug {
-  ThatTimeIGotReincarnatedAsASlime = "that-time-i-got-reincarnated-as-a-slime",
-}
 
 export interface MostRecent {
   image?:                 string;
@@ -147,14 +100,6 @@ export interface MostRecent {
   purchased?:             boolean;
 }
 
-export enum Device {
-  All = "All",
-}
-
-export enum Distributor {
-  FunimationVenue = "FunimationVenue",
-}
-
 export interface MostRecentAvodIDS {
   externalSeasonId:  ExternalSeasonID;
   externalAsianId:   null;
@@ -171,24 +116,12 @@ export enum Purchase {
   Svod = "SVOD",
 }
 
-export enum MostRecentAvodQuality {
-  HD1080 = "HD 1080",
-}
-
-export enum Territory {
-  Usa = "USA",
-}
-
 export enum Version {
   Simulcast = "Simulcast",
   Uncut = "Uncut",
 }
 
 export interface MostRecentSvodJpnUs {
-}
-
-export enum PrimaryAvail {
-  MostRecentSvodUs = "most_recent_svod_us",
 }
 
 export interface QualityClass {

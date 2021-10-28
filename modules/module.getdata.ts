@@ -26,7 +26,7 @@ export type Options = {
   },
   useToken?: boolean,
   token?: string|boolean,
-  dinstid?: boolean,
+  dinstid?: boolean|string,
   debug?: boolean
 }
 const getData = async <T = string>(options: Options) => {

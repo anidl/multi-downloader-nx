@@ -16,3 +16,4 @@ token.yml
 *.srt
 *.resume
 *.user.yml
+lib
