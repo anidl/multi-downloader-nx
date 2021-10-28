@@ -2,7 +2,7 @@ declare module 'hls-download' {
   export default class hlsDownload {
     constructor(options: {
       m3u8json: {
-        segments: {}[],
+        segments: Record<string, unknown>[],
         mediaSequence?: number,
       },
       output?: string,

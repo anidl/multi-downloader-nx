@@ -185,16 +185,16 @@ class Merger {
       MKVmerge: undefined|string|false,
       FFmpeg: undefined|string|false
     } = {
-        MKVmerge: bin.mkvmerge,
-        FFmpeg: bin.ffmpeg,
+      MKVmerge: bin.mkvmerge,
+      FFmpeg: bin.ffmpeg,
     };
     if( !useMP4format && !merger.MKVmerge ){
-        console.log('[WARN] MKVMerge not found, skip using this...');
-        merger.MKVmerge = false;
+      console.log('[WARN] MKVMerge not found, skip using this...');
+      merger.MKVmerge = false;
     }
     if( !merger.MKVmerge && !merger.FFmpeg || useMP4format && !merger.FFmpeg ){
-        console.log('[WARN] FFmpeg not found, skip using this...');
-        merger.FFmpeg = false;
+      console.log('[WARN] FFmpeg not found, skip using this...');
+      merger.FFmpeg = false;
     }
     return merger;
 

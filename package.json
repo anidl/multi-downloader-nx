@@ -1,7 +1,7 @@
 {
     "name": "funimation-downloader-nx",
     "short_name": "funi",
-    "version": "4.12.5",
+    "version": "5.0.0",
     "description": "Download videos from Funimation via cli.",
     "keywords": [
         "download",
@@ -57,6 +57,8 @@
         "build-macos64": "cd lib && node modules/build macos64",
         "eslint": "eslint *.js modules",
         "eslint-fix": "eslint *.js modules --fix",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "pretest": "npm run tsc",
+        "test": "cd lib && node modules/build win64 && node modules/build linux64 && node modules/build macos64"
+
     }
 }

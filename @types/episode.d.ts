@@ -59,20 +59,20 @@ export interface Value {
 }
 
 export enum Label {
-  Rating = "Rating",
-  RatingSystem = "Rating System",
-  ReleaseDate = "Release Date",
-  Synopsis = "Synopsis",
-  SynopsisType = "Synopsis Type",
+  Rating = 'Rating',
+  RatingSystem = 'Rating System',
+  ReleaseDate = 'Release Date',
+  Synopsis = 'Synopsis',
+  SynopsisType = 'Synopsis Type',
 }
 
 export enum MetaType {
-  Rating = "rating",
-  RatingSystemType = "RatingSystemType",
-  ReleaseDate = "release-date",
-  Synopsis = "synopsis",
-  Synopsistype = "synopsistype",
-  VideoRatingType = "VideoRatingType",
+  Rating = 'rating',
+  RatingSystemType = 'RatingSystemType',
+  ReleaseDate = 'release-date',
+  Synopsis = 'synopsis',
+  Synopsistype = 'synopsistype',
+  VideoRatingType = 'VideoRatingType',
 }
 
 export interface HistoricalSelections {
@@ -87,8 +87,8 @@ export interface EpisodeDataIDS {
 }
 
 export enum TitleElement {
-  Empty = "",
-  English = "English",
+  Empty = '',
+  English = 'English',
 }
 
 export interface Media {
@@ -194,8 +194,7 @@ export interface AvailIDS {
   externalAlphaId:   string;
 }
 
-export interface Next {
-}
+export type Next = Record<string, unknown> 
 
 export interface LanguageClass {
   code:  string;
@@ -299,7 +298,7 @@ export interface CatalogParent {
 }
 
 export enum Source {
-  Dbb = "dbb",
+  Dbb = 'dbb',
 }
 
 export interface MetaItems {
@@ -313,10 +312,10 @@ export interface Filters {
 }
 
 export interface Items {
-  "release-date":                AnimationProductionStudio;
+  'release-date':                AnimationProductionStudio;
   rating:                        AnimationProductionStudio;
   synopsis:                      AnimationProductionStudio;
-  "animation-production-studio": AnimationProductionStudio;
+  'animation-production-studio': AnimationProductionStudio;
 }
 
 export interface AnimationProductionStudio {
@@ -366,8 +365,8 @@ export interface PreviousSeasonEpisode {
 }
 
 export enum Type {
-  Episode = "episode",
-  Ova = "ova",
+  Episode = 'episode',
+  Ova = 'ova',
 }
 
 export interface Quality {

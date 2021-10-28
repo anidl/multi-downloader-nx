@@ -32,17 +32,17 @@ declare module 'm3u8-parsed' {
       uri: string,
       timeline: number,
       attributes: {
-        "CLOSED-CAPTIONS": string,
-        "AUDIO": string,
-        "FRAME-RATE": number,
-        "RESOLUTION": {
+        'CLOSED-CAPTIONS': string,
+        'AUDIO': string,
+        'FRAME-RATE': number,
+        'RESOLUTION': {
           width: number,
           height: number
         },
-        "CODECS": string,
-        "AVERAGE-BANDWIDTH": string,
-        "BANDWIDTH": number
+        'CODECS': string,
+        'AVERAGE-BANDWIDTH': string,
+        'BANDWIDTH': number
       }
     }[],
-  }
+  };
 }

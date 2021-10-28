@@ -39,8 +39,8 @@ export interface Item {
 }
 
 export enum ContentType {
-  Episode = "episode",
-  Ova = "ova",
+  Episode = 'episode',
+  Ova = 'ova',
 }
 
 export interface IDs {
@@ -110,19 +110,18 @@ export interface MostRecentAvodIDS {
 }
 
 export enum Purchase {
-  AVOD = "A-VOD",
-  Dfov = "DFOV",
-  Est = "EST",
-  Svod = "SVOD",
+  AVOD = 'A-VOD',
+  Dfov = 'DFOV',
+  Est = 'EST',
+  Svod = 'SVOD',
 }
 
 export enum Version {
-  Simulcast = "Simulcast",
-  Uncut = "Uncut",
+  Simulcast = 'Simulcast',
+  Uncut = 'Uncut',
 }
 
-export interface MostRecentSvodJpnUs {
-}
+export type MostRecentSvodJpnUs = Record<string, any>
 
 export interface QualityClass {
   quality: QualityQuality;
@@ -130,8 +129,8 @@ export interface QualityClass {
 }
 
 export enum QualityQuality {
-  HD = "HD",
-  SD = "SD",
+  HD = 'HD',
+  SD = 'SD',
 }
 
 export interface TitleImages {
