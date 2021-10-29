@@ -24,6 +24,7 @@
     "license": "MIT",
     "main": "funi.js",
     "dependencies": {
+        "cheerio": "^1.0.0-rc.10",
         "form-data": "^4.0.0",
         "fs-extra": "^10.0.0",
         "got": "^11.7.0",
@@ -59,6 +60,5 @@
         "eslint-fix": "eslint *.js modules --fix",
         "pretest": "npm run tsc",
         "test": "cd lib && node modules/build win64 && node modules/build linux64 && node modules/build macos64"
-
     }
 }

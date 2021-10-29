@@ -1,4 +1,18 @@
 import yargs from 'yargs';
+import * as langsData from "./module.langsData";
+
+yargs(process.argv.slice(2));
+
+const groups = {
+  'auth': 'Authentication:',
+  'fonts': 'Fonts:',
+  'search': 'Search:',
+  'dl': 'Downloading:',
+  'mux': 'Muxing:',
+  'fileName': 'Filename Template:',
+  'debug': 'Debug:',
+  'util': 'Utilities:'
+}
 
 const availableFilenameVars = [
   'title',
@@ -6,7 +20,8 @@ const availableFilenameVars = [
   'showTitle',
   'season',
   'width',
-  'height'
+  'height',
+  'service'
 ];
 
 export type possibleDubs = (
@@ -18,238 +33,235 @@ export type possibleSubs = (
 const subLang: possibleSubs = ['enUS', 'esLA', 'ptBR'];
 const dubLang: possibleDubs = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
 
-
 const appArgv = (cfg: {
-    [key: string]: unknown
+  [key: string]: unknown
 }) => {
-  // init
   const parseDefault = <T = unknown>(key: string, _default: T) : T=> {
     if (Object.prototype.hasOwnProperty.call(cfg, key)) {
       return cfg[key] as T;
     } else
       return _default;
   };
-  const argv = yargs.parserConfiguration({
-    'duplicate-arguments-array': true,
-    'camel-case-expansion': false
-  })
-  // main
-    .wrap(Math.min(120)) // yargs.terminalWidth()
-    .help(false).version(false)
-    .usage('Usage: $0 [options]')
-  // auth
-    .option('auth', {
-      group: 'Authentication:',
-      describe: 'Enter authentication mode',
-      type: 'boolean',
-    })
-  // search
-    .option('search', {
-      alias: 'f',
-      group: 'Search:',
-      describe: 'Search show ids',
-      type: 'string',
-    })
-  // select show and eps
-    .option('s', {
-      group: 'Downloading:',
-      describe: 'Sets the show id',
-      type: 'number',
-    })
-    .option('e', {
-      group: 'Downloading:',
-      describe: 'Select episode ids (comma-separated, hyphen-sequence)',
-      type: 'string',
-    })
-    .option('all', {
-      group: 'Downloading:',
-      describe: 'Used to download all episodes from the show',
-      type: 'boolean',
-      default: parseDefault<boolean>('all', false)
-    })
-    .option('partsize', {
-      group: 'Downloading:',
-      describe: 'The amount of parts that should be downloaded in paralell',
-      type: 'number',
-      default: parseDefault<number>('partsize', 10)
-    })
-  // quality
-    .option('q', {
-      group: 'Downloading:',
-      describe: 'Select video layer (0 is max)',
-      choices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      default: parseDefault<number>('videoLayer', 7),
-      type: 'number',
-    })
-  // alt listing
-    .option('alt', {
-      group: 'Downloading:',
-      describe: 'Alternative episode listing (if available)',
-      default: parseDefault<boolean>('altList', false),
-      type: 'boolean',
-    })
-  // switch to subs
-    .option('dub', {
-      group: 'Downloading:',
-      describe: 'Download non-Japanese Dub (English Dub mode by default)',
-      choices: dubLang,
-      default: parseDefault<possibleDubs>('dub', ['enUS']),
-      type: 'array',
-    })
-    .option('subLang', {
-      group: 'Downloading:',
-      describe: 'Set the subtitle language (English is default and fallback)',
-      default: parseDefault<possibleSubs>('subLang', ['enUS']),
-      choices: subLang,
-      type: 'array'
-    })
-    .option('fontSize', {
-      group: 'Downloading:',
-      describe: 'Used to set the fontsize of the subtitles',
-      default: parseDefault<number>('fontSize', 55),
-      type: 'number'
-    })
-    .option('allSubs', {
-      group: 'Downloading:',
-      describe: 'If set to true, all available subs will get downloaded',
-      default: false,
-      type: 'boolean'
-    })
-    .option('allDubs', {
-      group: 'Downloading:',
-      describe: 'If set to true, all available dubs will get downloaded',
-      default: false,
-      type: 'boolean'
-    })
-  // simulcast
-    .option('simul', {
-      group: 'Downloading:',
-      describe: 'Force downloading simulcast ver. instead of uncut ver. (if uncut ver. available)',
-      default: parseDefault<boolean>('forceSimul', false),
-      type: 'boolean',
-    })
-  // server number
-    .option('x', {
-      alias: 'server',
-      group: 'Downloading:',
-      describe: 'Select server',
-      choices: [1, 2, 3, 4],
-      default: parseDefault<number>('nServer', 1),
-      type: 'number',
-    })
-  // skip
-    .option('noaudio', {
-      group: 'Downloading:',
-      describe: 'Skip downloading audio',
-      type: 'boolean'
-    })
-    .option('novids', {
-      group: 'Downloading:',
-      alias: 'skipdl',
-      describe: 'Skip downloading video',
-      type: 'boolean',
-    })
-    .option('nosubs', {
-      group: 'Downloading:',
-      describe: 'Skip downloading subtitles for English Dub (if available)',
-      type: 'boolean',
-      default: false
-    })
-  // proxy
-    .option('proxy', {
-      group: 'Proxy:',
-      describe: 'Set http(s)/socks proxy WHATWG url',
-      default: parseDefault<boolean>('proxy', false),
-      hidden: true,
-    })
-    .option('proxy-auth', {
-      group: 'Proxy:',
-      describe: 'Colon-separated username and password for proxy',
-      default: parseDefault<string|boolean>('proxy_auth', false),
-      hidden: true,
-    })
-    .option('ssp', {
-      group: 'Proxy:',
-      describe: 'Don\'t use proxy for stream and subtitles downloading',
-      default: parseDefault<boolean>('proxy_ssp', false),
-      hidden: true,
-      type: 'boolean',
-    })
-  // muxing
-    .option('skipmux', {
-      group: 'Muxing:',
-      describe: 'Skip muxing video and subtitles',
-      type: 'boolean',
-    })
-    .option('mp4', {
-      group: 'Muxing:',
-      describe: 'Mux into mp4',
-      default: parseDefault<boolean>('mp4mux', false),
-      type: 'boolean'
-    })
-  // filenaming
-    .option('fileName', {
-      group: 'Filename Template:',
-      describe: `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
-        .map(a => `'${a}'`).join(', ')} as variables.`,
-      type: 'string',
-      default: parseDefault<string>('fileName', '[Funimation] ${showTitle} - ${episode} [${height}p]')
-    })
-    .option('numbers', {
-      group: 'Filename Template:',
-      describe: `Set how long a number in the title should be at least.\n${[[3, 5, '005'], [2, 1, '01'], [1, 20, '20']]
-        .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
-      type: 'number',
-      default: parseDefault<number>('numbers', 2)
-    })
-  // util
-    .option('nocleanup', {
-      group: 'Utilities:',
-      describe: 'Dont\'t delete the input files after muxing',
-      default: parseDefault<boolean>('noCleanUp', false),
-      type: 'boolean'
-    })
-    .option('timeout', {
-      group: 'Downloading:',
-      describe: 'Set the timeout of all download reqests. Set in millisecods',
-      type: 'number',
-      default: parseDefault('timeout', 60 * 1000)
-    })
-    .option('debug', {
-      group: 'Utilities:',
-      describe: 'Used to enter debug mode. Please use this flag when opening an issue to get more information'
-                + '\n!Be careful! - Your token might be exposed so make sure to delete it!',
-      type: 'boolean',
-      default: false
-    })
-  // help
-    .option('help', {
-      alias: 'h',
-      group: 'Help:',
-      describe: 'Show this help',
-      type: 'boolean'
-    })
-  // usage
-    .example([
-      ['$0 --search "My Hero"', 'search "My Hero" in title'],
-      ['$0 -s 124389 -e 1,2,3', 'download episodes 1-3 from show with id 124389'],
-      ['$0 -s 124389 -e 1-3,2-7,s1-2', 'download episodes 1-7 and "S"-episodes 1-2 from show with id 124389'],
-    ])
 
-  // --
-    .parseSync();
-    // Resolve unwanted arrays
-  if (argv.allDubs)
-    argv.dub = dubLang;
-  if (argv.allSubs)
-    argv.subLang = subLang;
-  for (const key in argv) {
-    if (argv[key] instanceof Array && !(key === 'subLang' || key === 'dub')) {
-      argv[key] = (argv[key] as Array<unknown>).pop();
-    }
-  }
-  return argv;
-};
+  const argv = yargs.parserConfiguration({
+    "duplicate-arguments-array": false,
+    "camel-case-expansion": false
+  })
+  .wrap(yargs.terminalWidth())
+  .usage('Usage: $0 [options]')
+  .help(false).version(false)
+  .option('auth', {
+    group: groups.auth,
+    describe: 'Enter authentication mode',
+    type: 'boolean'
+  })
+  .option('dlFonts', {
+    group: groups.fonts,
+    describe: 'Download all required fonts for mkv muxing',
+    type: 'boolean'
+  })
+  .option('search', {
+    group: groups.search,
+    alias: 'f',
+    describe: 'Search for an anime',
+    type: 'string'
+  })
+  .option('search-type', {
+    group: groups.search,
+    describe: 'Search type used for crunchyroll',
+    choices: [ '', 'top_results', 'series', 'movie_listing', 'episode' ],
+    default: '',
+    type: 'string',
+  })
+  .option('page', {
+    group: groups.search,
+    alias: 'p',
+    describe: 'Page number for search results',
+    type: 'number',
+  })
+  .option('search-locale', {
+    group: groups.search,
+    describe: 'Search locale used for crunchyroll',
+    choices: langsData.searchLocales,
+    default: '',
+    type: 'string',
+  })
+  .option('new', {
+    group: groups.dl,
+    describe: 'Get last updated series list from crunchyroll',
+    type: 'boolean',
+  })
+  .option('movie-listing', {
+    group: groups.dl,
+    alias: 'flm',
+    describe: 'Get video list by Movie Listing ID',
+    type: 'string',
+  })
+  .option('series', {
+    group: groups.dl,
+    alias: 'srz',
+    describe: 'Get season list by Series ID',
+    type: 'string',
+  })
+  .option('s', {
+    group: groups.dl,
+    describe: 'Set the season ID',
+    type: 'string'
+  })
+  .option('e', {
+    group: groups.dl,
+    describe: 'Sets the Episode Number/IDs (comma-separated, hyphen-sequence)',
+    type: 'string',
+  })
+  .option('q', {
+    group: groups.dl,
+    describe: 'Set the quality layer. Use 0 to get the best quality.',
+    default: parseDefault<number>('videoLayer', 7),
+    type: 'number'
+  })
+  .option('server', {
+    group: groups.dl,
+    alias: 'x',
+    describe: 'Select server',
+    choices: [1, 2, 3, 4],
+    default: parseDefault<number>('nServer', 1),
+    type: 'number',
+  })
+  .option('kstream', {
+    group: groups.dl,
+    alias: 'k',
+    describe: 'Select specific stream for crunchyroll',
+    choices: [1, 2, 3, 4, 5, 6, 7],
+    default: parseDefault<number>('kStream', 1),
+    type: 'number',
+  })
+  .option('partsize', {
+    group: groups.dl,
+    describe: 'Set the amount of parts that should be downloaded in paralell',
+    type: 'number',
+    default: parseDefault<number>('partsize', 10)
+  })
+  .option('hsland', {
+    group: groups.dl,
+    describe: 'Download video with specific hardsubs',
+    choices: langsData.subtitleLanguagesFilter.slice(1),
+    default: parseDefault<string>('hsLang', 'none'),
+    type: 'string',
+  })
+  .option('subLang', {
+    group: groups.dl,
+    describe: 'Set the subtitles to download (Funi only)',
+    choices: subLang, 
+    default: parseDefault<string[]>('subLang', []),
+    type: 'array'
+  })
+  .option('novids', {
+    group: groups.dl,
+    describe: 'Skip downloading videos',
+    type: 'boolean'
+  })
+  .option('noaudio', {
+    group: groups.dl,
+    describe: 'Skip downloading audio',
+    type: 'boolean'
+  })
+  .option('nosubs', {
+    group: groups.dl,
+    describe: 'Skip downloading subtitles',
+    type: 'boolean'
+  })
+  .option('dub', {
+    group: groups.dl,
+    describe: 'Set languages to download (funi only)',
+    choices: dubLang,
+    default: parseDefault<possibleDubs>('dub', ['enUS']),
+    type: 'array'
+  })
+  .option('all', {
+    group: groups.dl,
+    describe: 'Used to download all episodes from the show (Funi only)',
+    type: 'boolean',
+    default: parseDefault<boolean>('all', false)
+  })
+  .option('fontSize', {
+    group: groups.dl,
+    describe: 'Used to set the fontsize of the subtitles',
+    default: parseDefault<number>('fontSize', 55),
+    type: 'number'
+  })
+  .option('allSubs', {
+    group: groups.dl,
+    describe: 'If set to true, all available subs will get downloaded (Funi only)',
+    default: false,
+    type: 'boolean'
+  })
+  .option('allDubs', {
+    group: groups.dl,
+    describe: 'If set to true, all available dubs will get downloaded (Funi only)',
+    default: false,
+    type: 'boolean'
+  })
+  .option('timeout', {
+    group: groups.dl,
+    describe: 'Set the timeout of all download reqests. Set in millisecods',
+    type: 'number',
+    default: parseDefault('timeout', 60 * 1000)
+  })
+  .option('simul', {
+    group: groups.dl,
+    describe: 'Force downloading simulcast ver. instead of uncut ver. (if uncut ver. available) (Funi only)',
+    default: parseDefault<boolean>('forceSimul', false),
+    type: 'boolean',
+  })
+  .option('mp4', {
+    group: groups.mux,
+    describe: 'Mux video into mp4',
+    default: parseDefault<boolean>('mp4mux', false),
+    type: 'boolean'
+  })
+  .option('skipmux', {
+    group: groups.mux,
+    describe: 'Skip muxing video and subtitles',
+    type: 'boolean'
+  })
+  .option('fileName', {
+    group: groups.fileName,
+    describe: `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
+      .map(a => `'${a}'`).join(', ')} as variables.`,
+    type: 'string',
+    default: parseDefault<string>('fileName', '[${service}] ${showTitle} - ${episode} [${height}p]')
+  })
+  .option('numbers', {
+    group: groups.fileName,
+    describe: `Set how long a number in the title should be at least.\n${[[3, 5, '005'], [2, 1, '01'], [1, 20, '20']]
+      .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
+    type: 'number',
+    default: parseDefault<number>('numbers', 2)
+  })
+  .option('nosess', {
+    group: groups.debug,
+    type: 'boolean',
+    default: 'Reset session cookie for testing purposes'
+  })
+  .option('debug', {
+    group: groups.debug,
+    describe: 'Debug mode (tokens may be revield in the console output)',
+    type: 'boolean'
+  })
+  .option('nocleanup', {
+    group: groups.util,
+    describe: 'Don\'t delete subtitles and videos after muxing',
+    default: parseDefault<boolean>('noCleanUp', false),
+    type: 'boolean'
+  })
+  .option('help', {
+    alias: 'h',
+    group: 'Help:',
+    describe: 'Show this help',
+    type: 'boolean'
+  })
+  .parseSync();
+}
 
 const showHelp = yargs.showHelp;
 
@@ -257,6 +269,6 @@ export {
   appArgv,
   showHelp,
   availableFilenameVars,
-  dubLang,
-  subLang
-};
+  subLang,
+  dubLang
+}

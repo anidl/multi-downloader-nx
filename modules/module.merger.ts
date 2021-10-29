@@ -1,4 +1,8 @@
 import * as iso639 from 'iso-639';
+import { fonts, fontMime } from "./module.fontsData";
+import path from "path";
+import fs from "fs";
+import { LanguageItem } from './module.langsData';
 
 export type MergerInput = {
   path: string,
@@ -8,6 +12,15 @@ export type MergerInput = {
 export type SubtitleInput = {
   language: string,
   file: string,
+  fonts?: ParsedFont[]
+}
+
+export type Font = keyof typeof fonts;
+
+export type ParsedFont = {
+  name: string,
+  path: string,
+  mime: string,
 }
 
 export type MergerOptions = {
@@ -16,7 +29,7 @@ export type MergerOptions = {
   onlyAudio: MergerInput[],
   subtitels: SubtitleInput[],
   output: string,
-  simul?: boolean
+  simul?: boolean,
 }
 
 class Merger {
@@ -166,6 +179,13 @@ class Merger {
         args.push('--track-name', `0:"${trackName}"`);
         args.push('--language', `0:${Merger.getLanguageCode(subObj.language)}`);
         args.push(`"${subObj.file}"`);
+        if (subObj.fonts && subObj.fonts.length > 0) {
+          for (const f of subObj.fonts) {
+            args.push('--attachment-name', f.name);
+            args.push('--attachment-mime-type', f.mime);
+            args.push('--attach-file', f.path);
+          }
+        }
       }
     } else {
       args.push(
@@ -173,6 +193,7 @@ class Merger {
         '--no-attachments'
       );
     }
+
 
     return args.join(' ');
   };
@@ -199,6 +220,40 @@ class Merger {
     return merger;
 
   }
+
+  public static makeFontsList (fontsDir: string, subs: {
+    language: LanguageItem,
+    fonts: Font[]
+  }[]) : ParsedFont[] {
+    let fontsNameList: Font[] = [], fontsList = [], subsList = [], isNstr = true;
+    for(const s of subs){
+      fontsNameList.push(...s.fonts);
+      subsList.push(s.language.locale);
+    }
+    fontsNameList = [...new Set(fontsNameList)];
+    if(subsList.length > 0){
+      console.log('\n[INFO] Subtitles: %s (Total: %s)', subsList.join(', '), subsList.length);
+      isNstr = false;
+    }
+    if(fontsNameList.length > 0){
+      console.log((isNstr ? '\n' : '') + '[INFO] Required fonts: %s (Total: %s)', fontsNameList.join(', '), fontsNameList.length);
+    }
+    for(const f of fontsNameList){
+      const fontFile = fonts[f];
+      if(fontFile){
+        const fontPath = path.join(fontsDir, fontFile);
+        const mime = fontMime(fontFile);
+        if(fs.existsSync(fontPath) && fs.statSync(fontPath).size != 0){
+          fontsList.push({
+            name: fontFile,
+            path: fontPath,
+            mime: mime,
+          });
+        }
+      }
+    }
+    return fontsList;
+  };
 
 }
 

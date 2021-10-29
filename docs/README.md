@@ -1,10 +1,10 @@
-# Funimation Downloader NX
+# Anime Downloader NX by AniDL
 
-Funimation Downloader NX is capable of downloading videos from the *Funimation* streaming service.
+This downloader can download anime from diffrent sites. Currently supported are *Funimation* and *Crunchyroll*.
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Funimation*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
+This application is not endorsed by or affiliated with *Funimation* or *Crunchyroll*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
 
 ## Prerequisites
 

@@ -7,10 +7,14 @@ import { lookpath } from 'lookpath';
 const workingDir = (process as NodeJS.Process & {
   pkg?: unknown
 }).pkg ? path.dirname(process.execPath) : path.join(__dirname, '/..');
-const binCfgFile = path.join(workingDir, 'config', 'bin-path');
-const dirCfgFile = path.join(workingDir, 'config', 'dir-path');
-const cliCfgFile = path.join(workingDir, 'config', 'cli-defaults');
-const tokenFile  = path.join(workingDir, 'config', 'token');
+const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
+const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
+const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
+const sessCfgFile  = path.join(workingDir, 'config', 'session');
+const tokenFile    = {
+  funi: path.join(workingDir, 'config', 'funi_token'),
+  cr: path.join(workingDir, 'config', 'cr_token')
+};
 
 const loadYamlCfgFile = <T extends Record<string, any>>(file: string, isSess?: boolean): T => {
   if(fs.existsSync(`${file}.user.yml`) && !isSess){
@@ -49,13 +53,13 @@ const loadCfg = () : ConfigObject => {
   const defaultCfg: ConfigObject = {
     bin: {},
     dir: loadYamlCfgFile<{
-          content: string,
-          trash: string,
-          fonts: string
-        }>(dirCfgFile),
+      content: string,
+      trash: string,
+      fonts: string
+    }>(dirCfgFile),
     cli: loadYamlCfgFile<{
-          [key: string]: any
-        }>(cliCfgFile),
+      [key: string]: any
+    }>(cliCfgFile),
   };
   const defaultDirs = {
     fonts: '${wdir}/fonts/',
@@ -65,7 +69,7 @@ const loadCfg = () : ConfigObject => {
   if (typeof defaultCfg.dir !== 'object' || defaultCfg.dir === null || Array.isArray(defaultCfg.dir)) {
     defaultCfg.dir = defaultDirs;
   }
-
+  
   const keys = Object.keys(defaultDirs) as (keyof typeof defaultDirs)[];
   for (const key of keys) {
     if (!Object.prototype.hasOwnProperty.call(defaultCfg.dir, key) || typeof defaultCfg.dir[key] !== 'string') {
@@ -75,7 +79,7 @@ const loadCfg = () : ConfigObject => {
       defaultCfg.dir[key] = path.join(workingDir, defaultCfg.dir[key].replace(/^\${wdir}/, ''));
     }
   }
-
+  
   if(!fs.existsSync(defaultCfg.dir.content)){
     try{
       fs.ensureDirSync(defaultCfg.dir.content);
@@ -118,14 +122,57 @@ const loadBinCfg = async () => {
   return binCfg;
 };
 
+const loadCRSession = () => {
+  let session = loadYamlCfgFile(sessCfgFile, true);
+  if(typeof session !== 'object' || session === null || Array.isArray(session)){
+    session = {};
+  }
+  for(const cv of Object.keys(session)){
+    if(typeof session[cv] !== 'object' || session[cv] === null || Array.isArray(session[cv])){
+      session[cv] = {};
+    }
+  }
+  return session;
+};
+
+const saveCRSession = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(sessCfgFile);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${sessCfgFile}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.log('[ERROR] Can\'t save session file to disk!');
+  }
+};
+
+const loadCRToken = () => {
+  let token = loadYamlCfgFile(tokenFile.cr, true);
+  if(typeof token !== 'object' || token === null || Array.isArray(token)){
+    token = {};
+  }
+  return token;
+};
+
+const saveCRToken = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(tokenFile.cr);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${tokenFile.cr}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.log('[ERROR] Can\'t save token file to disk!');
+  }
+};
+
 const loadFuniToken = () => {
   const loadedToken = loadYamlCfgFile<{
-      token?: string
-    }>(tokenFile, true);
+    token?: string
+  }>(tokenFile.funi, true);
   let token: false|string = false;
   if (loadedToken && loadedToken.token)
-    token = loadedToken.token;
-    // info if token not set
+  token = loadedToken.token;
+  // info if token not set
   if(!token){
     console.log('[INFO] Token not set!\n');
   }
@@ -135,14 +182,14 @@ const loadFuniToken = () => {
 const saveFuniToken = (data: {
   token?: string
 }) => {
-  const cfgFolder = path.dirname(tokenFile);
+  const cfgFolder = path.dirname(tokenFile.funi);
   try{
     fs.ensureDirSync(cfgFolder);
-    fs.writeFileSync(`${tokenFile}.yml`, yaml.stringify(data));
+    fs.writeFileSync(`${tokenFile.funi}.yml`, yaml.stringify(data));
   }
   catch(e){
     console.log('[ERROR] Can\'t save token file to disk!');
   }
 };
 
-export { loadBinCfg, loadCfg, loadFuniToken, saveFuniToken };
+export { loadBinCfg, loadCfg, loadFuniToken, saveFuniToken, saveCRSession, saveCRToken, loadCRToken, loadCRSession };
