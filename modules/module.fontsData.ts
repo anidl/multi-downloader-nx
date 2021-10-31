@@ -89,5 +89,7 @@ function fontMime(fontFile: string){
   return 'application/octet-stream';
 }
 
+export type AvailableFonts = keyof typeof fonts;
+
 // output
 export { root, fonts, assFonts, fontMime };

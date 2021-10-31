@@ -119,9 +119,9 @@ const appArgv = (cfg: {
     default: parseDefault<number>('videoLayer', 7),
     type: 'number'
   })
-  .option('server', {
+  .option('x', {
     group: groups.dl,
-    alias: 'x',
+    alias: 'server',
     describe: 'Select server',
     choices: [1, 2, 3, 4],
     default: parseDefault<number>('nServer', 1),
@@ -260,7 +260,14 @@ const appArgv = (cfg: {
     describe: 'Show this help',
     type: 'boolean'
   })
+  .option('service', {
+    group: groups.util,
+    describe: 'Set the service to use',
+    choices: ['funi', 'chrunchy'],
+    demandOption: true
+  })
   .parseSync();
+  return argv;
 }
 
 const showHelp = yargs.showHelp;

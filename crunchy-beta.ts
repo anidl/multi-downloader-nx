@@ -1,40 +1,44 @@
 #!/usr/bin/env node
 
 // build-in
-const path = require('path');
-const fs = require('fs-extra');
+import path from 'path';
+import fs from 'fs-extra';
 
 // package program
-const packageJson = require('./package.json');
+import packageJson from './package.json';
 console.log(`\n=== Crunchyroll Beta Downloader NX ${packageJson.version} ===\n`);
 
 // plugins
-const shlp = require('sei-helper');
-const m3u8 = require('m3u8-parsed');
-const streamdl = require('hls-download');
+import shlp from 'sei-helper';
+import m3u8 from 'm3u8-parsed';
+import streamdl from 'hls-download';
 
 // custom modules
-const fontsData   = require('./crunchy/modules/module.fontsData');
-const langsData   = require('./crunchy/modules/module.langsData');
-const yamlCfg     = require('./crunchy/modules/module.cfg-loader');
-const yargs       = require('./crunchy/modules/module.app-args');
-const epsFilter   = require('./crunchy/modules/module.eps-filter');
-const appMux      = require('./crunchy/modules/module.muxing');
+import * as fontsData from './modules/module.fontsData';
+import * as langsData from './modules/module.langsData';
+import * as yamlCfg from './modules/module.cfg-loader';
+import * as yargs from './modules/module.app-args';
+import epsFilter from './modules/module.eps-filter';
+import Merger from './modules/module.merger';
 
 // new-cfg paths
 const cfg = yamlCfg.loadCfg();
 let token = yamlCfg.loadCRToken();
-let cmsToken = {};
+let cmsToken: {
+  cms?: Record<string, string> 
+} = {};
 
 // args
-const appYargs = new yargs(cfg.cli, langsData, true);
-const argv = appYargs.appArgv();
+const argv = yargs.appArgv(cfg.cli)
 argv.appstore = {};
 
 // load req
-const { domain, api } = require('./crunchy/modules/module.api-urls');
-const reqModule = require('./crunchy/modules/module.req');
-const req = new reqModule.Req(domain, argv, true);
+import { domain, api } from './modules/module.api-urls';
+import * as reqModule from './modules/module.req';
+import { CrunchySearch, ItemItem, ItemType } from './@types/crunchySearch';
+import { CrunchyEpisodeList } from './@types/crunchyEpisodeList';
+import { CrunchyEpMeta, ParseItem } from './@types/crunchyTypes';
+const req = new reqModule.Req(domain, argv);
 
 // select
 (async () => {
@@ -84,7 +88,7 @@ const req = new reqModule.Req(domain, argv, true);
 async function getFonts(){
     console.log('[INFO] Downloading fonts...');
     for(const f of Object.keys(fontsData.fonts)){
-        const fontFile = fontsData.fonts[f];
+        const fontFile = fontsData.fonts[f as fontsData.AvailableFonts];
         const fontLoc  = path.join(cfg.dir.fonts, fontFile);
         if(fs.existsSync(fontLoc) && fs.statSync(fontLoc).size != 0){
             console.log(`[INFO] ${f} (${fontFile}) already downloaded!`);
@@ -99,8 +103,8 @@ async function getFonts(){
             }
             catch(e){}
             const fontUrl = fontsData.root + fontFile;
-            const getFont = await req.getData(fontUrl, { useProxy: true, binary: true });
-            if(getFont.ok){
+            const getFont = await req.getData<Buffer>(fontUrl, { binary: true });
+            if(getFont.ok && getFont.res){
                 fs.writeFileSync(fontLoc, getFont.res.body);
                 console.log(`[INFO] Downloaded: ${f} (${fontFile})`);
             }
@@ -114,22 +118,21 @@ async function getFonts(){
 
 // auth method
 async function doAuth(){
-    const iLogin = argv.user ? argv.user : await shlp.question('[Q] LOGIN/EMAIL');
-    const iPsswd = argv.pass ? argv.pass : await shlp.question('[Q] PASSWORD   ');
+    const iLogin = await shlp.question('[Q] LOGIN/EMAIL');
+    const iPsswd = await shlp.question('[Q] PASSWORD   ');
     const authData = new URLSearchParams({
         'username': iLogin,
         'password': iPsswd,
         'grant_type': 'password',
         'scope': 'offline_access'
     }).toString();
-    const authReqOpts = {
+    const authReqOpts: reqModule.Params = {
         method: 'POST',
         headers: api.beta_authHeaderMob,
-        body: authData,
-        useProxy: true
+        body: authData
     };
     const authReq = await req.getData(api.beta_auth, authReqOpts);
-    if(!authReq.ok){
+    if(!authReq.ok || !authReq.res){
         console.log('[ERROR] Authentication failed!');
         return;
     }
@@ -152,7 +155,7 @@ async function getProfile(){
         useProxy: true
     };
     const profileReq = await req.getData(api.beta_profile, profileReqOptions);
-    if(!profileReq.ok){
+    if(!profileReq.ok || !profileReq.res){
         console.log('[ERROR] Get profile failed!');
         return;
     }
@@ -166,14 +169,13 @@ async function doAnonymousAuth(){
         'grant_type': 'client_id',
         'scope': 'offline_access',
     }).toString();
-    const authReqOpts = {
+    const authReqOpts: reqModule.Params = {
         method: 'POST',
         headers: api.beta_authHeaderMob,
-        body: authData,
-        useProxy: true
+        body: authData
     };
     const authReq = await req.getData(api.beta_auth, authReqOpts);
-    if(!authReq.ok){
+    if(!authReq.ok || !authReq.res){
         console.log('[ERROR] Authentication failed!');
         return;
     }
@@ -196,14 +198,13 @@ async function refreshToken(){
             'grant_type': 'refresh_token',
             'scope': 'offline_access'
         }).toString();
-        const authReqOpts = {
+        const authReqOpts: reqModule.Params = {
             method: 'POST',
             headers: api.beta_authHeaderMob,
-            body: authData,
-            useProxy: true
+            body: authData
         };
         const authReq = await req.getData(api.beta_auth, authReqOpts);
-        if(!authReq.ok){
+        if(!authReq.ok || !authReq.res){
             console.log('[ERROR] Authentication failed!');
             return;
         }
@@ -232,12 +233,12 @@ async function getCMStoken(){
         useProxy: true
     };
     const cmsTokenReq = await req.getData(api.beta_cmsToken, cmsTokenReqOpts);
-    if(!cmsTokenReq.ok){
+    if(!cmsTokenReq.ok || !cmsTokenReq.res){
         console.log('[ERROR] Authentication CMS token failed!');
         return;
     }
     cmsToken = JSON.parse(cmsTokenReq.res.body);
-    console.log('[INFO] Your Country: %s\n', cmsToken.cms.bucket.split('/')[1]);
+    console.log('[INFO] Your Country: %s\n', cmsToken.cms?.bucket.split('/')[1]);
 }
 
 async function getCmsData(){
@@ -257,8 +258,8 @@ async function getCmsData(){
             'Key-Pair-Id': cmsToken.cms.key_pair_id,
         }),
     ].join('');
-    const indexReq = await req.getData(indexReqOpts, { useProxy: true });
-    if(!indexReq.ok){
+    const indexReq = await req.getData(indexReqOpts);
+    if(!indexReq.ok || ! indexReq.res){
         console.log('[ERROR] Get CMS index FAILED!');
         return;
     }
@@ -277,18 +278,18 @@ async function doSearch(){
         useProxy: true
     };
     const searchParams = new URLSearchParams({
-        q: argv.search,
-        n: 5,
-        start: argv.page ? (parseInt(argv.page)-1)*5 : 0,
+        q: argv.search as string,
+        n: "5",
+        start: argv.page ? `${(argv.page-1)*5}` : "0",
         type: argv['search-type'],
         locale: argv['search-locale'],
     }).toString();
     let searchReq = await req.getData(`${api.beta_search}?${searchParams}`, searchReqOpts);
-    if(!searchReq.ok){
+    if(!searchReq.ok || ! searchReq.res){
         console.log('[ERROR] Search FAILED!');
         return;
     }
-    let searchResults = JSON.parse(searchReq.res.body);
+    let searchResults = JSON.parse(searchReq.res.body) as CrunchySearch;
     if(searchResults.total < 1){
         console.log('[INFO] Nothing Found!');
         return;
@@ -300,9 +301,9 @@ async function doSearch(){
         'episode':       'Found episodes'
     };
     for(let search_item of searchResults.items){
-        console.log('[INFO] %s:', searchTypesInfo[search_item.type]);
+        console.log('[INFO] %s:', searchTypesInfo[search_item.type as keyof typeof searchTypesInfo]);
         // calculate pages
-        let itemPad = parseInt(new URL(search_item.__href__, domain.api_beta).searchParams.get('start'));
+        let itemPad = parseInt(new URL(search_item.__href__, domain.api_beta).searchParams.get('start') || '');
         let pageCur = itemPad > 0 ? Math.ceil(itemPad/5) + 1 : 1;
         let pageMax = Math.ceil(search_item.total/5);
         // pages per category
@@ -322,16 +323,17 @@ async function doSearch(){
     }
 }
 
-async function parseObject(item, pad, getSeries, getMovieListing){
+async function parseObject(item: ParseItem, pad?: number, getSeries?: boolean, getMovieListing?: boolean){
     if(argv.debug){
         console.log(item);
     }
-    pad = typeof pad == 'number' ? pad : 2;
-    getSeries = typeof getSeries == 'boolean' ? getSeries : true;
-    getMovieListing = typeof getMovieListing == 'boolean' ? getMovieListing : true;
-    item.isSelected = typeof item.isSelected == 'boolean' ? item.isSelected : false;
+    pad = pad || 2;
+    getSeries = getSeries === undefined ? true : getSeries;
+    getMovieListing = getMovieListing === undefined ? true : getMovieListing;
+    item.isSelected = item.isSelected === undefined ? false : item.isSelected;
     if(!item.type){
-        item.type = item.__class__;
+      console.log('[INFO] Unable to parse type for %s. Defaulted to %s', item.id, ItemType.Episode)
+      item.type = ItemType.Episode;
     }
     const oTypes = {
         'series': 'Z',        // SRZ
@@ -396,7 +398,7 @@ async function parseObject(item, pad, getSeries, getMovieListing){
     const showObjectBooleans = oBooleans.length > 0 && !iMetadata.hide_metadata ? true : false;
     // make obj ids
     let objects_ids = [];
-    objects_ids.push(oTypes[item.type] + ':' + item.id);
+    objects_ids.push(oTypes[item.type as keyof typeof oTypes] + ':' + item.id);
     if(item.seq_id){
         objects_ids.unshift(item.seq_id);
     }
@@ -453,10 +455,10 @@ async function parseObject(item, pad, getSeries, getMovieListing){
     }
 }
 
-async function getSeriesById(pad, hideSeriesTitle){
+async function getSeriesById(pad?: number, hideSeriesTitle?: boolean){
     // parse
-    pad = typeof pad == 'number' ? pad : 0;
-    hideSeriesTitle = typeof hideSeriesTitle == 'boolean' ? hideSeriesTitle : false;
+    pad = pad || 0;
+    hideSeriesTitle = hideSeriesTitle !== undefined ? hideSeriesTitle : false;
     // check token
     if(!cmsToken.cms){
         console.log('[ERROR] Authentication required!');
@@ -480,7 +482,7 @@ async function getSeriesById(pad, hideSeriesTitle){
         cmsToken.cms.bucket,
         '/seasons?',
         new URLSearchParams({
-            'series_id': argv.series,
+            'series_id': argv.series as string,
             'Policy': cmsToken.cms.policy,
             'Signature': cmsToken.cms.signature,
             'Key-Pair-Id': cmsToken.cms.key_pair_id,
@@ -488,8 +490,8 @@ async function getSeriesById(pad, hideSeriesTitle){
     ].join('');
     // reqs
     if(!hideSeriesTitle){
-        const seriesReq = await req.getData(seriesReqOpts, {useProxy: true});
-        if(!seriesReq.ok){
+        const seriesReq = await req.getData(seriesReqOpts);
+        if(!seriesReq.ok || !seriesReq.res){
             console.log('[ERROR] Series Request FAILED!');
             return;
         }
@@ -497,8 +499,8 @@ async function getSeriesById(pad, hideSeriesTitle){
         await parseObject(seriesData, pad, false);
     }
     // seasons list
-    const seriesSeasonListReq = await req.getData(seriesSeasonListReqOpts, {useProxy: true});
-    if(!seriesSeasonListReq.ok){
+    const seriesSeasonListReq = await req.getData(seriesSeasonListReqOpts);
+    if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
         console.log('[ERROR] Series Request FAILED!');
         return;
     }
@@ -513,8 +515,8 @@ async function getSeriesById(pad, hideSeriesTitle){
     }
 }
 
-async function getMovieListingById(pad){
-    pad = typeof pad == 'number' ? pad : 2;
+async function getMovieListingById(pad?: number){
+    pad = pad || 2;
     if(!cmsToken.cms){
         console.log('[ERROR] Authentication required!');
         return;
@@ -524,14 +526,14 @@ async function getMovieListingById(pad){
         cmsToken.cms.bucket,
         '/movies?',
         new URLSearchParams({
-            'movie_listing_id': argv['movie-listing'],
+            'movie_listing_id': argv['movie-listing'] as string,
             'Policy': cmsToken.cms.policy,
             'Signature': cmsToken.cms.signature,
             'Key-Pair-Id': cmsToken.cms.key_pair_id,
         }),
     ].join('');
-    const movieListingReq = await req.getData(movieListingReqOpts, {useProxy: true});
-    if(!movieListingReq.ok){
+    const movieListingReq = await req.getData(movieListingReqOpts);
+    if(!movieListingReq.ok || !movieListingReq.res){
         console.log('[ERROR]  Movie Listing Request FAILED!');
         return;
     }
@@ -558,11 +560,11 @@ async function getNewlyAdded(){
     };
     const newlyAddedParams = new URLSearchParams({
         sort_by: 'newly_added',
-        n: 25,
-        start: argv.page ? (parseInt(argv.page)-1)*25 : 0,
+        n: "25",
+        start: (argv.page ? (argv.page-1)*25 : 0).toString(),
     }).toString();
     let newlyAddedReq = await req.getData(`${api.beta_browse}?${newlyAddedParams}`, newlyAddedReqOpts);
-    if(!newlyAddedReq.ok){
+    if(!newlyAddedReq.ok || !newlyAddedReq.res){
         console.log('[ERROR] Get newly added FAILED!');
         return;
     }
@@ -572,7 +574,7 @@ async function getNewlyAdded(){
         await parseObject(i, 2);
     }
     // calculate pages
-    let itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.api_beta).searchParams.get('start'));
+    let itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.api_beta).searchParams.get('start') as string);
     let pageCur = itemPad > 0 ? Math.ceil(itemPad/5) + 1 : 1;
     let pageMax = Math.ceil(newlyAddedResults.total/5);
     console.log(`  [INFO] Total results: ${newlyAddedResults.total} (Page: ${pageCur}/${pageMax})`);
@@ -596,8 +598,8 @@ async function getSeasonById(){
             'Key-Pair-Id': cmsToken.cms.key_pair_id,
         }),
     ].join('');
-    const showInfoReq = await req.getData(showInfoReqOpts, {useProxy: true});
-    if(!showInfoReq.ok){
+    const showInfoReq = await req.getData(showInfoReqOpts);
+    if(!showInfoReq.ok || !showInfoReq.res){
         console.log('[ERROR] Show Request FAILED!');
         return;
     }
@@ -608,20 +610,23 @@ async function getSeasonById(){
         cmsToken.cms.bucket,
         '/episodes?',
         new URLSearchParams({
-            'season_id': argv.season,
+            'season_id': argv.season as string,
             'Policy': cmsToken.cms.policy,
             'Signature': cmsToken.cms.signature,
             'Key-Pair-Id': cmsToken.cms.key_pair_id,
         }),
     ].join('');
-    const reqEpsList = await req.getData(reqEpsListOpts, {useProxy: true});
-    if(!reqEpsList.ok){
+    const reqEpsList = await req.getData(reqEpsListOpts);
+    if(!reqEpsList.ok || !reqEpsList.res){
         console.log('[ERROR] Episode List Request FAILED!');
         return;
     }
-    let episodeList = JSON.parse(reqEpsList.res.body);
+    let episodeList = JSON.parse(reqEpsList.res.body) as CrunchyEpisodeList;
     
-    const epNumList = { ep: [], sp: 0 };
+    const epNumList: {
+      ep: number[],
+      sp: number
+    } = { ep: [], sp: 0 };
     const epNumLen = epsFilter.epNumLen;
     
     if(episodeList.total < 1){
@@ -631,7 +636,7 @@ async function getSeasonById(){
     
     const doEpsFilter = new epsFilter.doFilter();
     const selEps = doEpsFilter.checkFilter(argv.episode);
-    const selectedMedia = [];
+    const selectedMedia: CrunchyEpMeta[] = [];
     
     episodeList.items.forEach((item) => {
         item.hide_season_title = true;
@@ -644,7 +649,7 @@ async function getSeasonById(){
             item.season_title = 'NO_TITLE';
         }
         // set data
-        const epMeta = {
+        const epMeta: CrunchyEpMeta = {
             mediaId:       item.id,
             seasonTitle:   item.season_title,
             episodeNumber: item.episode,
@@ -685,7 +690,7 @@ async function getSeasonById(){
     }
     
     if(selectedMedia.length > 1){
-        argv.appstore.isBatch = true;
+        (argv.appstore as Record<string, unknown>).isBatch = true;
     }
     
     console.log();

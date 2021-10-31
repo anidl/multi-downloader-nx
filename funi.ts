@@ -55,7 +55,7 @@ let title = '',
   stDlPath: Subtitle[] = [];
 
 // main
-(async () => {
+export default (async () => {
   // load binaries
   cfg.bin = await yamlCfg.loadBinCfg();
   // select mode
@@ -65,13 +65,13 @@ let title = '',
   else if(argv.search){
     searchShow();
   }
-  else if(argv.s && argv.s > 0){
+  else if(argv.s && !isNaN(parseInt(argv.s)) && parseInt(argv.s) > 0){
     getShow();
   }
   else{
     appYargs.showHelp();
   }
-})();
+});
 
 // auth
 async function auth(){
@@ -157,7 +157,7 @@ async function getShow(){
         sort_direction: string,
         title_id: number,
         language?: string
-    } = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: argv.s as number };
+    } = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: parseInt(argv.s as string) };
   if(argv.alt){ qs.language = 'English'; }
   const episodesData = await getData({
     baseUrl: api_host,

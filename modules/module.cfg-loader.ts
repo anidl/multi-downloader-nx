@@ -192,4 +192,17 @@ const saveFuniToken = (data: {
   }
 };
 
-export { loadBinCfg, loadCfg, loadFuniToken, saveFuniToken, saveCRSession, saveCRToken, loadCRToken, loadCRSession };
+const cfgDir = path.join(workingDir, 'config');
+
+export {
+  loadBinCfg,
+  loadCfg,
+  loadFuniToken,
+  saveFuniToken,
+  saveCRSession,
+  saveCRToken,
+  loadCRToken,
+  loadCRSession,
+  sessCfgFile,
+  cfgDir
+};

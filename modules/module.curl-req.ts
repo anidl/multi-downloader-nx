@@ -1,14 +1,15 @@
 // build-in
 import child_process from 'child_process';
 import fs from 'fs-extra';
+import { Headers } from 'got';
 import path from 'path';
 
 export type CurlOptions = {
-  headers?: Record<string, string>,
+  headers?: Headers,
   curlProxy?: boolean,
   curlProxyAuth?: string,
   minVersion?: string,
-  http2?: string,
+  http2?: boolean,
   body?: unknown,
   curlDebug?: boolean
 } | undefined;
@@ -158,4 +159,4 @@ function uuidv4() {
   });
 }
 
-module.exports = curlReq;
+export default curlReq;

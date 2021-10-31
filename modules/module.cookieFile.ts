@@ -23,4 +23,4 @@ const parse = (data: string) => {
   return res;
 };
 
-module.exports = parse;
+export default parse;
