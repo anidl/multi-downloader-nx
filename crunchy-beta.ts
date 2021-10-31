@@ -30,7 +30,13 @@ let cmsToken: {
 
 // args
 const argv = yargs.appArgv(cfg.cli)
-argv.appstore = {};
+const appstore: {
+  fn: Variable[],
+  isBatch: boolean
+} = {
+  fn: [],
+  isBatch: false
+}
 
 // load req
 import { domain, api } from './modules/module.api-urls';
@@ -38,6 +44,9 @@ import * as reqModule from './modules/module.req';
 import { CrunchySearch, ItemItem, ItemType } from './@types/crunchySearch';
 import { CrunchyEpisodeList } from './@types/crunchyEpisodeList';
 import { CrunchyEpMeta, ParseItem } from './@types/crunchyTypes';
+import { ObjectInfo } from './@types/objectInfo';
+import { Variable } from './modules/module.filename';
+import { PlaybackData } from './@types/playbackData';
 const req = new reqModule.Req(domain, argv);
 
 // select
@@ -654,6 +663,7 @@ async function getSeasonById(){
             seasonTitle:   item.season_title,
             episodeNumber: item.episode,
             episodeTitle:  item.title,
+            seasonID: item.season_id
         };
         if(item.playback){
             epMeta.playback = item.playback;
@@ -690,7 +700,7 @@ async function getSeasonById(){
     }
     
     if(selectedMedia.length > 1){
-        (argv.appstore as Record<string, unknown>).isBatch = true;
+        appstore.isBatch = true;
     }
     
     console.log();
@@ -700,14 +710,14 @@ async function getSeasonById(){
     
 }
 
-async function getObjectById(returnData){
+async function getObjectById(returnData?: boolean){
     if(!cmsToken.cms){
         console.log('[ERROR] Authentication required!');
         return;
     }
     
     const doEpsFilter = new epsFilter.doFilter();
-    const inpMedia = doEpsFilter.checkBetaFilter(argv.episode);
+    const inpMedia = doEpsFilter.checkBetaFilter(argv.e);
     
     if(inpMedia.length < 1){
         console.log('\n[INFO] Objects not selected!\n');
@@ -729,11 +739,11 @@ async function getObjectById(returnData){
             'Key-Pair-Id': cmsToken.cms.key_pair_id,
         }),
     ].join('');
-    const objectReq = await req.getData(objectReqOpts, {useProxy: true});
-    if(!objectReq.ok){
+    const objectReq = await req.getData(objectReqOpts);
+    if(!objectReq.ok || !objectReq.res){
         console.log('[ERROR] Objects Request FAILED!');
         if(objectReq.error && objectReq.error.res && objectReq.error.res.body){
-            const objectInfo = JSON.parse(objectReq.error.res.body);
+            const objectInfo = JSON.parse(objectReq.error.res.body as string);
             console.log('[INFO] Body:', JSON.stringify(objectInfo, null, '\t'));
             objectInfo.error = true;
             return objectInfo;
@@ -741,8 +751,7 @@ async function getObjectById(returnData){
         return { error: true };
     }
     
-    const objectInfo = JSON.parse(objectReq.res.body);
-    
+    const objectInfo = JSON.parse(objectReq.res.body) as ObjectInfo;
     if(returnData){
         return objectInfo;
     }
@@ -754,7 +763,7 @@ async function getObjectById(returnData){
             await parseObject(item, 2, true, false);
             continue;
         }
-        const epMeta = {};
+        const epMeta: Partial<CrunchyEpMeta> = {};
         switch (item.type) {
             case 'episode':
                 item.s_num = 'S:' + item.episode_metadata.season_id;
@@ -764,9 +773,9 @@ async function getObjectById(returnData){
                 epMeta.episodeTitle = item.title;
                 break;
             case 'movie':
-                item.f_num = 'F:' + item.movie_metadata.movie_listing_id;
+                item.f_num = 'F:' + item.movie_metadata?.movie_listing_id;
                 epMeta.mediaId = 'M:'+ item.id;
-                epMeta.seasonTitle = item.movie_metadata.movie_listing_title;
+                epMeta.seasonTitle = item.movie_metadata?.movie_listing_title;
                 epMeta.episodeNumber = 'Movie';
                 epMeta.episodeTitle = item.title;
                 break;
@@ -780,17 +789,17 @@ async function getObjectById(returnData){
     }
     
     if(selectedMedia.length > 1){
-        argv.appstore.isBatch = true;
+        appstore.isBatch = true;
     }
     
     console.log();
     for(let media of selectedMedia){
-        await getMedia(media);
+        await getMedia(media as CrunchyEpMeta);
     }
     
 }
 
-async function getMedia(mMeta){
+async function getMedia(mMeta: CrunchyEpMeta){
     
     let mediaName = '...';
     if(mMeta.seasonTitle && mMeta.episodeNumber && mMeta.episodeTitle){
@@ -804,32 +813,31 @@ async function getMedia(mMeta){
         return;
     }
     
-    if(appPatch.active){
-        mMeta = appPatch.doMod1(mMeta, argv);
-    }
+    let playbackReq = await req.getData(mMeta.playback);
     
-    let playbackReq = await req.getData(mMeta.playback, {useProxy: true});
-    
-    if(!playbackReq.ok){
+    if(!playbackReq.ok || !playbackReq.res){
         console.log('[ERROR] Request Stream URLs FAILED!');
         return;
     }
     
-    let pbData = JSON.parse(playbackReq.res.body);
-    
-    let epNum = mMeta.episodeNumber;
-    if(epNum != '' && epNum !== null){
-        epNum = epNum.match(/^\d+$/) ? epNum.padStart(argv['episode-number-length'], '0') : epNum;
-    }
-    
-    argv.appstore.fn = {};
-    argv.appstore.fn.title = argv.title ? argv.title : mMeta.seasonTitle,
-    argv.appstore.fn.epnum = !argv.appstore.isBatch && argv.episode ? argv.episode : epNum;
-    argv.appstore.fn.epttl = mMeta.episodeTitle;
-    argv.appstore.fn.out   = fnOutputGen();
-    
+    let pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
+
+    appstore.fn = ([
+      ['title', mMeta.episodeTitle],
+      ['episode', mMeta.episodeNumber],
+      ['service', 'Crunchyroll'],
+      ['showTitle', mMeta.seasonTitle],
+      ['season', mMeta.seasonID]
+    ] as [yargs.AvailableFilenameVars, string|number][]).map((a): Variable => {
+      return {
+        name: a[0],
+        replaceWith: a[1],
+        type: typeof a[1]
+      } as Variable
+    });
+
     let streams = [];
-    let hsLangs = [];
+    let hsLangs: string[] = [];
     let pbStreams = pbData.streams;
     
     for(let s of Object.keys(pbStreams)){
@@ -838,8 +846,8 @@ async function getMedia(mMeta){
                 v.hardsub_lang = v.hardsub_locale 
                     ? langsData.fixAndFindCrLC(v.hardsub_locale).locale
                     : v.hardsub_locale;
-                if(s.hardsub_lang && hsLangs.indexOf(s.hardsub_lang) < 0){
-                    hsLangs.push(s.hardsub_lang);
+                if(v.hardsub_lang && hsLangs.indexOf(v.hardsub_lang) < 0){
+                    hsLangs.push(v.hardsub_lang);
                 }
                 return { 
                     ...v, 
@@ -1247,17 +1255,4 @@ function doCleanUp(isMuxed, muxFile, addSubs, sxList){
     }
     // done
     console.log('\n[INFO] Done!\n');
-}
-
-function fnOutputGen(){
-    if(typeof argv.appstore.fn != 'object'){
-        argv.appstore.fn = {};
-    }
-    const fnPrepOutput = argv.filename.toString()
-        .replace('{rel_group}', argv['group-tag'])
-        .replace('{title}',     argv.appstore.fn.title)
-        .replace('{ep_num}',    argv.appstore.fn.epnum)
-        .replace('{ep_titl}',   argv.appstore.fn.epttl)
-        .replace('{suffix}',    argv.suffix.replace('SIZEp', argv.quality));
-    return shlp.cleanupFilename(fnPrepOutput);
 }

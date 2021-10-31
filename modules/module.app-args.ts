@@ -14,7 +14,9 @@ const groups = {
   'util': 'Utilities:'
 }
 
-const availableFilenameVars = [
+export type AvailableFilenameVars =  'title' | 'episode' | 'showTitle' | 'season' | 'width' | 'height' | 'service'
+
+const availableFilenameVars: AvailableFilenameVars[] = [
   'title',
   'episode',
   'showTitle',
@@ -110,6 +112,7 @@ const appArgv = (cfg: {
   })
   .option('e', {
     group: groups.dl,
+    alias: 'episode',
     describe: 'Sets the Episode Number/IDs (comma-separated, hyphen-sequence)',
     type: 'string',
   })

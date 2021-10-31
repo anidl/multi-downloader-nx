@@ -3,7 +3,8 @@ export type CrunchyEpMeta = {
   seasonTitle: string,
   episodeNumber: string,
   episodeTitle: string,
-  playback?: string
+  playback?: string,
+  seasonID: string
 }
 
 export type ParseItem = {

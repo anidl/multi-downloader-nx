@@ -117,7 +117,7 @@ const sortSubtitles = (data: Partial<LanguageItem>[], sortkey: keyof LanguageIte
 const sortTags = (data: string[]) => {
   const retData = data.map(e => { return { locale: e }; });
   const sort = sortSubtitles(retData);
-  return sort.map(e => e.locale);
+  return sort.map(e => e.locale as string);
 };
 
 const subsFile = (fnOutput:string, subsIndex: string, langItem: LanguageItem) => {
