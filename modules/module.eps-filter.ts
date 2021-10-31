@@ -8,38 +8,39 @@ const epLtReg     = new RegExp (/(?:E|S|M)/);
 
 class doFilter {
   constructor(){}
-  ifMaxEp(type, num){
+  ifMaxEp(type: keyof typeof epNumLen, num: number){
     const maxEp = Math.pow(10, epNumLen[type]) - 1;
     return num > maxEp ? true : false;
   }
-  powNum(type){
+  powNum(type: keyof typeof epNumLen){
     return Math.pow(10, epNumLen[type]);
   }
-  checkFilter(inputEps){
+  checkFilter(inputEps?: string){
     // check
-    inputEps = typeof inputEps != 'undefined'
+    const inputEpsArr = inputEps !== undefined
       ? inputEps.toString().split(',') : [];
     // input range
-    const inputEpsRange = [];
+    const inputEpsRange: string | string[] = [];
         
     // filter wrong numbers
-    inputEps = inputEps.map((e) => {
+    const filteredArr = inputEpsArr.map((e) => {
       // convert to uppercase
       e = e.toUpperCase();
       // if range
       if(e.match('-') && e.split('-').length == 2){
-        const eRange = e.split('-');
+        const eRange: (string|number)[] = e.split('-');
         // check range
-        if (!eRange[0].match(epRegex)) return '';
+        if (!eRange[0].toString().match(epRegex)) return '';
         // set ep latter and pad
-        const epLetter = eRange[0].match(epLtReg) ? eRange[0].match(epLtReg)[0] : 'E';
-        const padLen = epNumLen[epLetter];
+        const epLetter = (eRange[0].toString().match(epLtReg) ? (eRange[0].toString().match(epLtReg) || [])[0] : 'E') as keyof typeof epNumLen;
+        const padLen = epNumLen[epLetter as keyof typeof epNumLen];
         // parse range
-        eRange[0] = eRange[0].replace(epLtReg, '');
+        eRange[0] = eRange[0].toString().replace(epLtReg, '');
         eRange[0] = parseInt(eRange[0]);
         eRange[0] = this.ifMaxEp(epLetter, eRange[0]) ? this.powNum(epLetter) - 1 : eRange[0];
-        eRange[1] = eRange[1].match(/^\d+$/) ? parseInt(eRange[1]) : 0;
+        eRange[1] = eRange[1].toString().match(/^\d+$/) ? parseInt(eRange[1] as string) : 0;
         eRange[1] = this.ifMaxEp(epLetter, eRange[1]) ? this.powNum(epLetter) - 1 : eRange[1];
+        console.log(eRange)
         // check if correct range
         if (eRange[0] > eRange[1]){
           const parsedEl = [
@@ -63,11 +64,11 @@ class doFilter {
         return '';
       }
       else if(e.match(epRegex)){
-        const epLetter = e.match(epLtReg) ? e.match(epLtReg)[0] : 'E';
+        const epLetter = (e.match(epLtReg) ? (e.match(epLtReg) || [])[0] : 'E') as keyof typeof epNumLen;
         const padLen = epNumLen[epLetter];
-        e = parseInt(e.replace(epLtReg, ''));
-        e = this.ifMaxEp(epLetter, e) ? this.powNum(epLetter) - 1 : e;
-        return (epLetter != 'E' ? epLetter : '') + e.toString().padStart(padLen, '0');
+        const e1 = parseInt(e.replace(epLtReg, ''));
+        const e2 = this.ifMaxEp(epLetter, e1) ? this.powNum(epLetter) - 1 : e1;
+        return (epLetter != 'E' ? epLetter : '') + e2.toString().padStart(padLen, '0');
       }
       else if(e.match(betaEpRegex)){
         return e;
@@ -75,22 +76,21 @@ class doFilter {
       return '';
     });
     // end
-    inputEps = [...new Set(inputEps.concat(inputEpsRange))];
-    inputEps = inputEps.indexOf('') > -1 ? inputEps.slice(1) : inputEps;
-    return inputEps;
+    const filteredArr1 = [...new Set(filteredArr.concat(inputEpsRange))]
+    const filteredArr2 = filteredArr1.indexOf('') > -1 ? filteredArr1.slice(1) : filteredArr1;
+    return filteredArr2;
   }
-  checkMediaFilter(e){
-    e = e.split(',');
+  checkMediaFilter(e: string){
+    const split = e.split(',');
     const epLetter = 'M';
     const inpMedia = [''];
     // map select
-    e.map((e) => {
+    split.map((e) => {
       if(e.match('-')){
         const eRange = e.split('-');
         if(eRange[0].match(/^m?\d+$/i)){
           eRange[0] = eRange[0].replace(/^m/i,'');
-          eRange[0] = parseInt(eRange[0]);
-          eRange[0] = this.ifMaxEp(epLetter, eRange[0]) ? this.powNum(epLetter) - 1 : eRange[0];
+          eRange[0] = (this.ifMaxEp(epLetter, parseInt(eRange[0])) ? this.powNum(epLetter) - 1 : parseInt(eRange[0])).toString();
           inpMedia.push(eRange[0].toString());
         }
       }
@@ -102,21 +102,21 @@ class doFilter {
     });
     return [...new Set(inpMedia)].splice(1);
   }
-  checkBetaFilter(e){
-    e = ['', ...e.split(',')];
-    e = e.map((e) => {
+  checkBetaFilter(e: string){
+    const e1 = ['', ...e.split(',')];
+    const e2 = e1.map((e) => {
       if(e.match(betaEpRegex)){
         return e;
       }
       return '';
     });
-    e = [...new Set(e)].splice(1);
-    e = e.length > 100 ? e.slice(0, 100) : e;
-    return e;
+    const e3 = [...new Set(e2)].splice(1);
+    const e4 = e3.length > 100 ? e3.slice(0, 100) : e3;
+    return e4;
   }
 }
 
-module.exports = {
+export {
   epNumLen,
   doFilter,
 };

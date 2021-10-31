@@ -18,7 +18,7 @@ import * as fontsData from './modules/module.fontsData';
 import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
-import epsFilter from './modules/module.eps-filter';
+import * as epsFilter from './modules/module.eps-filter';
 import Merger from './modules/module.merger';
 
 // new-cfg paths
@@ -32,7 +32,8 @@ let cmsToken: {
 const argv = yargs.appArgv(cfg.cli)
 const appstore: {
   fn: Variable[],
-  isBatch: boolean
+  isBatch: boolean,
+  out?: string
 } = {
   fn: [],
   isBatch: false
@@ -41,11 +42,11 @@ const appstore: {
 // load req
 import { domain, api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.req';
-import { CrunchySearch, ItemItem, ItemType } from './@types/crunchySearch';
+import { CrunchySearch } from './@types/crunchySearch';
 import { CrunchyEpisodeList } from './@types/crunchyEpisodeList';
 import { CrunchyEpMeta, ParseItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
-import { Variable } from './modules/module.filename';
+import parseFileName, { Variable } from './modules/module.filename';
 import { PlaybackData } from './@types/playbackData';
 const req = new reqModule.Req(domain, argv);
 
@@ -80,16 +81,16 @@ const req = new reqModule.Req(domain, argv);
         await refreshToken();
         await getMovieListingById();
     }
-    else if(argv.season && argv.season.match(/^[0-9A-Z]{9}$/)){
+    else if(argv.s && argv.s.match(/^[0-9A-Z]{9}$/)){
         await refreshToken();
         await getSeasonById();
     }
-    else if(argv.episode){
+    else if(argv.e){
         await refreshToken();
         await getObjectById();
     }
     else{
-        appYargs.showHelp();
+      yargs.showHelp();
     }
 })();
 
@@ -340,9 +341,8 @@ async function parseObject(item: ParseItem, pad?: number, getSeries?: boolean, g
     getSeries = getSeries === undefined ? true : getSeries;
     getMovieListing = getMovieListing === undefined ? true : getMovieListing;
     item.isSelected = item.isSelected === undefined ? false : item.isSelected;
-    if(!item.type){
-      console.log('[INFO] Unable to parse type for %s. Defaulted to %s', item.id, ItemType.Episode)
-      item.type = ItemType.Episode;
+    if(!item.type) {
+      item.type = item.__class__;
     }
     const oTypes = {
         'series': 'Z',        // SRZ
@@ -357,7 +357,7 @@ async function parseObject(item: ParseItem, pad?: number, getSeries?: boolean, g
     const oMetadata = [],
         oBooleans = [],
         tMetadata = item.type + '_metadata',
-        iMetadata = item[tMetadata] ? item[tMetadata] : item,
+        iMetadata = (Object.prototype.hasOwnProperty.call(item, tMetadata) ? item[tMetadata as keyof ParseItem] : item) as Record<string, any>,
         iTitle = [ item.title ];
     // set object booleans
     if(iMetadata.duration_ms){
@@ -599,7 +599,7 @@ async function getSeasonById(){
         api.beta_cms,
         cmsToken.cms.bucket,
         '/seasons/',
-        argv.season,
+        argv.s,
         '?',
         new URLSearchParams({
             'Policy': cmsToken.cms.policy,
@@ -619,7 +619,7 @@ async function getSeasonById(){
         cmsToken.cms.bucket,
         '/episodes?',
         new URLSearchParams({
-            'season_id': argv.season as string,
+            'season_id': argv.s as string,
             'Policy': cmsToken.cms.policy,
             'Signature': cmsToken.cms.signature,
             'Key-Pair-Id': cmsToken.cms.key_pair_id,
@@ -644,7 +644,7 @@ async function getSeasonById(){
     }
     
     const doEpsFilter = new epsFilter.doFilter();
-    const selEps = doEpsFilter.checkFilter(argv.episode);
+    const selEps = doEpsFilter.checkFilter(argv.e);
     const selectedMedia: CrunchyEpMeta[] = [];
     
     episodeList.items.forEach((item) => {
@@ -717,7 +717,7 @@ async function getObjectById(returnData?: boolean){
     }
     
     const doEpsFilter = new epsFilter.doFilter();
-    const inpMedia = doEpsFilter.checkBetaFilter(argv.e);
+    const inpMedia = doEpsFilter.checkBetaFilter(argv.e as string);
     
     if(inpMedia.length < 1){
         console.log('\n[INFO] Objects not selected!\n');
@@ -922,9 +922,8 @@ async function getMedia(mMeta: CrunchyEpMeta){
         
         console.log('[INFO] Downloading video...');
         curStream = streams[argv.kstream-1];
-        
-        if(argv.dub != curStream.audio_lang){
-            argv.dub = curStream.audio_lang;
+        if(argv.dubLang != curStream.audio_lang){
+            argv.dubLang = curStream.audio_lang as string;
             console.log(`[INFO] audio language code detected, setted to ${curStream.audio_lang} for this episode`);
         }
         
@@ -932,24 +931,28 @@ async function getMedia(mMeta: CrunchyEpMeta){
         console.log('[INFO] Playlists URL: %s (%s)', streamUrlTxt, curStream.type);
     }
     
-    if(!argv.skipdl && !dlFailed){
-        const streamPlaylistsReq = await req.getData(curStream.url, {useProxy: argv['use-proxy-streaming']});
-        if(!streamPlaylistsReq.ok){
+    if(!argv.skipdl && !dlFailed && curStream){
+        const streamPlaylistsReq = await req.getData(curStream.url);
+        if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
             console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLISTS!');
             dlFailed = true;
         }
         else{
             const streamPlaylists = m3u8(streamPlaylistsReq.res.body);
-            let plServerList = [],
-                plStreams    = {},
-                plQualityStr = [],
-                plMaxQuality = 240;
+            let plServerList: string[] = [],
+                plStreams: Record<string, Record<string, string>> = {},
+                plQuality: {
+                  str: string,
+                  dim: string,
+                  RESOLUTION: {
+                    width: number,
+                    height: number
+                  }
+                }[] = []
             for(const pl of streamPlaylists.playlists){
                 // set quality
-                let plResolution     = pl.attributes.RESOLUTION.height;
-                let plResolutionText = `${plResolution}p`;
-                // set max quality
-                plMaxQuality = plMaxQuality < plResolution ? plResolution : plMaxQuality;
+                let plResolution     = pl.attributes.RESOLUTION;
+                let plResolutionText = `${plResolution.width}x${plResolution.height}`;
                 // parse uri
                 let plUri = new URL(pl.uri);
                 let plServer = plUri.hostname;
@@ -976,75 +979,83 @@ async function getMedia(mMeta: CrunchyEpMeta){
                 }
                 // set plQualityStr
                 let plBandwidth  = Math.round(pl.attributes.BANDWIDTH/1024);
-                if(plResolution < 1000){
-                    plResolution = plResolution.toString().padStart(4, ' ');
-                }
-                let qualityStrAdd   = `${plResolution}p (${plBandwidth}KiB/s)`;
+                let qualityStrAdd   = `${plResolutionText} (${plBandwidth}KiB/s)`;
                 let qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
-                let qualityStrMatch = !plQualityStr.join('\r\n').match(qualityStrRegx);
+                let qualityStrMatch = !plQuality.map(a => a.str).join('\r\n').match(qualityStrRegx);
                 if(qualityStrMatch){
-                    plQualityStr.push(qualityStrAdd);
+                    plQuality.push({
+                      str: qualityStrAdd,
+                      dim: plResolutionText,
+                      RESOLUTION: plResolution
+                    });
                 }
             }
             
-            argv.server = argv.server > plServerList.length ? 1 : argv.server;
-            argv.quality = argv.quality == 'max' ? `${plMaxQuality}p` : argv.quality;
-            argv.appstore.fn.out = fnOutputGen();
+            argv.server = argv.x > plServerList.length ? 1 : argv.x;
             
-            let plSelectedServer = plServerList[argv.server - 1];
+            let plSelectedServer = plServerList[argv.x - 1];
             let plSelectedList   = plStreams[plSelectedServer];
-            let selPlUrl = plSelectedList[argv.quality] ? plSelectedList[argv.quality] : '';
-            
-            plQualityStr.sort();
-            console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
-            console.log(`[INFO] Available qualities:\n\t${plQualityStr.join('\n\t')}`);
-            
+            plQuality.sort((a, b) => {
+              const aMatch = a.dim.match(/[0-9]+/) || []
+              const bMatch = b.dim.match(/[0-9]+/) || []
+              return parseInt(aMatch[0]) - parseInt(bMatch[0])
+            });
+            let quality = argv.q;
+            if (quality > plQuality.length) {
+              console.log(`[WARN] The requested quality of ${argv.q} is greater than the maximun ${plQuality.length}.\nTherefor the maximum will be capped at ${plQuality.length}.`)
+              quality = plQuality.length;
+            }
+            let selPlUrl = quality === 0 ? plSelectedList[plQuality.pop()?.dim as string] :
+              plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
+              console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
+            console.log(`[INFO] Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
+
             if(selPlUrl != ''){
-                console.log(`[INFO] Selected quality: ${argv.quality} @ ${plSelectedServer}`);
+              appstore.fn.push({
+                name: 'height',
+                type: 'number',
+                replaceWith: quality === 0 ? plQuality.pop()?.RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
+              }, {
+                name: 'width',
+                type: 'number',
+                replaceWith: quality === 0 ? plQuality.pop()?.RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
+              })
+                console.log(`[INFO] Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
                 if(argv['show-stream-url']){
                     console.log('[INFO] Stream URL:', selPlUrl);
                 }
-                console.log(`[INFO] Output filename: ${argv.appstore.fn.out}`);
-                const chunkPage = await req.getData(selPlUrl, {useProxy: argv['use-proxy-streaming']});
-                if(!chunkPage.ok){
+                // TODO check filename
+                appstore.out = parseFileName(argv.fileName, appstore.fn, argv.numbers).join(path.sep)
+                console.log(`[INFO] Output filename: ${appstore.out}`);
+                const chunkPage = await req.getData(selPlUrl);
+                if(!chunkPage.ok || !chunkPage.res){
                     console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLIST!');
                     dlFailed = true;
                 }
                 else{
                     const chunkPlaylist = m3u8(chunkPage.res.body);
-                    let proxyHLS;
-                    if(argv.proxy && argv['use-proxy-streaming']){
-                        try{
-                            proxyHLS = {};
-                            proxyHLS.url = reqModule.buildProxy(argv.proxy, argv['proxy-auth']);
-                            proxyHLS.url = proxyHLS.url.toString();
-                        }
-                        catch(e){
-                            console.log(`\n[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
-                            console.log('[WARN] Skiping...');
-                        }
-                    }
                     let totalParts = chunkPlaylist.segments.length;
-                    let mathParts  = Math.ceil(totalParts / argv.tsparts);
-                    let mathMsg    = `(${mathParts}*${argv.tsparts})`;
+                    let mathParts  = Math.ceil(totalParts / argv.partsize);
+                    let mathMsg    = `(${mathParts}*${argv.partsize})`;
                     console.log('[INFO] Total parts in stream:', totalParts, mathMsg);
-                    let tsFile = path.join(cfg.dir.content, argv.appstore.fn.out);
+                    let tsFile = path.join(cfg.dir.content, appstore.out);
+                    const split = appstore.out.split(path.sep).slice(0, -1);
+                    split.forEach((val, ind, arr) => {
+                        let isAbsolut = path.isAbsolute(appstore.out as string);
+                        if (!fs.existsSync(path.join(isAbsolut ? '' : cfg.dir.content, ...arr.slice(0, ind), val)))
+                          fs.mkdirSync(path.join(isAbsolut ? '' : cfg.dir.content, ...arr.slice(0, ind), val));
+                    })
                     let streamdlParams = {
                         fn: `${tsFile}.ts`,
                         m3u8json: chunkPlaylist,
                         // baseurl: chunkPlaylist.baseUrl,
                         pcount: argv.tsparts,
                         partsOffset: 0,
-                        proxy: proxyHLS || false,
                     };
                     let dlStreamByPl = await new streamdl(streamdlParams).download();
                     if(!dlStreamByPl.ok){
-                        fs.writeFileSync(`${tsFile}.ts.resume`, JSON.stringify(dlStreamByPl.parts));
                         console.log(`[ERROR] DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
                         dlFailed = true;
-                    }
-                    else if(fs.existsSync(`${tsFile}.ts.resume`) && dlStreamByPl.ok){
-                        fs.unlinkSync(`${tsFile}.ts.resume`);
                     }
                 }
             }
@@ -1059,6 +1070,7 @@ async function getMedia(mMeta: CrunchyEpMeta){
     }
     
     // fix max quality for non streams
+    /*
     if(argv.quality == 'max'){
         argv.quality = '1080p';
         argv.appstore.fn.out = fnOutputGen();
@@ -1125,10 +1137,12 @@ async function getMedia(mMeta: CrunchyEpMeta){
     else{
         console.log();
     }
+    */
     
 }
 
 async function muxStreams(){
+    /*
     const merger = await appMux.checkMerger(cfg.bin, argv.mp4);
     const muxFile = path.join(cfg.dir.content, argv.appstore.fn.out);
     const sxList = argv.appstore.sxList;
@@ -1196,12 +1210,15 @@ async function muxStreams(){
     }
     
     doCleanUp(isMuxed, muxFile, addSubs, sxList);
+    */
     
 }
 
-function doCleanUp(isMuxed, muxFile, addSubs, sxList){
+function doCleanUp(isMuxed: boolean, muxFile: string, addSubs: boolean, sxList: {
+  file: string
+}[]){
     // set output filename
-    const fnOut = argv.appstore.fn.out;
+    const fnOut = appstore.out;
     // check paths if same
     if(path.join(cfg.dir.trash) == path.join(cfg.dir.content)){
         argv.notrashfolder = true;
@@ -1240,18 +1257,6 @@ function doCleanUp(isMuxed, muxFile, addSubs, sxList){
                 fs.unlinkSync(subsFile);
             }
         }
-    }
-    // move to subfolder
-    if(argv.folder && isMuxed){
-        const dubName = argv.dub.toUpperCase().slice(0, -1);
-        const dubSuffix = argv.dub != 'jpn' ? ` [${dubName}DUB]` : '';
-        const titleFolder = shlp.cleanupFilename(argv.appstore.fn.title + dubSuffix);
-        const subFolder = path.join(cfg.dir.content, '/', titleFolder, '/');
-        const vExt = '.' + ( !argv.mp4 ? 'mkv' : 'mp4' );
-        if(!fs.existsSync(subFolder)){
-            fs.mkdirSync(subFolder);
-        }
-        fs.renameSync(muxFile + vExt, path.join(subFolder, fnOut + vExt));
     }
     // done
     console.log('\n[INFO] Done!\n');

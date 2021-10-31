@@ -165,11 +165,3 @@ export interface SeriesMetadata {
   season_count:         number;
   tenant_categories:    TenantCategory[];
 }
-
-export enum ItemType {
-  Episode = "episode",
-  Series = "series",
-  Season = 'season',
-  MovieListing = 'movie_listing',
-  Movie = 'Movie'
-}

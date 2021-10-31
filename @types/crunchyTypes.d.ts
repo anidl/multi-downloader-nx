@@ -8,6 +8,7 @@ export type CrunchyEpMeta = {
 }
 
 export type ParseItem = {
+  __class__?: string;
   isSelected?: boolean,
   type?: string,
   id: string,

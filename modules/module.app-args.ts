@@ -144,7 +144,7 @@ const appArgv = (cfg: {
     type: 'number',
     default: parseDefault<number>('partsize', 10)
   })
-  .option('hsland', {
+  .option('hslang', {
     group: groups.dl,
     describe: 'Download video with specific hardsubs',
     choices: langsData.subtitleLanguagesFilter.slice(1),
@@ -179,6 +179,13 @@ const appArgv = (cfg: {
     choices: dubLang,
     default: parseDefault<possibleDubs>('dub', ['enUS']),
     type: 'array'
+  })
+  .option('dubLang', {
+    group: groups.dl,
+    describe: 'Set the language to download (Crunchy only)',
+    choices: langsData.dubLanguageCodes,
+    default: parseDefault('dubLanguage', langsData.dubLanguageCodes.slice(-1)[0]),
+    type: 'string',
   })
   .option('all', {
     group: groups.dl,
@@ -266,8 +273,9 @@ const appArgv = (cfg: {
   .option('service', {
     group: groups.util,
     describe: 'Set the service to use',
-    choices: ['funi', 'chrunchy'],
-    demandOption: true
+    choices: ['funi', 'crunchy'],
+    demandOption: true,
+    default: parseDefault<'crunchy'|'funi'|undefined>('service', undefined)
   })
   .parseSync();
   return argv;

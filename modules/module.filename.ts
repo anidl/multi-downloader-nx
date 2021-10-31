@@ -7,7 +7,8 @@ export type Variable = ({
   type: 'number',
   replaceWith: number
 } | {
-
+  type: 'string',
+  replaceWith: string
 }) & {
   name: AvailableFilenameVars
 }
@@ -19,7 +20,7 @@ const parseFileName = (input: string, variables: Variable[], numbers: number): s
     return [input];
   for (let i = 0; i < vars.length; i++) {
     const type = vars[i];
-    const varName = type.slice(2, -1).toLowerCase();
+    const varName = type.slice(2, -1);
     const use = variables.find(a => a.name === varName);
     if (use === undefined) {
       console.log(`[ERROR] Found variable '${type}' in fileName but no values was internally found!`)
