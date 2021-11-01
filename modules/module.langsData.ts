@@ -26,7 +26,7 @@ const languages: LanguageItem[] = [
 
 // add en language names
 (() =>{
-  for(let languageIndex in languages){
+  for(const languageIndex in languages){
     if(!languages[languageIndex].language){
       languages[languageIndex].language = languages[languageIndex].name;
     }
@@ -99,16 +99,18 @@ const parseSubtitlesArray = (tags: string[]) => {
 };
 
 // sort subtitles
-const sortSubtitles = (data: Partial<LanguageItem>[], sortkey: keyof LanguageItem = 'locale') => {
+const sortSubtitles = <T extends {
+  [key: string]: unknown
+} = Record<string, string>> (data: T[], sortkey?: keyof T) : T[] => {
   const idx: Record<string, number> = {};
-  sortkey = sortkey || 'locale';
+  const key = sortkey || 'locale' as keyof T;
   const tags = [...new Set(Object.values(languages).map(e => e.locale))];
   for(const l of tags){
     idx[l] = Object.keys(idx).length + 1;
   }
   data.sort((a, b) => {
-    const ia = idx[a[sortkey] as string] ? idx[a[sortkey] as string] : 50;
-    const ib = idx[b[sortkey] as string] ? idx[b[sortkey] as string] : 50;
+    const ia = idx[a[key] as string] ? idx[a[key] as string] : 50;
+    const ib = idx[b[key] as string] ? idx[b[key] as string] : 50;
     return ia - ib;
   });
   return data;

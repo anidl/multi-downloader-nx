@@ -4,20 +4,16 @@ export interface ObjectInfo {
   __class__:        string;
   __href__:         string;
   __resource_key__: string;
-  __links__:        Actions;
-  __actions__:      Actions;
+  __links__:        unknown;
+  __actions__:      unknown;
   total:            number;
   items:            Item[];
 }
-
-export interface Actions {
-}
-
 export interface Item {
   __class__:           string;
   __href__:            string;
   __links__:           Links;
-  __actions__:         Actions;
+  __actions__:         unknown;
   id:                  string;
   external_id:         string;
   channel_id:          string;
@@ -43,10 +39,10 @@ export interface Item {
 }
 
 export interface Links {
-  "episode/season":   EpisodeSeason;
-  "episode/series":   EpisodeSeason;
+  'episode/season':   EpisodeSeason;
+  'episode/series':   EpisodeSeason;
   resource:           EpisodeSeason;
-  "resource/channel": EpisodeSeason;
+  'resource/channel': EpisodeSeason;
   streams:            EpisodeSeason;
 }
 

@@ -67,11 +67,11 @@ const fonts = {
 
 // collect styles from ass string
 function assFonts(ass: string){
-  let strings = ass.replace(/\r/g,'').split('\n');
-  let styles = [];
-  for(let s of strings){
+  const strings = ass.replace(/\r/g,'').split('\n');
+  const styles = [];
+  for(const s of strings){
     if(s.match(/^Style: /)){
-      let addStyle = s.split(',');
+      const addStyle = s.split(',');
       styles.push(addStyle[1]);
     }
   }

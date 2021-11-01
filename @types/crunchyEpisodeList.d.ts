@@ -2,13 +2,10 @@ export interface CrunchyEpisodeList {
   __class__:        string;
   __href__:         string;
   __resource_key__: string;
-  __links__:        Actions;
-  __actions__:      Actions;
+  __links__:        unknown;
+  __actions__:      unknown;
   total:            number;
   items:            Item[];
-}
-
-export interface Actions {
 }
 
 export interface Item {
@@ -16,7 +13,7 @@ export interface Item {
   __href__:              string;
   __resource_key__:      string;
   __links__:             Links;
-  __actions__:           Actions;
+  __actions__:           unknown;
   id:                    string;
   channel_id:            ChannelID;
   series_id:             string;
@@ -64,15 +61,15 @@ export interface Item {
 }
 
 export enum Class {
-  Episode = "episode",
+  Episode = 'episode',
 }
 
 export interface Links {
   ads:                     Ads;
-  "episode/channel":       Ads;
-  "episode/next_episode"?: Ads;
-  "episode/season":        Ads;
-  "episode/series":        Ads;
+  'episode/channel':       Ads;
+  'episode/next_episode'?: Ads;
+  'episode/season':        Ads;
+  'episode/series':        Ads;
   streams?:                Ads;
 }
 
@@ -86,12 +83,12 @@ export interface AdBreak {
 }
 
 export enum AdBreakType {
-  Midroll = "midroll",
-  Preroll = "preroll",
+  Midroll = 'midroll',
+  Preroll = 'preroll',
 }
 
 export enum ChannelID {
-  Crunchyroll = "crunchyroll",
+  Crunchyroll = 'crunchyroll',
 }
 
 export interface Images {
@@ -106,17 +103,17 @@ export interface Thumbnail {
 }
 
 export enum ThumbnailType {
-  Thumbnail = "thumbnail",
+  Thumbnail = 'thumbnail',
 }
 
 export enum SubtitleLocale {
-  ArSA = "ar-SA",
-  DeDE = "de-DE",
-  EnUS = "en-US",
-  Es419 = "es-419",
-  EsES = "es-ES",
-  FrFR = "fr-FR",
-  ItIT = "it-IT",
-  PtBR = "pt-BR",
-  RuRU = "ru-RU",
+  ArSA = 'ar-SA',
+  DeDE = 'de-DE',
+  EnUS = 'en-US',
+  Es419 = 'es-419',
+  EsES = 'es-ES',
+  FrFR = 'fr-FR',
+  ItIT = 'it-IT',
+  PtBR = 'pt-BR',
+  RuRU = 'ru-RU',
 }

@@ -22,7 +22,7 @@
         "url": "https://github.com/izu-co/funimation-downloader-nx/issues"
     },
     "license": "MIT",
-    "main": "funi.js",
+    "main": "index.js",
     "dependencies": {
         "cheerio": "^1.0.0-rc.10",
         "form-data": "^4.0.0",

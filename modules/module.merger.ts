@@ -1,18 +1,20 @@
 import * as iso639 from 'iso-639';
-import { fonts, fontMime } from "./module.fontsData";
-import path from "path";
-import fs from "fs";
+import { fonts, fontMime } from './module.fontsData';
+import path from 'path';
+import fs from 'fs';
 import { LanguageItem } from './module.langsData';
 
 export type MergerInput = {
   path: string,
   lang: string,
+  lookup?: false,
 }
 
 export type SubtitleInput = {
   language: string,
   file: string,
-  fonts?: ParsedFont[]
+  title?: string
+  lookup?: false,
 }
 
 export type Font = keyof typeof fonts;
@@ -30,6 +32,7 @@ export type MergerOptions = {
   subtitels: SubtitleInput[],
   output: string,
   simul?: boolean,
+  fonts?: ParsedFont[]
 }
 
 class Merger {
@@ -131,7 +134,7 @@ class Merger {
           '--video-tracks 0',
           '--no-audio'
         );
-        const trackName = this.subDict[vid.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+        const trackName = (vid.lookup === false ? vid.lang : this.subDict[vid.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
         args.push('--track-name', `0:"${trackName}"`);
         args.push(`--language 0:${Merger.getLanguageCode(vid.lang, vid.lang)}`);
         hasVideo = true;
@@ -145,7 +148,7 @@ class Merger {
           '--video-tracks 0',
           '--audio-tracks 1'
         );
-        const trackName = this.subDict[vid.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+        const trackName = (vid.lookup === false ? vid.lang : this.subDict[vid.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
         args.push('--track-name', `0:"${trackName}"`);
         args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${Merger.getLanguageCode(vid.lang, vid.lang)}`);
@@ -155,7 +158,7 @@ class Merger {
           '--no-video',
           '--audio-tracks 1'
         );
-        const trackName = this.subDict[vid.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+        const trackName = (vid.lookup === false ? vid.lang : this.subDict[vid.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
         args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${Merger.getLanguageCode(vid.lang, vid.lang)}`);
       }
@@ -163,7 +166,7 @@ class Merger {
     }
 
     for (const aud of this.options.onlyAudio) {
-      const trackName = this.subDict[aud.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+      const trackName = (aud.lookup === false ? aud.lang : this.subDict[aud.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
       args.push('--track-name', `0:"${trackName}"`);
       args.push(`--language 0:${Merger.getLanguageCode(aud.lang, aud.lang)}`);
       args.push(
@@ -175,25 +178,26 @@ class Merger {
 
     if (this.options.subtitels.length > 0) {
       for (const subObj of this.options.subtitels) {
-        const trackName = this.subDict[subObj.language] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
-        args.push('--track-name', `0:"${trackName}"`);
-        args.push('--language', `0:${Merger.getLanguageCode(subObj.language)}`);
+        args.push('--track-name', (subObj.title !== undefined ? `0:"${subObj.title}"` : `0:"${subObj.lookup === false ? subObj.language : Merger.getLanguageCode(subObj.language)}"`));
+        args.push('--language', `0:"${subObj.lookup === false ? subObj.language : Merger.getLanguageCode(subObj.language)}"`);
         args.push(`"${subObj.file}"`);
-        if (subObj.fonts && subObj.fonts.length > 0) {
-          for (const f of subObj.fonts) {
-            args.push('--attachment-name', f.name);
-            args.push('--attachment-mime-type', f.mime);
-            args.push('--attach-file', f.path);
-          }
-        }
       }
     } else {
       args.push(
         '--no-subtitles',
+      );
+    }
+    if (this.options.fonts && this.options.fonts.length > 0) {
+      for (const f of this.options.fonts) {
+        args.push('--attachment-name', f.name);
+        args.push('--attachment-mime-type', f.mime);
+        args.push('--attach-file', f.path);
+      }
+    } else {
+      args.push(
         '--no-attachments'
       );
     }
-
 
     return args.join(' ');
   };
@@ -225,7 +229,7 @@ class Merger {
     language: LanguageItem,
     fonts: Font[]
   }[]) : ParsedFont[] {
-    let fontsNameList: Font[] = [], fontsList = [], subsList = [], isNstr = true;
+    let fontsNameList: Font[] = []; const fontsList = [], subsList = []; let isNstr = true;
     for(const s of subs){
       fontsNameList.push(...s.fonts);
       subsList.push(s.language.locale);
@@ -253,7 +257,12 @@ class Merger {
       }
     }
     return fontsList;
-  };
+  }
+
+  public cleanUp() {
+    this.options.onlyAudio.concat(this.options.onlyVid).concat(this.options.videoAndAudio).forEach(a => fs.unlinkSync(a.path));
+    this.options.subtitels.forEach(a => fs.unlinkSync(a.file));
+  }
 
 }
 

@@ -24,7 +24,7 @@ export interface Stream {
 
 
 export enum Vcodec {
-  H264 = "h264",
+  H264 = 'h264',
 }
 
 export interface Subtitle {

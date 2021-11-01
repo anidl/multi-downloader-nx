@@ -171,7 +171,7 @@ const loadFuniToken = () => {
   }>(tokenFile.funi, true);
   let token: false|string = false;
   if (loadedToken && loadedToken.token)
-  token = loadedToken.token;
+    token = loadedToken.token;
   // info if token not set
   if(!token){
     console.log('[INFO] Token not set!\n');

@@ -5,13 +5,11 @@ export interface CrunchySearch {
   __href__:         string;
   __resource_key__: string;
   __links__:        CrunchySearchLinks;
-  __actions__:      Actions;
+  __actions__:      unknown;
   total:            number;
   items:            CrunchySearchItem[];
 }
 
-export interface Actions {
-}
 
 export interface CrunchySearchLinks {
   continuation?: Continuation;
@@ -26,14 +24,14 @@ export interface CrunchySearchItem {
   __href__:         string;
   __resource_key__: string;
   __links__:        CrunchySearchLinks;
-  __actions__:      Actions;
+  __actions__:      unknown;
   type:             string;
   total:            number;
   items:            ItemItem[];
 }
 
 export interface ItemItem {
-  __actions__:         Actions;
+  __actions__:         unknown;
   __class__:           Class;
   __href__:            string;
   __links__:           PurpleLinks;
@@ -69,19 +67,19 @@ export interface ItemItem {
 }
 
 export enum Class {
-  Panel = "panel",
+  Panel = 'panel',
 }
 
 export interface PurpleLinks {
   resource:           Continuation;
-  "resource/channel": Continuation;
-  "episode/season"?:  Continuation;
-  "episode/series"?:  Continuation;
+  'resource/channel': Continuation;
+  'episode/season'?:  Continuation;
+  'episode/series'?:  Continuation;
   streams?:           Continuation;
 }
 
 export enum ChannelID {
-  Crunchyroll = "crunchyroll",
+  Crunchyroll = 'crunchyroll',
 }
 
 export interface EpisodeMetadata {
@@ -119,14 +117,14 @@ export interface AdBreak {
 }
 
 export enum AdBreakType {
-  Midroll = "midroll",
-  Preroll = "preroll",
+  Midroll = 'midroll',
+  Preroll = 'preroll',
 }
 
 export enum TenantCategory {
-  Action = "Action",
-  Drama = "Drama",
-  SciFi = "Sci-Fi",
+  Action = 'Action',
+  Drama = 'Drama',
+  SciFi = 'Sci-Fi',
 }
 
 export interface Images {
@@ -143,9 +141,9 @@ export interface PosterTall {
 }
 
 export enum PosterTallType {
-  PosterTall = "poster_tall",
-  PosterWide = "poster_wide",
-  Thumbnail = "thumbnail",
+  PosterTall = 'poster_tall',
+  PosterWide = 'poster_wide',
+  Thumbnail = 'thumbnail',
 }
 
 export interface SearchMetadata {

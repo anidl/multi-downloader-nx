@@ -1,4 +1,4 @@
-import { Headers } from "got/dist/source";
+import { Headers } from 'got/dist/source';
 
 // api domains
 const domain = {

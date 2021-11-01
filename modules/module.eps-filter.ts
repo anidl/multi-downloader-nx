@@ -7,7 +7,6 @@ const betaEpRegex = new RegExp (/^[0-9A-Z]{9}$/);
 const epLtReg     = new RegExp (/(?:E|S|M)/);
 
 class doFilter {
-  constructor(){}
   ifMaxEp(type: keyof typeof epNumLen, num: number){
     const maxEp = Math.pow(10, epNumLen[type]) - 1;
     return num > maxEp ? true : false;
@@ -40,7 +39,7 @@ class doFilter {
         eRange[0] = this.ifMaxEp(epLetter, eRange[0]) ? this.powNum(epLetter) - 1 : eRange[0];
         eRange[1] = eRange[1].toString().match(/^\d+$/) ? parseInt(eRange[1] as string) : 0;
         eRange[1] = this.ifMaxEp(epLetter, eRange[1]) ? this.powNum(epLetter) - 1 : eRange[1];
-        console.log(eRange)
+        console.log(eRange);
         // check if correct range
         if (eRange[0] > eRange[1]){
           const parsedEl = [
@@ -76,7 +75,7 @@ class doFilter {
       return '';
     });
     // end
-    const filteredArr1 = [...new Set(filteredArr.concat(inputEpsRange))]
+    const filteredArr1 = [...new Set(filteredArr.concat(inputEpsRange))];
     const filteredArr2 = filteredArr1.indexOf('') > -1 ? filteredArr1.slice(1) : filteredArr1;
     return filteredArr2;
   }

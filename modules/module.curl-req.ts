@@ -27,7 +27,7 @@ export type Res = {
 // req
 const curlReq = async (curlBin: string, url: string, options: CurlOptions, cache: string) => {
     
-  let curlOpt = [
+  const curlOpt = [
     `"${curlBin}"`,
     `"${url}"`,
   ];
@@ -35,8 +35,8 @@ const curlReq = async (curlBin: string, url: string, options: CurlOptions, cache
   options = options || {};
     
   if(options.headers && Object.keys(options.headers).length > 0){
-    for(let h of Object.keys(options.headers)){
-      let hC = options.headers[h];
+    for(const h of Object.keys(options.headers)){
+      const hC = options.headers[h];
       curlOpt.push('-H', `"${h}: ${hC}"`);
     }
   }
@@ -103,7 +103,7 @@ const curlReq = async (curlBin: string, url: string, options: CurlOptions, cache
   fs.unlinkSync(bodyFile);
   fs.unlinkSync(errFile);
     
-  let res: Res = {
+  const res: Res = {
     httpVersion: '',
     statusCode: '',
     statusMessage: '',
@@ -113,20 +113,20 @@ const curlReq = async (curlBin: string, url: string, options: CurlOptions, cache
     body: rawBody.toString(),
   };
     
-  let headersCont = rawHeaders.replace(/\r/g, '').split('\n');
+  const headersCont = rawHeaders.replace(/\r/g, '').split('\n');
     
-  for(let h of headersCont){
+  for(const h of headersCont){
     if( h == '' ){ continue; }
     if(!h.match(':')){
-      let statusRes = h.split(' ');
+      const statusRes = h.split(' ');
       res.httpVersion = statusRes[0].split('/')[1];
       res.statusCode = statusRes[1];
       res.statusMessage = statusRes.slice(2).join(' ');
     }
     else{
-      let resHeader = h.split(': ');
-      let resHeadName = resHeader[0].toLowerCase();
-      let resHeadCont = resHeader.slice(1).join(': ');
+      const resHeader = h.split(': ');
+      const resHeadName = resHeader[0].toLowerCase();
+      const resHeadCont = resHeader.slice(1).join(': ');
       if(resHeadName == 'set-cookie'){
         if(!Object.prototype.hasOwnProperty.call(res.headers, resHeadName)){
           res.headers[resHeadName] = [];
@@ -140,7 +140,7 @@ const curlReq = async (curlBin: string, url: string, options: CurlOptions, cache
   }
     
   if(!res.statusCode.match(/^(2|3)\d\d$/)){
-    let httpStatusMessage = res.statusMessage ? ` (${res.statusMessage})` : '';
+    const httpStatusMessage = res.statusMessage ? ` (${res.statusMessage})` : '';
     throw { 
       name: 'HTTPError',
       message: `Response code ${res.statusCode}${httpStatusMessage}`,
@@ -154,7 +154,7 @@ const curlReq = async (curlBin: string, url: string, options: CurlOptions, cache
 
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
 }

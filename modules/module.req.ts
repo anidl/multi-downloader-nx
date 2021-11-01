@@ -1,6 +1,3 @@
-import path from 'path';
-import fs from 'fs-extra';
-
 import shlp from 'sei-helper';
 import got, { Headers, Method, Options, ReadError, Response } from 'got';
 import cookieFile from './module.cookieFile';
@@ -44,7 +41,7 @@ class Req {
   async getData<T = string> (durl: string, params?: Params) {
     params = params || {};
     // options
-    let options: Options & {
+    const options: Options & {
       minVersion?: string,
       maxVersion?: string
       curlDebug?: boolean
@@ -83,7 +80,6 @@ class Req {
       }
     }*/
     // if auth
-    let cookie = [];
     const loc = new URL(durl);
     // avoid cloudflare protection
     if(loc.origin == this.domain.www){
@@ -124,7 +120,7 @@ class Req {
         name: string
       } & ReadError & {
         res: Response<unknown>
-      }
+      };
       if(error.response && error.response.statusCode && error.response.statusMessage){
         console.log(`[ERROR] ${error.name} ${error.response.statusCode}: ${error.response.statusMessage}`);
       }
@@ -140,122 +136,122 @@ class Req {
       }
       if(error.res && error.res.body && error.response.statusCode 
         && error.response.statusCode != 404 && error.response.statusCode != 403){
-          console.log('[ERROR] Body:', error.res.body);
-        }
-        return {
-          ok: false,
-          error,
-        };
+        console.log('[ERROR] Body:', error.res.body);
+      }
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+  setNewCookie(setCookie: Record<string, string>, isAuth: boolean, fileData?: string){
+    const cookieUpdated = []; let lastExp = 0;
+    console.trace('Type of setCookie:', typeof setCookie, setCookie);
+    const parsedCookie = fileData ? cookieFile(fileData) : shlp.cookie.parse(setCookie);
+    for(const cookieName of Object.keys(parsedCookie)){
+      if(parsedCookie[cookieName] && parsedCookie[cookieName].value && parsedCookie[cookieName].value == 'deleted'){
+        delete parsedCookie[cookieName];
       }
     }
-    setNewCookie(setCookie: Record<string, string>, isAuth: boolean, fileData?: string){
-      let cookieUpdated = [], lastExp = 0;
-      console.trace('Type of setCookie:', typeof setCookie, setCookie)
-      const parsedCookie = fileData ? cookieFile(fileData) : shlp.cookie.parse(setCookie);
-      for(let cookieName of Object.keys(parsedCookie)){
-        if(parsedCookie[cookieName] && parsedCookie[cookieName].value && parsedCookie[cookieName].value == 'deleted'){
-          delete parsedCookie[cookieName];
-        }
+    for(const uCookie of usefulCookies.auth){
+      const cookieForceExp = 60*60*24*7;
+      const cookieExpCur = this.session[uCookie] ? this.session[uCookie] : { expires: 0 };
+      const cookieExp = new Date(cookieExpCur.expires).getTime() - cookieForceExp;
+      if(cookieExp > lastExp){
+        lastExp = cookieExp;
       }
-      for(let uCookie of usefulCookies.auth){
-        const cookieForceExp = 60*60*24*7;
-        const cookieExpCur = this.session[uCookie] ? this.session[uCookie] : { expires: 0 };
-        const cookieExp = new Date(cookieExpCur.expires).getTime() - cookieForceExp;
-        if(cookieExp > lastExp){
-          lastExp = cookieExp;
-        }
+    }
+    for(const uCookie of usefulCookies.auth){
+      if(!parsedCookie[uCookie]){
+        continue;
       }
-      for(let uCookie of usefulCookies.auth){
-        if(!parsedCookie[uCookie]){
-          continue;
-        }
-        if(isAuth || parsedCookie[uCookie] && Date.now() > lastExp){
-          this.session[uCookie] = parsedCookie[uCookie];
-          cookieUpdated.push(uCookie);
-        }
+      if(isAuth || parsedCookie[uCookie] && Date.now() > lastExp){
+        this.session[uCookie] = parsedCookie[uCookie];
+        cookieUpdated.push(uCookie);
       }
-      for(let uCookie of usefulCookies.sess){
-        if(!parsedCookie[uCookie]){
-          continue;
-        }
-        if(
-          isAuth 
+    }
+    for(const uCookie of usefulCookies.sess){
+      if(!parsedCookie[uCookie]){
+        continue;
+      }
+      if(
+        isAuth 
           || this.argv.nosess && parsedCookie[uCookie]
           || parsedCookie[uCookie] && !this.checkSessId(this.session[uCookie])
-          ){
-            const sessionExp = 60*60;
-            this.session[uCookie]            = parsedCookie[uCookie];
-            this.session[uCookie].expires    = new Date(Date.now() + sessionExp*1000);
-            this.session[uCookie]['Max-Age'] = sessionExp.toString();
-            cookieUpdated.push(uCookie);
-          }
-        }
-        if(cookieUpdated.length > 0){
-          if(this.argv.debug){
-            console.log('[SAVING FILE]',`${this.sessCfg}.yml`);
-          }
-          yamlCfg.saveCRSession(this.session);
-          console.log(`[INFO] Cookies were updated! (${cookieUpdated.join(', ')})\n`);
-        }
+      ){
+        const sessionExp = 60*60;
+        this.session[uCookie]            = parsedCookie[uCookie];
+        this.session[uCookie].expires    = new Date(Date.now() + sessionExp*1000);
+        this.session[uCookie]['Max-Age'] = sessionExp.toString();
+        cookieUpdated.push(uCookie);
       }
-      checkCookieVal(chcookie: Record<string, string>){
-        return     chcookie
+    }
+    if(cookieUpdated.length > 0){
+      if(this.argv.debug){
+        console.log('[SAVING FILE]',`${this.sessCfg}.yml`);
+      }
+      yamlCfg.saveCRSession(this.session);
+      console.log(`[INFO] Cookies were updated! (${cookieUpdated.join(', ')})\n`);
+    }
+  }
+  checkCookieVal(chcookie: Record<string, string>){
+    return     chcookie
         && chcookie.toString()   == '[object Object]'
         && typeof chcookie.value == 'string'
-        ?  true : false;
-      }
-      checkSessId(session_id: Record<string, unknown>){
-        if(session_id && typeof session_id.expires == 'string'){
-          session_id.expires = new Date(session_id.expires);
-        }
-        return     session_id
+      ?  true : false;
+  }
+  checkSessId(session_id: Record<string, unknown>){
+    if(session_id && typeof session_id.expires == 'string'){
+      session_id.expires = new Date(session_id.expires);
+    }
+    return     session_id
         && session_id.toString()     == '[object Object]'
         && typeof session_id.expires == 'object'
         && Date.now() < new Date(session_id.expires as any).getTime()
         && typeof session_id.value   == 'string'
-        ?  true : false;
-      }
-      uuidv4(){
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
-      }
-    };
+      ?  true : false;
+  }
+  uuidv4(){
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+}
     
-    function buildProxy(proxyBaseUrl: string, proxyAuth: string){
-      if(!proxyBaseUrl.match(/^(https?|socks4|socks5):/)){
-        proxyBaseUrl = 'http://' + proxyBaseUrl;
-      }
+function buildProxy(proxyBaseUrl: string, proxyAuth: string){
+  if(!proxyBaseUrl.match(/^(https?|socks4|socks5):/)){
+    proxyBaseUrl = 'http://' + proxyBaseUrl;
+  }
       
-      let proxyCfg = new URL(proxyBaseUrl);
-      let proxyStr = `${proxyCfg.protocol}//`;
+  const proxyCfg = new URL(proxyBaseUrl);
+  let proxyStr = `${proxyCfg.protocol}//`;
       
-      if(typeof proxyCfg.hostname != 'string' || proxyCfg.hostname == ''){
-        throw new Error('[ERROR] Hostname and port required for proxy!');
-      }
+  if(typeof proxyCfg.hostname != 'string' || proxyCfg.hostname == ''){
+    throw new Error('[ERROR] Hostname and port required for proxy!');
+  }
       
-      if(proxyAuth && typeof proxyAuth == 'string' && proxyAuth.match(':')){
-        proxyCfg.username = proxyAuth.split(':')[0];
-        proxyCfg.password = proxyAuth.split(':')[1];
-        proxyStr += `${proxyCfg.username}:${proxyCfg.password}@`;
-      }
+  if(proxyAuth && typeof proxyAuth == 'string' && proxyAuth.match(':')){
+    proxyCfg.username = proxyAuth.split(':')[0];
+    proxyCfg.password = proxyAuth.split(':')[1];
+    proxyStr += `${proxyCfg.username}:${proxyCfg.password}@`;
+  }
       
-      proxyStr += proxyCfg.hostname;
+  proxyStr += proxyCfg.hostname;
       
-      if(!proxyCfg.port && proxyCfg.protocol == 'http:'){
-        proxyStr += ':80';
-      }
-      else if(!proxyCfg.port && proxyCfg.protocol == 'https:'){
-        proxyStr += ':443';
-      }
+  if(!proxyCfg.port && proxyCfg.protocol == 'http:'){
+    proxyStr += ':80';
+  }
+  else if(!proxyCfg.port && proxyCfg.protocol == 'https:'){
+    proxyStr += ':443';
+  }
       
-      return proxyStr;
-    }
+  return proxyStr;
+}
     
-    export {
-      buildProxy,
-      usefulCookies,
-      Req,
-    };
+export {
+  buildProxy,
+  usefulCookies,
+  Req,
+};
     

@@ -10,6 +10,6 @@ declare module 'sei-helper' {
       domain: string;
       secure: boolean;
     }>
-  }
+  };
   export function formatTime(time: number): string
 }
