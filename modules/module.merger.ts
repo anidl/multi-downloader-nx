@@ -58,13 +58,13 @@ class Merger {
     for (const vid of this.options.videoAndAudio) {
       args.push(`-i "${vid.path}"`);
       if (!hasVideo) {
-        metaData.push(`-map ${index}`);
-        metaData.push(`-metadata:s:a:${audioIndex} language=${Merger.getLanguageCode(vid.lang, vid.lang)}`);
+        metaData.push(`-map ${index}:a -map ${index}:v`);
+        metaData.push(`-metadata:s:a:${audioIndex} language=${vid.lookup === false ? vid.lang : Merger.getLanguageCode(vid.lang, vid.lang)}`);
         metaData.push(`-metadata:s:v:${index} title="[Funimation]"`);
         hasVideo = true;
       } else {
         metaData.push(`-map ${index}:a`);
-        metaData.push(`-metadata:s:a:${audioIndex} language=${Merger.getLanguageCode(vid.lang, vid.lang)}`);
+        metaData.push(`-metadata:s:a:${audioIndex} language=${vid.lookup === false ? vid.lang : Merger.getLanguageCode(vid.lang, vid.lang)}`);
       }
       audioIndex++;
       index++;
@@ -83,7 +83,7 @@ class Merger {
     for (const aud of this.options.onlyAudio) {
       args.push(`-i "${aud.path}"`);
       metaData.push(`-map ${index}`);
-      metaData.push(`-metadata:s:a:${audioIndex} language=${Merger.getLanguageCode(aud.lang, aud.lang)}`);
+      metaData.push(`-metadata:s:a:${audioIndex} language=${aud.lookup === false ? aud.lang : Merger.getLanguageCode(aud.lang, aud.lang)}`);
       index++;
       audioIndex++;
     }
@@ -100,7 +100,9 @@ class Merger {
       '-c:a copy'
     );
     args.push(this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass');
-    args.push(...this.options.subtitels.map((sub, subindex) => `-metadata:s:${index + subindex} language=${Merger.getLanguageCode(sub.language)}`));
+    args.push(...this.options.subtitels.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
+      sub.title !== undefined ? sub.title : sub.lookup === false ? sub.language : Merger.getLanguageCode(sub.language)
+    }" -metadata:s:s:${subindex} language=${sub.lookup === false ? sub.language : Merger.getLanguageCode(sub.language)}`));
     args.push(`"${this.options.output}"`);
     return args.join(' ');
   }

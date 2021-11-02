@@ -7,7 +7,8 @@ const ignore = [
   '.git',
   'lib',
   'node_modules',
-  '@types'
+  '@types',
+  path.join('bin', 'mkvtoolnix')
 ].map(a => path.join(__dirname, a));
 
 (async () => {
