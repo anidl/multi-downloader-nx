@@ -1,13 +1,28 @@
 import * as iso639 from 'iso-639';
+import { fonts, fontMime } from './module.fontsData';
+import path from 'path';
+import fs from 'fs';
+import { LanguageItem } from './module.langsData';
 
 export type MergerInput = {
   path: string,
   lang: string,
+  lookup?: false,
 }
 
 export type SubtitleInput = {
   language: string,
   file: string,
+  title?: string
+  lookup?: false,
+}
+
+export type Font = keyof typeof fonts;
+
+export type ParsedFont = {
+  name: string,
+  path: string,
+  mime: string,
 }
 
 export type MergerOptions = {
@@ -16,7 +31,8 @@ export type MergerOptions = {
   onlyAudio: MergerInput[],
   subtitels: SubtitleInput[],
   output: string,
-  simul?: boolean
+  simul?: boolean,
+  fonts?: ParsedFont[]
 }
 
 class Merger {
@@ -42,13 +58,13 @@ class Merger {
     for (const vid of this.options.videoAndAudio) {
       args.push(`-i "${vid.path}"`);
       if (!hasVideo) {
-        metaData.push(`-map ${index}`);
-        metaData.push(`-metadata:s:a:${audioIndex} language=${Merger.getLanguageCode(vid.lang, vid.lang)}`);
+        metaData.push(`-map ${index}:a -map ${index}:v`);
+        metaData.push(`-metadata:s:a:${audioIndex} language=${vid.lookup === false ? vid.lang : Merger.getLanguageCode(vid.lang, vid.lang)}`);
         metaData.push(`-metadata:s:v:${index} title="[Funimation]"`);
         hasVideo = true;
       } else {
         metaData.push(`-map ${index}:a`);
-        metaData.push(`-metadata:s:a:${audioIndex} language=${Merger.getLanguageCode(vid.lang, vid.lang)}`);
+        metaData.push(`-metadata:s:a:${audioIndex} language=${vid.lookup === false ? vid.lang : Merger.getLanguageCode(vid.lang, vid.lang)}`);
       }
       audioIndex++;
       index++;
@@ -67,7 +83,7 @@ class Merger {
     for (const aud of this.options.onlyAudio) {
       args.push(`-i "${aud.path}"`);
       metaData.push(`-map ${index}`);
-      metaData.push(`-metadata:s:a:${audioIndex} language=${Merger.getLanguageCode(aud.lang, aud.lang)}`);
+      metaData.push(`-metadata:s:a:${audioIndex} language=${aud.lookup === false ? aud.lang : Merger.getLanguageCode(aud.lang, aud.lang)}`);
       index++;
       audioIndex++;
     }
@@ -84,7 +100,9 @@ class Merger {
       '-c:a copy'
     );
     args.push(this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass');
-    args.push(...this.options.subtitels.map((sub, subindex) => `-metadata:s:${index + subindex} language=${Merger.getLanguageCode(sub.language)}`));
+    args.push(...this.options.subtitels.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
+      sub.title !== undefined ? sub.title : sub.lookup === false ? sub.language : Merger.getLanguageCode(sub.language)
+    }" -metadata:s:s:${subindex} language=${sub.lookup === false ? sub.language : Merger.getLanguageCode(sub.language)}`));
     args.push(`"${this.options.output}"`);
     return args.join(' ');
   }
@@ -118,7 +136,7 @@ class Merger {
           '--video-tracks 0',
           '--no-audio'
         );
-        const trackName = this.subDict[vid.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+        const trackName = (vid.lookup === false ? vid.lang : this.subDict[vid.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
         args.push('--track-name', `0:"${trackName}"`);
         args.push(`--language 0:${Merger.getLanguageCode(vid.lang, vid.lang)}`);
         hasVideo = true;
@@ -132,7 +150,7 @@ class Merger {
           '--video-tracks 0',
           '--audio-tracks 1'
         );
-        const trackName = this.subDict[vid.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+        const trackName = (vid.lookup === false ? vid.lang : this.subDict[vid.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
         args.push('--track-name', `0:"${trackName}"`);
         args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${Merger.getLanguageCode(vid.lang, vid.lang)}`);
@@ -142,7 +160,7 @@ class Merger {
           '--no-video',
           '--audio-tracks 1'
         );
-        const trackName = this.subDict[vid.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+        const trackName = (vid.lookup === false ? vid.lang : this.subDict[vid.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
         args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${Merger.getLanguageCode(vid.lang, vid.lang)}`);
       }
@@ -150,7 +168,7 @@ class Merger {
     }
 
     for (const aud of this.options.onlyAudio) {
-      const trackName = this.subDict[aud.lang] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
+      const trackName = (aud.lookup === false ? aud.lang : this.subDict[aud.lang]) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
       args.push('--track-name', `0:"${trackName}"`);
       args.push(`--language 0:${Merger.getLanguageCode(aud.lang, aud.lang)}`);
       args.push(
@@ -162,14 +180,23 @@ class Merger {
 
     if (this.options.subtitels.length > 0) {
       for (const subObj of this.options.subtitels) {
-        const trackName = this.subDict[subObj.language] + (this.options.simul ? ' [Simulcast]' : ' [Uncut]');
-        args.push('--track-name', `0:"${trackName}"`);
-        args.push('--language', `0:${Merger.getLanguageCode(subObj.language)}`);
+        args.push('--track-name', (subObj.title !== undefined ? `0:"${subObj.title}"` : `0:"${subObj.lookup === false ? subObj.language : Merger.getLanguageCode(subObj.language)}"`));
+        args.push('--language', `0:"${subObj.lookup === false ? subObj.language : Merger.getLanguageCode(subObj.language)}"`);
         args.push(`"${subObj.file}"`);
       }
     } else {
       args.push(
         '--no-subtitles',
+      );
+    }
+    if (this.options.fonts && this.options.fonts.length > 0) {
+      for (const f of this.options.fonts) {
+        args.push('--attachment-name', f.name);
+        args.push('--attachment-mime-type', f.mime);
+        args.push('--attach-file', f.path);
+      }
+    } else {
+      args.push(
         '--no-attachments'
       );
     }
@@ -198,6 +225,45 @@ class Merger {
     }
     return merger;
 
+  }
+
+  public static makeFontsList (fontsDir: string, subs: {
+    language: LanguageItem,
+    fonts: Font[]
+  }[]) : ParsedFont[] {
+    let fontsNameList: Font[] = []; const fontsList = [], subsList = []; let isNstr = true;
+    for(const s of subs){
+      fontsNameList.push(...s.fonts);
+      subsList.push(s.language.locale);
+    }
+    fontsNameList = [...new Set(fontsNameList)];
+    if(subsList.length > 0){
+      console.log('\n[INFO] Subtitles: %s (Total: %s)', subsList.join(', '), subsList.length);
+      isNstr = false;
+    }
+    if(fontsNameList.length > 0){
+      console.log((isNstr ? '\n' : '') + '[INFO] Required fonts: %s (Total: %s)', fontsNameList.join(', '), fontsNameList.length);
+    }
+    for(const f of fontsNameList){
+      const fontFile = fonts[f];
+      if(fontFile){
+        const fontPath = path.join(fontsDir, fontFile);
+        const mime = fontMime(fontFile);
+        if(fs.existsSync(fontPath) && fs.statSync(fontPath).size != 0){
+          fontsList.push({
+            name: fontFile,
+            path: fontPath,
+            mime: mime,
+          });
+        }
+      }
+    }
+    return fontsList;
+  }
+
+  public cleanUp() {
+    this.options.onlyAudio.concat(this.options.onlyVid).concat(this.options.videoAndAudio).forEach(a => fs.unlinkSync(a.path));
+    this.options.subtitels.forEach(a => fs.unlinkSync(a.file));
   }
 
 }

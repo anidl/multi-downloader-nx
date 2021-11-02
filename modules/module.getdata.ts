@@ -29,6 +29,7 @@ export type Options = {
   dinstid?: boolean|string,
   debug?: boolean
 }
+// TODO convert to class
 const getData = async <T = string>(options: Options) => {
   const regionHeaders = {};
 

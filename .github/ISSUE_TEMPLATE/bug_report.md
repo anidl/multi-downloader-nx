@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Found a Bug? Than report it here :)
-title: "[BUG] <Short description here>"
+title: "[BUG] [Funimation/Crunchy] <Short description here>"
 labels: bug
 assignees: izu-co
 
@@ -12,6 +12,7 @@ assignees: izu-co
 ** Main info: **
 
 Script version: 
+Service: 
 Show ID: 
 Episode ID: 
 Command used:

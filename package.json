@@ -1,19 +1,21 @@
 {
-    "name": "funimation-downloader-nx",
-    "short_name": "funi",
-    "version": "5.0.1",
-    "description": "Download videos from Funimation via cli.",
+    "name": "multi-downloader-nx",
+    "short_name": "aniDL",
+    "version": "1.0.0",
+    "description": "Download videos from Funimation or Crunchyroll via cli.",
     "keywords": [
         "download",
         "downloader",
         "funimation",
         "funimationnow",
+        "crunchy",
+        "crunchyroll",
         "util",
         "utility",
         "cli"
     ],
     "author": "AniDL/Izu-co",
-    "homepage": "https://github.com/izu-co/funimation-downloader-nx",
+    "homepage": "https://github.com/anidl/multi-downloader-nx",
     "repository": {
         "type": "git",
         "url": "https://github.com/izu-co/funimation-downloader-nx.git"
@@ -22,8 +24,9 @@
         "url": "https://github.com/izu-co/funimation-downloader-nx/issues"
     },
     "license": "MIT",
-    "main": "funi.js",
+    "main": "index.js",
     "dependencies": {
+        "cheerio": "^1.0.0-rc.10",
         "form-data": "^4.0.0",
         "fs-extra": "^10.0.0",
         "got": "^11.7.0",
@@ -39,8 +42,8 @@
         "@types/fs-extra": "^9.0.13",
         "@types/node": "^16.11.6",
         "@types/yargs": "^17.0.5",
-        "@typescript-eslint/eslint-plugin": "^5.2.0",
-        "@typescript-eslint/parser": "^5.2.0",
+        "@typescript-eslint/eslint-plugin": "^5.3.0",
+        "@typescript-eslint/parser": "^5.3.0",
         "eslint": "^7.30.0",
         "pkg": "^5.4.1",
         "removeNPMAbsolutePaths": "^2.0.0",

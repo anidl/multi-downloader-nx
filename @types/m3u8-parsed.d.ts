@@ -1,5 +1,5 @@
 declare module 'm3u8-parsed' {
-  export default function (data: string): {
+  export type M3U8 = {
     allowCache: boolean,
     discontinuityStarts: [],
     segments: {
@@ -44,5 +44,6 @@ declare module 'm3u8-parsed' {
         'BANDWIDTH': number
       }
     }[],
-  };
+  }
+  export default function (data: string): M3U8;
 }

@@ -8,7 +8,7 @@ import { exec } from 'pkg';
 import { execSync } from 'child_process';
 
 const buildsDir = './_builds';
-const nodeVer = 'node14-';
+const nodeVer = 'node16-';
 
 // main
 (async function(){

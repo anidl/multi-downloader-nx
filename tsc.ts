@@ -7,7 +7,11 @@ const ignore = [
   '.git',
   'lib',
   'node_modules',
-  '@types'
+  '@types',
+  path.join('bin', 'mkvtoolnix'),
+  path.join('config', 'token.yml'),
+  '.eslint',
+  'tsconfig.json'
 ].map(a => path.join(__dirname, a));
 
 (async () => {
