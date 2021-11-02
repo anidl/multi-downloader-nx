@@ -23,13 +23,14 @@ To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
 ### Node Modules
 
-After installing NodeJS with NPM go to directory with `package.json` file and type: `npm i`.
+After installing NodeJS with NPM go to directory with `package.json` file and type: `npm i`. Afterwards run `npm run tsc`. You can now find a lib folder containing the js code execute.
 * [check dependencies](https://david-dm.org/anidl/funimation-downloader-nx)
 
 ## CLI Options
 
 ### Authentication
 
+* `--service ['funi', 'crunchy']` Set the service you want to use
 * `--auth` enter auth mode
 
 ### Get Show ID
@@ -78,12 +79,10 @@ The proxy is currently unmainted. Use at your on risk.
 
 ## Filename Template
 
-[Funimation] ${showTitle} - ${episode} [${height}p]"]
+[${service}] ${showTitle} - ${episode} [${height}p]"]
 
-## CLI Examples
+## CLI Help
 
-* `node funi --search "My Hero"` search "My Hero" in title
-* `node funi -s 124389 -e 1,2,3` download episodes 1-3 from show with id 124389
-* `node funi -s 124389 -e 1-3,2-7,s1-2` download episodes 1-7 and "S"-episodes 1-2 from show with id 124389
-* `node funi -s 19373 -e 28-47 -q 7 --allSubs --dub jaJP ptBR` download episodes 28 to 47 with Portuguese (Brazil) and Japanese audio in 720p(HD) resolution with all subtitles available
-* `node funi -s 19373 -e 15-30 -q 10 --subLang ptBR enUS --dub jaJP` download episodes 15 to 30 with Japanese audio in 1080p resolution (Full HD) with Portuguese (Brazil) and English subtitles
+If you need help with the cli run `node index.js --help` or `aniDL[.exe] --help` .
+
+If you still don't get it please open up an issue with the CLI template.
