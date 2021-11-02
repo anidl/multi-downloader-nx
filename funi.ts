@@ -606,7 +606,7 @@ async function downloadStreams(){
           replaceWith: a[1],
           type: typeof a[1],
         } as Variable;
-      }), argv.numbers)
+      }), argv.numbers);
       if (fnOutput.length < 1)
         throw new Error(`Invalid path generated for input ${argv.fileName}`);
       console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
