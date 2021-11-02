@@ -1,13 +1,15 @@
 {
-    "name": "funimation-downloader-nx",
-    "short_name": "funi",
+    "name": "multi-downloader-nx",
+    "short_name": "aniDL",
     "version": "5.0.0",
-    "description": "Download videos from Funimation via cli.",
+    "description": "Download videos from Funimation or Crunchyroll via cli.",
     "keywords": [
         "download",
         "downloader",
         "funimation",
         "funimationnow",
+        "crunchy",
+        "crunchyroll",
         "util",
         "utility",
         "cli"

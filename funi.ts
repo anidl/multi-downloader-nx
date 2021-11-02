@@ -38,6 +38,7 @@ import { EpisodeData, MediaChild } from './@types/episode';
 import { Subtitle } from './@types/subtitleObject';
 import { StreamData } from './@types/streamData';
 import { DownloadedFile } from './@types/downloadedFile';
+import parseFileName, { Variable } from './modules/module.filename';
 
 // check page
 argv.p = 1;
@@ -591,7 +592,21 @@ async function downloadStreams(){
       console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q].width}x${plLayersRes[argv.q].height}) @ ${plSelectedServer}`);
       console.log('[INFO] Stream URL:',videoUrl);
     
-      fnOutput = parseFileName(argv.fileName, title, fnEpNum, showTitle, season, plLayersRes[argv.q].width, plLayersRes[argv.q].height);
+      fnOutput = parseFileName(argv.fileName, ([
+        ['episode', fnEpNum],
+        ['title', title],
+        ['showTitle', showTitle],
+        ['season', season],
+        ['width', plLayersRes[argv.q].width],
+        ['height', plLayersRes[argv.q].height],
+        ['service', 'Funimation']
+      ] as [appYargs.AvailableFilenameVars, string|number][]).map((a): Variable => {
+        return {
+          name: a[0],
+          replaceWith: a[1],
+          type: typeof a[1],
+        } as Variable;
+      }), argv.numbers)
       if (fnOutput.length < 1)
         throw new Error(`Invalid path generated for input ${argv.fileName}`);
       console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
@@ -761,45 +776,4 @@ async function downloadFile(filename: string, chunkList: {
   }).download();
     
   return downloadStatus.ok;
-}
-
-function parseFileName(input: string, title: string, episode:number|string, showTitle: string, season: number, width: number, height: number): string[] {
-  const varRegex = /\${[A-Za-z1-9]+}/g;
-  const vars = input.match(varRegex);
-  if (!vars)
-    return [input];
-  for (let i = 0; i < vars.length; i++) {
-    const type = vars[i];
-    switch (type.slice(2, -1).toLowerCase()) {
-    case 'title':
-      input = input.replace(vars[i], title);
-      break;
-    case 'episode': {
-      if (typeof episode === 'number') {
-        const len = episode.toFixed(0).toString().length;
-        input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + episode : episode.toString());
-      } else {
-        input = input.replace(vars[i], episode);
-      }
-      break;
-    }
-    case 'showtitle':
-      input = input.replace(vars[i], showTitle);
-      break;
-    case 'season': {
-      const len = season.toFixed(0).toString().length;
-      input = input.replace(vars[i], len < argv.numbers ? '0'.repeat(argv.numbers - len) + season : season.toString());
-      break;
-    }
-    case 'width':
-      input = input.replace(vars[i], width.toString());
-      break;
-    case 'height':
-      input = input.replace(vars[i], height.toString());
-      break;
-    default:
-      break;
-    }
-  }
-  return input.split(path.sep).map(a => shlp.cleanupFilename(a));
 }
