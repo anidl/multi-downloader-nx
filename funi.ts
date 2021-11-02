@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // modules build-in
 import fs from 'fs';
 import path from 'path';
