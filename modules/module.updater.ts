@@ -20,7 +20,8 @@ const updateIgnore = [
   path.join('config', 'token.yml'),
   '.eslint',
   'tsconfig.json',
-  'updates.json'
+  'updates.json',
+  'tsc.ts'
 ];
 
 enum ApplyType {
@@ -56,8 +57,6 @@ export default (async (force = false) => {
       return done();
     }
     const newest = newer.sort((a, b) => a.name < b.name ? 1 : a.name > b.name ? -1 : 0)[0];
-    //TODO REMOVE
-    newest.name = 'auto-updates'
     const compareRequest = await got(`https://api.github.com/repos/anidl/multi-downloader-nx/compare/${packageJson.version}...${newest.name}`)
 
     const compareJSON = JSON.parse(compareRequest.body) as TagCompare;
@@ -74,7 +73,7 @@ export default (async (force = false) => {
         } else if (filter.split(path.sep).pop()?.indexOf('.') === -1) {
           return a.filename.startsWith(filter);
         } else {
-          return a.filename.split('/').pop() === filter;
+          return a.filename.split(path.sep).pop() === _filter;
         }
       })
     })
@@ -106,7 +105,6 @@ export default (async (force = false) => {
 
     changesToApply.forEach(a => {
       fsextra.ensureDirSync(path.dirname(a.path));
-      console.log(path.join(__dirname, '..', a.path))
       fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
       console.log('✓ %s', a.path)
     })
