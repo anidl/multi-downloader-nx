@@ -3,7 +3,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 
 import funimation from './funi';
 import crunchy from './crunchy';
-import update from './modules/module.updater'
+import update from './modules/module.updater';
 
 (async () => {
   const cfg = yamlCfg.loadCfg();

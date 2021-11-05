@@ -14,7 +14,7 @@ const ignore = [
   '.eslint',
 ].map(a => path.join(__dirname, a));
 
-export { ignore }
+export { ignore };
 
 (async () => {
   removeSync('lib');
