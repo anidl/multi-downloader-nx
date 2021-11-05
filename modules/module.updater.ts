@@ -7,7 +7,10 @@ import packageJson from '../package.json';
 import { CompilerOptions, transpileModule } from 'typescript';
 import tsConfig from '../tsconfig.json';
 import fsextra from 'fs-extra';
-const updateFilePlace = path.join(__dirname, '..', 'config', 'updates.json');
+const workingDir = (process as NodeJS.Process & {
+  pkg?: unknown
+}).pkg ? path.dirname(process.execPath) : path.join(__dirname, '/..');
+const updateFilePlace = path.join(workingDir, 'config', 'updates.json');
 
 const updateIgnore = [
   '*.json',
@@ -35,6 +38,12 @@ export type ApplyItem = {
 }
 
 export default (async (force = false) => {
+  const isPackaged = (process as NodeJS.Process & {
+    pkg?: unknown
+  }).pkg ? true : false;
+  if (isPackaged) {
+    return;
+  }
   let updateFile: UpdateFile|undefined;
   if (fs.existsSync(updateFilePlace)) {
     updateFile = JSON.parse(fs.readFileSync(updateFilePlace).toString()) as UpdateFile;
