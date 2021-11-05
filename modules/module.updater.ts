@@ -4,6 +4,9 @@ import { GithubTag, TagCompare } from "../@types/github";
 import path from "path";
 import { UpdateFile } from "../@types/updateFile";
 import packageJson from '../package.json';
+import { CompilerOptions, transpileModule } from "typescript";
+import tsConfig from "../tsconfig.json";
+import fsextra from "fs-extra";
 const updateFilePlace = path.join(__dirname, '..', 'config', 'updates.json');
 
 const updateIgnore = [
@@ -20,7 +23,17 @@ const updateIgnore = [
   'updates.json'
 ];
 
-(async (force = false) => {
+enum ApplyType {
+  DELETE, ADD, UPDATE
+} 
+
+export type ApplyItem = {
+  type: ApplyType,
+  path: string,
+  content: string
+}
+
+export default (async (force = false) => {
   let updateFile: UpdateFile|undefined;
   if (fs.existsSync(updateFilePlace)) {
     updateFile = JSON.parse(fs.readFileSync(updateFilePlace).toString()) as UpdateFile;
@@ -49,12 +62,16 @@ const updateIgnore = [
 
     const compareJSON = JSON.parse(compareRequest.body) as TagCompare;
 
-    console.log(`You are behind by ${compareJSON.behind_by} releases!`)
-    const changedFiles = compareJSON.files.filter(a => {
-      return !updateIgnore.some(filter => {
-        if (filter.startsWith('*')) {
-          return a.filename.endsWith(filter.slice(1))
-        } else if (fs.statSync(filter).isDirectory()) {
+    console.log(`You are behind by ${compareJSON.ahead_by} releases!`)
+    const changedFiles = compareJSON.files.map(a => ({
+      ...a,
+      filename: path.join(...a.filename.split('/'))
+    })).filter(a => {
+      return !updateIgnore.some(_filter => {
+        const filter = path.join('..', _filter);
+        if (_filter.startsWith('*')) {
+          return a.filename.endsWith(_filter.slice(1))
+        } else if (filter.split(path.sep).pop()?.indexOf('.') === -1) {
           return a.filename.startsWith(filter);
         } else {
           return a.filename.split('/').pop() === filter;
@@ -65,12 +82,39 @@ const updateIgnore = [
       console.log('[INFO] No file changes found... updating package.json. If you thing this is an error please get the newst version yourself.')
       return done(newest.name);
     }
-    console.log(`Found file changes: \n${changedFiles.map(a => `  [
-      ${a.status === 'modified' ? '*' : a.status === 'added' ? '+' : '-'}
-    ] ${a.filename}`).join('\n')}`)
+    console.log(`Found file changes: \n${changedFiles.map(a => `  [${
+      a.status === 'modified' ? '*' : a.status === 'added' ? '+' : '-'
+    }] ${a.filename}`).join('\n')}`)
 
+    const changesToApply = await Promise.all(changedFiles.map(async (a): Promise<ApplyItem> => {
+      if (a.filename.endsWith('.ts')) {
+        return {
+          path: a.filename.slice(0, -2) + 'js',
+          content: transpileModule((await got(a.raw_url)).body, {
+            compilerOptions: tsConfig as unknown as CompilerOptions
+          }).outputText,
+          type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
+        } 
+      } else {
+        return {
+          path: a.filename,
+          content: (await got(a.raw_url)).body,
+          type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
+        }
+      }
+    }))
+
+    changesToApply.forEach(a => {
+      fsextra.ensureDirSync(path.dirname(a.path));
+      console.log(path.join(__dirname, '..', a.path))
+      fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
+      console.log('✓ %s', a.path)
+    })
+
+    console.log('[INFO] Done')
+    return done();
   } 
-})(true)
+})
 
 function done(newVersion?: string) {
   const next = new Date(Date.now() + 1000 * 60 * 60 * 24);
