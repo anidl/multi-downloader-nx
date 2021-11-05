@@ -57,6 +57,12 @@ let title = '',
 export default (async () => {
   // load binaries
   cfg.bin = await yamlCfg.loadBinCfg();
+  if (argv.allDubs) {
+    argv.dub = appYargs.dubLang;
+  }
+  if (argv.allSubs) {
+    argv.subLang = appYargs.subLang;
+  }
   // select mode
   if(argv.auth){
     auth();
