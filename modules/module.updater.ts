@@ -1,12 +1,12 @@
-import got from "got";
-import fs from "fs";
-import { GithubTag, TagCompare } from "../@types/github";
-import path from "path";
-import { UpdateFile } from "../@types/updateFile";
+import got from 'got';
+import fs from 'fs';
+import { GithubTag, TagCompare } from '../@types/github';
+import path from 'path';
+import { UpdateFile } from '../@types/updateFile';
 import packageJson from '../package.json';
-import { CompilerOptions, transpileModule } from "typescript";
-import tsConfig from "../tsconfig.json";
-import fsextra from "fs-extra";
+import { CompilerOptions, transpileModule } from 'typescript';
+import tsConfig from '../tsconfig.json';
+import fsextra from 'fs-extra';
 const updateFilePlace = path.join(__dirname, '..', 'config', 'updates.json');
 
 const updateIgnore = [
@@ -42,26 +42,26 @@ export default (async (force = false) => {
       return;
     }
   }
-  console.log('Checking for updates...')
-  const tagRequest = await got('https://api.github.com/repos/anidl/multi-downloader-nx/tags')
+  console.log('Checking for updates...');
+  const tagRequest = await got('https://api.github.com/repos/anidl/multi-downloader-nx/tags');
   const tags = JSON.parse(tagRequest.body) as GithubTag[];
 
   if (tags.length > 0) {
     const newer = tags.filter(a => {
       return a.name > packageJson.version;
-    })
-    console.log(`Found ${tags.length} release tags and ${newer.length} that are new.`)
+    });
+    console.log(`Found ${tags.length} release tags and ${newer.length} that are new.`);
   
     if (newer.length < 1) {
-      console.log('[INFO] No new tags found')
+      console.log('[INFO] No new tags found');
       return done();
     }
     const newest = newer.sort((a, b) => a.name < b.name ? 1 : a.name > b.name ? -1 : 0)[0];
-    const compareRequest = await got(`https://api.github.com/repos/anidl/multi-downloader-nx/compare/${packageJson.version}...${newest.name}`)
+    const compareRequest = await got(`https://api.github.com/repos/anidl/multi-downloader-nx/compare/${packageJson.version}...${newest.name}`);
 
     const compareJSON = JSON.parse(compareRequest.body) as TagCompare;
 
-    console.log(`You are behind by ${compareJSON.ahead_by} releases!`)
+    console.log(`You are behind by ${compareJSON.ahead_by} releases!`);
     const changedFiles = compareJSON.files.map(a => ({
       ...a,
       filename: path.join(...a.filename.split('/'))
@@ -69,21 +69,21 @@ export default (async (force = false) => {
       return !updateIgnore.some(_filter => {
         const filter = path.join('..', _filter);
         if (_filter.startsWith('*')) {
-          return a.filename.endsWith(_filter.slice(1))
+          return a.filename.endsWith(_filter.slice(1));
         } else if (filter.split(path.sep).pop()?.indexOf('.') === -1) {
           return a.filename.startsWith(filter);
         } else {
           return a.filename.split(path.sep).pop() === _filter;
         }
-      })
-    })
+      });
+    });
     if (changedFiles.length < 1) {
-      console.log('[INFO] No file changes found... updating package.json. If you thing this is an error please get the newst version yourself.')
+      console.log('[INFO] No file changes found... updating package.json. If you thing this is an error please get the newst version yourself.');
       return done(newest.name);
     }
     console.log(`Found file changes: \n${changedFiles.map(a => `  [${
       a.status === 'modified' ? '*' : a.status === 'added' ? '+' : '-'
-    }] ${a.filename}`).join('\n')}`)
+    }] ${a.filename}`).join('\n')}`);
 
     const changesToApply = await Promise.all(changedFiles.map(async (a): Promise<ApplyItem> => {
       if (a.filename.endsWith('.ts')) {
@@ -93,38 +93,38 @@ export default (async (force = false) => {
             compilerOptions: tsConfig as unknown as CompilerOptions
           }).outputText,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
-        } 
+        }; 
       } else {
         return {
           path: a.filename,
           content: (await got(a.raw_url)).body,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
-        }
+        };
       }
-    }))
+    }));
 
     changesToApply.forEach(a => {
       fsextra.ensureDirSync(path.dirname(a.path));
       fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
-      console.log('✓ %s', a.path)
-    })
+      console.log('✓ %s', a.path);
+    });
 
-    console.log('[INFO] Done')
+    console.log('[INFO] Done');
     return done();
   } 
-})
+});
 
 function done(newVersion?: string) {
   const next = new Date(Date.now() + 1000 * 60 * 60 * 24);
   fs.writeFileSync(updateFilePlace, JSON.stringify({
     lastCheck: Date.now(),
     nextCheck: next.getTime()
-  } as UpdateFile, null, 2))
+  } as UpdateFile, null, 2));
   if (newVersion) {
     fs.writeFileSync('../package.json', JSON.stringify({
       ...packageJson,
       version: newVersion
-    }, null, 4))
+    }, null, 4));
   }
-  console.log('[INFO] Searching for update finished. Next time running on the ' + next.toLocaleDateString() + ' at ' + next.toLocaleTimeString() + '.')
+  console.log('[INFO] Searching for update finished. Next time running on the ' + next.toLocaleDateString() + ' at ' + next.toLocaleTimeString() + '.');
 }
