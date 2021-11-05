@@ -17,3 +17,5 @@ token.yml
 *.resume
 *.user.yml
 lib
+test.*
+updates.json
