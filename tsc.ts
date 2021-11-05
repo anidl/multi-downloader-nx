@@ -10,9 +10,11 @@ const ignore = [
   '@types',
   path.join('bin', 'mkvtoolnix'),
   path.join('config', 'token.yml'),
+  path.join('config', 'updates.json'),
   '.eslint',
-  'tsconfig.json'
 ].map(a => path.join(__dirname, a));
+
+export { ignore };
 
 (async () => {
   removeSync('lib');

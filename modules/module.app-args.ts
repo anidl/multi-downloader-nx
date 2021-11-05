@@ -284,6 +284,12 @@ const appArgv = (cfg: {
       demandOption: true,
       default: parseDefault<'crunchy'|'funi'|undefined>('service', undefined)
     })
+    .option('update', {
+      group: groups.util,
+      describe: 'Force the tool to check for updates',
+      type: 'boolean',
+      default: false
+    })
     .parseSync();
   return argv;
 };
