@@ -99,7 +99,7 @@ export default (async (force = false) => {
         return {
           path: a.filename.slice(0, -2) + 'js',
           content: transpileModule((await got(a.raw_url)).body, {
-            compilerOptions: tsConfig as unknown as CompilerOptions
+            compilerOptions: tsConfig.compilerOptions as unknown as CompilerOptions
           }).outputText,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
         }; 

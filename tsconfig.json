@@ -12,6 +12,7 @@
   },
   "exclude": [
     "./videos",
-    "./tsc.ts"
+    "./tsc.ts",
+    "lib/**/*"
   ]
 }

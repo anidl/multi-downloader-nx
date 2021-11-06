@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // build requirements
 import fs from 'fs-extra';
 import pkg from '../package.json';

@@ -1,13 +1,9 @@
-#!/usr/bin/env node
-
 // build-in
 import path from 'path';
 import fs from 'fs-extra';
 
 // package program
 import packageJson from './package.json';
-console.log(`\n=== Crunchyroll Beta Downloader NX ${packageJson.version} ===\n`);
-
 // plugins
 import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
@@ -63,6 +59,7 @@ const req = new reqModule.Req(domain, argv);
 
 // select
 export default (async () => {
+  console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
   // load binaries
   cfg.bin = await yamlCfg.loadBinCfg();
   // select mode
@@ -1017,7 +1014,7 @@ async function getMedia(mMeta: CrunchyEpMeta){
         console.log(`[WARN] The requested quality of ${argv.q} is greater than the maximun ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
         quality = plQuality.length;
       }
-      const selPlUrl = quality === 0 ? plSelectedList[plQuality.pop()?.dim as string] :
+      const selPlUrl = quality === 0 ? plSelectedList[plQuality[plQuality.length - 1].dim as string] :
         plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
       console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
       console.log(`[INFO] Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
@@ -1026,11 +1023,11 @@ async function getMedia(mMeta: CrunchyEpMeta){
         appstore.fn.push({
           name: 'height',
           type: 'number',
-          replaceWith: quality === 0 ? plQuality.pop()?.RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
+          replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
         }, {
           name: 'width',
           type: 'number',
-          replaceWith: quality === 0 ? plQuality.pop()?.RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
+          replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
         });
         appstore.lang = curStream.audio_lang;
         console.log(`[INFO] Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
@@ -1058,14 +1055,13 @@ async function getMedia(mMeta: CrunchyEpMeta){
             if (!fs.existsSync(path.join(isAbsolut ? '' : cfg.dir.content, ...arr.slice(0, ind), val)))
               fs.mkdirSync(path.join(isAbsolut ? '' : cfg.dir.content, ...arr.slice(0, ind), val));
           });
-          const streamdlParams = {
-            fn: `${tsFile}.ts`,
+          const dlStreamByPl = await new streamdl({
+            output: `${tsFile}.ts`,
+            timeout: argv.timeout,
             m3u8json: chunkPlaylist,
             // baseurl: chunkPlaylist.baseUrl,
-            pcount: argv.tsparts,
-            partsOffset: 0,
-          };
-          const dlStreamByPl = await new streamdl(streamdlParams).download();
+            threads: argv.partsize
+          }).download();
           if(!dlStreamByPl.ok){
             console.log(`[ERROR] DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
             dlFailed = true;

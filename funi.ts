@@ -6,7 +6,6 @@ import path from 'path';
 import packageJson from './package.json'; 
 
 // program name
-console.log(`\n=== Funimation Downloader NX ${packageJson.version} ===\n`);
 const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 
 // modules extra
@@ -56,6 +55,7 @@ let title = '',
 // main
 export default (async () => {
   // load binaries
+  console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
   cfg.bin = await yamlCfg.loadBinCfg();
   if (argv.allDubs) {
     argv.dub = appYargs.dubLang;
@@ -375,7 +375,7 @@ async function getEpisode(fnSlug: {
       return true;
     }
   });
-  if(streamIds.length <1){
+  if(streamIds.length < 1){
     console.log('[ERROR] Track not selected\n');
     return;
   }
