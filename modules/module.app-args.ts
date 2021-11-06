@@ -290,6 +290,12 @@ const appArgv = (cfg: {
       type: 'boolean',
       default: false
     })
+    .option('fontName', {
+      group: groups.fonts,
+      describe: 'Set the font to use in subtiles (Funi only)',
+      type: 'string',
+      default: parseDefault<string|undefined>('fontName', undefined)
+    })
     .parseSync();
   return argv;
 };

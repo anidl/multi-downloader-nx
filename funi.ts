@@ -700,7 +700,7 @@ async function downloadStreams(){
         debug: argv.debug,
       });
       if(subsSrc.ok && subsSrc.res){
-        const assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize);
+        const assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize, argv.fontName);
         subObject.file =  path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.subtitle${subObject.ext}${subsExt}`);
         fs.writeFileSync(subObject.file, assData);
       }
