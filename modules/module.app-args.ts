@@ -34,10 +34,13 @@ export type possibleSubs = (
 )[];
 const subLang: possibleSubs = ['enUS', 'esLA', 'ptBR'];
 const dubLang: possibleDubs = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
+let argvC: { [x: string]: unknown; auth: boolean | undefined; dlFonts: boolean | undefined; search: string | undefined; "search-type": string; page: number | undefined; "search-locale": string; new: boolean | undefined; "movie-listing": string | undefined; series: string | undefined; s: string | undefined; e: string | undefined; q: number; x: number; kstream: number; partsize: number; hslang: string; subLang: string[]; dlsubs: string | string[]; novids: boolean | undefined; noaudio: boolean | undefined; nosubs: boolean | undefined; dub: possibleDubs; dubLang: string; all: boolean; fontSize: number; allSubs: boolean; allDubs: boolean; timeout: number; simul: boolean; mp4: boolean; skipmux: boolean | undefined; fileName: string; numbers: number; nosess: string; debug: boolean | undefined; nocleanup: boolean; help: boolean | undefined; service: "funi" | "crunchy"; update: boolean; fontName: string | undefined; _: (string | number)[]; $0: string; };
 
 const appArgv = (cfg: {
   [key: string]: unknown
 }) => {
+  if (argvC)
+    return argvC;
   const parseDefault = <T = unknown>(key: string, _default: T) : T=> {
     if (Object.prototype.hasOwnProperty.call(cfg, key)) {
       return cfg[key] as T;
@@ -47,7 +50,7 @@ const appArgv = (cfg: {
 
   const argv = yargs.parserConfiguration({
     'duplicate-arguments-array': false,
-    'camel-case-expansion': false
+    'camel-case-expansion': false,
   })
     .wrap(yargs.terminalWidth())
     .usage('Usage: $0 [options]')
@@ -297,6 +300,7 @@ const appArgv = (cfg: {
       default: parseDefault<string|undefined>('fontName', undefined)
     })
     .parseSync();
+  argvC = argv;
   return argv;
 };
 
