@@ -835,7 +835,7 @@ async function getMedia(mMeta: CrunchyEpMeta){
   appstore.fn = ([
     ['title', mMeta.episodeTitle],
     ['episode', mMeta.episodeNumber],
-    ['service', 'Crunchyroll'],
+    ['service', 'CR'],
     ['showTitle', mMeta.seasonTitle],
     ['season', mMeta.seasonID]
   ] as [yargs.AvailableFilenameVars, string|number][]).map((a): Variable => {

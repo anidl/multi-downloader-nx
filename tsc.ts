@@ -11,6 +11,7 @@ const ignore = [
   path.join('bin', 'mkvtoolnix'),
   path.join('config', 'token.yml'),
   path.join('config', 'updates.json'),
+  path.join('config', 'cr_token.yml'),
   '.eslint',
 ].map(a => path.join(__dirname, a));
 

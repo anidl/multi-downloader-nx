@@ -19,3 +19,4 @@ token.yml
 lib
 test.*
 updates.json
+cr_token.yml
