@@ -93,7 +93,7 @@ export default (async () => {
   else if(argv.s && argv.s.match(/^[0-9A-Z]{9}$/)){
     await refreshToken();
     if (argv.dubLang.length > 1) {
-      console.log('[INFO] One show can only be downloaded with one dub. Use --srz instead.')
+      console.log('[INFO] One show can only be downloaded with one dub. Use --srz instead.');
       argv.dubLang = argv.dubLang[0];
     }
     await getSeasonById();
@@ -1202,12 +1202,12 @@ const downloadFromSeriesID = async () => {
   const episodes : Record<string, {
     items: Item[],
     langs: langsData.LanguageItem[]
-  }> = {}
-  for (let key of Object.keys(result)) {
+  }> = {};
+  for (const key of Object.keys(result)) {
     const s = result[key];
     (await getSeasonDataById(s))?.items.forEach(a => {
       if (Object.prototype.hasOwnProperty.call(episodes, a.episode_number?.toString() as string)) {
-        let item = episodes[a.episode_number?.toString() as string];
+        const item = episodes[a.episode_number?.toString() as string];
         item.items.push(a);
         item.langs.push(langsData.languages.find(a => a.code == key) as langsData.LanguageItem);
       } else {
@@ -1216,9 +1216,9 @@ const downloadFromSeriesID = async () => {
           langs: [langsData.languages.find(a => a.code == key) as langsData.LanguageItem]
         };
       }
-    })
+    });
   }
-  for (let key of Object.keys(episodes)) {
+  for (const key of Object.keys(episodes)) {
     const item = episodes[key];
     //if (item.items[0].episode_number == null)
     //  continue;
@@ -1226,25 +1226,25 @@ const downloadFromSeriesID = async () => {
       item.items.find(a => !a.season_title.includes('('))?.season_title as string
     } - ${item.items[0].title} [${
       item.items.map((a, index) => {
-        return `${a.is_premium_only ? '☆ ' : ''}${item.langs[index].name}`
+        return `${a.is_premium_only ? '☆ ' : ''}${item.langs[index].name}`;
       }).join(', ')
-    }]`)
+    }]`);
   }
-  console.log()
+  console.log();
   console.log('-'.repeat(30));
-  console.log()
-  const selected = itemSelectMultiDub(episodes)
-  for (let key of Object.keys(selected)) {
+  console.log();
+  const selected = itemSelectMultiDub(episodes);
+  for (const key of Object.keys(selected)) {
     const item = selected[key];
     console.log(`[${item.episodeNumber}] - ${item.episodeTitle} [${
       item.data.map(a => {
-        return `✓ ${a.lang.name}`
+        return `✓ ${a.lang.name}`;
       }).join(', ')
-    }]`)
+    }]`);
   }
-  for (let key of Object.keys(selected)) {
+  for (const key of Object.keys(selected)) {
     const item = selected[key];
-    let res = await getMediaList(item);
+    const res = await getMediaList(item);
     if (!res)
       return;
     muxStreams({
@@ -1260,9 +1260,9 @@ const downloadFromSeriesID = async () => {
       videoAndAudio: res,
       simul: false,
       fonts: Merger.makeFontsList(cfg.dir.fonts, appstore.sxList)
-    })
+    });
   }
-}
+};
 
 const itemSelectMultiDub = (eps: Record<string, {
   items: Item[],
@@ -1278,7 +1278,7 @@ const itemSelectMultiDub = (eps: Record<string, {
   } = { sp: 0 };
   const epNumLen = epsFilter.epNumLen;
   appstore.sxList = [];
-  for (let key of Object.keys(eps)) {
+  for (const key of Object.keys(eps)) {
     const itemE = eps[key];
     itemE.items.forEach((item, index) => {
       if (!argv.dubLang.includes(itemE.langs[index].code))
@@ -1322,7 +1322,7 @@ const itemSelectMultiDub = (eps: Record<string, {
             lang: itemE.langs[index],
             mediaId: epMeta.mediaId,
             playback: epMeta.playback
-          })
+          });
         } else {
           ret[key] = {
             data: [
@@ -1333,21 +1333,21 @@ const itemSelectMultiDub = (eps: Record<string, {
               }
             ],
             ...epMeta
-          }
+          };
         }
       }
       // show ep
       item.seq_id = selEpId;
-    })
+    });
   }
   return ret;
-}
+};
 
 const parseSeriesResult = (seasonsList: SeriesSearch) : Record<string, SeriesSearchItem> => {
   const ret: Record<string, SeriesSearchItem> = {};
 
-  for (let item of seasonsList.items) {
-    for (let lang of langsData.languages) {
+  for (const item of seasonsList.items) {
+    for (const lang of langsData.languages) {
       if (item.title.includes(`(${lang.name} Dub)`)) {
         ret[lang.code] = item;
       } else if (item.is_subbed && !item.is_dubbed && lang.code == 'jpn') {
@@ -1356,7 +1356,7 @@ const parseSeriesResult = (seasonsList: SeriesSearch) : Record<string, SeriesSea
     }
   }
   return ret;
-}
+};
 
 async function parseSeriesById() {
   if(!cmsToken.cms){
@@ -1447,7 +1447,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
     mediaName = `${medias.seasonTitle} - ${medias.episodeNumber} - ${medias.episodeTitle}`;
   }
     
-  let files: {
+  const files: {
     path: string,
     lang: string
   }[] = [];
@@ -1706,7 +1706,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
             files.push({
               path: `${tsFile}.ts`,
               lang: lang as string
-            })
+            });
           }
         }
         else{

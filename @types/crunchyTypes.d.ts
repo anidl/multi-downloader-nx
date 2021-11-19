@@ -1,4 +1,4 @@
-import { LanguageItem } from "../modules/module.langsData"
+import { LanguageItem } from '../modules/module.langsData';
 
 export type CrunchyEpMeta = {
   mediaId: string,
@@ -79,9 +79,9 @@ export interface SeriesSearchItem {
 }
 
 export interface Links {
-  "season/channel":  Season;
-  "season/episodes": Season;
-  "season/series":   Season;
+  'season/channel':  Season;
+  'season/episodes': Season;
+  'season/series':   Season;
 }
 
 export interface Season {
