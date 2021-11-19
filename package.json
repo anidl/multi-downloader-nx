@@ -1,7 +1,7 @@
 {
     "name": "multi-downloader-nx",
     "short_name": "aniDL",
-    "version": "1.0.4",
+    "version": "1.1.0",
     "description": "Download videos from Funimation or Crunchyroll via cli",
     "keywords": [
         "download",
@@ -29,7 +29,7 @@
         "cheerio": "^1.0.0-rc.10",
         "form-data": "^4.0.0",
         "fs-extra": "^10.0.0",
-        "got": "^11.7.0",
+        "got": "^11.8.3",
         "hls-download": "^2.6.5",
         "iso-639": "^0.2.2",
         "lookpath": "^1.1.0",
@@ -40,15 +40,15 @@
     },
     "devDependencies": {
         "@types/fs-extra": "^9.0.13",
-        "@types/node": "^16.11.7",
-        "@types/yargs": "^17.0.5",
-        "@typescript-eslint/eslint-plugin": "^5.3.1",
-        "@typescript-eslint/parser": "^5.3.1",
+        "@types/node": "^16.11.9",
+        "@types/yargs": "^17.0.7",
+        "@typescript-eslint/eslint-plugin": "^5.4.0",
+        "@typescript-eslint/parser": "^5.4.0",
         "eslint": "^7.30.0",
         "pkg": "^5.4.1",
         "removeNPMAbsolutePaths": "^2.0.0",
         "ts-node": "^10.4.0",
-        "typescript": "^4.4.4"
+        "typescript": "^4.5.2"
     },
     "scripts": {
         "tsc": "ts-node tsc.ts",

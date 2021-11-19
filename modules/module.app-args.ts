@@ -195,7 +195,7 @@ const appArgv = (cfg: {
       describe: 'Set the language to download (Crunchy only)',
       choices: langsData.dubLanguageCodes,
       default: parseDefault('dubLanguage', langsData.dubLanguageCodes.slice(-1)[0]),
-      type: 'string',
+      array: true,
     })
     .option('all', {
       group: groups.dl,
