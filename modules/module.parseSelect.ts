@@ -83,10 +83,10 @@ const parseSelect = (selectString: string, but = false) : {
           return false;
         }
         const included = select.includes(`${letter}${number}`);
-        return but ? !included : included
+        return but ? !included : included;
       } else {
         const included =  select.includes(`${parseInt(st)}`);
-        return but ? !included : included
+        return but ? !included : included;
       }
     }
   };

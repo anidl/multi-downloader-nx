@@ -11,7 +11,7 @@ import update from './modules/module.updater';
   await update(argv.update);
 
   if (argv.all && argv.but) {
-    console.log('[ERROR] --all and --but exclude each other!')
+    console.log('[ERROR] --all and --but exclude each other!');
     return;
   }
   
