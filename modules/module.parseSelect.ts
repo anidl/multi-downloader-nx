@@ -1,11 +1,11 @@
-const parseSelect = (selectString: string) : {
+const parseSelect = (selectString: string, but = false) : {
     isSelected: (val: string) => boolean,
     values: string[]
 } => {
   if (!selectString)
     return {
       values: [],
-      isSelected: () => false
+      isSelected: () => but
     };
   const parts = selectString.split(',');
   const select: string[] = [];
@@ -82,10 +82,11 @@ const parseSelect = (selectString: string) : {
         if (isNaN(number)) {
           return false;
         }
-
-        return select.includes(`${letter}${number}`);
+        const included = select.includes(`${letter}${number}`);
+        return but ? !included : included
       } else {
-        return select.includes(`${parseInt(st)}`);
+        const included =  select.includes(`${parseInt(st)}`);
+        return but ? !included : included
       }
     }
   };

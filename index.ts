@@ -10,6 +10,11 @@ import update from './modules/module.updater';
 
   await update(argv.update);
 
+  if (argv.all && argv.but) {
+    console.log('[ERROR] --all and --but exclude each other!')
+    return;
+  }
+  
   if (argv.service === 'funi') {
     (await import('./funi')).default();
   } else if (argv.service === 'crunchy') {

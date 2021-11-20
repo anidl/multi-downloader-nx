@@ -34,7 +34,7 @@ export type possibleSubs = (
 )[];
 const subLang: possibleSubs = ['enUS', 'esLA', 'ptBR'];
 const dubLang: possibleDubs = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
-let argvC: { [x: string]: unknown; auth: boolean | undefined; dlFonts: boolean | undefined; search: string | undefined; 'search-type': string; page: number | undefined; 'search-locale': string; new: boolean | undefined; 'movie-listing': string | undefined; series: string | undefined; s: string | undefined; e: string | undefined; q: number; x: number; kstream: number; partsize: number; hslang: string; subLang: string[]; dlsubs: string | string[]; novids: boolean | undefined; noaudio: boolean | undefined; nosubs: boolean | undefined; dub: possibleDubs; dubLang: string; all: boolean; fontSize: number; allSubs: boolean; allDubs: boolean; timeout: number; simul: boolean; mp4: boolean; skipmux: boolean | undefined; fileName: string; numbers: number; nosess: string; debug: boolean | undefined; nocleanup: boolean; help: boolean | undefined; service: 'funi' | 'crunchy'; update: boolean; fontName: string | undefined; _: (string | number)[]; $0: string; };
+let argvC: { [x: string]: unknown; but: boolean, auth: boolean | undefined; dlFonts: boolean | undefined; search: string | undefined; 'search-type': string; page: number | undefined; 'search-locale': string; new: boolean | undefined; 'movie-listing': string | undefined; series: string | undefined; s: string | undefined; e: string | undefined; q: number; x: number; kstream: number; partsize: number; hslang: string; subLang: string[]; dlsubs: string | string[]; novids: boolean | undefined; noaudio: boolean | undefined; nosubs: boolean | undefined; dub: possibleDubs; dubLang: string; all: boolean; fontSize: number; allSubs: boolean; allDubs: boolean; timeout: number; simul: boolean; mp4: boolean; skipmux: boolean | undefined; fileName: string; numbers: number; nosess: string; debug: boolean | undefined; nocleanup: boolean; help: boolean | undefined; service: 'funi' | 'crunchy'; update: boolean; fontName: string | undefined; _: (string | number)[]; $0: string; };
 
 const appArgv = (cfg: {
   [key: string]: unknown
@@ -199,7 +199,7 @@ const appArgv = (cfg: {
     })
     .option('all', {
       group: groups.dl,
-      describe: 'Used to download all episodes from the show (Funi only)',
+      describe: 'Used to download all episodes from the show',
       type: 'boolean',
       default: parseDefault<boolean>('all', false)
     })
@@ -298,6 +298,12 @@ const appArgv = (cfg: {
       describe: 'Set the font to use in subtiles (Funi only)',
       type: 'string',
       default: parseDefault<string|undefined>('fontName', undefined)
+    })
+    .option('but', {
+      group: groups.dl,
+      describe: 'Download everything but',
+      type: 'boolean',
+      default: false
     })
     .parseSync();
   argvC = argv;

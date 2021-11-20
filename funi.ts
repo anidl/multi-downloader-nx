@@ -209,7 +209,7 @@ async function getShow(){
     return e;
   });
     
-  const epSelList = parseSelect(argv.e as string);
+  const epSelList = parseSelect(argv.e as string, argv.but);
 
   const fnSlug: {
     title: string,

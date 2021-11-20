@@ -94,8 +94,8 @@ export default (async () => {
     await refreshToken();
     if (argv.dubLang.length > 1) {
       console.log('[INFO] One show can only be downloaded with one dub. Use --srz instead.');
-      argv.dubLang = argv.dubLang[0];
     }
+    argv.dubLang = argv.dubLang[0];
     await getSeasonById();
   }
   else if(argv.e){
@@ -699,7 +699,7 @@ async function getSeasonById(){
         ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
         : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
     );
-    if(selEps.indexOf(selEpId) > -1 && !item.isSelected && item.playback){
+    if((argv.all && item.playback) || (selEps.indexOf(selEpId) > -1 && !item.isSelected && item.playback)){
       selectedMedia.push(epMeta);
       item.isSelected = true;
     }
@@ -1315,7 +1315,7 @@ const itemSelectMultiDub = (eps: Record<string, {
           ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
           : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
       );
-      if(selEps.indexOf(selEpId) > -1 && item.playback){
+      if((argv.all || selEps.indexOf(selEpId) > -1) && item.playback){
         if (Object.prototype.hasOwnProperty.call(ret, key)) {
           const epMe = ret[key];
           epMe.data.push({
