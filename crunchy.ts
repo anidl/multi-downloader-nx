@@ -699,7 +699,7 @@ async function getSeasonById(){
         ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
         : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
     );
-    if((argv.all && item.playback) || (selEps.indexOf(selEpId) > -1 && !item.isSelected && item.playback)){
+    if((argv.but && item.playback && selEps.indexOf(selEpId) == -1) || (argv.all && item.playback) || (!argv.but && selEps.indexOf(selEpId) > -1 && !item.isSelected && item.playback)){
       selectedMedia.push(epMeta);
       item.isSelected = true;
     }
@@ -1315,7 +1315,7 @@ const itemSelectMultiDub = (eps: Record<string, {
           ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
           : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
       );
-      if((argv.all || selEps.indexOf(selEpId) > -1) && item.playback){
+      if((argv.but && selEps.indexOf(selEpId) == -1) || (argv.all || (selEps.indexOf(selEpId) > -1) && item.playback && !argv.but)){
         if (Object.prototype.hasOwnProperty.call(ret, key)) {
           const epMe = ret[key];
           epMe.data.push({
