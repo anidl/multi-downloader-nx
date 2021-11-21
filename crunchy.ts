@@ -55,6 +55,7 @@ import { CrunchyEpMeta, CrunchyEpMetaMultiDub, ParseItem, SeriesSearch, SeriesSe
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
 import { PlaybackData } from './@types/playbackData';
+import { downloaded } from './modules/module.downloadArchive';
 const req = new reqModule.Req(domain, argv);
 
 // select
@@ -84,7 +85,7 @@ export default (async () => {
   else if(argv.series && argv.series.match(/^[0-9A-Z]{9}$/)){
     await refreshToken();
     await getSeriesById();
-    await downloadFromSeriesID();
+    return await downloadFromSeriesID();
   }
   else if(argv['movie-listing'] && argv['movie-listing'].match(/^[0-9A-Z]{9}$/)){
     await refreshToken();
@@ -94,9 +95,9 @@ export default (async () => {
     await refreshToken();
     if (argv.dubLang.length > 1) {
       console.log('[INFO] One show can only be downloaded with one dub. Use --srz instead.');
-      argv.dubLang = argv.dubLang[0];
     }
-    await getSeasonById();
+    argv.dubLang = argv.dubLang[0];
+    return await getSeasonById();
   }
   else if(argv.e){
     await refreshToken();
@@ -699,7 +700,7 @@ async function getSeasonById(){
         ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
         : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
     );
-    if(selEps.indexOf(selEpId) > -1 && !item.isSelected && item.playback){
+    if((argv.but && item.playback && selEps.indexOf(selEpId) == -1) || (argv.all && item.playback) || (!argv.but && selEps.indexOf(selEpId) > -1 && !item.isSelected && item.playback)){
       selectedMedia.push(epMeta);
       item.isSelected = true;
     }
@@ -719,10 +720,18 @@ async function getSeasonById(){
   }
     
   console.log();
+  let ok = true;
   for(const media of selectedMedia){
-    await getMedia(media);
+    if (await getMedia(media) !== true) {
+      ok = false;
+    } else {
+      downloaded({
+        service: 'crunchy',
+        type: 's'
+      }, argv.s as string, [media.episodeNumber]);
+    }
   }
-    
+  return ok;
 }
 
 async function getObjectById(returnData?: boolean){
@@ -1164,7 +1173,8 @@ async function getMedia(mMeta: CrunchyEpMeta){
   else{
     console.log();
   }
-    
+
+  return !dlFailed;
 }
 
 async function muxStreams(options: MergerOptions){
@@ -1247,6 +1257,10 @@ const downloadFromSeriesID = async () => {
     const res = await getMediaList(item);
     if (!res)
       return;
+    downloaded({
+      service: 'crunchy',
+      type: 'srz'
+    }, argv.series as string, [item.episodeNumber]);
     muxStreams({
       onlyAudio: [],
       onlyVid: [],
@@ -1262,6 +1276,7 @@ const downloadFromSeriesID = async () => {
       fonts: Merger.makeFontsList(cfg.dir.fonts, appstore.sxList)
     });
   }
+  return true;
 };
 
 const itemSelectMultiDub = (eps: Record<string, {
@@ -1315,7 +1330,7 @@ const itemSelectMultiDub = (eps: Record<string, {
           ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
           : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
       );
-      if(selEps.indexOf(selEpId) > -1 && item.playback){
+      if((argv.but && selEps.indexOf(selEpId) == -1) || (argv.all || (selEps.indexOf(selEpId) > -1) && item.playback && !argv.but)){
         if (Object.prototype.hasOwnProperty.call(ret, key)) {
           const epMe = ret[key];
           epMe.data.push({
