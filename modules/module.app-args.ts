@@ -27,27 +27,58 @@ const availableFilenameVars: AvailableFilenameVars[] = [
 ];
 
 export type possibleDubs = (
-    'enUS' | 'esLA' | 'ptBR' | 'zhMN' | 'jaJP'
-)[]; 
+  'enUS' | 'esLA' | 'ptBR' | 'zhMN' | 'jaJP'
+  )[]; 
 export type possibleSubs = (
     'enUS' | 'esLA' | 'ptBR'
-)[];
+    )[];
 const subLang: possibleSubs = ['enUS', 'esLA', 'ptBR'];
 const dubLang: possibleDubs = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
-let argvC: { [x: string]: unknown; but: boolean, auth: boolean | undefined; dlFonts: boolean | undefined; search: string | undefined; 'search-type': string; page: number | undefined; 'search-locale': string; new: boolean | undefined; 'movie-listing': string | undefined; series: string | undefined; s: string | undefined; e: string | undefined; q: number; x: number; kstream: number; partsize: number; hslang: string; subLang: string[]; dlsubs: string | string[]; novids: boolean | undefined; noaudio: boolean | undefined; nosubs: boolean | undefined; dub: possibleDubs; dubLang: string; all: boolean; fontSize: number; allSubs: boolean; allDubs: boolean; timeout: number; simul: boolean; mp4: boolean; skipmux: boolean | undefined; fileName: string; numbers: number; nosess: string; debug: boolean | undefined; nocleanup: boolean; help: boolean | undefined; service: 'funi' | 'crunchy'; update: boolean; fontName: string | undefined; _: (string | number)[]; $0: string; };
+let argvC: { [x: string]: unknown; downloadArchive: boolean, addArchive: boolean, but: boolean, auth: boolean | undefined; dlFonts: boolean | undefined; search: string | undefined; 'search-type': string; page: number | undefined; 'search-locale': string; new: boolean | undefined; 'movie-listing': string | undefined; series: string | undefined; s: string | undefined; e: string | undefined; q: number; x: number; kstream: number; partsize: number; hslang: string; subLang: string[]; dlsubs: string | string[]; novids: boolean | undefined; noaudio: boolean | undefined; nosubs: boolean | undefined; dub: possibleDubs; dubLang: string; all: boolean; fontSize: number; allSubs: boolean; allDubs: boolean; timeout: number; simul: boolean; mp4: boolean; skipmux: boolean | undefined; fileName: string; numbers: number; nosess: string; debug: boolean | undefined; nocleanup: boolean; help: boolean | undefined; service: 'funi' | 'crunchy'; update: boolean; fontName: string | undefined; _: (string | number)[]; $0: string; };
+    
+export type ArgvType = typeof argvC;  
 
 const appArgv = (cfg: {
   [key: string]: unknown
 }) => {
   if (argvC)
     return argvC;
+  const argv = getArgv(cfg)
+    .parseSync();
+  argvC = argv;
+  return argv;
+};
+
+
+const overrideArguments = (cfg: { [key:string]: unknown }, override: Partial<typeof argvC>) => {
+  const argv = getArgv(cfg).middleware((ar) => {
+    for (const key of Object.keys(override)) {
+      ar[key] = override[key];
+    }
+    return ar;
+  }).parseSync();
+  argvC = argv;
+};
+
+const showHelp = yargs.showHelp;
+    
+export {
+  appArgv,
+  showHelp,
+  availableFilenameVars,
+  subLang,
+  dubLang,
+  overrideArguments
+};
+    
+const getArgv = (cfg: { [key:string]: unknown }) => {
   const parseDefault = <T = unknown>(key: string, _default: T) : T=> {
     if (Object.prototype.hasOwnProperty.call(cfg, key)) {
       return cfg[key] as T;
     } else
       return _default;
   };
-
+      
   const argv = yargs.parserConfiguration({
     'duplicate-arguments-array': false,
     'camel-case-expansion': false,
@@ -305,17 +336,19 @@ const appArgv = (cfg: {
       type: 'boolean',
       default: false
     })
-    .parseSync();
-  argvC = argv;
+    .option('downloadArchive', {
+      group: groups.dl,
+      desc: 'Used to download all archived shows',
+      type: 'boolean',
+      default: false
+    })
+    .option('addArchive', {
+      group: groups.dl,
+      desc: 'Used to add the `-s` and `--srz` to downloadArchive',
+      type: 'boolean',
+      default: false
+    });
   return argv;
 };
-
-const showHelp = yargs.showHelp;
-
-export {
-  appArgv,
-  showHelp,
-  availableFilenameVars,
-  subLang,
-  dubLang
-};
+      
+      

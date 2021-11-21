@@ -26,7 +26,6 @@ const cfg = yamlCfg.loadCfg();
 const token = yamlCfg.loadFuniToken();
 // cli
 const argv = appYargs.appArgv(cfg.cli);
-
 // Import modules after argv has been exported
 import getData from './modules/module.getdata.js';
 import merger, { SubtitleInput } from './modules/module.merger';
@@ -36,6 +35,7 @@ import { Subtitle } from './@types/subtitleObject';
 import { StreamData } from './@types/streamData';
 import { DownloadedFile } from './@types/downloadedFile';
 import parseFileName, { Variable } from './modules/module.filename';
+import { downloaded } from './modules/module.downloadArchive';
 
 // check page
 argv.p = 1;
@@ -47,9 +47,9 @@ let title = '',
   fnOutput: string[] = [],
   season = 0,
   tsDlPath: {
-        path: string,
-        lang: string,
-    }[] = [],
+    path: string,
+    lang: string
+  }[] = [],
   stDlPath: Subtitle[] = [];
 
 // main
@@ -71,7 +71,7 @@ export default (async () => {
     searchShow();
   }
   else if(argv.s && !isNaN(parseInt(argv.s)) && parseInt(argv.s) > 0){
-    getShow();
+    return getShow();
   }
   else{
     appYargs.showHelp();
@@ -134,7 +134,7 @@ async function searchShow(){
 
 // get show
 async function getShow(){
-  // show main data
+  let ok = true;
   const showData = await getData({
     baseUrl: api_host,
     url: `/source/catalog/title/${argv.s}`,
@@ -213,7 +213,8 @@ async function getShow(){
 
   const fnSlug: {
     title: string,
-    episode: string
+    episode: string,
+    episodeID: string
   }[] = []; let is_selected = false;
     
   const eps = epsDataArr;
@@ -233,7 +234,7 @@ async function getShow(){
     // select
     is_selected = false;
     if (argv.all || epSelList.isSelected(epStrId)) {
-      fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug});
+      fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug, episodeID:epStrId});
       epSelEpsTxt.push(epStrId);
       is_selected = true;
     }
@@ -265,15 +266,17 @@ async function getShow(){
   else{
     console.log('[INFO] Selected Episodes: %s\n',epSelEpsTxt.join(', '));
     for(let fnEp=0;fnEp<fnSlug.length;fnEp++){
-      await getEpisode(fnSlug[fnEp]);
+      if (await getEpisode(fnSlug[fnEp]) !== true)
+        ok = false;
     }
   }
-    
+  return ok;
 }
 
 async function getEpisode(fnSlug: {
-    title: string,
-    episode: string
+  title: string,
+  episode: string,
+  episodeID: string
 }) {
   const episodeData = await getData({
     baseUrl: api_host,
@@ -321,7 +324,7 @@ async function getEpisode(fnSlug: {
         language: m.language,
         version: m.version,
         type: m.experienceType,
-        subtitles: getSubsUrl(m.mediaChildren),
+        subtitles: getSubsUrl(m.mediaChildren)
       };
     }
     else{
@@ -352,6 +355,7 @@ async function getEpisode(fnSlug: {
       for (const curDub of (argv.dub as appYargs.possibleDubs)) {
         if(dub_type == dubType[curDub] && selUncut){
           streamIds.push({
+            
             id: m.id,
             lang: merger.getLanguageCode(curDub, curDub.slice(0, -2))
           });
@@ -413,7 +417,7 @@ async function getEpisode(fnSlug: {
       return;
     }
     else{
-      await downloadStreams();
+      return await downloadStreams(fnSlug.episodeID);
     }
   }
 }
@@ -457,7 +461,7 @@ function getSubsUrl(m: MediaChild[]) : Subtitle[] {
   return found;
 }
 
-async function downloadStreams(){
+async function downloadStreams(epsiodeID: string){
     
   // req playlist
 
@@ -713,7 +717,7 @@ async function downloadStreams(){
     if (addSubs)
       console.log('[INFO] Subtitles downloaded!');
   }
-    
+  
   if((puraudio.length < 1 && audioAndVideo.length < 1) || (purvideo.length < 1 && audioAndVideo.length < 1)){
     console.log('\n[INFO] Unable to locate a video AND audio file\n');
     return;
@@ -721,6 +725,10 @@ async function downloadStreams(){
     
   if(argv.skipmux){
     console.log('[INFO] Skipping muxing...');
+    downloaded({
+      service: 'funi',
+      type: 's'
+    }, argv.s as string, [epsiodeID]);
     return;
   }
     
@@ -759,14 +767,28 @@ async function downloadStreams(){
   }
   else{
     console.log('\n[INFO] Done!\n');
-    return;
+    downloaded({
+      service: 'funi',
+      type: 's'
+    }, argv.s as string, [epsiodeID]);
+    return true;
   }
-  if (argv.nocleanup)
-    return;
+  if (argv.nocleanup) {
+    downloaded({
+      service: 'funi',
+      type: 's'
+    }, argv.s as string, [epsiodeID]);
+    return true;
+  }
     
   audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path));
   stDlPath.forEach(subObject => subObject.file && fs.unlinkSync(subObject.file));
   console.log('\n[INFO] Done!\n');
+  downloaded({
+    service: 'funi',
+    type: 's'
+  }, argv.s as string, [epsiodeID]);
+  return true;
 }
 
 async function downloadFile(filename: string, chunkList: {

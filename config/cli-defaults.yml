@@ -1,4 +1,6 @@
-videoLayer: 7
+videoLayer: 1
 nServer: 1
 mp4mux: false
 noCleanUp: false
+partsize: 50
+timeout: 30000

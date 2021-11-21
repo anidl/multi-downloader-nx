@@ -20,3 +20,4 @@ lib
 test.*
 updates.json
 cr_token.yml
+archive.json
