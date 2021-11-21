@@ -1,6 +1,6 @@
 import { appArgv, overrideArguments } from './modules/module.app-args';
 import * as yamlCfg from './modules/module.cfg-loader';
-import { makeCommand, downloaded, addToArchive } from './modules/module.downloadArchive';
+import { makeCommand, addToArchive } from './modules/module.downloadArchive';
 
 import update from './modules/module.updater';
 
@@ -43,8 +43,8 @@ import update from './modules/module.updater';
       /* Reimport module to override appArgv */
       Object.keys(require.cache).forEach(key => {
         if (key.endsWith('crunchy.js') || key.endsWith('funi.js'))
-          delete require.cache[key]
-      })
+          delete require.cache[key];
+      });
       await (argv.service === 'funi' ? await import('./funi') : await import('./crunchy')).default();
     }
   } else {
