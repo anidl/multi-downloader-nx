@@ -954,7 +954,7 @@ async function getMedia(mMeta: CrunchyEpMeta){
     console.log('[INFO] Playlists URL: %s (%s)', curStream.url, curStream.type);
   }
     
-  if(!argv.skipdl && !dlFailed && curStream){
+  if(!argv.novids && !dlFailed && curStream){
     const streamPlaylistsReq = await req.getData(curStream.url);
     if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
       console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLISTS!');
@@ -1088,7 +1088,8 @@ async function getMedia(mMeta: CrunchyEpMeta){
       }
     }
   }
-  else if(argv.skipdl){
+  else if(argv.novids){
+    appstore.out = parseFileName(argv.fileName, appstore.fn, argv.numbers).join(path.sep);
     console.log('[INFO] Downloading skipped!');
   }
     
@@ -1150,11 +1151,11 @@ async function getMedia(mMeta: CrunchyEpMeta){
   }
     
   // go to muxing
-  if(!argv.skipmux && !dlFailed){
+  if(!argv.skipmux && !dlFailed && !argv.novids){
     await muxStreams({
       onlyAudio: [],
       onlyVid: [],
-      videoAndAudio: [{
+      videoAndAudio: argv.novids ? [] : [{
         path: (path.isAbsolute(appstore.out as string) ? appstore.out as string : path.join(cfg.dir.content, appstore.out as string)) + '.ts',
         lang: appstore.lang as string,
         lookup: false
@@ -1261,6 +1262,7 @@ const downloadFromSeriesID = async () => {
       service: 'crunchy',
       type: 'srz'
     }, argv.series as string, [item.episodeNumber]);
+    if (!argv.novids)
     muxStreams({
       onlyAudio: [],
       onlyVid: [],
@@ -1591,7 +1593,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
       console.log('[INFO] Playlists URL: %s (%s)', curStream.url, curStream.type);
     }
       
-    if(!argv.skipdl && !dlFailed && curStream){
+    if(!argv.novids && !dlFailed && curStream){
       const streamPlaylistsReq = await req.getData(curStream.url);
       if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
         console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLISTS!');
@@ -1730,7 +1732,8 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
         }
       }
     }
-    else if(argv.skipdl){
+    else if(argv.novids){
+      appstore.out = parseFileName(argv.fileName, appstore.fn, argv.numbers).join(path.sep);
       console.log('[INFO] Downloading skipped!');
     }
     
