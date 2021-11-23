@@ -15,7 +15,7 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import * as epsFilter from './modules/module.eps-filter';
-import Merger, { Font, MergerOptions } from './modules/module.merger';
+import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 
 // new-cfg paths
 const cfg = yamlCfg.loadCfg();
@@ -34,24 +34,13 @@ export type sxItem = {
 
 // args
 const argv = yargs.appArgv(cfg.cli);
-const appstore: {
-  fn: Variable[],
-  isBatch: boolean,
-  out?: string,
-  sxList: sxItem[],
-  lang?: string
-} = {
-  fn: [],
-  isBatch: false,
-  sxList: []
-};
 
 // load req
 import { domain, api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.req';
 import { CrunchySearch } from './@types/crunchySearch';
 import { CrunchyEpisodeList, Item } from './@types/crunchyEpisodeList';
-import { CrunchyEpMeta, CrunchyEpMetaMultiDub, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
+import { CrunchyEpMeta, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
 import { PlaybackData } from './@types/playbackData';
@@ -675,14 +664,18 @@ async function getSeasonById(){
     }
     // set data
     const epMeta: CrunchyEpMeta = {
-      mediaId:       item.id,
+      data: [
+        {
+          mediaId: item.id
+        }
+      ],
       seasonTitle:   item.season_title,
       episodeNumber: item.episode,
       episodeTitle:  item.title,
       seasonID: item.season_id
     };
     if(item.playback){
-      epMeta.playback = item.playback;
+      epMeta.data[0].playback = item.playback;
     }
     // find episode numbers
     const epNum = item.episode;
@@ -715,16 +708,14 @@ async function getSeasonById(){
     return;
   }
     
-  if(selectedMedia.length > 1){
-    appstore.isBatch = true;
-  }
-    
   console.log();
   let ok = true;
   for(const media of selectedMedia){
-    if (await getMedia(media) !== true) {
+    const res = await downloadMediaList(media);
+    if (res === undefined) {
       ok = false;
     } else {
+      muxStreams(res.data, res.fileName);
       downloaded({
         service: 'crunchy',
         type: 's'
@@ -791,395 +782,72 @@ async function getObjectById(returnData?: boolean){
     switch (item.type) {
     case 'episode':
       item.s_num = 'S:' + item.episode_metadata.season_id;
-      epMeta.mediaId = 'E:'+ item.id;
+      epMeta.data = [
+        {
+          mediaId: 'E:'+ item.id
+        }
+      ];
       epMeta.seasonTitle = item.episode_metadata.season_title;
       epMeta.episodeNumber = item.episode_metadata.episode;
       epMeta.episodeTitle = item.title;
       break;
     case 'movie':
       item.f_num = 'F:' + item.movie_metadata?.movie_listing_id;
-      epMeta.mediaId = 'M:'+ item.id;
+      epMeta.data = [
+        {
+          mediaId: 'M:'+ item.id
+        }
+      ];
       epMeta.seasonTitle = item.movie_metadata?.movie_listing_title;
       epMeta.episodeNumber = 'Movie';
       epMeta.episodeTitle = item.title;
       break;
     }
     if(item.playback){
-      epMeta.playback = item.playback;
+      epMeta.data[0].playback = item.playback;
       selectedMedia.push(epMeta);
       item.isSelected = true;
     }
     await parseObject(item, 2);
   }
     
-  if(selectedMedia.length > 1){
-    appstore.isBatch = true;
-  }
-    
   console.log();
   for(const media of selectedMedia){
-    await getMedia(media as CrunchyEpMeta);
+    await downloadMediaList(media as CrunchyEpMeta);
   }
     
 }
 
-async function getMedia(mMeta: CrunchyEpMeta){
-    
-  let mediaName = '...';
-  if(mMeta.seasonTitle && mMeta.episodeNumber && mMeta.episodeTitle){
-    mediaName = `${mMeta.seasonTitle} - ${mMeta.episodeNumber} - ${mMeta.episodeTitle}`;
-  }
-    
-  console.log(`[INFO] Requesting: [${mMeta.mediaId}] ${mediaName}`);
-    
-  if(!mMeta.playback){
-    console.log('[WARN] Video not available!');
-    return;
-  }
-    
-  const playbackReq = await req.getData(mMeta.playback);
-    
-  if(!playbackReq.ok || !playbackReq.res){
-    console.log('[ERROR] Request Stream URLs FAILED!');
-    return;
-  }
-    
-  const pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
-
-  appstore.fn = ([
-    ['title', mMeta.episodeTitle],
-    ['episode', mMeta.episodeNumber],
-    ['service', 'CR'],
-    ['showTitle', mMeta.seasonTitle],
-    ['season', mMeta.seasonID]
-  ] as [yargs.AvailableFilenameVars, string|number][]).map((a): Variable => {
-    return {
-      name: a[0],
-      replaceWith: a[1],
-      type: typeof a[1]
-    } as Variable;
-  });
-
-  let streams = [];
-  let hsLangs: string[] = [];
-  const pbStreams = pbData.streams;
-    
-  for(const s of Object.keys(pbStreams)){
-    if(s.match(/hls/) && !s.match(/drm/) && !s.match(/trailer/)){
-      const pb = Object.values(pbStreams[s]).map(v => {
-        v.hardsub_lang = v.hardsub_locale 
-          ? langsData.fixAndFindCrLC(v.hardsub_locale).locale
-          : v.hardsub_locale;
-        if(v.hardsub_lang && hsLangs.indexOf(v.hardsub_lang) < 0){
-          hsLangs.push(v.hardsub_lang);
-        }
-        return { 
-          ...v, 
-          ...{ format: s }
-        };
-      });
-      streams.push(...pb);
-    }
-  }
-    
-  if(streams.length < 1){
-    console.log('[WARN] No full streams found!');
-    return;
-  }
-    
-  const audDub = langsData.findLang(langsData.fixLanguageTag(pbData.audio_locale)).code;
-  hsLangs = langsData.sortTags(hsLangs);
-    
-  streams = streams.map((s) => {
-    s.audio_lang = audDub;
-    s.hardsub_lang = s.hardsub_lang ? s.hardsub_lang : '-';
-    s.type = `${s.format}/${s.audio_lang}/${s.hardsub_lang}`;
-    return s;
-  });
-    
-  let dlFailed = false;
-    
-  if(argv.hslang != 'none'){
-    if(hsLangs.indexOf(argv.hslang) > -1){
-      console.log('[INFO] Selecting stream with %s hardsubs', langsData.locale2language(argv.hslang).language);
-      streams = streams.filter((s) => {
-        if(s.hardsub_lang == '-'){
-          return false;
-        }
-        return s.hardsub_lang == argv.hslang ? true : false;
-      });
-    }
-    else{
-      console.log('[WARN] Selected stream with %s hardsubs not available', langsData.locale2language(argv.hslang).language);
-      if(hsLangs.length > 0){
-        console.log('[WARN] Try other hardsubs stream:', hsLangs.join(', '));
-      }
-      dlFailed = true;
-    }
-  }
-  else{
-    streams = streams.filter((s) => {
-      if(s.hardsub_lang != '-'){
-        return false;
-      }
-      return true;
-    });
-    if(streams.length < 1){
-      console.log('[WARN] Raw streams not available!');
-      if(hsLangs.length > 0){
-        console.log('[WARN] Try hardsubs stream:', hsLangs.join(', '));
-      }
-      dlFailed = true;
-    }
-    console.log('[INFO] Selecting raw stream');
-  }
-    
-  let curStream;
-  if(!dlFailed){
-    argv.kstream = typeof argv.kstream == 'number' ? argv.kstream : 1;
-    argv.kstream = argv.kstream > streams.length ? 1 : argv.kstream;
-        
-    streams.forEach((s, i) => {
-      const isSelected = argv.kstream == i + 1 ? '✓' : ' ';
-      console.log('[INFO] Full stream found! (%s%s: %s )', isSelected, i + 1, s.type); 
-    });
-        
-    console.log('[INFO] Downloading video...');
-    curStream = streams[argv.kstream-1];
-    if(argv.dubLang != curStream.audio_lang){
-      argv.dubLang = curStream.audio_lang as string;
-      console.log(`[INFO] audio language code detected, setted to ${curStream.audio_lang} for this episode`);
-    }
-        
-    console.log('[INFO] Playlists URL: %s (%s)', curStream.url, curStream.type);
-  }
-    
-  if(!argv.novids && !dlFailed && curStream){
-    const streamPlaylistsReq = await req.getData(curStream.url);
-    if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
-      console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLISTS!');
-      dlFailed = true;
-    }
-    else{
-      const streamPlaylists = m3u8(streamPlaylistsReq.res.body);
-      const plServerList: string[] = [],
-        plStreams: Record<string, Record<string, string>> = {},
-        plQuality: {
-                  str: string,
-                  dim: string,
-                  RESOLUTION: {
-                    width: number,
-                    height: number
-                  }
-                }[] = [];
-      for(const pl of streamPlaylists.playlists){
-        // set quality
-        const plResolution     = pl.attributes.RESOLUTION;
-        const plResolutionText = `${plResolution.width}x${plResolution.height}`;
-        // parse uri
-        const plUri = new URL(pl.uri);
-        let plServer = plUri.hostname;
-        // set server list
-        if(plUri.searchParams.get('cdn')){
-          plServer += ` (${plUri.searchParams.get('cdn')})`;
-        }
-        if(!plServerList.includes(plServer)){
-          plServerList.push(plServer);
-        }
-        // add to server
-        if(!Object.keys(plStreams).includes(plServer)){
-          plStreams[plServer] = {};
-        }
-        if(
-          plStreams[plServer][plResolutionText]
-                    && plStreams[plServer][plResolutionText] != pl.uri
-                    && typeof plStreams[plServer][plResolutionText] != 'undefined'
-        ){
-          console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
-        }
-        else{
-          plStreams[plServer][plResolutionText] = pl.uri;
-        }
-        // set plQualityStr
-        const plBandwidth  = Math.round(pl.attributes.BANDWIDTH/1024);
-        const qualityStrAdd   = `${plResolutionText} (${plBandwidth}KiB/s)`;
-        const qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
-        const qualityStrMatch = !plQuality.map(a => a.str).join('\r\n').match(qualityStrRegx);
-        if(qualityStrMatch){
-          plQuality.push({
-            str: qualityStrAdd,
-            dim: plResolutionText,
-            RESOLUTION: plResolution
-          });
-        }
-      }
-            
-      argv.server = argv.x > plServerList.length ? 1 : argv.x;
-            
-      const plSelectedServer = plServerList[argv.x - 1];
-      const plSelectedList   = plStreams[plSelectedServer];
-      plQuality.sort((a, b) => {
-        const aMatch = a.dim.match(/[0-9]+/) || [];
-        const bMatch = b.dim.match(/[0-9]+/) || [];
-        return parseInt(aMatch[0]) - parseInt(bMatch[0]);
-      });
-      let quality = argv.q;
-      if (quality > plQuality.length) {
-        console.log(`[WARN] The requested quality of ${argv.q} is greater than the maximun ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
-        quality = plQuality.length;
-      }
-      const selPlUrl = quality === 0 ? plSelectedList[plQuality[plQuality.length - 1].dim as string] :
-        plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
-      console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
-      console.log(`[INFO] Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
-
-      if(selPlUrl != ''){
-        appstore.fn.push({
-          name: 'height',
-          type: 'number',
-          replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
-        }, {
-          name: 'width',
-          type: 'number',
-          replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
-        });
-        appstore.lang = curStream.audio_lang;
-        console.log(`[INFO] Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
-        if(argv['show-stream-url']){
-          console.log('[INFO] Stream URL:', selPlUrl);
-        }
-        // TODO check filename
-        appstore.out = parseFileName(argv.fileName, appstore.fn, argv.numbers).join(path.sep);
-        console.log(`[INFO] Output filename: ${appstore.out}`);
-        const chunkPage = await req.getData(selPlUrl);
-        if(!chunkPage.ok || !chunkPage.res){
-          console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLIST!');
-          dlFailed = true;
-        }
-        else{
-          const chunkPlaylist = m3u8(chunkPage.res.body);
-          const totalParts = chunkPlaylist.segments.length;
-          const mathParts  = Math.ceil(totalParts / argv.partsize);
-          const mathMsg    = `(${mathParts}*${argv.partsize})`;
-          console.log('[INFO] Total parts in stream:', totalParts, mathMsg);
-          const tsFile = path.isAbsolute(appstore.out as string) ? appstore.out : path.join(cfg.dir.content, appstore.out);
-          const split = appstore.out.split(path.sep).slice(0, -1);
-          split.forEach((val, ind, arr) => {
-            const isAbsolut = path.isAbsolute(appstore.out as string);
-            if (!fs.existsSync(path.join(isAbsolut ? '' : cfg.dir.content, ...arr.slice(0, ind), val)))
-              fs.mkdirSync(path.join(isAbsolut ? '' : cfg.dir.content, ...arr.slice(0, ind), val));
-          });
-          const dlStreamByPl = await new streamdl({
-            output: `${tsFile}.ts`,
-            timeout: argv.timeout,
-            m3u8json: chunkPlaylist,
-            // baseurl: chunkPlaylist.baseUrl,
-            threads: argv.partsize
-          }).download();
-          if(!dlStreamByPl.ok){
-            console.log(`[ERROR] DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
-            dlFailed = true;
-          }
-        }
-      }
-      else{
-        console.log('[ERROR] Quality not selected!\n');
-        dlFailed = true;
-      }
-    }
-  }
-  else if(argv.novids){
-    appstore.out = parseFileName(argv.fileName, appstore.fn, argv.numbers).join(path.sep);
-    console.log('[INFO] Downloading skipped!');
-  }
-    
-  appstore.sxList = [];
-    
-  if(argv.dlsubs.indexOf('all') > -1){
-    argv.dlsubs = ['all'];
-  }
-    
-  if(argv.hslang != 'none'){
-    console.log('[WARN] Subtitles downloading disabled for hardsubs streams.');
-    argv.skipsubs = true;
-  }
-
-
-  if(!argv.skipsubs && argv.dlsubs.indexOf('none') == -1){
-    if(pbData.subtitles && Object.values(pbData.subtitles).length > 0){
-      const subsData = Object.values(pbData.subtitles);
-      const subsDataMapped = subsData.map((s) => {
-        const subLang = langsData.fixAndFindCrLC(s.locale);
-        return {
-          ...s,
-          locale: subLang,
-          language: subLang.locale,
-          titile: subLang.language
-        };
-      });
-      const subsArr = langsData.sortSubtitles<typeof subsDataMapped[0]>(subsDataMapped, 'language');
-      for(const subsIndex in subsArr){
-        const subsItem = subsArr[subsIndex];
-        const langItem = subsItem.locale;
-        const sxData: Partial<sxItem> = {};
-        sxData.language = langItem;
-        sxData.file = langsData.subsFile(appstore.out as string, subsIndex, langItem);
-        sxData.path = path.join(cfg.dir.content, sxData.file);
-        if(argv.dlsubs.includes('all') || argv.dlsubs.includes(langItem.locale)){
-          const subsAssReq = await req.getData(subsItem.url);
-          if(subsAssReq.ok && subsAssReq.res){
-            const sBody = '\ufeff' + subsAssReq.res.body;
-            sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
-            sxData.title = `${langItem.language} / ${sxData.title}`;
-            sxData.fonts = fontsData.assFonts(sBody) as Font[];
-            fs.writeFileSync(path.join(cfg.dir.content, sxData.file), sBody);
-            console.log(`[INFO] Subtitle downloaded: ${sxData.file}`);
-            appstore.sxList.push(sxData as sxItem);
-          }
-          else{
-            console.log(`[WARN] Failed to download subtitle: ${sxData.file}`);
-          }
-        }
-      }
-    }
-    else{
-      console.log('[WARN] Can\'t find urls for subtitles!');
-    }
-  }
-  else{
-    console.log('[INFO] Subtitles downloading skipped!');
-  }
-    
-  // go to muxing
-  if(!argv.skipmux && !dlFailed && !argv.novids){
-    await muxStreams({
-      onlyAudio: [],
-      onlyVid: [],
-      videoAndAudio: argv.novids ? [] : [{
-        path: (path.isAbsolute(appstore.out as string) ? appstore.out as string : path.join(cfg.dir.content, appstore.out as string)) + '.ts',
-        lang: appstore.lang as string,
-        lookup: false
-      }],
-      subtitels: appstore.sxList.map(a => ({
-        language: a.language.code,
+async function muxStreams(data: DownloadedMedia[], output: string) {
+  if (argv.novids || data.filter(a => a.type === 'Video').length === 0)
+    return console.log('[INFO] Skip muxing since no vids are downloaded');
+  const merger = new Merger({
+    onlyVid: [],
+    skipSubMux: argv.skipSubMux,
+    onlyAudio: [],
+    output: `${output}.${argv.mp4 ? 'mp4' : 'mkv'}`,
+    subtitels: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
+      if (a.type === 'Video')
+        throw new Error('Never');
+      return {
         file: a.path,
+        language: a.language.code,
         lookup: false,
         title: a.title
-      })),
-      output: (path.isAbsolute(appstore.out as string) ? appstore.out as string : path.join(cfg.dir.content, appstore.out as string)) + '.' + (argv.mp4 ? 'mp4' : 'mkv'),
-      simul: false,
-      fonts: Merger.makeFontsList(cfg.dir.fonts, appstore.sxList)
-    });
-  }
-  else{
-    console.log();
-  }
-
-  return !dlFailed;
-}
-
-async function muxStreams(options: MergerOptions){
-  const merger = new Merger(options);
+      };
+    }),
+    simul: false,
+    fonts: Merger.makeFontsList(cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
+    videoAndAudio: data.filter(a => a.type === 'Video').map((a) : MergerInput => {
+      if (a.type === 'Subtitle')
+        throw new Error('Never');
+      return {
+        lang: a.lang,
+        path: a.path,
+        lookup: false
+      };
+    })
+  });
   const bin = Merger.checkMerger(cfg.bin, argv.mp4);
   // collect fonts info
   // mergers
@@ -1249,34 +917,20 @@ const downloadFromSeriesID = async () => {
     const item = selected[key];
     console.log(`[${item.episodeNumber}] - ${item.episodeTitle} [${
       item.data.map(a => {
-        return `✓ ${a.lang.name}`;
+        return `✓ ${a.lang?.name || 'Unknown Language'}`;
       }).join(', ')
     }]`);
   }
   for (const key of Object.keys(selected)) {
     const item = selected[key];
-    const res = await getMediaList(item);
+    const res = await downloadMediaList(item);
     if (!res)
       return;
     downloaded({
       service: 'crunchy',
       type: 'srz'
     }, argv.series as string, [item.episodeNumber]);
-    if (!argv.novids)
-      muxStreams({
-        onlyAudio: [],
-        onlyVid: [],
-        output: (path.isAbsolute(appstore.out as string) ? appstore.out as string : path.join(cfg.dir.content, appstore.out as string)) + '.' + (argv.mp4 ? 'mp4' : 'mkv'),
-        subtitels: appstore.sxList.map(a => ({
-          language: a.language.code,
-          file: a.path,
-          lookup: false,
-          title: a.title
-        })),
-        videoAndAudio: res,
-        simul: false,
-        fonts: Merger.makeFontsList(cfg.dir.fonts, appstore.sxList)
-      });
+    muxStreams(res.data, res.fileName);
   }
   return true;
 };
@@ -1288,13 +942,12 @@ const itemSelectMultiDub = (eps: Record<string, {
   const doEpsFilter = new epsFilter.doFilter();
   const selEps = doEpsFilter.checkFilter(argv.e);
 
-  const ret: Record<string, CrunchyEpMetaMultiDub> = {};
+  const ret: Record<string, CrunchyEpMeta> = {};
 
   const epNumList: {
     sp: number
   } = { sp: 0 };
   const epNumLen = epsFilter.epNumLen;
-  appstore.sxList = [];
   for (const key of Object.keys(eps)) {
     const itemE = eps[key];
     itemE.items.forEach((item, index) => {
@@ -1311,14 +964,18 @@ const itemSelectMultiDub = (eps: Record<string, {
       }
       // set data
       const epMeta: CrunchyEpMeta = {
-        mediaId:       item.id,
+        data: [
+          {
+            mediaId: item.id
+          }
+        ],
         seasonTitle:   itemE.items.find(a => !a.season_title.includes('('))?.season_title as string,
         episodeNumber: item.episode,
         episodeTitle:  item.title,
         seasonID: item.season_id
       };
       if(item.playback){
-        epMeta.playback = item.playback;
+        epMeta.data[0].playback = item.playback;
       }
       // find episode numbers
       const epNum = item.episode;
@@ -1337,18 +994,11 @@ const itemSelectMultiDub = (eps: Record<string, {
           const epMe = ret[key];
           epMe.data.push({
             lang: itemE.langs[index],
-            mediaId: epMeta.mediaId,
-            playback: epMeta.playback
+            ...epMeta.data[0]
           });
         } else {
+          epMeta.data[0].lang = itemE.langs[index];
           ret[key] = {
-            data: [
-              {
-                lang: itemE.langs[index],
-                mediaId: epMeta.mediaId,
-                playback: epMeta.playback
-              }
-            ],
             ...epMeta
           };
         }
@@ -1457,21 +1107,23 @@ async function getSeasonDataById(item: SeriesSearchItem, log = false){
   return episodeList;
 }
 
-async function getMediaList(medias: CrunchyEpMetaMultiDub){
+async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
+  data: DownloadedMedia[],
+  fileName: string
+} | undefined> {
 
   let mediaName = '...';
+  let fileName;
+  const variables: Variable[] = [];
   if(medias.seasonTitle && medias.episodeNumber && medias.episodeTitle){
     mediaName = `${medias.seasonTitle} - ${medias.episodeNumber} - ${medias.episodeTitle}`;
   }
     
-  const files: {
-    path: string,
-    lang: string
-  }[] = [];
-  
+  const files: DownloadedMedia[] = [];
+
   if(medias.data.every(a => !a.playback)){
     console.log('[WARN] Video not available!');
-    return;
+    return undefined;
   }
   
   for (const mMeta of medias.data) {
@@ -1480,12 +1132,12 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
     
     if(!playbackReq.ok || !playbackReq.res){
       console.log('[ERROR] Request Stream URLs FAILED!');
-      return;
+      return undefined;
     }
       
     const pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
   
-    appstore.fn = ([
+    variables.push(...([
       ['title', medias.episodeTitle],
       ['episode', medias.episodeNumber],
       ['service', 'CR'],
@@ -1497,7 +1149,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
         replaceWith: a[1],
         type: typeof a[1]
       } as Variable;
-    });
+    }));
   
     let streams = [];
     let hsLangs: string[] = [];
@@ -1523,7 +1175,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
       
     if(streams.length < 1){
       console.log('[WARN] No full streams found!');
-      return;
+      return undefined;
     }
       
     const audDub = langsData.findLang(langsData.fixLanguageTag(pbData.audio_locale)).code;
@@ -1673,7 +1325,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
         console.log(`[INFO] Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
   
         if(selPlUrl != ''){
-          appstore.fn.push({
+          variables.push({
             name: 'height',
             type: 'number',
             replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
@@ -1688,8 +1340,8 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
             console.log('[INFO] Stream URL:', selPlUrl);
           }
           // TODO check filename
-          appstore.out = parseFileName(argv.fileName, appstore.fn, argv.numbers).join(path.sep);
-          const outFile = parseFileName(argv.fileName + '.' + mMeta.lang.name, appstore.fn, argv.numbers).join(path.sep);
+          fileName = parseFileName(argv.fileName, variables, argv.numbers).join(path.sep);
+          const outFile = parseFileName(argv.fileName + '.' + (mMeta.lang?.name || lang), variables, argv.numbers).join(path.sep);
           console.log(`[INFO] Output filename: ${outFile}`);
           const chunkPage = await req.getData(selPlUrl);
           if(!chunkPage.ok || !chunkPage.res){
@@ -1721,6 +1373,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
               dlFailed = true;
             }
             files.push({
+              type: 'Video',
               path: `${tsFile}.ts`,
               lang: lang as string
             });
@@ -1733,7 +1386,7 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
       }
     }
     else if(argv.novids){
-      appstore.out = parseFileName(argv.fileName, appstore.fn, argv.numbers).join(path.sep);
+      fileName = parseFileName(argv.fileName, variables, argv.numbers).join(path.sep);
       console.log('[INFO] Downloading skipped!');
     }
     
@@ -1766,9 +1419,9 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
           const langItem = subsItem.locale;
           const sxData: Partial<sxItem> = {};
           sxData.language = langItem;
-          sxData.file = langsData.subsFile(appstore.out as string, subsIndex, langItem);
+          sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem);
           sxData.path = path.join(cfg.dir.content, sxData.file);
-          if (appstore.sxList.some(a => a.language.code == langItem.code))
+          if (files.some(a => a.type === 'Subtitle' && a.language.code == langItem.code))
             continue;
           if(argv.dlsubs.includes('all') || argv.dlsubs.includes(langItem.locale)){
             const subsAssReq = await req.getData(subsItem.url);
@@ -1777,9 +1430,12 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
               sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
               sxData.title = `${langItem.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
-              fs.writeFileSync(path.join(cfg.dir.content, sxData.file), sBody);
+              fs.writeFileSync(sxData.path, sBody);
               console.log(`[INFO] Subtitle downloaded: ${sxData.file}`);
-              appstore.sxList.push(sxData as sxItem);
+              files.push({
+                type: 'Subtitle',
+                ...sxData as sxItem
+              });
             }
             else{
               console.log(`[WARN] Failed to download subtitle: ${sxData.file}`);
@@ -1795,5 +1451,8 @@ async function getMediaList(medias: CrunchyEpMetaMultiDub){
       console.log('[INFO] Subtitles downloading skipped!');
     }
   }
-  return files;
+  return {
+    data: files,
+    fileName: (path.isAbsolute(fileName as string) ? fileName : path.join(cfg.dir.content, fileName as string)) || './unknown'
+  };
 }

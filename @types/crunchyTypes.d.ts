@@ -1,18 +1,10 @@
+import { sxItem } from '../crunchy';
 import { LanguageItem } from '../modules/module.langsData';
 
 export type CrunchyEpMeta = {
-  mediaId: string,
-  seasonTitle: string,
-  episodeNumber: string,
-  episodeTitle: string,
-  playback?: string,
-  seasonID: string
-}
-
-export type CrunchyEpMetaMultiDub = {
   data: {
     mediaId: string,
-    lang: LanguageItem,
+    lang?: LanguageItem,
     playback?: string
   }[],
   seasonTitle: string,
@@ -20,6 +12,14 @@ export type CrunchyEpMetaMultiDub = {
   episodeTitle: string,
   seasonID: string
 }
+
+export type DownloadedMedia = {
+  type: 'Video',
+  lang: string,
+  path: string
+} | ({
+  type: 'Subtitle'
+} & sxItem )
 
 export type ParseItem = {
   __class__?: string;

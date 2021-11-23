@@ -754,7 +754,8 @@ async function downloadStreams(epsiodeID: string){
     output: `${path.join(cfg.dir.content, ...fnOutput)}.${ffext}`,
     subtitels: stDlPath as SubtitleInput[],
     videoAndAudio: audioAndVideo,
-    simul: argv.simul
+    simul: argv.simul,
+    skipSubMux: argv.skipSubMux
   });
 
   if(!argv.mp4 && mergerBin.MKVmerge){
@@ -781,8 +782,7 @@ async function downloadStreams(epsiodeID: string){
     return true;
   }
     
-  audioAndVideo.concat(puraudio).concat(purvideo).forEach(a => fs.unlinkSync(a.path));
-  stDlPath.forEach(subObject => subObject.file && fs.unlinkSync(subObject.file));
+  mergeInstance.cleanUp();
   console.log('\n[INFO] Done!\n');
   downloaded({
     service: 'funi',

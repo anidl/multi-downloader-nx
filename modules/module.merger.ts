@@ -32,7 +32,8 @@ export type MergerOptions = {
   subtitels: SubtitleInput[],
   output: string,
   simul?: boolean,
-  fonts?: ParsedFont[]
+  fonts?: ParsedFont[],
+  skipSubMux?: boolean
 }
 
 class Merger {
@@ -46,7 +47,10 @@ class Merger {
     [key: string]: string;
   };
   
-  constructor(private options: MergerOptions) {}
+  constructor(private options: MergerOptions) {
+    if (this.options.skipSubMux)
+      this.options.subtitels = [];
+  }
 
   public FFmpeg() : string {
     const args = [];
@@ -55,12 +59,13 @@ class Merger {
     let index = 0;
     let audioIndex = 0;
     let hasVideo = false;
+
     for (const vid of this.options.videoAndAudio) {
       args.push(`-i "${vid.path}"`);
       if (!hasVideo) {
         metaData.push(`-map ${index}:a -map ${index}:v`);
         metaData.push(`-metadata:s:a:${audioIndex} language=${vid.lookup === false ? vid.lang : Merger.getLanguageCode(vid.lang, vid.lang)}`);
-        metaData.push(`-metadata:s:v:${index} title="[Funimation]"`);
+        metaData.push(`-metadata:s:v:${index} title="[Video Stream]"`);
         hasVideo = true;
       } else {
         metaData.push(`-map ${index}:a`);
@@ -74,7 +79,7 @@ class Merger {
       if (!hasVideo) {
         args.push(`-i "${vid.path}"`);
         metaData.push(`-map ${index} -map -${index}:a`);
-        metaData.push(`-metadata:s:v:${index} title="[Funimation]"`);
+        metaData.push(`-metadata:s:v:${index} title="[Video Stream]"`);
         hasVideo = true;
         index++;
       }
