@@ -70,9 +70,11 @@ const downloaded = (kind: {
   service: 'crunchy',
   type: 's'|'srz'
 }, ID: string, episode: string[]) => {
-  const data = loadData();
-  if (!Object.prototype.hasOwnProperty.call(data, kind.service))
+  let data = loadData();
+  if (!Object.prototype.hasOwnProperty.call(data, kind.service)) {
     addToArchive(kind, ID);
+    data = loadData(); // Load updated version
+  }
   (kind.service == 'crunchy' ? data[kind.service][kind.type] : data[kind.service][kind.type]).find(a => a.id === ID)?.already.push(...episode);
   fs.writeFileSync(archiveFile, JSON.stringify(data, null, 4));
 };
