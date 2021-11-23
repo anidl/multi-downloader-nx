@@ -1263,20 +1263,20 @@ const downloadFromSeriesID = async () => {
       type: 'srz'
     }, argv.series as string, [item.episodeNumber]);
     if (!argv.novids)
-    muxStreams({
-      onlyAudio: [],
-      onlyVid: [],
-      output: (path.isAbsolute(appstore.out as string) ? appstore.out as string : path.join(cfg.dir.content, appstore.out as string)) + '.' + (argv.mp4 ? 'mp4' : 'mkv'),
-      subtitels: appstore.sxList.map(a => ({
-        language: a.language.code,
-        file: a.path,
-        lookup: false,
-        title: a.title
-      })),
-      videoAndAudio: res,
-      simul: false,
-      fonts: Merger.makeFontsList(cfg.dir.fonts, appstore.sxList)
-    });
+      muxStreams({
+        onlyAudio: [],
+        onlyVid: [],
+        output: (path.isAbsolute(appstore.out as string) ? appstore.out as string : path.join(cfg.dir.content, appstore.out as string)) + '.' + (argv.mp4 ? 'mp4' : 'mkv'),
+        subtitels: appstore.sxList.map(a => ({
+          language: a.language.code,
+          file: a.path,
+          lookup: false,
+          title: a.title
+        })),
+        videoAndAudio: res,
+        simul: false,
+        fonts: Merger.makeFontsList(cfg.dir.fonts, appstore.sxList)
+      });
   }
   return true;
 };
