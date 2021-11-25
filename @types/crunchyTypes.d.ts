@@ -10,7 +10,8 @@ export type CrunchyEpMeta = {
   seasonTitle: string,
   episodeNumber: string,
   episodeTitle: string,
-  seasonID: string
+  seasonID: string,
+  season: number
 }
 
 export type DownloadedMedia = {

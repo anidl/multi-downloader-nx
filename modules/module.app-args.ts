@@ -280,7 +280,7 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
       describe: `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
         .map(a => `'${a}'`).join(', ')} as variables.`,
       type: 'string',
-      default: parseDefault<string>('fileName', '[${service}] ${showTitle} - ${episode} [${height}p]')
+      default: parseDefault<string>('fileName', '[${service}] ${showTitle} - S${season}E${episode} [${height}p]')
     })
     .option('numbers', {
       group: groups.fileName,

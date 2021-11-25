@@ -672,7 +672,8 @@ async function getSeasonById(){
       seasonTitle:   item.season_title,
       episodeNumber: item.episode,
       episodeTitle:  item.title,
-      seasonID: item.season_id
+      seasonID: item.season_id,
+      season: item.season_number
     };
     if(item.playback){
       epMeta.data[0].playback = item.playback;
@@ -972,7 +973,8 @@ const itemSelectMultiDub = (eps: Record<string, {
         seasonTitle:   itemE.items.find(a => !a.season_title.includes('('))?.season_title as string,
         episodeNumber: item.episode,
         episodeTitle:  item.title,
-        seasonID: item.season_id
+        seasonID: item.season_id,
+        season: item.season_number
       };
       if(item.playback){
         epMeta.data[0].playback = item.playback;
@@ -1142,7 +1144,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
       ['episode', medias.episodeNumber],
       ['service', 'CR'],
       ['showTitle', medias.seasonTitle],
-      ['season', medias.seasonID]
+      ['season', medias.season]
     ] as [yargs.AvailableFilenameVars, string|number][]).map((a): Variable => {
       return {
         name: a[0],
