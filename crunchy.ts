@@ -14,7 +14,6 @@ import * as fontsData from './modules/module.fontsData';
 import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
-import * as epsFilter from './modules/module.eps-filter';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 
 // new-cfg paths
@@ -45,6 +44,7 @@ import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
 import { PlaybackData } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
+import parseSelect from './modules/module.parseSelect';
 const req = new reqModule.Req(domain, argv);
 
 // select
@@ -462,10 +462,12 @@ async function parseObject(item: ParseItem, pad?: number, getSeries?: boolean, g
   if(item.type == 'series' && getSeries){
     argv.series = item.id;
     await getSeriesById(pad, true);
+    console.log()
   }
   if(item.type == 'movie_listing' && getMovieListing){
     argv['movie-listing'] = item.id;
     await getMovieListingById(pad+2);
+    console.log()
   }
 }
 
@@ -641,15 +643,14 @@ async function getSeasonById(){
       ep: number[],
       sp: number
     } = { ep: [], sp: 0 };
-  const epNumLen = epsFilter.epNumLen;
+  const epNumLen = argv.numbers;
     
   if(episodeList.total < 1){
     console.log('  [INFO] Season is empty!');
     return;
   }
     
-  const doEpsFilter = new epsFilter.doFilter();
-  const selEps = doEpsFilter.checkFilter(argv.e);
+  const doEpsFilter = parseSelect(argv.e as string);
   const selectedMedia: CrunchyEpMeta[] = [];
     
   episodeList.items.forEach((item) => {
@@ -691,10 +692,10 @@ async function getSeasonById(){
     }
     const selEpId = (
       isSpecial 
-        ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
-        : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
+        ? 'S' + epNumList.sp.toString().padStart(epNumLen, '0')
+        : ''  + parseInt(epNum, 10).toString().padStart(epNumLen, '0')
     );
-    if((argv.but && item.playback && selEps.indexOf(selEpId) == -1) || (argv.all && item.playback) || (!argv.but && selEps.indexOf(selEpId) > -1 && !item.isSelected && item.playback)){
+    if((argv.but && item.playback && !doEpsFilter.isSelected([selEpId, item.id])) || (argv.all && item.playback) || (!argv.but && doEpsFilter.isSelected([selEpId, item.id]) && !item.isSelected && item.playback)){
       selectedMedia.push(epMeta);
       item.isSelected = true;
     }
@@ -732,22 +733,21 @@ async function getObjectById(returnData?: boolean){
     return;
   }
     
-  const doEpsFilter = new epsFilter.doFilter();
-  const inpMedia = doEpsFilter.checkBetaFilter(argv.e as string);
+  const doEpsFilter = parseSelect(argv.e as string);
     
-  if(inpMedia.length < 1){
+  if(doEpsFilter.values.length < 1){
     console.log('\n[INFO] Objects not selected!\n');
     return;
   }
     
   // node crunchy-beta -e G6497Z43Y,GRZXCMN1W,G62PEZ2E6,G25FVGDEK,GZ7UVPVX5
-  console.log('[INFO] Requested object ID: %s', inpMedia.join(', '));
+  console.log('[INFO] Requested object ID: %s', doEpsFilter.values.join(', '));
     
   const objectReqOpts = [
     api.beta_cms,
     cmsToken.cms.bucket,
     '/objects/',
-    inpMedia.join(','),
+    doEpsFilter.values.join(','),
     '?',
     new URLSearchParams({
       'Policy': cmsToken.cms.policy,
@@ -940,15 +940,14 @@ const itemSelectMultiDub = (eps: Record<string, {
   items: Item[],
   langs: langsData.LanguageItem[]
 }>) => {
-  const doEpsFilter = new epsFilter.doFilter();
-  const selEps = doEpsFilter.checkFilter(argv.e);
+  const doEpsFilter = parseSelect(argv.e as string);
 
   const ret: Record<string, CrunchyEpMeta> = {};
 
   const epNumList: {
     sp: number
   } = { sp: 0 };
-  const epNumLen = epsFilter.epNumLen;
+  const epNumLen = doEpsFilter.values.length;
   for (const key of Object.keys(eps)) {
     const itemE = eps[key];
     itemE.items.forEach((item, index) => {
@@ -988,10 +987,10 @@ const itemSelectMultiDub = (eps: Record<string, {
       }
       const selEpId = (
         isSpecial 
-          ? 'S' + epNumList.sp.toString().padStart(epNumLen['S'], '0')
-          : ''  + parseInt(epNum, 10).toString().padStart(epNumLen['E'], '0')
+          ? 'S' + epNumList.sp.toString().padStart(argv.numbers, '0')
+          : ''  + parseInt(epNum, 10).toString().padStart(argv.numbers, '0')
       );
-      if((argv.but && selEps.indexOf(selEpId) == -1) || (argv.all || (selEps.indexOf(selEpId) > -1) && item.playback && !argv.but)){
+      if((argv.but && !doEpsFilter.isSelected([selEpId, item.id])) || (argv.all || (doEpsFilter.isSelected([selEpId, item.id])) && item.playback && !argv.but)){
         if (Object.prototype.hasOwnProperty.call(ret, key)) {
           const epMe = ret[key];
           epMe.data.push({

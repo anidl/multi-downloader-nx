@@ -1,5 +1,5 @@
 const parseSelect = (selectString: string, but = false) : {
-    isSelected: (val: string) => boolean,
+    isSelected: (val: string|string[]) => boolean,
     values: string[]
 } => {
   if (!selectString)
@@ -9,7 +9,6 @@ const parseSelect = (selectString: string, but = false) : {
     };
   const parts = selectString.split(',');
   const select: string[] = [];
-
 
   parts.forEach(part => {
     if (part.includes('-')) {
@@ -50,6 +49,10 @@ const parseSelect = (selectString: string, but = false) : {
       }
 
     } else {
+      if (part.match(/[0-9A-Z]{9}/)) {
+        select.push(part);
+        return;
+      }
       const match = part.match(/[A-Za-z]+/);
       if (match && match.length > 0) {
         if (match.index && match.index !== 0) {
@@ -72,22 +75,29 @@ const parseSelect = (selectString: string, but = false) : {
   return {
     values: select,
     isSelected: (st) => {
-      const match = st.match(/[A-Za-z]+/);
-      if (match && match.length > 0) {
-        if (match.index && match.index !== 0) {
-          return false;
+      if (typeof st === "string")
+        st = [st];
+      return st.some(st => {
+        const match = st.match(/[A-Za-z]+/);
+        if (st.match(/[0-9A-Z]{9}/)) {
+          const included = select.includes(st);
+          return but ? !included : included;
+        } else if (match && match.length > 0) {
+          if (match.index && match.index !== 0) {
+            return false;
+          }
+          const letter = st.substring(0, match[0].length);
+          const number = parseInt(st.substring(match[0].length));
+          if (isNaN(number)) {
+            return false;
+          }
+          const included = select.includes(`${letter}${number}`);
+          return but ? !included : included;
+        } else {
+          const included =  select.includes(`${parseInt(st)}`);
+          return but ? !included : included;
         }
-        const letter = st.substring(0, match[0].length);
-        const number = parseInt(st.substring(match[0].length));
-        if (isNaN(number)) {
-          return false;
-        }
-        const included = select.includes(`${letter}${number}`);
-        return but ? !included : included;
-      } else {
-        const included =  select.includes(`${parseInt(st)}`);
-        return but ? !included : included;
-      }
+      });
     }
   };
 };
