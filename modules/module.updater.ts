@@ -13,7 +13,6 @@ const workingDir = (process as NodeJS.Process & {
 const updateFilePlace = path.join(workingDir, 'config', 'updates.json');
 
 const updateIgnore = [
-  '*.json',
   '*.d.ts',
   '.git',
   'lib',
