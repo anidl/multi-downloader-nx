@@ -1427,7 +1427,10 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
           if(argv.dlsubs.includes('all') || argv.dlsubs.includes(langItem.locale)){
             const subsAssReq = await req.getData(subsItem.url);
             if(subsAssReq.ok && subsAssReq.res){
-              const sBody = '\ufeff' + subsAssReq.res.body;
+              let sBody = '\ufeff' + subsAssReq.res.body;
+              const sBodySplit = sBody.split('\r\n');
+              sBodySplit.splice(2, 0, 'ScaledBorderAndShadow: yes');
+              sBody = sBodySplit.join('\r\n');
               sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
               sxData.title = `${langItem.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
