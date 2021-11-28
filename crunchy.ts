@@ -462,12 +462,12 @@ async function parseObject(item: ParseItem, pad?: number, getSeries?: boolean, g
   if(item.type == 'series' && getSeries){
     argv.series = item.id;
     await getSeriesById(pad, true);
-    console.log()
+    console.log();
   }
   if(item.type == 'movie_listing' && getMovieListing){
     argv['movie-listing'] = item.id;
     await getMovieListingById(pad+2);
-    console.log()
+    console.log();
   }
 }
 
@@ -947,7 +947,6 @@ const itemSelectMultiDub = (eps: Record<string, {
   const epNumList: {
     sp: number
   } = { sp: 0 };
-  const epNumLen = doEpsFilter.values.length;
   for (const key of Object.keys(eps)) {
     const itemE = eps[key];
     itemE.items.forEach((item, index) => {

@@ -75,7 +75,7 @@ const parseSelect = (selectString: string, but = false) : {
   return {
     values: select,
     isSelected: (st) => {
-      if (typeof st === "string")
+      if (typeof st === 'string')
         st = [st];
       return st.some(st => {
         const match = st.match(/[A-Za-z]+/);
