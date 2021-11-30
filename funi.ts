@@ -429,9 +429,9 @@ function getSubsUrl(m: MediaChild[]) : Subtitle[] {
 
   const found: Subtitle[] = [];
 
-  let media = m.filter(a => a.filePath.split('.').pop() === 'vtt');
-  for (let me of media) {
-    const lang = langsData.languages.find(a => me.language === (a.funi_name || a.name))
+  const media = m.filter(a => a.filePath.split('.').pop() === 'vtt');
+  for (const me of media) {
+    const lang = langsData.languages.find(a => me.language === (a.funi_name || a.name));
     if (!lang) {
       continue;
     }
@@ -440,7 +440,7 @@ function getSubsUrl(m: MediaChild[]) : Subtitle[] {
         url: me.filePath,
         ext: `.${lang.code}`,
         lang
-      })
+      });
     }
   }
 
