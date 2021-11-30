@@ -82,11 +82,6 @@ class Req {
     // if auth
     const loc = new URL(durl);
     // avoid cloudflare protection
-    if(loc.origin == this.domain.www){
-      options.minVersion = 'TLSv1.3';
-      options.maxVersion = 'TLSv1.3';
-      options.http2 = true;
-    }
     // debug
     options.hooks = {
       beforeRequest: [

@@ -26,15 +26,7 @@ const availableFilenameVars: AvailableFilenameVars[] = [
   'service'
 ];
 
-export type possibleDubs = (
-  'enUS' | 'esLA' | 'ptBR' | 'zhMN' | 'jaJP'
-  )[]; 
-export type possibleSubs = (
-    'enUS' | 'esLA' | 'ptBR'
-    )[];
-const subLang: possibleSubs = ['enUS', 'esLA', 'ptBR'];
-const dubLang: possibleDubs = ['enUS', 'esLA', 'ptBR', 'zhMN', 'jaJP'];
-let argvC: { [x: string]: unknown; skipSubMux: boolean, downloadArchive: boolean, addArchive: boolean, but: boolean, auth: boolean | undefined; dlFonts: boolean | undefined; search: string | undefined; 'search-type': string; page: number | undefined; 'search-locale': string; new: boolean | undefined; 'movie-listing': string | undefined; series: string | undefined; s: string | undefined; e: string | undefined; q: number; x: number; kstream: number; partsize: number; hslang: string; subLang: string[]; dlsubs: string | string[]; novids: boolean | undefined; noaudio: boolean | undefined; nosubs: boolean | undefined; dub: possibleDubs; dubLang: string; all: boolean; fontSize: number; allSubs: boolean; allDubs: boolean; timeout: number; simul: boolean; mp4: boolean; skipmux: boolean | undefined; fileName: string; numbers: number; nosess: string; debug: boolean | undefined; nocleanup: boolean; help: boolean | undefined; service: 'funi' | 'crunchy'; update: boolean; fontName: string | undefined; _: (string | number)[]; $0: string; };
+let argvC: { [x: string]: unknown; skipSubMux: boolean, downloadArchive: boolean, addArchive: boolean, but: boolean, auth: boolean | undefined; dlFonts: boolean | undefined; search: string | undefined; 'search-type': string; page: number | undefined; 'search-locale': string; new: boolean | undefined; 'movie-listing': string | undefined; series: string | undefined; s: string | undefined; e: string | undefined; q: number; x: number; kstream: number; partsize: number; hslang: string; dlsubs: string[]; novids: boolean | undefined; noaudio: boolean | undefined; nosubs: boolean | undefined; dubLang: string[]; all: boolean; fontSize: number; allSubs: boolean; allDubs: boolean; timeout: number; simul: boolean; mp4: boolean; skipmux: boolean | undefined; fileName: string; numbers: number; nosess: string; debug: boolean | undefined; nocleanup: boolean; help: boolean | undefined; service: 'funi' | 'crunchy'; update: boolean; fontName: string | undefined; _: (string | number)[]; $0: string; };
     
 export type ArgvType = typeof argvC;  
 
@@ -66,8 +58,6 @@ export {
   appArgv,
   showHelp,
   availableFilenameVars,
-  subLang,
-  dubLang,
   overrideArguments
 };
     
@@ -185,18 +175,13 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
       default: parseDefault<string>('hsLang', 'none'),
       type: 'string',
     })
-    .option('subLang', {
-      group: groups.dl,
-      describe: 'Set the subtitles to download (Funi only)',
-      choices: subLang, 
-      default: parseDefault<string[]>('subLang', []),
-      type: 'array'
-    })
     .option('dlsubs', {
       group: groups.dl,
-      describe: 'Download subtitles by language tag (space-separated) (crunchy only)',
+      describe: 'Download subtitles by language tag (space-separated)' 
+        + `\nFuni Only: ${langsData.languages.filter(a => a.funi_locale && !a.cr_locale).map(a => a.locale).join(', ')}`
+        + `\nCrunchy Only: ${langsData.languages.filter(a => a.cr_locale && !a.funi_locale).map(a => a.locale).join(', ')}`,
       choices: langsData.subtitleLanguagesFilter,
-      default: parseDefault<string|string[]>('dlSubs', 'all'),
+      default: parseDefault<string[]>('dlSubs', ['all']),
       type: 'array',
     })
     .option('novids', {
@@ -214,18 +199,13 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
       describe: 'Skip downloading subtitles',
       type: 'boolean'
     })
-    .option('dub', {
-      group: groups.dl,
-      describe: 'Set languages to download (funi only)',
-      choices: dubLang,
-      default: parseDefault<possibleDubs>('dub', ['enUS']),
-      type: 'array'
-    })
     .option('dubLang', {
       group: groups.dl,
-      describe: 'Set the language to download (Crunchy only)',
+      describe: 'Set the language to download: ' 
+        + `\nFuni Only: ${langsData.languages.filter(a => a.funi_locale && !a.cr_locale).map(a => a.code).join(', ')}`
+        + `\nCrunchy Only: ${langsData.languages.filter(a => a.cr_locale && !a.funi_locale).map(a => a.code).join(', ')}`,
       choices: langsData.dubLanguageCodes,
-      default: parseDefault('dubLanguage', langsData.dubLanguageCodes.slice(-1)[0]),
+      default: parseDefault<string[]>('dubLanguage', [langsData.dubLanguageCodes.slice(-1)[0]]),
       array: true,
     })
     .option('all', {

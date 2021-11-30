@@ -28,22 +28,21 @@ const token = yamlCfg.loadFuniToken();
 const argv = appYargs.appArgv(cfg.cli);
 // Import modules after argv has been exported
 import getData from './modules/module.getdata.js';
-import merger, { SubtitleInput } from './modules/module.merger';
+import merger from './modules/module.merger';
 import parseSelect from './modules/module.parseSelect';
 import { EpisodeData, MediaChild } from './@types/episode';
-import { Subtitle } from './@types/subtitleObject';
+import { Subtitle } from './@types/funiTypes';
 import { StreamData } from './@types/streamData';
 import { DownloadedFile } from './@types/downloadedFile';
 import parseFileName, { Variable } from './modules/module.filename';
 import { downloaded } from './modules/module.downloadArchive';
-
+import { FunimationMediaDownload } from './@types/funiTypes';
+import * as langsData from './modules/module.langsData';
 // check page
 argv.p = 1;
 
 // fn variables
-let title = '',
-  showTitle = '',
-  fnEpNum: string|number = 0,
+let  fnEpNum: string|number = 0,
   fnOutput: string[] = [],
   season = 0,
   tsDlPath: {
@@ -58,10 +57,10 @@ export default (async () => {
   console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
   cfg.bin = await yamlCfg.loadBinCfg();
   if (argv.allDubs) {
-    argv.dub = appYargs.dubLang;
+    argv.dub = langsData.dubLanguageCodes;
   }
   if (argv.allSubs) {
-    argv.subLang = appYargs.subLang;
+    argv.subLang = langsData.languages.map(a => a.code);
   }
   // select mode
   if(argv.auth){
@@ -288,8 +287,6 @@ async function getEpisode(fnSlug: {
   if(!episodeData.ok || !episodeData.res){return;}
   const ep = JSON.parse(episodeData.res.body).items[0] as EpisodeData, streamIds = [];
   // build fn
-  showTitle = ep.parent.title;
-  title = ep.title;
   season = parseInt(ep.parent.seasonNumber);
   if(ep.mediaCategory != 'Episode'){
     ep.number = ep.number !== '' ? ep.mediaCategory+ep.number : ep.mediaCategory+'#'+ep.id;
@@ -332,14 +329,6 @@ async function getEpisode(fnSlug: {
     }
   });
     
-  const dubType = {
-    'enUS': 'English',
-    'esLA': 'Spanish (Latin Am)',
-    'ptBR': 'Portuguese (Brazil)',
-    'zhMN': 'Chinese (Mandarin, PRC)',
-    'jaJP': 'Japanese'
-  };
-    
   // select
   stDlPath = [];
   for(const m of media){
@@ -352,10 +341,10 @@ async function getEpisode(fnSlug: {
       const selUncut = !argv.simul && uncut[dub_type] && m.version?.match(/uncut/i) 
         ? true 
         : (!uncut[dub_type] || argv.simul && m.version?.match(/simulcast/i) ? true : false);
-      for (const curDub of (argv.dub as appYargs.possibleDubs)) {
-        if(dub_type == dubType[curDub] && selUncut){
+      for (const curDub of argv.dubLang) {
+        const item = langsData.languages.find(a => a.code === curDub);
+        if(item && dub_type == (item.funi_name || item.name) && selUncut){
           streamIds.push({
-            
             id: m.id,
             lang: merger.getLanguageCode(curDub, curDub.slice(0, -2))
           });
@@ -365,17 +354,17 @@ async function getEpisode(fnSlug: {
         }
       }
       console.log(`[#${m.id}] ${dub_type} [${m.version}]${(selected?' (selected)':'')}${
-        localSubs && localSubs.length > 0 && selected ? ` (using ${localSubs.map(a => `'${a.langName}'`).join(', ')} for subtitles)` : ''
+        localSubs && localSubs.length > 0 && selected ? ` (using ${localSubs.map(a => `'${a.lang.name}'`).join(', ')} for subtitles)` : ''
       }`);
     }
   }
 
   const already: string[] = [];
   stDlPath = stDlPath.filter(a => {
-    if (already.includes(a.language)) {
+    if (already.includes(a.lang.code)) {
       return false;
     } else {
-      already.push(a.language);
+      already.push(a.lang.code);
       return true;
     }
   });
@@ -417,51 +406,48 @@ async function getEpisode(fnSlug: {
       return;
     }
     else{
-      return await downloadStreams(fnSlug.episodeID);
+      const res = await downloadStreams({
+        id: fnSlug.episodeID,
+        title: ep.title,
+        showTitle: ep.parent.title
+      });
+      if (res === true) {
+        downloaded({
+          service: 'funi',
+          type: 's'
+        }, argv.s as string, [fnSlug.episodeID]);
+      }
+      return res;
     }
   }
 }
 
 function getSubsUrl(m: MediaChild[]) : Subtitle[] {
-  if(argv.nosubs && !argv.sub){
+  if((argv.nosubs && !argv.sub) || argv.dlsubs.includes('none')){
     return [];
   }
 
-  let subLangs = argv.subLang as appYargs.possibleSubs;
-
-  const subType = {
-    'enUS': 'English',
-    'esLA': 'Spanish (Latin Am)',
-    'ptBR': 'Portuguese (Brazil)'
-  };
-
-  const subLangAvailable = m.some(a => subLangs.some(subLang => a.ext == 'vtt' && a.language === subType[subLang]));
-
-  if (!subLangAvailable) {
-    subLangs = [ 'enUS' ];
-  }
-    
   const found: Subtitle[] = [];
 
-  for(const i in m){
-    const fpp = m[i].filePath.split('.');
-    const fpe = fpp[fpp.length-1];
-    for (const lang of subLangs) {
-      if(fpe == 'vtt' && m[i].language === subType[lang]) {
-        found.push({
-          path: m[i].filePath,
-          ext: `.${lang}`,
-          langName: subType[lang],
-          language: m[i].languages[0].code || lang.slice(0, 2)
-        });
-      }
+  let media = m.filter(a => a.filePath.split('.').pop() === 'vtt');
+  for (let me of media) {
+    const lang = langsData.languages.find(a => me.language === (a.funi_name || a.name))
+    if (!lang) {
+      continue;
+    }
+    if (argv.dlsubs.includes('all') || argv.dlsubs.some(a => a === lang.locale)) {
+      found.push({
+        url: me.filePath,
+        ext: `.${lang.code}`,
+        lang
+      })
     }
   }
 
   return found;
 }
 
-async function downloadStreams(epsiodeID: string){
+async function downloadStreams(epsiode: FunimationMediaDownload){
     
   // req playlist
 
@@ -602,8 +588,8 @@ async function downloadStreams(epsiodeID: string){
     
       fnOutput = parseFileName(argv.fileName, ([
         ['episode', fnEpNum],
-        ['title', title],
-        ['showTitle', showTitle],
+        ['title', epsiode.title],
+        ['showTitle', epsiode.showTitle],
         ['season', season],
         ['width', plLayersRes[argv.q].width],
         ['height', plLayersRes[argv.q].height],
@@ -700,13 +686,13 @@ async function downloadStreams(epsiodeID: string){
     console.log('[INFO] Downloading subtitles...');
     for (const subObject of stDlPath) {
       const subsSrc = await getData({
-        url: subObject.path,
+        url: subObject.url,
         debug: argv.debug,
       });
       if(subsSrc.ok && subsSrc.res){
-        const assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.langName, argv.fontSize, argv.fontName);
-        subObject.file =  path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.subtitle${subObject.ext}${subsExt}`);
-        fs.writeFileSync(subObject.file, assData);
+        const assData = vttConvert(subsSrc.res.body, (subsExt == '.srt' ? true : false), subObject.lang.name, argv.fontSize, argv.fontName);
+        subObject.out = path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.subtitle${subObject.ext}${subsExt}`);
+        fs.writeFileSync(subObject.out, assData);
       }
       else{
         console.log('[ERROR] Failed to download subtitles!');
@@ -725,10 +711,6 @@ async function downloadStreams(epsiodeID: string){
     
   if(argv.skipmux){
     console.log('[INFO] Skipping muxing...');
-    downloaded({
-      service: 'funi',
-      type: 's'
-    }, argv.s as string, [epsiodeID]);
     return;
   }
     
@@ -752,7 +734,14 @@ async function downloadStreams(epsiodeID: string){
     onlyAudio: puraudio,
     onlyVid: purvideo,
     output: `${path.join(cfg.dir.content, ...fnOutput)}.${ffext}`,
-    subtitels: stDlPath as SubtitleInput[],
+    subtitels: stDlPath.map(a => {
+      return {
+        file: a.out as string,
+        language: a.lang.code,
+        lookup: false,
+        title: a.lang.name
+      };
+    }),
     videoAndAudio: audioAndVideo,
     simul: argv.simul,
     skipSubMux: argv.skipSubMux
@@ -768,26 +757,14 @@ async function downloadStreams(epsiodeID: string){
   }
   else{
     console.log('\n[INFO] Done!\n');
-    downloaded({
-      service: 'funi',
-      type: 's'
-    }, argv.s as string, [epsiodeID]);
     return true;
   }
   if (argv.nocleanup) {
-    downloaded({
-      service: 'funi',
-      type: 's'
-    }, argv.s as string, [epsiodeID]);
     return true;
   }
     
   mergeInstance.cleanUp();
   console.log('\n[INFO] Done!\n');
-  downloaded({
-    service: 'funi',
-    type: 's'
-  }, argv.s as string, [epsiodeID]);
   return true;
 }
 

@@ -85,7 +85,7 @@ export default (async () => {
     if (argv.dubLang.length > 1) {
       console.log('[INFO] One show can only be downloaded with one dub. Use --srz instead.');
     }
-    argv.dubLang = argv.dubLang[0];
+    argv.dubLang = [argv.dubLang[0]];
     return await getSeasonById();
   }
   else if(argv.e){
@@ -876,9 +876,6 @@ const downloadFromSeriesID = async () => {
   if (!parsed)
     return;
   const result = parseSeriesResult(parsed);
-  /*if(selectedMedia.length > 1){
-    appstore.isBatch = true;
-  }*/
   const episodes : Record<string, {
     items: Item[],
     langs: langsData.LanguageItem[]
@@ -1178,7 +1175,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
       return undefined;
     }
       
-    const audDub = langsData.findLang(langsData.fixLanguageTag(pbData.audio_locale)).code;
+    const audDub = langsData.findLang(langsData.fixLanguageTag(pbData.audio_locale) || '').code;
     hsLangs = langsData.sortTags(hsLangs);
       
     streams = streams.map((s) => {
@@ -1237,10 +1234,6 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
           
       console.log('[INFO] Downloading video...');
       curStream = streams[argv.kstream-1];
-      if(argv.dubLang != curStream.audio_lang){
-        argv.dubLang = curStream.audio_lang as string;
-        console.log(`[INFO] audio language code detected, setted to ${curStream.audio_lang} for this episode`);
-      }
           
       console.log('[INFO] Playlists URL: %s (%s)', curStream.url, curStream.type);
     }
