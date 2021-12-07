@@ -22,9 +22,9 @@ const languages: LanguageItem[] = [
   { cr_locale: 'it-IT',  locale: 'it',     code: 'ita', name: 'Italian'                                        },
   { cr_locale: 'ru-RU',  locale: 'ru',     code: 'rus', name: 'Russian'                                        },
   { cr_locale: 'tr-TR',  locale: 'tr',     code: 'tur', name: 'Turkish'                                        },
-  { cr_locale: 'ja-JP',  funi_locale: 'jaJP', locale: 'ja',     code: 'jpn', name: 'Japanese'                                       },
   { funi_locale: 'zhMN', locale: 'zh',     code: 'cmn', name: 'Chinese (Mandarin, PRC)'                                             },
   { cr_locale: 'en-US',  funi_locale: 'enUS', locale: 'en',     code: 'eng', name: 'English'                                        },
+  { cr_locale: 'ja-JP',  funi_locale: 'jaJP', locale: 'ja',     code: 'jpn', name: 'Japanese'                                       },
 ];
 
 // add en language names
@@ -48,7 +48,7 @@ const dubLanguageCodes = (() => {
 // construct subtitle languages filter
 const subtitleLanguagesFilter = (() => {
   const subtitleLanguagesExtraParameters = ['all', 'none'];
-  return [...subtitleLanguagesExtraParameters, ...new Set(languages.map(l => { return l.locale; }).slice(0, -1))];
+  return [...subtitleLanguagesExtraParameters, ...new Set(languages.map(l => { return l.locale; }))];
 })();
 
 const searchLocales = (() => {
