@@ -196,6 +196,7 @@ class Merger {
     }
     if (this.options.fonts && this.options.fonts.length > 0) {
       for (const f of this.options.fonts) {
+        console.log(f.path);
         args.push('--attachment-name', f.name);
         args.push('--attachment-mime-type', f.mime);
         args.push('--attach-file', f.path);
@@ -212,24 +213,25 @@ class Merger {
   public static checkMerger(bin: {
     mkvmerge?: string,
     ffmpeg?: string
-  }, useMP4format: boolean) {
-    const merger: {
-      MKVmerge: undefined|string|false,
-      FFmpeg: undefined|string|false
-    } = {
-      MKVmerge: bin.mkvmerge,
-      FFmpeg: bin.ffmpeg,
-    };
-    if( !useMP4format && !merger.MKVmerge ){
-      console.log('[WARN] MKVMerge not found, skip using this...');
-      merger.MKVmerge = false;
+  }, useMP4format: boolean) : {
+    MKVmerge?: string,
+    FFmpeg?: string
+  } {
+    if (useMP4format && bin.ffmpeg) {
+      return {
+        FFmpeg: bin.ffmpeg
+      }
+    } else if (!useMP4format && (bin.mkvmerge || bin.ffmpeg)) {
+      return {
+        MKVmerge: bin.mkvmerge,
+        FFmpeg: bin.ffmpeg
+      }
+    } else if (useMP4format) {
+      console.log('[WARN] FFmpeg not found, skip muxing...');
+    } else if (!bin.mkvmerge) {
+      console.log('[WARN] MKVMerge not found, skip muxing...');
     }
-    if( !merger.MKVmerge && !merger.FFmpeg || useMP4format && !merger.FFmpeg ){
-      console.log('[WARN] FFmpeg not found, skip using this...');
-      merger.FFmpeg = false;
-    }
-    return merger;
-
+    return {};
   }
 
   public static makeFontsList (fontsDir: string, subs: {

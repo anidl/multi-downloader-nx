@@ -720,14 +720,6 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
   if ( argv.novids ){
     console.log('[INFO] Video not downloaded. Skip muxing video.');
   }
-    
-  // mergers
-  if(!argv.mp4 && !mergerBin.MKVmerge){
-    console.log('[WARN] MKVMerge not found...');
-  }
-  if(!mergerBin.MKVmerge && !mergerBin.FFmpeg || argv.mp4 && !mergerBin.MKVmerge){
-    console.log('[WARN] FFmpeg not found...');
-  }
 
   const ffext = !argv.mp4 ? 'mkv' : 'mp4';
   const mergeInstance = new merger({
@@ -747,7 +739,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     skipSubMux: argv.skipSubMux
   });
 
-  if(!argv.mp4 && mergerBin.MKVmerge){
+  if(mergerBin.MKVmerge){
     const command = mergeInstance.MkvMerge();
     shlp.exec('mkvmerge', `"${mergerBin.MKVmerge}"`, command);
   }
