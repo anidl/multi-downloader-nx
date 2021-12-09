@@ -220,12 +220,12 @@ class Merger {
     if (useMP4format && bin.ffmpeg) {
       return {
         FFmpeg: bin.ffmpeg
-      }
+      };
     } else if (!useMP4format && (bin.mkvmerge || bin.ffmpeg)) {
       return {
         MKVmerge: bin.mkvmerge,
         FFmpeg: bin.ffmpeg
-      }
+      };
     } else if (useMP4format) {
       console.log('[WARN] FFmpeg not found, skip muxing...');
     } else if (!bin.mkvmerge) {

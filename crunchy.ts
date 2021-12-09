@@ -814,7 +814,7 @@ async function getObjectById(returnData?: boolean){
     
   console.log();
   for(const media of selectedMedia){
-    let res = await downloadMediaList(media as CrunchyEpMeta);
+    const res = await downloadMediaList(media as CrunchyEpMeta);
     if (res) {
       await muxStreams(res.data, res.fileName);
     }
