@@ -52,6 +52,12 @@ export default (async () => {
   console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
   // load binaries
   cfg.bin = await yamlCfg.loadBinCfg();
+  if (argv.allDubs) {
+    argv.dubLang = langsData.dubLanguageCodes;
+  }
+  if (argv.allSubs) {
+    argv.dlsubs = langsData.languages.map(a => a.code);
+  }
   // select mode
   if(argv.dlfonts){
     await getFonts();

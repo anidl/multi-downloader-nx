@@ -57,10 +57,10 @@ export default (async () => {
   console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
   cfg.bin = await yamlCfg.loadBinCfg();
   if (argv.allDubs) {
-    argv.dub = langsData.dubLanguageCodes;
+    argv.dubLang = langsData.dubLanguageCodes;
   }
   if (argv.allSubs) {
-    argv.subLang = langsData.languages.map(a => a.code);
+    argv.dlsubs = langsData.languages.map(a => a.code);
   }
   // select mode
   if(argv.auth){

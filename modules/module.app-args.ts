@@ -222,13 +222,13 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
     })
     .option('allSubs', {
       group: groups.dl,
-      describe: 'If set to true, all available subs will get downloaded (Funi only)',
+      describe: 'If set to true, all available subs will get downloaded',
       default: false,
       type: 'boolean'
     })
     .option('allDubs', {
       group: groups.dl,
-      describe: 'If set to true, all available dubs will get downloaded (Funi only)',
+      describe: 'If set to true, all available dubs will get downloaded',
       default: false,
       type: 'boolean'
     })
