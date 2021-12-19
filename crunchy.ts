@@ -1145,7 +1145,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
   
     variables.push(...([
       ['title', medias.episodeTitle],
-      ['episode', medias.episodeNumber],
+      ['episode', isNaN(parseInt(medias.episodeNumber)) ? medias.episodeNumber : parseInt(medias.episodeNumber)],
       ['service', 'CR'],
       ['showTitle', medias.seasonTitle],
       ['season', medias.season]

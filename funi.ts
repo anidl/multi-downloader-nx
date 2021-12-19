@@ -587,7 +587,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
       console.log('[INFO] Stream URL:',videoUrl);
     
       fnOutput = parseFileName(argv.fileName, ([
-        ['episode', fnEpNum],
+        ['episode', isNaN(parseInt(fnEpNum as string)) ? fnEpNum : parseInt(fnEpNum as string)],
         ['title', epsiode.title],
         ['showTitle', epsiode.showTitle],
         ['season', season],
