@@ -889,26 +889,28 @@ const downloadFromSeriesID = async () => {
     items: Item[],
     langs: langsData.LanguageItem[]
   }> = {};
-  for (const key of Object.keys(result)) {
-    const s = result[key];
-    (await getSeasonDataById(s))?.items.forEach(a => {
-      if (Object.prototype.hasOwnProperty.call(episodes, a.episode_number?.toString() as string)) {
-        const item = episodes[a.episode_number?.toString() as string];
-        item.items.push(a);
-        item.langs.push(langsData.languages.find(a => a.code == key) as langsData.LanguageItem);
-      } else {
-        episodes[a.episode_number?.toString() as string] = {
-          items: [a],
-          langs: [langsData.languages.find(a => a.code == key) as langsData.LanguageItem]
-        };
-      }
-    });
+  for(const season of Object.keys(result) as unknown as number[]) {
+    for (const key of Object.keys(result[season])) {
+      const s = result[season][key];
+      (await getSeasonDataById(s))?.items.forEach(a => {
+        if (Object.prototype.hasOwnProperty.call(episodes, a.episode_number?.toString() as string)) {
+          const item = episodes[`S${a.season_number}E${a.episode_number || a.episode}`];
+          item.items.push(a);
+          item.langs.push(langsData.languages.find(a => a.code == key) as langsData.LanguageItem);
+        } else {
+          episodes[`S${a.season_number}E${a.episode_number || a.episode}`] = {
+            items: [a],
+            langs: [langsData.languages.find(a => a.code == key) as langsData.LanguageItem]
+          };
+        }
+      });
+    }
   }
   for (const key of Object.keys(episodes)) {
     const item = episodes[key];
     //if (item.items[0].episode_number == null)
     //  continue;
-    console.log(`[${item.items[0].episode}] ${
+    console.log(`[S${item.items[0].season_number}E${item.items[0].episode}] ${
       item.items.find(a => !a.season_title.includes('('))?.season_title as string
     } - ${item.items[0].title} [${
       item.items.map((a, index) => {
@@ -922,7 +924,7 @@ const downloadFromSeriesID = async () => {
   const selected = itemSelectMultiDub(episodes);
   for (const key of Object.keys(selected)) {
     const item = selected[key];
-    console.log(`[${item.episodeNumber}] - ${item.episodeTitle} [${
+    console.log(`[S${item.season}E${item.episodeNumber}] - ${item.episodeTitle} [${
       item.data.map(a => {
         return `✓ ${a.lang?.name || 'Unknown Language'}`;
       }).join(', ')
@@ -1016,15 +1018,17 @@ const itemSelectMultiDub = (eps: Record<string, {
   return ret;
 };
 
-const parseSeriesResult = (seasonsList: SeriesSearch) : Record<string, SeriesSearchItem> => {
-  const ret: Record<string, SeriesSearchItem> = {};
+const parseSeriesResult = (seasonsList: SeriesSearch) : Record<number, Record<string, SeriesSearchItem>> => {
+  const ret: Record<number, Record<string, SeriesSearchItem>> = {};
 
   for (const item of seasonsList.items) {
     for (const lang of langsData.languages) {
+      if (!Object.prototype.hasOwnProperty.call(ret, item.season_number))
+        ret[item.season_number] = {};
       if (item.title.includes(`(${lang.name} Dub)`)) {
-        ret[lang.code] = item;
+        ret[item.season_number][lang.code] = item;
       } else if (item.is_subbed && !item.is_dubbed && lang.code == 'jpn') {
-        ret[lang.code] = item;
+        ret[item.season_number][lang.code] = item;
       }
     }
   }
@@ -1458,6 +1462,6 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
   }
   return {
     data: files,
-    fileName: (path.isAbsolute(fileName as string) ? fileName : path.join(cfg.dir.content, fileName as string)) || './unknown'
+    fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(cfg.dir.content, fileName)) || './unknown' : './unknown'
   };
 }

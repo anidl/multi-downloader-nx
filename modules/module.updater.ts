@@ -56,7 +56,7 @@ export default (async (force = false) => {
 
   if (tags.length > 0) {
     const newer = tags.filter(a => {
-      return a.name > packageJson.version;
+      return isNewer(packageJson.version, a.name);
     });
     console.log(`Found ${tags.length} release tags and ${newer.length} that are new.`);
   
@@ -135,4 +135,20 @@ function done(newVersion?: string) {
     }, null, 4));
   }
   console.log('[INFO] Searching for update finished. Next time running on the ' + next.toLocaleDateString() + ' at ' + next.toLocaleTimeString() + '.');
+}
+
+function isNewer(curr: string, compare: string) : boolean {
+  const currParts = curr.split('.').map(a => parseInt(a));
+  const compareParts = curr.split('.').map(a => parseInt(a));
+
+  for (let i = 0; i < Math.max(currParts.length, compareParts.length); i++) {
+    if (currParts.length <= i)
+      return true;
+    if (compareParts.length <= i)
+      return false;
+    if (currParts[i] !== compareParts[i])
+      return compareParts[i] > currParts[i];
+  }
+
+  return false;
 }
