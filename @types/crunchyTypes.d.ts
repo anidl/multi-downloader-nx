@@ -16,7 +16,7 @@ export type CrunchyEpMeta = {
 
 export type DownloadedMedia = {
   type: 'Video',
-  lang: string,
+  lang: LanguageItem,
   path: string
 } | ({
   type: 'Subtitle'

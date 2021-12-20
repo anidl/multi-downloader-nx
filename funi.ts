@@ -47,7 +47,7 @@ let  fnEpNum: string|number = 0,
   season = 0,
   tsDlPath: {
     path: string,
-    lang: string
+    lang: langsData.LanguageItem
   }[] = [],
   stDlPath: Subtitle[] = [];
 
@@ -346,7 +346,7 @@ async function getEpisode(fnSlug: {
         if(item && dub_type == (item.funi_name || item.name) && selUncut){
           streamIds.push({
             id: m.id,
-            lang: merger.getLanguageCode(curDub, curDub.slice(0, -2))
+            lang: item
           });
           stDlPath.push(...m.subtitles);
           localSubs = m.subtitles;
@@ -481,11 +481,10 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     }>  = {};
     let plMaxLayer   = 1,
       plNewIds     = 1,
-      plAud: {
-      uri: string,
-      langStr: string,
-      language: string
-    } = { uri: '', langStr: '', language: '' };
+    plAud: undefined|{
+      uri: string
+      language: langsData.LanguageItem
+    };
         
     // new uris
     const vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
@@ -497,7 +496,18 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
         const audioDataParts = plQualityLinkList.mediaGroups.AUDIO[audioKey],
           audioEl = Object.keys(audioDataParts);
         const audioData = audioDataParts[audioEl[0]];
-        plAud = { ...audioData, ...{ langStr: audioEl[0] } };
+        let language = langsData.languages.find(a => a.locale === audioData.language);
+        if (!language) {
+          language = langsData.languages.find(a => a.funi_name || a.name === audioEl[0]);
+          if (!language) {
+            console.log(`[ERROR] Unable to find language for locale ${audioData.language} or name ${audioEl[0]}`);
+            return;
+          }
+        }
+        plAud = {
+          uri: audioData.uri,
+          language: language
+        };
       }
       plQualityLinkList.playlists.sort((a, b) => {
         const aMatch = a.uri.match(vplReg), bMatch = b.uri.match(vplReg);
@@ -620,9 +630,9 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     await fs.promises.mkdir(path.join(cfg.dir.content, ...fnOutput.slice(0, -1)), { recursive: true });
 
     video: if (!argv.novids) {
-      if (plAud.uri && (purvideo.length > 0 || audioAndVideo.length > 0)) {
+      if (plAud && (purvideo.length > 0 || audioAndVideo.length > 0)) {
         break video;
-      } else if (!plAud.uri && (audioAndVideo.some(a => a.lang === streamPath.lang) || puraudio.some(a => a.lang === streamPath.lang))) {
+      } else if (!plAud && (audioAndVideo.some(a => a.lang === streamPath.lang) || puraudio.some(a => a.lang === streamPath.lang))) {
         break video;
       }
       // download video
@@ -634,10 +644,10 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
             
       const chunkList = m3u8(reqVideo.res.body);
             
-      const tsFile = path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.video${(plAud.uri ? '' : '.' + streamPath.lang )}`);
+      const tsFile = path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}`);
       dlFailed = !await downloadFile(tsFile, chunkList);
       if (!dlFailed) {
-        if (plAud.uri) {
+        if (plAud) {
           purvideo.push({
             path: `${tsFile}.ts`,
             lang: plAud.language
@@ -653,9 +663,9 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     else{
       console.log('[INFO] Skip video downloading...\n');
     }
-    audio: if (!argv.noaudio && plAud.uri) {
+    audio: if (plAud && !argv.noaudio) {
       // download audio
-      if (audioAndVideo.some(a => a.lang === plAud.language) || puraudio.some(a => a.lang === plAud.language))
+      if (audioAndVideo.some(a => a.lang === plAud?.language) || puraudio.some(a => a.lang === plAud?.language))
         break audio;
       const reqAudio = await getData({
         url: plAud.uri,
@@ -665,7 +675,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
             
       const chunkListA = m3u8(reqAudio.res.body);
     
-      const tsFileA = path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.audio.${plAud.language}`);
+      const tsFileA = path.join(cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.audio.${plAud.language.code}`);
     
       dlFailedA = !await downloadFile(tsFileA, chunkListA);
       if (!dlFailedA)
@@ -729,8 +739,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     subtitels: stDlPath.map(a => {
       return {
         file: a.out as string,
-        language: a.lang.code,
-        lookup: false,
+        language: a.lang,
         title: a.lang.name
       };
     }),

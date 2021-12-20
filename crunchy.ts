@@ -42,7 +42,7 @@ import { CrunchyEpisodeList, Item } from './@types/crunchyEpisodeList';
 import { CrunchyEpMeta, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-import { PlaybackData } from './@types/playbackData';
+import { PlaybackData, Vcodec } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 const req = new reqModule.Req(domain, argv);
@@ -841,9 +841,7 @@ async function muxStreams(data: DownloadedMedia[], output: string) {
         throw new Error('Never');
       return {
         file: a.path,
-        language: a.language.code,
-        lookup: false,
-        title: a.title
+        language: a.language
       };
     }),
     simul: false,
@@ -854,7 +852,6 @@ async function muxStreams(data: DownloadedMedia[], output: string) {
       return {
         lang: a.lang,
         path: a.path,
-        lookup: false
       };
     })
   });
@@ -997,7 +994,7 @@ const itemSelectMultiDub = (eps: Record<string, {
           ? 'S' + epNumList.sp.toString().padStart(argv.numbers, '0')
           : ''  + parseInt(epNum, 10).toString().padStart(argv.numbers, '0')
       );
-      if((argv.but && !doEpsFilter.isSelected([selEpId, item.id])) || (argv.all || (doEpsFilter.isSelected([selEpId, item.id])) && item.playback && !argv.but)){
+      if(item.playback && ((argv.but && !doEpsFilter.isSelected([selEpId, item.id])) || (argv.all || (doEpsFilter.isSelected([selEpId, item.id])) && !argv.but))) {
         if (Object.prototype.hasOwnProperty.call(ret, key)) {
           const epMe = ret[key];
           epMe.data.push({
@@ -1235,7 +1232,9 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
       console.log('[INFO] Selecting raw stream');
     }
       
-    let curStream;
+    let curStream:
+      undefined|typeof streams[0]
+      = undefined;
     if(!dlFailed){
       argv.kstream = typeof argv.kstream == 'number' ? argv.kstream : 1;
       argv.kstream = argv.kstream > streams.length ? 1 : argv.kstream;
@@ -1251,7 +1250,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
       console.log('[INFO] Playlists URL: %s (%s)', curStream.url, curStream.type);
     }
       
-    if(!argv.novids && !dlFailed && curStream){
+    if(!argv.novids && !dlFailed && curStream !== undefined){
       const streamPlaylistsReq = await req.getData(curStream.url);
       if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
         console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLISTS!');
@@ -1340,7 +1339,11 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
             type: 'number',
             replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
           });
-          const lang = curStream.audio_lang;
+          const lang = langsData.languages.find(a => a.code === curStream?.audio_lang);
+          if (!lang) {
+            console.log(`[ERROR] Unable to find language for code ${curStream.audio_lang}`);
+            return;
+          }
           console.log(`[INFO] Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
           if(argv['show-stream-url']){
             console.log('[INFO] Stream URL:', selPlUrl);
@@ -1381,7 +1384,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
             files.push({
               type: 'Video',
               path: `${tsFile}.ts`,
-              lang: lang as string
+              lang: lang
             });
           }
         }
@@ -1415,8 +1418,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
           return {
             ...s,
             locale: subLang,
-            language: subLang.locale,
-            titile: subLang.language
+            language: subLang.locale
           };
         });
         const subsArr = langsData.sortSubtitles<typeof subsDataMapped[0]>(subsDataMapped, 'language');
