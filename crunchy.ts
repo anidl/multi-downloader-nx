@@ -893,7 +893,7 @@ const downloadFromSeriesID = async () => {
     for (const key of Object.keys(result[season])) {
       const s = result[season][key];
       (await getSeasonDataById(s))?.items.forEach(a => {
-        if (Object.prototype.hasOwnProperty.call(episodes, a.episode_number?.toString() as string)) {
+        if (Object.prototype.hasOwnProperty.call(episodes, `S${a.season_number}E${a.episode_number || a.episode}`)) {
           const item = episodes[`S${a.season_number}E${a.episode_number || a.episode}`];
           item.items.push(a);
           item.langs.push(langsData.languages.find(a => a.code == key) as langsData.LanguageItem);
