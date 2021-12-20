@@ -139,7 +139,7 @@ function done(newVersion?: string) {
 
 function isNewer(curr: string, compare: string) : boolean {
   const currParts = curr.split('.').map(a => parseInt(a));
-  const compareParts = curr.split('.').map(a => parseInt(a));
+  const compareParts = compare.split('.').map(a => parseInt(a));
 
   for (let i = 0; i < Math.max(currParts.length, compareParts.length); i++) {
     if (currParts.length <= i)

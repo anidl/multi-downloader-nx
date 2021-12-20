@@ -42,7 +42,7 @@ import { CrunchyEpisodeList, Item } from './@types/crunchyEpisodeList';
 import { CrunchyEpMeta, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-import { PlaybackData, Vcodec } from './@types/playbackData';
+import { PlaybackData } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 const req = new reqModule.Req(domain, argv);

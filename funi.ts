@@ -481,7 +481,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     }>  = {};
     let plMaxLayer   = 1,
       plNewIds     = 1,
-    plAud: undefined|{
+      plAud: undefined|{
       uri: string
       language: langsData.LanguageItem
     };
