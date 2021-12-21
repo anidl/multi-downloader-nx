@@ -10,5 +10,6 @@ export type Subtitle = {
   url: string,
   lang: LanguageItem,
   ext: string,
-  out?: string
+  out?: string,
+  closedCaption?: boolean
 }

@@ -38,6 +38,7 @@ import parseFileName, { Variable } from './modules/module.filename';
 import { downloaded } from './modules/module.downloadArchive';
 import { FunimationMediaDownload } from './@types/funiTypes';
 import * as langsData from './modules/module.langsData';
+import { TitleElement } from './@types/episode';
 // check page
 argv.p = 1;
 
@@ -321,7 +322,7 @@ async function getEpisode(fnSlug: {
         language: m.language,
         version: m.version,
         type: m.experienceType,
-        subtitles: getSubsUrl(m.mediaChildren)
+        subtitles: getSubsUrl(m.mediaChildren, m.language)
       };
     }
     else{
@@ -361,10 +362,10 @@ async function getEpisode(fnSlug: {
 
   const already: string[] = [];
   stDlPath = stDlPath.filter(a => {
-    if (already.includes(a.lang.code)) {
+    if (already.includes(`${a.closedCaption ? 'cc' : ''}-${a.lang.code}`)) {
       return false;
     } else {
-      already.push(a.lang.code);
+      already.push(`${a.closedCaption ? 'cc' : ''}-${a.lang.code}`);
       return true;
     }
   });
@@ -422,7 +423,7 @@ async function getEpisode(fnSlug: {
   }
 }
 
-function getSubsUrl(m: MediaChild[]) : Subtitle[] {
+function getSubsUrl(m: MediaChild[], parentLanguage: TitleElement|undefined) : Subtitle[] {
   if((argv.nosubs && !argv.sub) || argv.dlsubs.includes('none')){
     return [];
   }
@@ -435,11 +436,13 @@ function getSubsUrl(m: MediaChild[]) : Subtitle[] {
     if (!lang) {
       continue;
     }
+    const pLang = langsData.languages.find(a => (a.funi_name || a.name) === parentLanguage);
     if (argv.dlsubs.includes('all') || argv.dlsubs.some(a => a === lang.locale)) {
       found.push({
         url: me.filePath,
-        ext: `.${lang.code}`,
-        lang
+        ext: `.${lang.code}${pLang?.code === lang.code ? '.cc' : ''}`,
+        lang,
+        closedCaption: pLang?.code === lang.code
       });
     }
   }
@@ -740,7 +743,8 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
       return {
         file: a.out as string,
         language: a.lang,
-        title: a.lang.name
+        title: a.lang.name,
+        closedCaption: a.closedCaption
       };
     }),
     videoAndAudio: audioAndVideo,

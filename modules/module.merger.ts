@@ -12,6 +12,7 @@ export type MergerInput = {
 export type SubtitleInput = {
   language: LanguageItem,
   file: string,
+  closedCaption?: boolean
 }
 
 export type Font = keyof typeof fonts;
@@ -94,7 +95,7 @@ class Merger {
     );
     args.push(this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass');
     args.push(...this.options.subtitels.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
-      sub.language.language || sub.language.name
+      (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ' CC' : ''}`
     }" -metadata:s:s:${subindex} language=${sub.language.code}`));
     args.push(`"${this.options.output}"`);
     return args.join(' ');
@@ -173,7 +174,7 @@ class Merger {
 
     if (this.options.subtitels.length > 0) {
       for (const subObj of this.options.subtitels) {
-        args.push('--track-name', `0:"${subObj.language.language || subObj.language.name}"`);
+        args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ' CC' : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
         args.push(`"${subObj.file}"`);
       }
