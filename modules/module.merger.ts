@@ -27,7 +27,7 @@ export type MergerOptions = {
   videoAndAudio: MergerInput[],
   onlyVid: MergerInput[],
   onlyAudio: MergerInput[],
-  subtitels: SubtitleInput[],
+  subtitles: SubtitleInput[],
   output: string,
   simul?: boolean,
   fonts?: ParsedFont[],
@@ -38,7 +38,7 @@ class Merger {
   
   constructor(private options: MergerOptions) {
     if (this.options.skipSubMux)
-      this.options.subtitels = [];
+      this.options.subtitles = [];
   }
 
   public FFmpeg() : string {
@@ -82,19 +82,19 @@ class Merger {
       audioIndex++;
     }
 
-    for (const index in this.options.subtitels) {
-      const sub = this.options.subtitels[index];
+    for (const index in this.options.subtitles) {
+      const sub = this.options.subtitles[index];
       args.push(`-i "${sub.file}"`);
     }
 
     args.push(...metaData);
-    args.push(...this.options.subtitels.map((_, subIndex) => `-map ${subIndex + index}`));
+    args.push(...this.options.subtitles.map((_, subIndex) => `-map ${subIndex + index}`));
     args.push(
       '-c:v copy',
       '-c:a copy'
     );
     args.push(this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass');
-    args.push(...this.options.subtitels.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
+    args.push(...this.options.subtitles.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
       (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ' CC' : ''}`
     }" -metadata:s:s:${subindex} language=${sub.language.code}`));
     args.push(`"${this.options.output}"`);
@@ -172,8 +172,8 @@ class Merger {
       args.push(`"${aud.path}"`);
     }
 
-    if (this.options.subtitels.length > 0) {
-      for (const subObj of this.options.subtitels) {
+    if (this.options.subtitles.length > 0) {
+      for (const subObj of this.options.subtitles) {
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ' CC' : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
         args.push(`"${subObj.file}"`);
@@ -259,7 +259,7 @@ class Merger {
 
   public cleanUp() {
     this.options.onlyAudio.concat(this.options.onlyVid).concat(this.options.videoAndAudio).forEach(a => fs.unlinkSync(a.path));
-    this.options.subtitels.forEach(a => fs.unlinkSync(a.file));
+    this.options.subtitles.forEach(a => fs.unlinkSync(a.file));
   }
 
 }

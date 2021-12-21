@@ -59,7 +59,7 @@ export default (async () => {
     argv.dlsubs = langsData.languages.map(a => a.code);
   }
   // select mode
-  if(argv.dlfonts){
+  if(argv.dlFonts){
     await getFonts();
   }
   else if(argv.auth){
@@ -836,7 +836,7 @@ async function muxStreams(data: DownloadedMedia[], output: string) {
     skipSubMux: argv.skipSubMux,
     onlyAudio: [],
     output: `${output}.${argv.mp4 ? 'mp4' : 'mkv'}`,
-    subtitels: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
+    subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
       if (a.type === 'Video')
         throw new Error('Never');
       return {

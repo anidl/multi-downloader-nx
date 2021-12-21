@@ -739,7 +739,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     onlyAudio: puraudio,
     onlyVid: purvideo,
     output: `${path.join(cfg.dir.content, ...fnOutput)}.${ffext}`,
-    subtitels: stDlPath.map(a => {
+    subtitles: stDlPath.map(a => {
       return {
         file: a.out as string,
         language: a.lang,
