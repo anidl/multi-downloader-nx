@@ -1,5 +1,5 @@
 import * as iso639 from 'iso-639';
-import { fonts, fontMime } from './module.fontsData';
+import { fontFamilies, fontMime } from './module.fontsData';
 import path from 'path';
 import fs from 'fs';
 import { LanguageItem } from './module.langsData';
@@ -15,7 +15,7 @@ export type SubtitleInput = {
   closedCaption?: boolean
 }
 
-export type Font = keyof typeof fonts;
+export type Font = keyof typeof fontFamilies;
 
 export type ParsedFont = {
   name: string,
@@ -27,7 +27,7 @@ export type MergerOptions = {
   videoAndAudio: MergerInput[],
   onlyVid: MergerInput[],
   onlyAudio: MergerInput[],
-  subtitles: SubtitleInput[],
+  subtitels: SubtitleInput[],
   output: string,
   simul?: boolean,
   fonts?: ParsedFont[],
@@ -38,7 +38,7 @@ class Merger {
   
   constructor(private options: MergerOptions) {
     if (this.options.skipSubMux)
-      this.options.subtitles = [];
+      this.options.subtitels = [];
   }
 
   public FFmpeg() : string {
@@ -82,19 +82,19 @@ class Merger {
       audioIndex++;
     }
 
-    for (const index in this.options.subtitles) {
-      const sub = this.options.subtitles[index];
+    for (const index in this.options.subtitels) {
+      const sub = this.options.subtitels[index];
       args.push(`-i "${sub.file}"`);
     }
 
     args.push(...metaData);
-    args.push(...this.options.subtitles.map((_, subIndex) => `-map ${subIndex + index}`));
+    args.push(...this.options.subtitels.map((_, subIndex) => `-map ${subIndex + index}`));
     args.push(
       '-c:v copy',
       '-c:a copy'
     );
     args.push(this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass');
-    args.push(...this.options.subtitles.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
+    args.push(...this.options.subtitels.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
       (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ' CC' : ''}`
     }" -metadata:s:s:${subindex} language=${sub.language.code}`));
     args.push(`"${this.options.output}"`);
@@ -172,8 +172,8 @@ class Merger {
       args.push(`"${aud.path}"`);
     }
 
-    if (this.options.subtitles.length > 0) {
-      for (const subObj of this.options.subtitles) {
+    if (this.options.subtitels.length > 0) {
+      for (const subObj of this.options.subtitels) {
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ' CC' : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
         args.push(`"${subObj.file}"`);
@@ -241,16 +241,18 @@ class Merger {
       console.log((isNstr ? '\n' : '') + '[INFO] Required fonts: %s (Total: %s)', fontsNameList.join(', '), fontsNameList.length);
     }
     for(const f of fontsNameList){
-      const fontFile = fonts[f];
-      if(fontFile){
-        const fontPath = path.join(fontsDir, fontFile);
-        const mime = fontMime(fontFile);
-        if(fs.existsSync(fontPath) && fs.statSync(fontPath).size != 0){
-          fontsList.push({
-            name: fontFile,
-            path: fontPath,
-            mime: mime,
-          });
+      const fontFiles = fontFamilies[f];
+      if(fontFiles){
+        for (const fontFile of fontFiles) {
+          const fontPath = path.join(fontsDir, fontFile);
+          const mime = fontMime(fontFile);
+          if(fs.existsSync(fontPath) && fs.statSync(fontPath).size != 0){
+            fontsList.push({
+              name: fontFile,
+              path: fontPath,
+              mime: mime,
+            });
+          } 
         }
       }
     }
@@ -259,7 +261,7 @@ class Merger {
 
   public cleanUp() {
     this.options.onlyAudio.concat(this.options.onlyVid).concat(this.options.videoAndAudio).forEach(a => fs.unlinkSync(a.path));
-    this.options.subtitles.forEach(a => fs.unlinkSync(a.file));
+    this.options.subtitels.forEach(a => fs.unlinkSync(a.file));
   }
 
 }

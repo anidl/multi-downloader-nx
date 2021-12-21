@@ -106,11 +106,11 @@ export default (async () => {
 // get cr fonts
 async function getFonts(){
   console.log('[INFO] Downloading fonts...');
-  for(const f of Object.keys(fontsData.fonts)){
-    const fontFile = fontsData.fonts[f as fontsData.AvailableFonts];
-    const fontLoc  = path.join(cfg.dir.fonts, fontFile);
+  const fonts = Object.values(fontsData.fontFamilies).reduce((pre, curr) => pre.concat(curr));
+  for(const f of fonts) {
+    const fontLoc  = path.join(cfg.dir.fonts, f);
     if(fs.existsSync(fontLoc) && fs.statSync(fontLoc).size != 0){
-      console.log(`[INFO] ${f} (${fontFile}) already downloaded!`);
+      console.log(`[INFO] ${f} already downloaded!`);
     }
     else{
       const fontFolder = path.dirname(fontLoc);
@@ -123,14 +123,14 @@ async function getFonts(){
       catch(e){
         console.log();
       }
-      const fontUrl = fontsData.root + fontFile;
+      const fontUrl = fontsData.root + f;
       const getFont = await req.getData<Buffer>(fontUrl, { binary: true });
       if(getFont.ok && getFont.res){
         fs.writeFileSync(fontLoc, getFont.res.body);
-        console.log(`[INFO] Downloaded: ${f} (${fontFile})`);
+        console.log(`[INFO] Downloaded: ${f}`);
       }
       else{
-        console.log(`[WARN] Failed to download: ${f} (${fontFile})`);
+        console.log(`[WARN] Failed to download: ${f}`);
       }
     }
   }
@@ -836,7 +836,7 @@ async function muxStreams(data: DownloadedMedia[], output: string) {
     skipSubMux: argv.skipSubMux,
     onlyAudio: [],
     output: `${output}.${argv.mp4 ? 'mp4' : 'mkv'}`,
-    subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
+    subtitels: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
       if (a.type === 'Video')
         throw new Error('Never');
       return {
@@ -1350,7 +1350,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
           }
           // TODO check filename
           fileName = parseFileName(argv.fileName, variables, argv.numbers).join(path.sep);
-          const outFile = parseFileName(argv.fileName + '.' + (mMeta.lang?.name || lang), variables, argv.numbers).join(path.sep);
+          const outFile = parseFileName(argv.fileName + '.' + (mMeta.lang?.name || lang.name), variables, argv.numbers).join(path.sep);
           console.log(`[INFO] Output filename: ${outFile}`);
           const chunkPage = await req.getData(selPlUrl);
           if(!chunkPage.ok || !chunkPage.res){
