@@ -585,18 +585,20 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
     }
 
         
-    argv.q = argv.q < 1 || argv.q > plMaxLayer ? plMaxLayer : argv.q;
-        
     const plSelectedServer = plServerList[argv.x-1];
     const plSelectedList   = plStreams[plSelectedServer];
-    const videoUrl = argv.x < plServerList.length+1 && plSelectedList[argv.q] ? plSelectedList[argv.q] : '';
         
     plLayersStr.sort();
     console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
     console.log(`[INFO] Available qualities:\n\t${plLayersStr.join('\n\t')}`);
-        
+
+    const selectedQuality = argv.q === 0 || argv.q > Object.keys(plLayersRes).length
+      ? Object.keys(plLayersRes).pop() as string
+      : argv.q;
+    const videoUrl = argv.x < plServerList.length+1 && plSelectedList[selectedQuality] ? plSelectedList[selectedQuality] : '';
+
     if(videoUrl != ''){
-      console.log(`[INFO] Selected layer: ${argv.q} (${plLayersRes[argv.q].width}x${plLayersRes[argv.q].height}) @ ${plSelectedServer}`);
+      console.log(`[INFO] Selected layer: ${selectedQuality} (${plLayersRes[selectedQuality].width}x${plLayersRes[selectedQuality].height}) @ ${plSelectedServer}`);
       console.log('[INFO] Stream URL:',videoUrl);
     
       fnOutput = parseFileName(argv.fileName, ([
@@ -604,8 +606,8 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
         ['title', epsiode.title],
         ['showTitle', epsiode.showTitle],
         ['season', season],
-        ['width', plLayersRes[argv.q].width],
-        ['height', plLayersRes[argv.q].height],
+        ['width', plLayersRes[selectedQuality].width],
+        ['height', plLayersRes[selectedQuality].height],
         ['service', 'Funimation']
       ] as [appYargs.AvailableFilenameVars, string|number][]).map((a): Variable => {
         return {
