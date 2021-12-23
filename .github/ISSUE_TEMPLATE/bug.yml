@@ -65,4 +65,4 @@ body:
     attributes:
       label: Additional Information
       description: "Do you have any additional information you can provide?"
-      render: shell
+      render: Text
