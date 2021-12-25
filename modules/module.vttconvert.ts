@@ -58,7 +58,7 @@ function convertToAss(vttStr: string, lang: string, fontSize: number, fontName?:
             + 'Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, '
             + 'BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
     `Style: Main,${fontName || 'Noto Sans'},${fontSize},&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,2,10,10,10,1`,
-    `Style: MainTop,${fontName || 'Noto Sans'},${fontSize},&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,8,10,10,10`,
+    `Style: MainTop,${fontName || 'Noto Sans'},${fontSize},&H00FFFFFF,&H000000FF,&H00020713,&H00000000,0,0,0,0,100,100,0,0,1,3,0,8,10,10,10,1`,
     '',
     '[Events]',
     'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',
