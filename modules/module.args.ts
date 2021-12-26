@@ -1,0 +1,496 @@
+import { dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
+
+const groups = {
+  'auth': 'Authentication:',
+  'fonts': 'Fonts:',
+  'search': 'Search:',
+  'dl': 'Downloading:',
+  'mux': 'Muxing:',
+  'fileName': 'Filename Template:',
+  'debug': 'Debug:',
+  'util': 'Utilities:',
+  'help': 'Help:'
+};
+
+export type AvailableFilenameVars =  'title' | 'episode' | 'showTitle' | 'season' | 'width' | 'height' | 'service'
+
+const availableFilenameVars: AvailableFilenameVars[] = [
+  'title',
+  'episode',
+  'showTitle',
+  'season',
+  'width',
+  'height',
+  'service'
+];
+
+type TAppArg<T extends boolean|string|number|unknown[]> = {
+  name: string,
+  group: keyof typeof groups,
+  type: 'boolean'|'string'|'number'|'array',
+  choices?: T[],
+  alias?: string,
+  describe: string,
+  docDescribe: true|string, // true means use describe for the docs
+  default?: T|{
+    default: T,
+    name?: string    
+  },
+  service: 'funi'|'crunchy'|'both',
+  usage: string // -(-)${name} will be added for each command,
+  demandOption?: true
+}
+
+const args: TAppArg<boolean|number|string|unknown[]>[] = [
+  {
+    name: 'auth',
+    describe: 'Enter authentication mode',
+    type: 'boolean',
+    group: 'auth',
+    service: 'both',
+    docDescribe: 'Most of the shows on both services are only accessible if you payed for the service.'
+      + '\nIn order for them to know who you are you are required to log in.'
+      + '\nIf you trigger this command, you will be prompted for the username and password for the selected service',
+    usage: ''
+  },
+  {
+    name: 'dlFonts',
+    group: 'fonts',
+    describe: 'Download all required fonts for mkv muxing',
+    docDescribe: 'Crunchyroll uses a variaty of fonts for the subtitles.'
+      + '\nUse this command to download all the fonts and add them to the muxed **mkv** file.',
+    service: 'crunchy',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'search',
+    group: 'search',
+    alias: 'f',
+    describe: 'Search of an anime by the given string',
+    type: 'string',
+    docDescribe: true,
+    service: 'both',
+    usage: '${search}'
+  },
+  {
+    name: 'search-type',
+    describe: 'Search by type',
+    docDescribe: 'Search only for type of anime listings (e.g. episodes, series)',
+    group: 'search',
+    service: 'crunchy',
+    type: 'string',
+    usage: '${type}',
+    choices: [ '', 'top_results', 'series', 'movie_listing', 'episode' ],
+    default: ''
+  },
+  {
+    name: 'page',
+    alias: 'p',
+    describe: 'Set the page number for search results',
+    docDescribe: 'The output is organized in pages. Use this command to output the items for the given page',
+    group: 'search',
+    service: 'crunchy',
+    type: 'number',
+    usage: '${page}'
+  },
+  {
+    name: 'search-locale',
+    describe: 'Set the search locale',
+    docDescribe: 'Set the search local that will be used for searching for items.',
+    group: 'search',
+    choices: (searchLocales.filter(a => a !== undefined) as string[]),
+    default: '',
+    type: 'string',
+    service: 'crunchy',
+    usage: '${locale}'
+  },
+  {
+    group: 'search',
+    name: 'new',
+    describe: 'Get last updated series list',
+    docDescribe: true,
+    service: 'crunchy',
+    type: 'boolean',
+    usage: '',
+  },
+  {
+    group: 'dl',
+    alias: 'flm',
+    name: 'movie-listing',
+    describe: 'Get video list by Movie Listing ID',
+    docDescribe: true,
+    service: 'crunchy',
+    type: 'string',
+    usage: '${ID}',
+  },
+  {
+    name: 'series',
+    group: 'dl',
+    alias: 'srz',
+    describe: 'Get season list by series ID',
+    docDescribe: 'This command is used only for crunchyroll.'
+      + '\n Requested is the ID of a show not a season.',
+    service: 'crunchy',
+    type: 'string',
+    usage: '${ID}'
+  },
+  {
+    name: 's',
+    group: 'dl',
+    type: 'string',
+    describe: 'Set the season ID',
+    docDescribe: 'Used to set the season ID to download from',
+    service: 'both',
+    usage: '${ID}'
+  },
+  {
+    name: 'e',
+    group: 'dl',
+    describe: 'Set the episode(s) to download from any given show',
+    docDescribe: 'Set the episode(s) to download from any given show.'
+      + '\nFor multiple selection: 1-4 OR 1,2,3,4 '
+      + '\nFor special episodes: S1-4 OR S1,S2,S3,S4 where S is the special letter',
+    service: 'both',
+    type: 'string',
+    usage: '${selection}',
+    alias: 'epsisode'
+  },
+  {
+    name: 'q',
+    group: 'dl',
+    describe: 'Set the quality level. Use 0 to use the maximum quality.',
+    default: {
+      default: 7
+    },
+    docDescribe: true,
+    service: 'both',
+    type: 'number',
+    usage: '${qualityLevel}'
+  },
+  {
+    name: 'x',
+    group: 'dl',
+    describe: 'Select the server to use',
+    choices: [1, 2, 3, 4],
+    default: {
+      default: 1
+    },
+    type: 'number',
+    alias: 'server',
+    docDescribe: true,
+    service: 'both',
+    usage: '${server}'
+  },
+  {
+    name: 'kstream',
+    group: 'dl',
+    alias: 'k',
+    describe: 'Select specific stream',
+    choices: [1, 2, 3, 4, 5, 6, 7],
+    default: {
+      default: 1
+    },
+    docDescribe: true,
+    service: 'crunchy',
+    type: 'number',
+    usage: '${stream}'
+  },
+  {
+    name: 'hslang',
+    group: 'dl',
+    describe: 'Download video with specific hardsubs',
+    choices: subtitleLanguagesFilter.slice(1),
+    default: {
+      default: 'none'
+    },
+    type: 'string',
+    usage: '${hslang}',
+    docDescribe: true,
+    service: 'crunchy'
+  },
+  {
+    name: 'dlsubs',
+    group: 'dl',
+    describe: 'Download subtitles by language tag (space-separated)' 
+    + `\nFuni Only: ${languages.filter(a => a.funi_locale && !a.cr_locale).map(a => a.locale).join(', ')}`
+    + `\nCrunchy Only: ${languages.filter(a => a.cr_locale && !a.funi_locale).map(a => a.locale).join(', ')}`,
+    docDescribe: true,
+    service: 'both',
+    type: 'array',
+    choices: subtitleLanguagesFilter,
+    default: {
+      default: 'all'
+    },
+    usage: '${sub1} ${sub2}'
+  },
+  {
+    name: 'novids',
+    group: 'dl',
+    describe: 'Skip downloading videos',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'noaudio',
+    group: 'dl',
+    describe: 'Skip downloading audio',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'nosubs',
+    group: 'dl',
+    describe: 'Skip downloading subtitles',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'dubLang',
+    describe: 'Set the language to download: ' 
+        + `\nFuni Only: ${languages.filter(a => a.funi_locale && !a.cr_locale).map(a => a.code).join(', ')}`
+        + `\nCrunchy Only: ${languages.filter(a => a.cr_locale && !a.funi_locale).map(a => a.code).join(', ')}`,
+    docDescribe: true,
+    group: 'dl',
+    choices: dubLanguageCodes,
+    default: {
+      default: [dubLanguageCodes.slice(-1)[0]]
+    },
+    service: 'both',
+    type: 'array',
+    usage: '${dub1} ${dub2}',
+  },
+  {
+    name: 'all',
+    describe: 'Used to download all episodes from the show',
+    docDescribe: true,
+    group: 'dl',
+    service: 'both',
+    default: {
+      default: false
+    },
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'fontSize',
+    describe: 'Used to set the fontsize of the subtitles',
+    default: {
+      default: 55
+    },
+    docDescribe: true,
+    group: 'dl',
+    service: 'both',
+    type: 'number',
+    usage: '${fontSize}'
+  },
+  {
+    name: 'allDubs',
+    describe: 'If selected, all available dubs will get downloaded',
+    docDescribe: true,
+    group: 'dl',
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'timeout',
+    group: 'dl',
+    type: 'number',
+    describe: 'Set the timeout of all download reqests. Set in millisecods',
+    docDescribe: true,
+    service: 'both',
+    usage: '${timeout}',
+    default: {
+      default: 60 * 1000
+    }
+  },
+  {
+    name: 'simul',
+    group: 'dl',
+    describe: 'Force downloading simulcast version instead of uncut version (if available).',
+    docDescribe: true,
+    service: 'funi',
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
+    name: 'mp4',
+    group: 'mux',
+    describe: 'Mux video into mp4',
+    docDescribe: 'If selected, the output file will be an mp4 file (not recommened tho)',
+    service: 'both',
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
+    name: 'skipmux',
+    describe: 'Skip muxing video, audio and subtitles',
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'fileName',
+    group: 'fileName',
+    describe:  `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
+      .map(a => `'${a}'`).join(', ')} as variables.`,
+    docDescribe: true,
+    service: 'both',
+    type: 'string',
+    usage: '${fileName}',
+    default: {
+      default: '[${service}] ${showTitle} - S${season}E${episode} [${height}p]'
+    }
+  },
+  {
+    name: 'numbers',
+    group: 'fileName',
+    describe: `Set how long a number in the title should be at least.\n${[[3, 5, '005'], [2, 1, '01'], [1, 20, '20']]
+      .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
+    type: 'number',
+    default: {
+      default: 2
+    },
+    docDescribe: true,
+    service: 'both',
+    usage: '${number}'
+  },
+  {
+    name: 'nosess',
+    group: 'debug',
+    describe: 'Reset session cookie for testing purposes',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
+    name: 'debug',
+    group: 'debug',
+    describe: 'Debug mode (tokens may be revield in the console output)',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
+    name: 'nocleanup',
+    describe: 'Don\'t delete subtitle, audio and video files after muxing',
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'boolean',
+    default: {
+      default: false
+    },
+    usage: ''
+  }, 
+  {
+    name: 'help',
+    alias: 'h',
+    describe: 'Show the help output',
+    docDescribe: true,
+    group: 'help',
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'service',
+    describe: 'Set the service you want to use',
+    docDescribe: true,
+    group: 'util',
+    service: 'both',
+    type: 'string',
+    choices: ['funi', 'crunchy'],
+    usage: '${service}',
+    default: {
+      default: ''
+    }
+  },
+  {
+    name: 'update',
+    group: 'util',
+    describe: 'Force the tool to check for updates (code version only)',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'fontName',
+    group: 'fonts',
+    describe: 'Set the font to use in subtiles',
+    docDescribe: true,
+    service: 'funi',
+    type: 'string',
+    usage: '${fontName}',
+  },
+  {
+    name: 'but',
+    describe: 'Download everything but the -e selection',
+    docDescribe: true,
+    group: 'dl',
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'downloadArchive',
+    describe: 'Used to download all archived shows',
+    group: 'dl',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'addArchive',
+    describe: 'Used to add the `-s` and `--srz` to downloadArchive',
+    group: 'dl',
+    docDescribe: true,
+    service: 'both',
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'skipSubMux',
+    describe: 'Skip muxing the subtitles',
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  }
+];
+
+export {
+  TAppArg,
+  args,
+  groups,
+  availableFilenameVars
+};

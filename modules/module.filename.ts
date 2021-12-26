@@ -1,6 +1,6 @@
 import * as shlp from 'sei-helper';
 import path from 'path';
-import { AvailableFilenameVars } from './module.app-args';
+import { AvailableFilenameVars } from './module.args';
 
 
 export type Variable = ({
