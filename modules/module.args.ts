@@ -1,4 +1,4 @@
-import { dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from "./module.langsData";
+import { dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
 
 const groups = {
   'auth': 'Authentication:',
@@ -361,7 +361,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     name: 'numbers',
     group: 'fileName',
     describe: `Set how long a number in the title should be at least.\n${[[3, 5, '005'], [2, 1, '01'], [1, 20, '20']]
-        .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
+      .map(val => `Set in config: ${val[0]}; Episode number: ${val[1]}; Output: ${val[2]}`).join('\n')}`,
     type: 'number',
     default: {
       default: 2
@@ -422,7 +422,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     docDescribe: true,
     group: 'util',
     service: 'both',
-    type: "string",
+    type: 'string',
     choices: ['funi', 'crunchy'],
     usage: '${service}',
     default: {
