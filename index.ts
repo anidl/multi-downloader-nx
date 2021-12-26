@@ -1,4 +1,4 @@
-import { appArgv, overrideArguments } from './modules/module.app-args';
+import { appArgv, overrideArguments, showHelp } from './modules/module.app-args';
 import * as yamlCfg from './modules/module.cfg-loader';
 import { makeCommand, addToArchive } from './modules/module.downloadArchive';
 
@@ -52,6 +52,8 @@ import update from './modules/module.updater';
       (await import('./funi')).default();
     } else if (argv.service === 'crunchy') {
       (await import('./crunchy')).default();
+    } else {
+      showHelp();
     }
   }
 })();

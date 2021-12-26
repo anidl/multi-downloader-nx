@@ -45,6 +45,7 @@ import parseFileName, { Variable } from './modules/module.filename';
 import { PlaybackData } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
+import { AvailableFilenameVars } from './modules/module.args';
 const req = new reqModule.Req(domain, argv);
 
 // select
@@ -1150,7 +1151,7 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
       ['service', 'CR'],
       ['showTitle', medias.seasonTitle],
       ['season', medias.season]
-    ] as [yargs.AvailableFilenameVars, string|number][]).map((a): Variable => {
+    ] as [AvailableFilenameVars, string|number][]).map((a): Variable => {
       return {
         name: a[0],
         replaceWith: a[1],

@@ -39,6 +39,7 @@ import { downloaded } from './modules/module.downloadArchive';
 import { FunimationMediaDownload } from './@types/funiTypes';
 import * as langsData from './modules/module.langsData';
 import { TitleElement } from './@types/episode';
+import { AvailableFilenameVars } from './modules/module.args';
 // check page
 argv.p = 1;
 
@@ -609,7 +610,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
         ['width', plLayersRes[selectedQuality].width],
         ['height', plLayersRes[selectedQuality].height],
         ['service', 'Funimation']
-      ] as [appYargs.AvailableFilenameVars, string|number][]).map((a): Variable => {
+      ] as [AvailableFilenameVars, string|number][]).map((a): Variable => {
         return {
           name: a[0],
           replaceWith: a[1],
