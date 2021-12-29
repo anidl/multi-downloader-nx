@@ -327,7 +327,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     name: 'mp4',
     group: 'mux',
     describe: 'Mux video into mp4',
-    docDescribe: 'If selected, the output file will be an mp4 file (not recommened tho)',
+    docDescribe: 'If selected, the output file will be an mp4 file (not recommended tho)',
     service: 'both',
     type: 'boolean',
     usage: '',
@@ -385,7 +385,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
   {
     name: 'debug',
     group: 'debug',
-    describe: 'Debug mode (tokens may be revield in the console output)',
+    describe: 'Debug mode (tokens may be revealed in the console output)',
     docDescribe: true,
     service: 'both',
     type: 'boolean',
