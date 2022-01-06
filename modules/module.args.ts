@@ -485,6 +485,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     default: {
       default: false
     }
+  },
+  {
+    name: 'partsize',
+    describe: 'Set the amount of parts to download at once',
+    docDescribe: 'Set the amount of parts to download at once\nIf you have a good connection try incresing this number to get a higher overall speed',
+    group: 'dl',
+    service: 'both',
+    type: 'number',
+    usage: '${amount}',
+    default: {
+      default: 10
+    }
   }
 ];
 
