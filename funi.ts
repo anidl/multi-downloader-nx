@@ -65,6 +65,9 @@ export default (async () => {
     argv.dlsubs = langsData.languages.map(a => a.code);
   }
   // select mode
+  if (argv.silentAuth && !argv.auth) {
+    await auth();
+  }
   if(argv.auth){
     auth();
   }
@@ -82,8 +85,8 @@ export default (async () => {
 // auth
 async function auth(){
   const authOpts = {
-    user: await shlp.question('[Q] LOGIN/EMAIL'),
-    pass: await shlp.question('[Q] PASSWORD   ')
+    user: argv.username ?? await shlp.question('[Q] LOGIN/EMAIL'),
+    pass: argv.password ?? await shlp.question('[Q] PASSWORD   ')
   };
   const authData =  await getData({
     baseUrl: api_host,

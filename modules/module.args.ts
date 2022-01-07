@@ -33,7 +33,7 @@ type TAppArg<T extends boolean|string|number|unknown[]> = {
   describe: string,
   docDescribe: true|string, // true means use describe for the docs
   default?: T|{
-    default: T,
+    default: T|undefined,
     name?: string    
   },
   service: 'funi'|'crunchy'|'both',
@@ -347,7 +347,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
   {
     name: 'fileName',
     group: 'fileName',
-    describe:  `Set the filename template. Use \${variable_name} to insert variables.\nYou may use ${availableFilenameVars
+    describe:  `Set the filename template. Use \${variable_name} to insert variables.\nYou can also create folders by inserting a path seperator in the filename\nYou may use ${availableFilenameVars
       .map(a => `'${a}'`).join(', ')} as variables.`,
     docDescribe: true,
     service: 'both',
@@ -496,6 +496,42 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${amount}',
     default: {
       default: 10
+    }
+  },
+  {
+    name: 'username',
+    describe: 'Set the username to use for the authentication. If not provided, you will be prompted for the input',
+    docDescribe: true,
+    group: 'auth',
+    service: 'both',
+    type: 'string',
+    usage: '${username}',
+    default: {
+      default: undefined
+    }
+  },
+  {
+    name: 'password',
+    describe: 'Set the password to use for the authentication. If not provided, you will be prompted for the input',
+    docDescribe: true,
+    group: 'auth',
+    service: 'both',
+    type: 'string',
+    usage: '${password}',
+    default: {
+      default: undefined
+    }
+  },
+  {
+    name: 'silentAuth',
+    describe: 'Authenticate every time the script runns. Use at your own risk.',
+    docDescribe: true,
+    group: 'auth',
+    service: 'both',
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
     }
   }
 ];

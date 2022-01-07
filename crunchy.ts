@@ -60,6 +60,9 @@ export default (async () => {
     argv.dlsubs = langsData.languages.map(a => a.code);
   }
   // select mode
+  if (argv.silentAuth && !argv.auth) {
+    await doAuth();
+  }
   if(argv.dlFonts){
     await getFonts();
   }
@@ -140,8 +143,9 @@ async function getFonts(){
 
 // auth method
 async function doAuth(){
-  const iLogin = await shlp.question('[Q] LOGIN/EMAIL');
-  const iPsswd = await shlp.question('[Q] PASSWORD   ');
+
+  const iLogin = argv.username ?? await shlp.question('[Q] LOGIN/EMAIL');
+  const iPsswd = argv.password ?? await shlp.question('[Q] PASSWORD   ');
   const authData = new URLSearchParams({
     'username': iLogin,
     'password': iPsswd,
