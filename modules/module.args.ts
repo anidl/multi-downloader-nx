@@ -102,7 +102,9 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     docDescribe: 'Set the search local that will be used for searching for items.',
     group: 'search',
     choices: (searchLocales.filter(a => a !== undefined) as string[]),
-    default: '',
+    default: {
+      default: ''
+    },
     type: 'string',
     service: 'crunchy',
     usage: '${locale}'
