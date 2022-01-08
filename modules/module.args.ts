@@ -82,7 +82,9 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     type: 'string',
     usage: '${type}',
     choices: [ '', 'top_results', 'series', 'movie_listing', 'episode' ],
-    default: ''
+    default: {
+      default: ''
+    }
   },
   {
     name: 'page',
