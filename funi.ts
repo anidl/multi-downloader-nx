@@ -265,7 +265,7 @@ async function getShow(){
   }
   if(fnSlug.length < 1){
     console.log('[INFO] Episodes not selected!\n');
-    process.exit();
+    return;
   }
   else{
     console.log('[INFO] Selected Episodes: %s\n',epSelEpsTxt.join(', '));
