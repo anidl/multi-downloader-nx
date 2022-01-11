@@ -86,7 +86,7 @@ export default (async (force = false) => {
       });
     });
     if (changedFiles.length < 1) {
-      console.log('[INFO] No file changes found... updating package.json. If you thing this is an error please get the newst version yourself.');
+      console.log('[INFO] No file changes found... updating package.json. If you think this is an error please get the newst version yourself.');
       return done(newest.name);
     }
     console.log(`Found file changes: \n${changedFiles.map(a => `  [${
@@ -95,26 +95,30 @@ export default (async (force = false) => {
 
     const changesToApply = await Promise.all(changedFiles.map(async (a): Promise<ApplyItem> => {
       if (a.filename.endsWith('.ts')) {
-        return {
+        const ret = {
           path: a.filename.slice(0, -2) + 'js',
           content: transpileModule((await got(a.raw_url)).body, {
             compilerOptions: tsConfig.compilerOptions as unknown as CompilerOptions
           }).outputText,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
-        }; 
+        };
+        console.log('✓ transpiled %s', ret.path);
+        return ret;
       } else {
-        return {
+        const ret = {
           path: a.filename,
           content: (await got(a.raw_url)).body,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
         };
+        console.log('✓ transpiled %s', ret.path);
+        return ret;
       }
     }));
 
     changesToApply.forEach(a => {
       fsextra.ensureDirSync(path.dirname(a.path));
       fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
-      console.log('✓ %s', a.path);
+      console.log('✓ written %s', a.path);
     });
 
     console.log('[INFO] Done');

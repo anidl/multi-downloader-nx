@@ -353,7 +353,7 @@ async function parseObject(item: ParseItem, pad?: number, getSeries?: boolean, g
   if(argv.debug){
     console.log(item);
   }
-  pad = pad || 2;
+  pad = pad ?? 2;
   getSeries = getSeries === undefined ? true : getSeries;
   getMovieListing = getMovieListing === undefined ? true : getMovieListing;
   item.isSelected = item.isSelected === undefined ? false : item.isSelected;
@@ -910,10 +910,8 @@ const downloadFromSeriesID = async () => {
   }
   for (const key of Object.keys(episodes)) {
     const item = episodes[key];
-    //if (item.items[0].episode_number == null)
-    //  continue;
     console.log(`[S${item.items[0].season_number}E${item.items[0].episode}] ${
-      item.items.find(a => !a.season_title.includes('('))?.season_title as string
+      item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title
     } - ${item.items[0].title} [${
       item.items.map((a, index) => {
         return `${a.is_premium_only ? '☆ ' : ''}${item.langs[index].name}`;
