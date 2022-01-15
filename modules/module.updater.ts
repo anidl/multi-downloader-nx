@@ -89,15 +89,15 @@ export default (async (force = false) => {
       a.status === 'modified' ? '*' : a.status === 'added' ? '+' : '-'
     }] ${a.filename}`).join('\n')}`);
 
-    let remove: string[] = [];
+    const remove: string[] = [];
 
     changedFiles.filter(a => a.status !== 'added').forEach(async a => {
       if (!askBeforeUpdate.some(pattern => matchString(pattern, a.filename)))
         return;
-      let answer = await seiHelper.question(`The developer decided that the file '${a.filename}' may contain information you changed yourself. Should they be overriden to be updated? [y/N]`);
+      const answer = await seiHelper.question(`The developer decided that the file '${a.filename}' may contain information you changed yourself. Should they be overriden to be updated? [y/N]`);
       if (answer.toLowerCase() === 'y')
         remove.push(a.sha);
-    })
+    });
 
     const changesToApply = await Promise.all(changedFiles.filter(a => !remove.includes(a.sha)).map(async (a): Promise<ApplyItem> => {
       if (a.filename.endsWith('.ts')) {
