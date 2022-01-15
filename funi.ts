@@ -61,9 +61,6 @@ export default (async () => {
   if (argv.allDubs) {
     argv.dubLang = langsData.dubLanguageCodes;
   }
-  if (argv.allSubs) {
-    argv.dlsubs = langsData.languages.map(a => a.code);
-  }
   // select mode
   if (argv.silentAuth && !argv.auth) {
     await auth();
