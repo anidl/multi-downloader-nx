@@ -51,6 +51,7 @@
         "typescript": "^4.5.2"
     },
     "scripts": {
+        "docs": "ts-node modules/build-docs.ts",
         "tsc": "ts-node tsc.ts",
         "prebuild-win64": "npm run tsc",
         "prebuild-linux64": "npm run tsc",

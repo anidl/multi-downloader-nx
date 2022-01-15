@@ -14,14 +14,13 @@ jobs:
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.head_ref }}
-
-    - name: Use Node.js 14
+    - name: Use Node.js 16
       uses: actions/setup-node@v2
       with:
-        node-version: 14
+        node-version: 16
         cache: 'npm'
     - run: npm i 
-    - run: npx -y ts-node modules/build-docs.ts
+    - run: npm run docs
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Build Documentaion
