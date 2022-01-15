@@ -7,6 +7,7 @@ import packageJson from '../package.json';
 import { CompilerOptions, transpileModule } from 'typescript';
 import tsConfig from '../tsconfig.json';
 import fsextra from 'fs-extra';
+import seiHelper from 'sei-helper';
 const workingDir = (process as NodeJS.Process & {
   pkg?: unknown
 }).pkg ? path.dirname(process.execPath) : path.join(__dirname, '/..');
@@ -24,6 +25,10 @@ const updateIgnore = [
   'tsconfig.json',
   'updates.json',
   'tsc.ts'
+];
+
+const askBeforeUpdate = [
+  '*.yml'
 ];
 
 enum ApplyType {
@@ -74,16 +79,7 @@ export default (async (force = false) => {
       ...a,
       filename: path.join(...a.filename.split('/'))
     })).filter(a => {
-      return !updateIgnore.some(_filter => {
-        const filter = path.join('..', _filter);
-        if (_filter.startsWith('*')) {
-          return a.filename.endsWith(_filter.slice(1));
-        } else if (filter.split(path.sep).pop()?.indexOf('.') === -1) {
-          return a.filename.startsWith(filter);
-        } else {
-          return a.filename.split(path.sep).pop() === _filter;
-        }
-      });
+      return !updateIgnore.some(_filter => matchString(_filter, a.filename));
     });
     if (changedFiles.length < 1) {
       console.log('[INFO] No file changes found... updating package.json. If you think this is an error please get the newst version yourself.');
@@ -93,7 +89,17 @@ export default (async (force = false) => {
       a.status === 'modified' ? '*' : a.status === 'added' ? '+' : '-'
     }] ${a.filename}`).join('\n')}`);
 
-    const changesToApply = await Promise.all(changedFiles.map(async (a): Promise<ApplyItem> => {
+    let remove: string[] = [];
+
+    changedFiles.filter(a => a.status !== 'added').forEach(async a => {
+      if (!askBeforeUpdate.some(pattern => matchString(pattern, a.filename)))
+        return;
+      let answer = await seiHelper.question(`The developer decided that the file '${a.filename}' may contain information you changed yourself. Should they be overriden to be updated? [y/N]`);
+      if (answer.toLowerCase() === 'y')
+        remove.push(a.sha);
+    })
+
+    const changesToApply = await Promise.all(changedFiles.filter(a => !remove.includes(a.sha)).map(async (a): Promise<ApplyItem> => {
       if (a.filename.endsWith('.ts')) {
         const ret = {
           path: a.filename.slice(0, -2) + 'js',
@@ -155,4 +161,15 @@ function isNewer(curr: string, compare: string) : boolean {
   }
 
   return false;
+}
+
+function matchString(pattern: string, toMatch: string) : boolean {
+  const filter = path.join('..', pattern);
+  if (pattern.startsWith('*')) {
+    return toMatch.endsWith(pattern.slice(1));
+  } else if (filter.split(path.sep).pop()?.indexOf('.') === -1) {
+    return toMatch.startsWith(filter);
+  } else {
+    return toMatch.split(path.sep).pop() === pattern;
+  }
 }
