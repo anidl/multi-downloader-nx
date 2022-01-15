@@ -18,10 +18,10 @@
     "homepage": "https://github.com/anidl/multi-downloader-nx",
     "repository": {
         "type": "git",
-        "url": "https://github.com/izu-co/funimation-downloader-nx.git"
+        "url": "https://github.com/anidl/multi-downloader-nx.git"
     },
     "bugs": {
-        "url": "https://github.com/izu-co/funimation-downloader-nx/issues"
+        "url": "https://github.com/anidl/multi-downloader-nx/issues"
     },
     "license": "MIT",
     "main": "index.js",

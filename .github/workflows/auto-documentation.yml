@@ -1,0 +1,27 @@
+name: auto-documentation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Use Node.js 14
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+        cache: 'npm'
+    - run: npm i 
+    - run: npx -y ts-node modules/build-docs.ts
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Build Documentaion

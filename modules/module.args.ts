@@ -431,7 +431,8 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${service}',
     default: {
       default: ''
-    }
+    },
+    demandOption: true
   },
   {
     name: 'update',
