@@ -1,4 +1,4 @@
-# multi-downloader-nx (2.0.16v)
+# multi-downloader-nx (2.0.17v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
