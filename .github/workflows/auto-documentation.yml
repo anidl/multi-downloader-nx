@@ -12,9 +12,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.head_ref }}
-
     - name: Use Node.js 14
       uses: actions/setup-node@v2
       with:
