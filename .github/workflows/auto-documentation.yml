@@ -20,8 +20,6 @@ jobs:
         node-version: 14
         cache: 'npm'
     - run: npm i 
-    - name: ls
-      run: ls
     - run: npm run docs
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
