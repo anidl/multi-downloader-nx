@@ -22,7 +22,7 @@ jobs:
     - run: npm i 
     - name: ls
       run: ls
-    - run: npx -y ts-node modules/build-docs.ts
+    - run: npm run docs
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Build Documentaion
