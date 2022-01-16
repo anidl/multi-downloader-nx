@@ -252,6 +252,12 @@ Don't delete subtitle, audio and video files after muxing
 | Both | `--skipSubMux ` | `boolean` | `No`| `NaN` | `false`| `skipSubMux: ` |
 
 Skip muxing the subtitles
+#### `--forceMuxer`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--forceMuxer ${muxer}` | `string` | `No`| `NaN` | [`ffmpeg`, `mkvmerge`] | `undefined`| `forceMuxer: ` |
+
+Force the program to use said muxer or don't mux if the given muxer is not present
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
