@@ -12,7 +12,7 @@ const ignore = [
   path.join('config', 'token.yml'),
   path.join('config', 'updates.json'),
   path.join('config', 'cr_token.yml'),
-  path.join('config', 'token.yml'),
+  path.join('config', 'funi_token.yml'),
   '.eslint',
 ].map(a => path.join(__dirname, a));
 

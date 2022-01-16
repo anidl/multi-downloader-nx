@@ -554,7 +554,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     default: {
       default: undefined
     }
-  }
+  },
 ];
 
 export {

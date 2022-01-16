@@ -3,6 +3,7 @@ import { fontFamilies, fontMime } from './module.fontsData';
 import path from 'path';
 import fs from 'fs';
 import { LanguageItem } from './module.langsData';
+import { AvailableMuxer } from './module.args';
 
 export type MergerInput = {
   path: string,
@@ -31,7 +32,8 @@ export type MergerOptions = {
   output: string,
   simul?: boolean,
   fonts?: ParsedFont[],
-  skipSubMux?: boolean
+  skipSubMux?: boolean,
+  coustomOptions?: string,
 }
 
 class Merger {
@@ -87,16 +89,26 @@ class Merger {
       args.push(`-i "${sub.file}"`);
     }
 
+    if (this.options.output.split('.').pop() === 'mkv')
+      if (this.options.fonts) {
+        let fontIndex = 0;
+        for (const font of this.options.fonts) {
+          args.push(`-attach ${font.path} -metadata:s:t:${fontIndex} mimetype=${font.mime}`);
+          fontIndex++;
+        }
+      }
+
     args.push(...metaData);
     args.push(...this.options.subtitles.map((_, subIndex) => `-map ${subIndex + index}`));
     args.push(
       '-c:v copy',
-      '-c:a copy'
+      '-c:a copy',
+      this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass',
+      ...this.options.subtitles.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
+        (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ' CC' : ''}`
+      }" -metadata:s:s:${subindex} language=${sub.language.code}`),
+      this.options.coustomOptions ?? ''
     );
-    args.push(this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass');
-    args.push(...this.options.subtitles.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
-      (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ' CC' : ''}`
-    }" -metadata:s:s:${subindex} language=${sub.language.code}`));
     args.push(`"${this.options.output}"`);
     return args.join(' ');
   }

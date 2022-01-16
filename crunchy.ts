@@ -873,7 +873,7 @@ async function muxStreams(data: DownloadedMedia[], output: string) {
     console.log('\n[INFO] Done!\n');
     return;
   }
-  if (isMuxed)
+  if (isMuxed && !argv.nocleanup)
     merger.cleanUp();
 }
 
