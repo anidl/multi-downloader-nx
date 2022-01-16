@@ -731,7 +731,7 @@ async function downloadStreams(epsiode: FunimationMediaDownload){
   }
     
   // check exec
-  const mergerBin = merger.checkMerger(cfg.bin, argv.mp4);
+  const mergerBin = merger.checkMerger(cfg.bin, argv.mp4, argv.forceMuxer);
     
   if ( argv.novids ){
     console.log('[INFO] Video not downloaded. Skip muxing video.');

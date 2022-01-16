@@ -24,6 +24,9 @@ const availableFilenameVars: AvailableFilenameVars[] = [
   'service'
 ];
 
+export type AvailableMuxer = 'ffmpeg' | 'mkvmerge'
+export const muxer: AvailableMuxer[] = [ 'ffmpeg', 'mkvmerge' ];
+
 type TAppArg<T extends boolean|string|number|unknown[]> = {
   name: string,
   group: keyof typeof groups,
@@ -537,6 +540,19 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '',
     default: {
       default: false
+    }
+  },
+  {
+    name: 'forceMuxer',
+    describe: 'Force the program to use said muxer or don\'t mux if the given muxer is not present',
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'string',
+    usage: '${muxer}',
+    choices: muxer,
+    default: {
+      default: undefined
     }
   }
 ];

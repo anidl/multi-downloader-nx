@@ -201,11 +201,17 @@ class Merger {
 
   public static checkMerger(bin: {
     mkvmerge?: string,
-    ffmpeg?: string
-  }, useMP4format: boolean) : {
+    ffmpeg?: string,
+  }, useMP4format: boolean, force: AvailableMuxer|undefined) : {
     MKVmerge?: string,
     FFmpeg?: string
   } {
+    if (force && bin[force]) {
+      return {
+        FFmpeg: force === 'ffmpeg' ? bin.ffmpeg : undefined,
+        MKVmerge: force === 'mkvmerge' ? bin.mkvmerge : undefined
+      };
+    }
     if (useMP4format && bin.ffmpeg) {
       return {
         FFmpeg: bin.ffmpeg

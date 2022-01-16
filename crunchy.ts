@@ -857,7 +857,7 @@ async function muxStreams(data: DownloadedMedia[], output: string) {
       };
     })
   });
-  const bin = Merger.checkMerger(cfg.bin, argv.mp4);
+  const bin = Merger.checkMerger(cfg.bin, argv.mp4, argv.forceMuxer);
   // collect fonts info
   // mergers
   let isMuxed = false;
