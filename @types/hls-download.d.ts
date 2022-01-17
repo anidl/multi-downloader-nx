@@ -12,7 +12,8 @@ declare module 'hls-download' {
       baseurl?: string,
       proxy?: string,
       skipInit?: boolean,
-      timeout?: number
+      timeout?: number,
+      fsRetryTime?: number
     })
     async download() : Promise<{
       ok: boolean,

@@ -783,7 +783,8 @@ async function downloadFile(filename: string, chunkList: {
     m3u8json: chunkList,
     output: `${filename + '.ts'}`,
     timeout: argv.timeout,
-    threads: argv.partsize
+    threads: argv.partsize,
+    fsRetryTime: argv.fsRetryTime * 1000
   }).download();
     
   return downloadStatus.ok;

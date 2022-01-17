@@ -1375,7 +1375,8 @@ async function downloadMediaList(medias: CrunchyEpMeta) : Promise<{
               timeout: argv.timeout,
               m3u8json: chunkPlaylist,
               // baseurl: chunkPlaylist.baseUrl,
-              threads: argv.partsize
+              threads: argv.partsize,
+              fsRetryTime: argv.fsRetryTime * 1000
             }).download();
             if(!dlStreamByPl.ok){
               console.log(`[ERROR] DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);

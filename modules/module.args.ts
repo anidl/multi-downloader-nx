@@ -555,6 +555,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
       default: undefined
     }
   },
+  {
+    name: 'fsRetryTime',
+    describe: 'Set the time the downloader waits before retrying if an error while writing the file occurs',
+    docDescribe: true,
+    group: 'dl',
+    service: 'both',
+    type: 'number',
+    usage: '${time in seconds}',
+    default: {
+      default: 5
+    },
+  }
 ];
 
 export {
