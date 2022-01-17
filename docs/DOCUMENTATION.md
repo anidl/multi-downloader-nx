@@ -1,4 +1,4 @@
-# multi-downloader-nx (2.0.17v)
+# multi-downloader-nx (2.0.18v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -227,6 +227,12 @@ Used to add the `-s` and `--srz` to downloadArchive
 
 Set the amount of parts to download at once
 If you have a good connection try incresing this number to get a higher overall speed
+#### `--fsRetryTime`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--fsRetryTime ${time in seconds}` | `number` | `No`| `NaN` | `5`| `fsRetryTime: ` |
+
+Set the time the downloader waits before retrying if an error while writing the file occurs
 ### Muxing
 #### `--mp4`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
