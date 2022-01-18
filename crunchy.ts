@@ -884,7 +884,7 @@ const downloadFromSeriesID = async () => {
   if (!parsed)
     return;
   const result = parseSeriesResult(parsed);
-  const episodes : Record<string, {
+  let episodes : Record<string, {
     items: Item[],
     langs: langsData.LanguageItem[]
   }> = {};
@@ -905,11 +905,27 @@ const downloadFromSeriesID = async () => {
       });
     }
   }
+
+  let itemIndexes = {
+    sp: 1,
+    no: 1
+  };
+  for (const key of Object.keys(episodes)) {
+    let item = episodes[key];
+    let isSpecial = !item.items[0].episode.match(/^\d+$/);
+    episodes[`${isSpecial ? 'S' : 'E'}${itemIndexes[isSpecial ? 'sp' : 'no']}`] = item;
+    if (isSpecial)
+      itemIndexes.sp++;
+    else 
+      itemIndexes.no++;
+    delete episodes[key];
+  }
+
   for (const key of Object.keys(episodes)) {
     const item = episodes[key];
-    console.log(`[S${item.items[0].season_number}E${item.items[0].episode}] ${
-      item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title
-    } - ${item.items[0].title} [${
+    console.log(`[${key}] ${
+      item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
+    } - Season ${item.items[0].season_number} - ${item.items[0].title} [${
       item.items.map((a, index) => {
         return `${a.is_premium_only ? '☆ ' : ''}${item.langs[index].name}`;
       }).join(', ')
@@ -929,6 +945,7 @@ const downloadFromSeriesID = async () => {
   }
   for (const key of Object.keys(selected)) {
     const item = selected[key];
+    console.log(item);
     const res = await downloadMediaList(item);
     if (!res)
       return;
@@ -973,7 +990,7 @@ const itemSelectMultiDub = (eps: Record<string, {
             mediaId: item.id
           }
         ],
-        seasonTitle:   itemE.items.find(a => !a.season_title.includes('('))?.season_title as string,
+        seasonTitle:   itemE.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? itemE.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
         episodeNumber: item.episode,
         episodeTitle:  item.title,
         seasonID: item.season_id,
@@ -982,19 +999,9 @@ const itemSelectMultiDub = (eps: Record<string, {
       if(item.playback){
         epMeta.data[0].playback = item.playback;
       }
+      const epNum = key.startsWith('E') ? key.slice(1) : key;
       // find episode numbers
-      const epNum = item.episode;
-      let isSpecial = false;
-      if(!epNum.match(/^\d+$/)){
-        isSpecial = true;
-        epNumList.sp++;
-      }
-      const selEpId = (
-        isSpecial 
-          ? 'S' + epNumList.sp.toString().padStart(argv.numbers, '0')
-          : ''  + parseInt(epNum, 10).toString().padStart(argv.numbers, '0')
-      );
-      if(item.playback && ((argv.but && !doEpsFilter.isSelected([selEpId, item.id])) || (argv.all || (doEpsFilter.isSelected([selEpId, item.id])) && !argv.but))) {
+      if(item.playback && ((argv.but && !doEpsFilter.isSelected([epNum, item.id])) || (argv.all || (doEpsFilter.isSelected([epNum, item.id])) && !argv.but))) {
         if (Object.prototype.hasOwnProperty.call(ret, key)) {
           const epMe = ret[key];
           epMe.data.push({
@@ -1009,7 +1016,7 @@ const itemSelectMultiDub = (eps: Record<string, {
         }
       }
       // show ep
-      item.seq_id = selEpId;
+      item.seq_id = epNum;
     });
   }
   return ret;
