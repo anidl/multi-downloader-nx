@@ -884,7 +884,7 @@ const downloadFromSeriesID = async () => {
   if (!parsed)
     return;
   const result = parseSeriesResult(parsed);
-  let episodes : Record<string, {
+  const episodes : Record<string, {
     items: Item[],
     langs: langsData.LanguageItem[]
   }> = {};
@@ -906,13 +906,13 @@ const downloadFromSeriesID = async () => {
     }
   }
 
-  let itemIndexes = {
+  const itemIndexes = {
     sp: 1,
     no: 1
   };
   for (const key of Object.keys(episodes)) {
-    let item = episodes[key];
-    let isSpecial = !item.items[0].episode.match(/^\d+$/);
+    const item = episodes[key];
+    const isSpecial = !item.items[0].episode.match(/^\d+$/);
     episodes[`${isSpecial ? 'S' : 'E'}${itemIndexes[isSpecial ? 'sp' : 'no']}`] = item;
     if (isSpecial)
       itemIndexes.sp++;
@@ -966,9 +966,6 @@ const itemSelectMultiDub = (eps: Record<string, {
 
   const ret: Record<string, CrunchyEpMeta> = {};
 
-  const epNumList: {
-    sp: number
-  } = { sp: 0 };
   for (const key of Object.keys(eps)) {
     const itemE = eps[key];
     itemE.items.forEach((item, index) => {
