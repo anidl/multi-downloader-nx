@@ -40,7 +40,7 @@ Set the password to use for the authentication. If not provided, you will be pro
 | --- | --- | --- | --- | --- | --- | ---| 
 | Both | `--silentAuth ` | `boolean` | `No`| `NaN` | `false`| `silentAuth: ` |
 
-Authenticate every time the script runns. Use at your own risk.
+Authenticate every time the script runs. Use at your own risk.
 ### Fonts
 #### `--dlFonts`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
