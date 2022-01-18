@@ -532,7 +532,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
   },
   {
     name: 'silentAuth',
-    describe: 'Authenticate every time the script runns. Use at your own risk.',
+    describe: 'Authenticate every time the script runs. Use at your own risk.',
     docDescribe: true,
     group: 'auth',
     service: 'both',
