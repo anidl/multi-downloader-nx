@@ -200,7 +200,7 @@ class Merger {
         console.log(f.path);
         args.push('--attachment-name', f.name);
         args.push('--attachment-mime-type', f.mime);
-        args.push('--attach-file', f.path);
+        args.push('--attach-file', `"${f.path}"`);
       }
     } else {
       args.push(
