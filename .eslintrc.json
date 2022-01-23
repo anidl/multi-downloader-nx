@@ -1,7 +1,8 @@
 {
     "env": {
         "es2021": true,
-        "node": true
+        "node": true,
+        "browser": true
     },
     "extends": [
         "eslint:recommended",
@@ -13,7 +14,12 @@
         "sourceType": "module"
     },
     "plugins": [
-        "@typescript-eslint"
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/recommended",
+        "plugin:import/electron",
+        "plugin:import/typescript"
     ],
     "rules": {
         "@typescript-eslint/no-explicit-any": "off",

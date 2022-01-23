@@ -40,6 +40,7 @@ import { FunimationMediaDownload } from './@types/funiTypes';
 import * as langsData from './modules/module.langsData';
 import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
+import { AuthResponse } from './@types/messageHandler';
 // check page
 argv.p = 1;
 
@@ -63,10 +64,10 @@ export default (async () => {
   }
   // select mode
   if (argv.silentAuth && !argv.auth) {
-    await auth();
+    await auth(argv.username, argv.password);
   }
   if(argv.auth){
-    auth();
+    auth(argv.username, argv.password);
   }
   else if(argv.search){
     searchShow();
@@ -80,10 +81,10 @@ export default (async () => {
 });
 
 // auth
-async function auth(){
+async function auth(username?: string, password?: string, ask = true): Promise<AuthResponse> {
   const authOpts = {
-    user: argv.username ?? await shlp.question('[Q] LOGIN/EMAIL'),
-    pass: argv.password ?? await shlp.question('[Q] PASSWORD   ')
+    user: username ? username : ask ? await shlp.question('[Q] LOGIN/EMAIL') : '',
+    pass: password ? password : ask ? await shlp.question('[Q] PASSWORD   ') : ''
   };
   const authData =  await getData({
     baseUrl: api_host,
@@ -96,14 +97,16 @@ async function auth(){
     if(resJSON.token){
       console.log('[INFO] Authentication success, your token: %s%s\n', resJSON.token.slice(0,8),'*'.repeat(32));
       yamlCfg.saveFuniToken({'token': resJSON.token});
+      return { isOk: true, value: undefined };
     } else {
       console.log('[ERROR]%s\n', ' No token found');
       if (argv.debug) {
         console.log(resJSON);
       }
-      process.exit(1);
+      return { isOk: false, reason: new Error(resJSON) }
     }
   }
+  return { isOk: false, reason: new Error('Login request failed') }
 }
 
 // search show
@@ -789,3 +792,5 @@ async function downloadFile(filename: string, chunkList: {
     
   return downloadStatus.ok;
 }
+
+export { auth };
