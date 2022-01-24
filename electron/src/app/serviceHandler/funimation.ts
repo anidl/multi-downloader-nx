@@ -1,10 +1,15 @@
 import { AuthData, AuthResponse, MessageHandler } from "../../../../@types/messageHandler";
 
-import * as funi from '../../../../funi';
+import Funimation from '../../../../funi';
 
 class FunimationHandler implements MessageHandler {
+  private funi: Funimation;
+  constructor() {
+    this.funi = new Funimation();
+  }
+
   public auth(data: AuthData) {
-    return funi.auth(data.username, data.password);
+    return this.funi.auth(data);
   }
 }
 

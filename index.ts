@@ -45,11 +45,12 @@ import update from './modules/module.updater';
         if (key.endsWith('crunchy.js') || key.endsWith('funi.js'))
           delete require.cache[key];
       });
-      await (argv.service === 'funi' ? await import('./funi') : await import('./crunchy')).default();
+      await (argv.service === 'funi' ? (new (await import('./funi')).default()) : (await import('./crunchy')).default());
     }
   } else {
     if (argv.service === 'funi') {
-      (await import('./funi')).default();
+      const funi = new (await import('./funi')).default();
+      await funi.cli();
     } else if (argv.service === 'crunchy') {
       (await import('./crunchy')).default();
     } else {
