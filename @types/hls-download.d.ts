@@ -1,4 +1,11 @@
 declare module 'hls-download' {
+  export type HLSCallback = (data: {
+    total: number,
+    cur: number,
+    percent: number|string,
+    time: number,
+    downloadSpeed: number
+  }) => unknown;
   export default class hlsDownload {
     constructor(options: {
       m3u8json: {
@@ -13,7 +20,8 @@ declare module 'hls-download' {
       proxy?: string,
       skipInit?: boolean,
       timeout?: number,
-      fsRetryTime?: number
+      fsRetryTime?: number,
+      callback?: HLSCallback
     })
     async download() : Promise<{
       ok: boolean,
