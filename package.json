@@ -14,7 +14,7 @@
     "utility",
     "cli"
   ],
-  "author": "AniDL/Izu-co",
+  "author": "Izu-co",
   "homepage": "https://github.com/anidl/multi-downloader-nx",
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
     "url": "https://github.com/anidl/multi-downloader-nx/issues"
   },
   "license": "MIT",
-  "main": "lib/gui/electron/src/index.js",
+  "main": "gui/electron/src/index.js",
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
     "electron-squirrel-startup": "^1.0.0",
@@ -69,7 +69,7 @@
   },
   "scripts": {
     "prestart": "npm run tsc",
-    "start": "electron-forge start",
+    "start": "cd lib && electron-forge start",
     "docs": "ts-node modules/build-docs.ts",
     "tsc": "ts-node tsc.ts",
     "prebuild-win64": "npm run tsc",

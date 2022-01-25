@@ -24,7 +24,9 @@ jobs:
           check-latest: true
 
       - name: Install Node modules
-        run: npm install
+        run: |
+          npm install
+          cd gui/react && npm install
 
       - name: Get name and version from package.json
         run: |

@@ -1,10 +1,14 @@
 import { app, BrowserWindow } from 'electron';
+import path from 'path/posix';
 import json from '../../../package.json';
 import registerMessageHandler from './messageHandler';
+import fs from "fs";
 
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
+
+console.log(process.argv, process.env);
 
 const createWindow = (): void => {
   registerMessageHandler();
@@ -15,11 +19,17 @@ const createWindow = (): void => {
     title: json.name,
     webPreferences: {
       nodeIntegration: true,
-      preload: 'preload.js'
+      preload: path.join(__dirname, 'preload.js')
     },
   });
 
-  mainWindow.loadURL('http://localhost:3000');
+  const htmlFile = path.join(__dirname, '..', 'build', 'index.html');
+
+  if (fs.existsSync(htmlFile)) {
+    mainWindow.loadFile(htmlFile);
+  } else {
+    mainWindow.loadURL('http://localhost:3000');
+  }
 
   mainWindow.webContents.openDevTools();
 };

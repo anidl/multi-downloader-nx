@@ -26,3 +26,4 @@ fonts
 .webpack/
 out/
 dist/
+build/
