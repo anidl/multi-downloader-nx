@@ -24,7 +24,7 @@ import { Item } from './@types/items';
 // params
 
 // Import modules after argv has been exported
-import getData from './modules/module.getdata.js';
+import getData from './modules/module.getdata';
 import merger from './modules/module.merger';
 import parseSelect from './modules/module.parseSelect';
 import { EpisodeData, MediaChild } from './@types/episode';

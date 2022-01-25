@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "downlevelIteration": true,
-    "jsx": "react"
+    "jsx": "react",
   },
   "exclude": [
     "./videos",

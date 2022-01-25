@@ -1,14 +1,13 @@
 import { app, BrowserWindow } from 'electron';
-import json from '../../package.json';
-import './app/messageHandler';
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+import json from '../../../package.json';
+import registerMessageHandler from './messageHandler';
 
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
 const createWindow = (): void => {
+  registerMessageHandler();
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     height: 600,
@@ -16,11 +15,11 @@ const createWindow = (): void => {
     title: json.name,
     webPreferences: {
       nodeIntegration: true,
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
+      preload: 'preload.js'
     },
   });
 
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  mainWindow.loadURL('http://localhost:3000');
 
   mainWindow.webContents.openDevTools();
 };

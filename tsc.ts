@@ -8,6 +8,7 @@ const ignore = [
   'lib',
   'node_modules',
   '@types',
+  path.join('gui', 'react', 'node_modules'),
   path.join('bin', 'mkvtoolnix'),
   path.join('config', 'token.yml'),
   path.join('config', 'updates.json'),
@@ -19,12 +20,15 @@ const ignore = [
 export { ignore };
 
 (async () => {
+  process.stdout.write('Removing lib dir... ');
   removeSync('lib');
+  process.stdout.write('✓\nRunning tsc... ');
   const tsc = exec('npx tsc');
   tsc.stdout?.on('data', console.log);
   tsc.stderr?.on('data', console.log);
 
   tsc.on('close', () => {
+    process.stdout.write('✓\nCopying files... ');
     const files = readDir(__dirname);
     const filtered = files.filter(a => {
       if (a.stats.isFile()) {
@@ -42,6 +46,7 @@ export { ignore };
         copyFileSync(item.path, itemPath);
       }
     });
+    process.stdout.write('✓\n');
   });
 })();
 
