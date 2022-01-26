@@ -1,4 +1,4 @@
-import { AuthData, AuthResponse, MessageHandler } from "../../../../@types/messageHandler";
+import { AuthData, AuthResponse, CheckTokenResponse, MessageHandler } from "../../../../@types/messageHandler";
 
 import Funimation from '../../../../funi';
 
@@ -6,6 +6,10 @@ class FunimationHandler implements MessageHandler {
   private funi: Funimation;
   constructor() {
     this.funi = new Funimation();
+  }
+
+  public async checkToken(): Promise<CheckTokenResponse> {
+    return this.funi.checkToken();
   }
 
   public auth(data: AuthData) {

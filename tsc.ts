@@ -3,22 +3,30 @@ import fs from 'fs';
 import path from 'path';
 import { removeSync, copyFileSync } from 'fs-extra';
 
+const argv = process.argv.slice(2);
+let buildIgnore: string[] = [];
+
+if (argv.length > 0 && argv[0] !== 'test')
+  buildIgnore = [
+    '*/\\.env'
+  ];
+
 const ignore = [
-  '*SEP\\.git*',
-  '*SEPlib*',
-  '*SEPnode_modules*',
-  '*SEP@types*',
-  '*SEPout*',
-  '*SEPbinSEPmkvtoolnix*',
-  '*SEPtoken.yml$',
-  '*SEPupdates.json$',
-  '*SEPcr_token.yml$',
-  '*SEPfuni_token.yml$',
-  '*SEP\\.eslint*',
-  '*SEP*\\.tsx?$',
-  'SEP*fonts',
-  'SEPreact*',
-].map(a => a.replace(/\*/g, '[^]*').replace(/SEP/g, path.sep === '\\' ? '\\\\' : '/')).map(a => new RegExp(a, 'i'));
+  ...buildIgnore,
+  '*/\\.git*',
+  './lib*',
+  '*/@types*',
+  './out*',
+  './bin/mkvtoolnix*',
+  './config/token.yml$',
+  './config/updates.json$',
+  './config/cr_token.yml$',
+  './config/funi_token.yml$',
+  '*/\\.eslint*',
+  '*/*\\.tsx?$',
+  './fonts*',
+  './gui/react*',
+].map(a => a.replace(/\*/g, '[^]*').replace(/\.\//g, escapeRegExp(__dirname) + '/').replace(/\//g, path.sep === '\\' ? '\\\\' : '/')).map(a => new RegExp(a, 'i'));
 
 export { ignore };
 
@@ -46,10 +54,10 @@ export { ignore };
   });
 
   await waitForProcess(react);
+  process.stdout.write('✓\nCopying files... ');
 
   copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'electron', 'build'));
 
-  process.stdout.write('✓\nCopying files... ');
   const files = readDir(__dirname);
   files.forEach(item => {
     const itemPath = path.join(__dirname, 'lib', item.path.replace(__dirname, ''));
@@ -102,4 +110,8 @@ async function copyDir(src: string, dest: string) {
           await copyDir(srcPath, destPath) :
           await fs.promises.copyFile(srcPath, destPath);
   }
+}
+
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }

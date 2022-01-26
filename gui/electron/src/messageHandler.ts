@@ -5,7 +5,7 @@ import Funimation from './serviceHandler/funimation';
 export default () => {
   let handler: MessageHandler|undefined;
   
-  ipcMain.handle('setup', (ev, data) => {
+  ipcMain.handle('setup', (_, data) => {
     if (data === 'funi') {
       handler = new Funimation();
     } else if (data === 'crunchy') {
@@ -13,5 +13,6 @@ export default () => {
     }
   });
   
-  ipcMain.handle('auth', async (ev, data) => handler?.auth(data));
+  ipcMain.handle('auth', async (_, data) => handler?.auth(data));
+  ipcMain.handle('checkToken', async () => handler?.checkToken());
 }

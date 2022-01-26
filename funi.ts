@@ -37,7 +37,7 @@ import { FunimationMediaDownload } from './@types/funiTypes';
 import * as langsData from './modules/module.langsData';
 import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
-import { AuthData, AuthResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, FuniSearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData } from './@types/messageHandler';
+import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, FuniSearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData } from './@types/messageHandler';
 // check page
 
 // fn variables
@@ -57,6 +57,11 @@ export default class Funi {
   constructor(private debug = false) {
     this.cfg = yamlCfg.loadCfg();
     this.token = yamlCfg.loadFuniToken();
+  }
+
+  public checkToken(): CheckTokenResponse {
+    const isOk = typeof this.token === 'string';
+    return isOk ? { isOk, value: undefined } : { isOk, reason: new Error('Not authenticated') };
   }
 
   public async init() {
@@ -141,6 +146,7 @@ export default class Funi {
       if(resJSON.token){
         console.log('[INFO] Authentication success, your token: %s%s\n', resJSON.token.slice(0,8),'*'.repeat(32));
         yamlCfg.saveFuniToken({'token': resJSON.token});
+        this.token = resJSON.token;
         return { isOk: true, value: undefined };
       } else {
         console.log('[ERROR]%s\n', ' No token found');

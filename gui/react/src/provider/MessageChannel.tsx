@@ -16,7 +16,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
   }, [service])
 
   const messageHandler: MessageHandler = {
-    auth: async (data) => await ipcRenderer.invoke('auth', data)
+    auth: async (data) => await ipcRenderer.invoke('auth', data),
+    checkToken: async () => await ipcRenderer.invoke('checkToken')
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

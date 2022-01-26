@@ -4,6 +4,7 @@ import type { AvailableMuxer } from '../modules/module.args';
 
 export interface MessageHandler {
   auth: (data: AuthData) => Promise<AuthResponse>;
+  checkToken: () => Promise<CheckTokenResponse>;
 }
 
 export type FuniEpisodeData = {
@@ -25,6 +26,7 @@ export type AuthResponse = ResponseBase<undefined>;
 export type FuniSearchReponse = ResponseBase<FunimationSearch>;
 export type FuniShowResponse = ResponseBase<FuniEpisodeData[]>;
 export type FuniGetEpisodeResponse = ResponseBase<undefined>;
+export type CheckTokenResponse = ResponseBase<undefined>;
 
 export type ResponseBase<T> = ({
   isOk: true,
