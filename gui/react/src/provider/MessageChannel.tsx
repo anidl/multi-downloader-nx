@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AuthData, AuthResponse, MessageHandler, ResponseBase } from '../../../../@types/messageHandler';
+import type { AuthData, AuthResponse, MessageHandler, ResponseBase, SearchData } from '../../../../@types/messageHandler';
 import { serviceContext } from './ServiceProvider';
 import type { IpcRenderer } from "electron";
 
@@ -17,7 +17,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
 
   const messageHandler: MessageHandler = {
     auth: async (data) => await ipcRenderer.invoke('auth', data),
-    checkToken: async () => await ipcRenderer.invoke('checkToken')
+    checkToken: async () => await ipcRenderer.invoke('checkToken'),
+    search: async (data) => await ipcRenderer.invoke('search', data)
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

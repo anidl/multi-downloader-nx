@@ -1,0 +1,4 @@
+.divider-width::before, .divider-width::after {
+  border-top: 3px solid white !important;
+  transform: translateY(40%) !important;
+}

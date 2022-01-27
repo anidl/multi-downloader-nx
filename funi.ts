@@ -37,7 +37,7 @@ import { FunimationMediaDownload } from './@types/funiTypes';
 import * as langsData from './modules/module.langsData';
 import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
-import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, FuniSearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData } from './@types/messageHandler';
+import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData } from './@types/messageHandler';
 // check page
 
 // fn variables
@@ -104,23 +104,7 @@ export default class Funi {
       for (const episodeData of data.value) {
         if ((await this.getEpisode(true, { subs: { dlsubs: argv.dlsubs, nosubs: argv.nosubs, sub: false }, dubLang: argv.dubLang, fnSlug: episodeData, s: argv.s, simul: argv.simul }, {
           ass: false,
-          fileName: argv.fileName,
-          fontSize: argv.fontSize,
-          fontName: argv.fontName,
-          forceMuxer: argv.forceMuxer,
-          fsRetryTime: argv.fsRetryTime,
-          mp4: argv.mp4,
-          noaudio: argv.noaudio,
-          nocleanup: argv.nocleanup,
-          novids: argv.novids,
-          numbers: argv.numbers,
-          partsize: argv.partsize,
-          q: argv.q,
-          simul: argv.simul,
-          skipSubMux: argv.skipSubMux,
-          skipmux: argv.skipmux,
-          timeout: argv.timeout,
-          x: argv.x
+          ...argv
         })).isOk !== true)
           ok = false;
       }
@@ -159,7 +143,7 @@ export default class Funi {
     return { isOk: false, reason: new Error('Login request failed') }
   }
 
-  public async searchShow(log: boolean, data: FuniSearchData): Promise<FuniSearchReponse>  {
+  public async searchShow(log: boolean, data: SearchData): Promise<FuniSearchReponse>  {
     const qs = {unique: true, limit: 100, q: data.search, offset: 0 };
     const searchData = await getData({
       baseUrl: api_host,

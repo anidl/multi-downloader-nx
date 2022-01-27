@@ -1,11 +1,21 @@
 import { HLSCallback } from 'hls-download';
-import type { FunimationShow as FunimationSearch } from './funiSearch';
+import type { FunimationSearch } from './funiSearch';
 import type { AvailableMuxer } from '../modules/module.args';
 
 export interface MessageHandler {
   auth: (data: AuthData) => Promise<AuthResponse>;
   checkToken: () => Promise<CheckTokenResponse>;
+  search: (data: SearchData) => Promise<SearchResponse>
 }
+
+export type SearchResponse = ResponseBase<{
+  image: string,
+  name: string,
+  desc?: string,
+  id: string,
+  lang?: string[],
+  rating: number
+}[]>
 
 export type FuniEpisodeData = {
   title: string,
@@ -14,7 +24,7 @@ export type FuniEpisodeData = {
 };
 
 export type AuthData = { username: string, password: string };
-export type FuniSearchData = { search: string };
+export type SearchData = { search: string };
 export type FuniGetShowData = { id: number, e?: string, but: boolean, all: boolean };
 export type FuniGetEpisodeData = { subs: FuniSubsData, fnSlug: FuniEpisodeData, callback?: HLSCallback, simul?: boolean; dubLang: string[], s: string }
 export type FuniStreamData = { q: number, callback?: HLSCallback, x: number, fileName: string, numbers: number, novids?: boolean,
