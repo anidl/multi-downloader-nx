@@ -7,6 +7,7 @@ import MessageChannel from './provider/MessageChannel';
 import { IconButton } from "@mui/material";
 import { CloseOutlined } from "@mui/icons-material";
 import { SnackbarProvider, SnackbarKey } from 'notistack';
+import Store from './provider/Store';
 
 const notistackRef = React.createRef<SnackbarProvider>();
 const onClickDismiss = (key: SnackbarKey | undefined) => () => { 
@@ -16,22 +17,24 @@ const onClickDismiss = (key: SnackbarKey | undefined) => () => {
 
 ReactDOM.render(
   <React.StrictMode>
-    <SnackbarProvider
-      ref={notistackRef}
-      action={(key) => (
-        <IconButton onClick={onClickDismiss(key)} color="inherit">
-          <CloseOutlined />
-        </IconButton>
-      )}
-      >
-      <Style>
-        <ServiceProvider>
-          <MessageChannel>
-            <App />
-          </MessageChannel>
-        </ServiceProvider>
-      </Style>
-    </SnackbarProvider>
+    <Store>
+      <SnackbarProvider
+        ref={notistackRef}
+        action={(key) => (
+          <IconButton onClick={onClickDismiss(key)} color="inherit">
+            <CloseOutlined />
+          </IconButton>
+        )}
+        >
+        <Style>
+          <ServiceProvider>
+            <MessageChannel>
+              <App />
+            </MessageChannel>
+          </ServiceProvider>
+        </Style>
+      </SnackbarProvider>
+    </Store>
   </React.StrictMode>,
   document.getElementById('root')
 );

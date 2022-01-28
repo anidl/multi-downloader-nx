@@ -1,21 +1,29 @@
-import { Image } from "@mui/icons-material";
-import { Box, Button, Divider, List, ListItem, ListItemText, Paper, Popover, TextField, Typography } from "@mui/material";
 import React from "react";
-import { SearchResponse } from "../../../../../@types/messageHandler";
-import { messageChannelContext } from "../../provider/MessageChannel";
-import Require from "../Require";
+import { Box, Divider, List, ListItem, Paper, TextField, Typography } from "@mui/material";
+import { SearchResponse } from "../../../../../../@types/messageHandler";
+import useStore from "../../../hooks/useStore";
+import { messageChannelContext } from "../../../provider/MessageChannel";
 import './SearchBox.css';
 
 const SearchBox: React.FC = () => {
   const messageHandler = React.useContext(messageChannelContext);
-
+  const [store, dispatch] = useStore();
   const [search, setSearch] = React.useState('');
+
+  const [focus, setFocus] = React.useState(false);
 
   const [searchResult, setSearchResult] = React.useState<undefined|SearchResponse>();
   const anchor = React.useRef<HTMLDivElement>(null);
 
   const selectItem = (id: string) => {
-    window.alert(id); //TODO change
+    console.log(id);
+    dispatch({
+      type: 'downloadOptions',
+      payload: {
+        ...store.downloadOptions,
+        id
+      }
+    });
   };
 
   React.useEffect(() => {
@@ -31,9 +39,10 @@ const SearchBox: React.FC = () => {
 
   const anchorBounding = anchor.current?.getBoundingClientRect();
 
-  return <Box sx={{ mt: 2, mb: 2 }}>
-    <TextField ref={anchor} value={search} onChange={e => setSearch(e.target.value)} variant='outlined' label='Search' sx={{ width: 'calc(100% - 50px)', left: 25 }} />
-    {searchResult !== undefined && searchResult.isOk && searchResult.value.length > 0 && 
+
+  return <Box onBlurCapture={() => /* Delay to capture onclick */setTimeout(() => setFocus(false), 100) } onFocusCapture={() => setFocus(true)}  sx={{ m: 2 }}>
+    <TextField ref={anchor} value={search} onChange={e => setSearch(e.target.value)} variant='outlined' label='Search' fullWidth  />
+    {searchResult !== undefined && searchResult.isOk && searchResult.value.length > 0 && focus &&
     <Paper sx={{ position: 'absolute', maxHeight: '50%', width: `${anchorBounding?.width}px`, 
       left: anchorBounding?.x, top: (anchorBounding?.y ?? 0) + (anchorBounding?.height ?? 0), zIndex: 99, overflowY: 'scroll'}}>
       <List>

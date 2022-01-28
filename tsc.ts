@@ -6,7 +6,9 @@ import { removeSync, copyFileSync } from 'fs-extra';
 const argv = process.argv.slice(2);
 let buildIgnore: string[] = [];
 
-if (argv.length > 0 && argv[0] !== 'test')
+const isTest = !(argv.length > 0 && argv[0] !== 'test');
+
+if (!isTest)
   buildIgnore = [
     '*/\\.env'
   ];
@@ -47,15 +49,17 @@ export { ignore };
   const tsc = exec('npx tsc');
 
   await waitForProcess(tsc);
-
-  process.stdout.write('✓\nBuilding react... ');
-  const react = exec('npm run build', {
-    cwd: path.join(__dirname, 'gui', 'react'),
-  });
-
-  await waitForProcess(react);
+  
+  if (!isTest) {
+    process.stdout.write('✓\nBuilding react... ');
+    const react = exec('npm run build', {
+      cwd: path.join(__dirname, 'gui', 'react'),
+    });
+  
+    await waitForProcess(react);
+  }
+  
   process.stdout.write('✓\nCopying files... ');
-
   copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'electron', 'build'));
 
   const files = readDir(__dirname);

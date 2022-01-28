@@ -5,7 +5,8 @@ import type { AvailableMuxer } from '../modules/module.args';
 export interface MessageHandler {
   auth: (data: AuthData) => Promise<AuthResponse>;
   checkToken: () => Promise<CheckTokenResponse>;
-  search: (data: SearchData) => Promise<SearchResponse>
+  search: (data: SearchData) => Promise<SearchResponse>,
+  dubLangCodes: () => Promise<string[]>
 }
 
 export type SearchResponse = ResponseBase<{

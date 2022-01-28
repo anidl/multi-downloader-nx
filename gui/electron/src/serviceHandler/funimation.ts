@@ -1,10 +1,15 @@
 import { AuthData, CheckTokenResponse, MessageHandler, SearchData, SearchResponse } from "../../../../@types/messageHandler";
 import Funimation from '../../../../funi';
+import { dubLanguageCodes } from "../../../../modules/module.langsData";
 
 class FunimationHandler implements MessageHandler {
   private funi: Funimation;
   constructor() {
     this.funi = new Funimation();
+  }
+  
+  public async dubLangCodes(): Promise<string[]> {
+    return dubLanguageCodes;
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {

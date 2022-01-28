@@ -16,4 +16,5 @@ export default () => {
   ipcMain.handle('auth', async (_, data) => handler?.auth(data));
   ipcMain.handle('checkToken', async () => handler?.checkToken());
   ipcMain.handle('search', async (_, data) => handler?.search(data));
+  ipcMain.handle('dubLangCodes', async () => handler?.dubLangCodes());
 }
