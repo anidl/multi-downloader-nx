@@ -60,7 +60,9 @@ export { ignore };
   }
   
   process.stdout.write('✓\nCopying files... ');
-  copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'electron', 'build'));
+  if (!isTest) {
+    copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'electron', 'build'));
+  }
 
   const files = readDir(__dirname);
   files.forEach(item => {
