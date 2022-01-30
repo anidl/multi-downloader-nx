@@ -38,6 +38,7 @@ import * as langsData from './modules/module.langsData';
 import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
 import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData } from './@types/messageHandler';
+import { ServiceClass } from './@types/serviceClassInterface';
 // check page
 
 // fn variables
@@ -50,7 +51,7 @@ let  fnEpNum: string|number = 0,
   }[] = [],
   stDlPath: Subtitle[] = [];
 
-export default class Funi {
+export default class Funi implements ServiceClass {
   private cfg: yamlCfg.ConfigObject;
   private token: string | boolean;
 
@@ -137,10 +138,10 @@ export default class Funi {
         if (this.debug) {
           console.log(resJSON);
         }
-        return { isOk: false, reason: new Error(resJSON) }
+        return { isOk: false, reason: new Error(resJSON) };
       }
     }
-    return { isOk: false, reason: new Error('Login request failed') }
+    return { isOk: false, reason: new Error('Login request failed') };
   }
 
   public async searchShow(log: boolean, data: SearchData): Promise<FuniSearchReponse>  {
@@ -154,12 +155,12 @@ export default class Funi {
       debug: this.debug,
     });
     if(!searchData.ok || !searchData.res){
-      return { isOk: false, reason: new Error('Request is not ok') }
+      return { isOk: false, reason: new Error('Request is not ok') };
     }
     const searchDataJSON = JSON.parse(searchData.res.body);
     if(searchDataJSON.detail){
       console.log(`[ERROR] ${searchDataJSON.detail}`);
-      return { isOk: false, reason: new Error(searchDataJSON.defail) }
+      return { isOk: false, reason: new Error(searchDataJSON.defail) };
     }
     if(searchDataJSON.items && searchDataJSON.items.hits && log){
       const shows = searchDataJSON.items.hits;
@@ -170,7 +171,7 @@ export default class Funi {
     }
     if (log)
       console.log('[INFO] Total shows found: %s\n',searchDataJSON.count);
-    return { isOk: true, value: searchDataJSON }
+    return { isOk: true, value: searchDataJSON };
   }
 
   public async getShow(log: boolean, data: FuniGetShowData) : Promise<FuniShowResponse>  {
@@ -182,16 +183,16 @@ export default class Funi {
       debug: this.debug,
     });
       // check errors
-    if(!showData.ok || !showData.res){ return { isOk: false, reason: new Error('ShowData is not ok') } }
+    if(!showData.ok || !showData.res){ return { isOk: false, reason: new Error('ShowData is not ok') }; }
     const showDataJSON = JSON.parse(showData.res.body);
     if(showDataJSON.status){
       if (log)
         console.log('[ERROR] Error #%d: %s\n', showDataJSON.status, showDataJSON.data.errors[0].detail);
-      return { isOk: false, reason: new Error(showDataJSON.data.errors[0].detail) }
+      return { isOk: false, reason: new Error(showDataJSON.data.errors[0].detail) };
     }
     else if(!showDataJSON.items || showDataJSON.items.length<1){
       console.log('[ERROR] Show not found\n');
-      return { isOk: false, reason: new Error('Show not found') }
+      return { isOk: false, reason: new Error('Show not found') };
     }
     const showDataItem = showDataJSON.items[0];
     if (log)
@@ -203,7 +204,7 @@ export default class Funi {
           sort_direction: string,
           title_id: number,
           language?: string
-      } = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: data.id }
+      } = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: data.id };
     const episodesData = await getData({
       baseUrl: api_host,
       url: '/funimation/episodes/',
@@ -212,7 +213,7 @@ export default class Funi {
       useToken: true,
       debug: this.debug,
     });
-    if(!episodesData.ok || !episodesData.res){ return { isOk: false, reason: new Error('episodesData is not ok') } }
+    if(!episodesData.ok || !episodesData.res){ return { isOk: false, reason: new Error('episodesData is not ok') }; }
       
     let epsDataArr: Item[] = JSON.parse(episodesData.res.body).items;
     const epNumRegex = /^([A-Z0-9]*[A-Z])?(\d+)$/i;
@@ -319,7 +320,7 @@ export default class Funi {
       useToken: true,
       debug: this.debug,
     });
-    if(!episodeData.ok || !episodeData.res){return { isOk: false, reason: new Error('Unable to get episodeData') } }
+    if(!episodeData.ok || !episodeData.res){return { isOk: false, reason: new Error('Unable to get episodeData') }; }
     const ep = JSON.parse(episodeData.res.body).items[0] as EpisodeData, streamIds = [];
     // build fn
     season = parseInt(ep.parent.seasonNumber);
@@ -421,7 +422,7 @@ export default class Funi {
           useToken: true,
           debug: this.debug,
         });
-        if(!streamData.ok || !streamData.res){return { isOk: false, reason: new Error('Unable to get streamdata') }}
+        if(!streamData.ok || !streamData.res){return { isOk: false, reason: new Error('Unable to get streamdata') };}
         const streamDataRes = JSON.parse(streamData.res.body) as StreamData;
         if(streamDataRes.errors){
           if (log)
@@ -458,7 +459,7 @@ export default class Funi {
           }, data.s, [data.fnSlug.episodeID]);
           return { isOk: res, value: undefined };
         }
-        return { isOk: false, reason: new Error('Unknown download error') }
+        return { isOk: false, reason: new Error('Unknown download error') };
       }
     }
   }
@@ -517,7 +518,7 @@ export default class Funi {
             language = langsData.languages.find(a => a.funi_name || a.name === audioEl[0]);
             if (!language) {
               if (log)
-              console.log(`[ERROR] Unable to find language for locale ${audioData.language} or name ${audioEl[0]}`);
+                console.log(`[ERROR] Unable to find language for locale ${audioData.language} or name ${audioEl[0]}`);
               return;
             }
           }
@@ -636,17 +637,17 @@ export default class Funi {
         }), data.numbers);
         if (fnOutput.length < 1)
           throw new Error(`Invalid path generated for input ${data.fileName}`);
-          if (log)
-        console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
+        if (log)
+          console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
       }
       else if(data.x > plServerList.length){
         if (log)
-        console.log('[ERROR] Server not selected!\n');
+          console.log('[ERROR] Server not selected!\n');
         return;
       }
       else{
         if (log)
-        console.log('[ERROR] Layer not selected!\n');
+          console.log('[ERROR] Layer not selected!\n');
         return;
       }
           
@@ -688,7 +689,7 @@ export default class Funi {
       }
       else{
         if (log)
-        console.log('[INFO] Skip video downloading...\n');
+          console.log('[INFO] Skip video downloading...\n');
       }
       audio: if (plAud && !data.noaudio) {
         // download audio
@@ -721,7 +722,7 @@ export default class Funi {
     // download subtitles
     if(stDlPath.length > 0){
       if (log)
-      console.log('[INFO] Downloading subtitles...');
+        console.log('[INFO] Downloading subtitles...');
       for (const subObject of stDlPath) {
         const subsSrc = await getData({
           url: subObject.url,
@@ -734,7 +735,7 @@ export default class Funi {
         }
         else{
           if (log)
-          console.log('[ERROR] Failed to download subtitles!');
+            console.log('[ERROR] Failed to download subtitles!');
           addSubs = false;
           break;
         }
@@ -745,13 +746,13 @@ export default class Funi {
     
     if((puraudio.length < 1 && audioAndVideo.length < 1) || (purvideo.length < 1 && audioAndVideo.length < 1)){
       if (log)
-      console.log('\n[INFO] Unable to locate a video AND audio file\n');
+        console.log('\n[INFO] Unable to locate a video AND audio file\n');
       return;
     }
       
     if(data.skipmux){
       if (log)
-      console.log('[INFO] Skipping muxing...');
+        console.log('[INFO] Skipping muxing...');
       return;
     }
       
@@ -760,7 +761,7 @@ export default class Funi {
       
     if ( data.novids ){
       if (log)
-      console.log('[INFO] Video not downloaded. Skip muxing video.');
+        console.log('[INFO] Video not downloaded. Skip muxing video.');
     }
   
     const ffext = !data.mp4 ? 'mkv' : 'mp4';
@@ -791,7 +792,7 @@ export default class Funi {
     }
     else{
       if (log)
-      console.log('\n[INFO] Done!\n');
+        console.log('\n[INFO] Done!\n');
       return true;
     }
     if (data.nocleanup) {
@@ -800,7 +801,7 @@ export default class Funi {
       
     mergeInstance.cleanUp();
     if (log)
-    console.log('\n[INFO] Done!\n');
+      console.log('\n[INFO] Done!\n');
     return true;
   }
   

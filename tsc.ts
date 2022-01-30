@@ -40,8 +40,8 @@ export { ignore };
       proc.stderr?.on('data', console.error);
       proc.on('close', resolve);
       proc.on('error', reject);
-    })
-  }
+    });
+  };
 
   process.stdout.write('Removing lib dir... ');
   removeSync('lib');
@@ -102,19 +102,19 @@ function readDir (dir: string): {
     }
   }
   return items;
-};
+}
 
 async function copyDir(src: string, dest: string) {
   await fs.promises.mkdir(dest, { recursive: true });
-  let entries = await fs.promises.readdir(src, { withFileTypes: true });
+  const entries = await fs.promises.readdir(src, { withFileTypes: true });
 
-  for (let entry of entries) {
-      let srcPath = path.join(src, entry.name);
-      let destPath = path.join(dest, entry.name);
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
 
-      entry.isDirectory() ?
-          await copyDir(srcPath, destPath) :
-          await fs.promises.copyFile(srcPath, destPath);
+    entry.isDirectory() ?
+      await copyDir(srcPath, destPath) :
+      await fs.promises.copyFile(srcPath, destPath);
   }
 }
 

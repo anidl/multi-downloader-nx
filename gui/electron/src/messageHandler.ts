@@ -1,5 +1,6 @@
-import { ipcMain, MessagePortMain } from "electron";
-import { MessageHandler } from "../../../@types/messageHandler";
+import { ipcMain } from 'electron';
+import { MessageHandler } from '../../../@types/messageHandler';
+import Crunchy from './serviceHandler/crunchyroll';
 import Funimation from './serviceHandler/funimation';
 
 export default () => {
@@ -9,7 +10,7 @@ export default () => {
     if (data === 'funi') {
       handler = new Funimation();
     } else if (data === 'crunchy') {
-  
+      handler = new Crunchy();
     }
   });
   
@@ -17,4 +18,4 @@ export default () => {
   ipcMain.handle('checkToken', async () => handler?.checkToken());
   ipcMain.handle('search', async (_, data) => handler?.search(data));
   ipcMain.handle('dubLangCodes', async () => handler?.dubLangCodes());
-}
+};

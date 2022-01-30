@@ -1,3 +1,4 @@
+import { ServiceClass } from './@types/serviceClassInterface';
 import { appArgv, overrideArguments, showHelp } from './modules/module.app-args';
 import * as yamlCfg from './modules/module.cfg-loader';
 import { makeCommand, addToArchive } from './modules/module.downloadArchive';
@@ -45,14 +46,16 @@ import update from './modules/module.updater';
         if (key.endsWith('crunchy.js') || key.endsWith('funi.js'))
           delete require.cache[key];
       });
-      await (argv.service === 'funi' ? (new (await import('./funi')).default()) : (await import('./crunchy')).default());
+      const service = new (argv.service === 'funi' ? (await import('./funi')).default : (await import('./crunchy')).default) as ServiceClass;
+      await service.cli();
     }
   } else {
     if (argv.service === 'funi') {
       const funi = new (await import('./funi')).default();
       await funi.cli();
     } else if (argv.service === 'crunchy') {
-      (await import('./crunchy')).default();
+      const crunchy = new (await import('./crunchy')).default();
+      await crunchy.cli();
     } else {
       showHelp();
     }

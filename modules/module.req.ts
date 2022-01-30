@@ -37,7 +37,7 @@ class Req {
   private cfgDir = yamlCfg.cfgDir
   private curl: boolean|string = false;
   
-  constructor(private domain: Record<string, unknown>, private argv: Record<string, unknown>) {}
+  constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false) {}
   async getData<T = string> (durl: string, params?: Params) {
     params = params || {};
     // options
@@ -67,18 +67,6 @@ class Req {
     if(typeof params.followRedirect == 'boolean'){
       options.followRedirect = params.followRedirect;
     }
-    // Removed Proxy support since it was only partialy supported
-    /*if(params.useProxy && this.argv.proxy && this.argv.curl){
-      try{
-        options.curlProxy =  buildProxy(this.argv.proxy);
-        options.curlProxyAuth = this.argv['proxy-auth'];
-      }
-      catch(e){
-        console.log(`[WARN] Not valid proxy URL${e.input?' ('+e.input+')':''}!`);
-        console.log('[WARN] Skipping...\n');
-        this.argv.proxy = false;
-      }
-    }*/
     // if auth
     const loc = new URL(durl);
     // avoid cloudflare protection
@@ -86,25 +74,19 @@ class Req {
     options.hooks = {
       beforeRequest: [
         (options) => {
-          if(this.argv.debug){
+          if(this.debug){
             console.log('[DEBUG] GOT OPTIONS:');
             console.log(options);
           }
         }
       ]
     };
-    if(this.argv.debug){ 
+    if(this.debug){ 
       options.curlDebug = true;
     }
     // try do request
     try {
-      let res: Response<T>;
-      if(this.curl && this.argv.curl &&  Object.values(this.domain).includes(loc.origin)){
-        res = await curlReq(typeof this.curl === 'boolean' ? '' : this.curl, durl.toString(), options, this.cfgDir) as unknown as Response<T>;
-      }
-      else{
-        res = await got(durl.toString(), options) as unknown as Response<T>;
-      }
+      const res = await got(durl.toString(), options) as unknown as Response<T>;
       return {
         ok: true,
         res
@@ -171,7 +153,7 @@ class Req {
       }
       if(
         isAuth 
-          || this.argv.nosess && parsedCookie[uCookie]
+          || this.nosess && parsedCookie[uCookie]
           || parsedCookie[uCookie] && !this.checkSessId(this.session[uCookie])
       ){
         const sessionExp = 60*60;
@@ -182,7 +164,7 @@ class Req {
       }
     }
     if(cookieUpdated.length > 0){
-      if(this.argv.debug){
+      if(this.debug){
         console.log('[SAVING FILE]',`${this.sessCfg}.yml`);
       }
       yamlCfg.saveCRSession(this.session);

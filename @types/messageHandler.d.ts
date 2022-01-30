@@ -9,14 +9,16 @@ export interface MessageHandler {
   dubLangCodes: () => Promise<string[]>
 }
 
-export type SearchResponse = ResponseBase<{
+export type SearchResponseItem = {
   image: string,
   name: string,
   desc?: string,
   id: string,
   lang?: string[],
   rating: number
-}[]>
+};
+
+export type SearchResponse = ResponseBase<SearchResponseItem[]>
 
 export type FuniEpisodeData = {
   title: string,
@@ -25,7 +27,7 @@ export type FuniEpisodeData = {
 };
 
 export type AuthData = { username: string, password: string };
-export type SearchData = { search: string };
+export type SearchData = { search: string, page?: number, 'search-type'?: string, 'search-locale'?: string };
 export type FuniGetShowData = { id: number, e?: string, but: boolean, all: boolean };
 export type FuniGetEpisodeData = { subs: FuniSubsData, fnSlug: FuniEpisodeData, callback?: HLSCallback, simul?: boolean; dubLang: string[], s: string }
 export type FuniStreamData = { q: number, callback?: HLSCallback, x: number, fileName: string, numbers: number, novids?: boolean,

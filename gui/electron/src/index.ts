@@ -2,8 +2,8 @@ import { app, BrowserWindow } from 'electron';
 import path from 'path/posix';
 import json from '../../../package.json';
 import registerMessageHandler from './messageHandler';
-import fs from "fs";
-import dotenv from "dotenv";
+import fs from 'fs';
+import dotenv from 'dotenv';
 
 if (fs.existsSync(path.join(__dirname, '.env')))
   dotenv.config({ path: path.join(__dirname, '.env'), debug: true });

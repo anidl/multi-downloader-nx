@@ -1,11 +1,12 @@
 import { AuthData, CheckTokenResponse, MessageHandler, SearchData, SearchResponse } from '../../../../@types/messageHandler';
+import Crunchy from '../../../../crunchy';
 import Funimation from '../../../../funi';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
 
-class FunimationHandler implements MessageHandler {
-  private funi: Funimation;
+class CrunchyHandler implements MessageHandler {
+  private crunchy: Crunchy;
   constructor() {
-    this.funi = new Funimation();
+    this.crunchy = new Crunchy();
   }
   
   public async dubLangCodes(): Promise<string[]> {
@@ -13,26 +14,23 @@ class FunimationHandler implements MessageHandler {
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
-    const funiSearch = await this.funi.searchShow(false, data);
+    const funiSearch = await this.crunchy.doSearch(data);
     if (!funiSearch.isOk)
       return funiSearch;
-    return { isOk: true, value: funiSearch.value.items.hits.map(a => ({
-      image: a.image.showThumbnail,
-      name: a.title,
-      desc: a.description,
-      id: a.id,
-      lang: a.languages,
-      rating: a.starRating
-    })) };
+    return { isOk: true, value: funiSearch.value };
   }
 
   public async checkToken(): Promise<CheckTokenResponse> {
-    return this.funi.checkToken();
+    if (this.crunchy.checkToken()) {
+      return { isOk: true, value: undefined };
+    } else {
+      return { isOk: false, reason: new Error('') };
+    }
   }
 
   public auth(data: AuthData) {
-    return this.funi.auth(data);
+    return this.crunchy.doAuth(data);
   }
 }
 
-export default FunimationHandler;
+export default CrunchyHandler;
