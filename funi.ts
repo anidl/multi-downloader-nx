@@ -37,7 +37,7 @@ import { FunimationMediaDownload } from './@types/funiTypes';
 import * as langsData from './modules/module.langsData';
 import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
-import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData } from './@types/messageHandler';
+import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData, FuniEpisodeData } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
 // check page
 
@@ -248,11 +248,7 @@ export default class Funi implements ServiceClass {
       
     const epSelList = parseSelect(data.e as string, data.but);
   
-    const fnSlug: {
-      title: string,
-      episode: string,
-      episodeID: string
-    }[] = []; let is_selected = false;
+    const fnSlug: FuniEpisodeData[] = []; let is_selected = false;
       
     const eps = epsDataArr;
     epsDataArr.sort((a, b) => {
@@ -271,7 +267,7 @@ export default class Funi implements ServiceClass {
       // select
       is_selected = false;
       if (data.all || epSelList.isSelected(epStrId)) {
-        fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug, episodeID:epStrId});
+        fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug, episodeID:epStrId, seasonTitle: eps[e].item.seasonTitle, seasonNumber: eps[e].item.seasonNum});
         epSelEpsTxt.push(epStrId);
         is_selected = true;
       }

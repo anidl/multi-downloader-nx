@@ -27,11 +27,11 @@ ReactDOM.render(
         )}
         >
         <Style>
-          <ServiceProvider>
-            <MessageChannel>
+          <MessageChannel>
+            <ServiceProvider>
               <App />
-            </MessageChannel>
-          </ServiceProvider>
+            </ServiceProvider>
+          </MessageChannel>
         </Style>
       </SnackbarProvider>
     </Store>

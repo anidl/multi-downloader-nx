@@ -7,7 +7,30 @@ export interface MessageHandler {
   checkToken: () => Promise<CheckTokenResponse>;
   search: (data: SearchData) => Promise<SearchResponse>,
   availableDubCodes: () => Promise<string[]>,
-  handleDefault: (name: string) => Promise<any>
+  handleDefault: (name: string) => Promise<any>,
+  resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>
+}
+
+export type QueueItem = {
+  title: string,
+  ids: string[],
+  fileName: string,
+  parent: {
+    title: string,
+    season: string
+  },
+  q: number,
+  dubLang: string[],
+}
+
+export type ResolveItemsData = {
+  id: string,
+  dubLang: string[],
+  all: boolean,
+  but: boolean,
+  e: string,
+  fileName: string,
+  q: number
 }
 
 export type SearchResponseItem = {
@@ -24,7 +47,9 @@ export type SearchResponse = ResponseBase<SearchResponseItem[]>
 export type FuniEpisodeData = {
   title: string,
   episode: string,
-  episodeID: string
+  episodeID: string,
+  seasonTitle: string,
+  seasonNumber: string
 };
 
 export type AuthData = { username: string, password: string };

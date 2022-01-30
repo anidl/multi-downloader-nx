@@ -1,4 +1,4 @@
-import { AuthData, CheckTokenResponse, MessageHandler, SearchData, SearchResponse } from '../../../../@types/messageHandler';
+import { AuthData, CheckTokenResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Crunchy from '../../../../crunchy';
 import Funimation from '../../../../funi';
 import { getDefault } from '../../../../modules/module.args';
@@ -18,6 +18,23 @@ class CrunchyHandler extends Base implements MessageHandler {
 
   public async availableDubCodes(): Promise<string[]> {
     return dubLanguageCodes;
+  }
+
+  public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
+    const res = await this.crunchy.downloadFromSeriesID(data.id, data);
+    if (!res.isOk)
+      return res;
+    return { isOk: true, value: res.value.map(a => {
+      return {
+        ids: a.data.map(a => a.mediaId),
+        title: a.episodeTitle,
+        parent: {
+          title: a.seasonTitle,
+          season: a.season.toString()
+        },
+        ...data
+      };
+    }) };
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {

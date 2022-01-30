@@ -1,9 +1,6 @@
 import React from 'react';
+import { QueueItem } from '../../../../@types/messageHandler';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
-
-export type QueueItem = {
-
-}
 
 export type DownloadOptions = {
   q: number,
@@ -17,7 +14,8 @@ export type DownloadOptions = {
 
 export type StoreState = {
   queue: QueueItem[],
-  downloadOptions: DownloadOptions
+  downloadOptions: DownloadOptions,
+  service: 'crunchy'|'funi'|undefined
 }
 
 export type StoreAction<T extends keyof StoreState> = {
@@ -28,11 +26,10 @@ export type StoreAction<T extends keyof StoreState> = {
 const Reducer = <T extends keyof StoreState,>(state: StoreState, action: StoreAction<T>): StoreState => {
   switch(action.type) {
     case "queue":
-      return { ...state, queue: state.queue.concat(action.payload)  };
-    case "downloadOptions":
-      return { ...state, downloadOptions: action.payload as DownloadOptions };
+      return { ...state, queue: state.queue.concat(action.payload as QueueItem[])  };
+    default:
+      return { ...state, [action.type]: action.payload }
   }
-  return state;
 };
 
 const initialState: StoreState = {
@@ -45,7 +42,8 @@ const initialState: StoreState = {
     fileName: '[${service}] ${showTitle} - S${season}E${episode} [${height}p]',
     all: false,
     but: false
-  }
+  },
+  service: undefined
 };
 
 const Store: React.FC = ({children}) => {

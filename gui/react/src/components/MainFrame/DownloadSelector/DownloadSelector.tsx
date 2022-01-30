@@ -4,11 +4,13 @@ import useStore from "../../../hooks/useStore";
 import MultiSelect from "../../MultiSelect";
 import { messageChannelContext } from "../../../provider/MessageChannel";
 import { Check, Close } from "@mui/icons-material";
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const DownloadSelector: React.FC = () => {
   const messageHandler = React.useContext(messageChannelContext);
   const [store, dispatch] = useStore();
   const [availableDubs, setAvailableDubs] = React.useState<string[]>([]);
+  const [ loading, setLoading ] = React.useState(false);
 
   React.useEffect(() => {
     (async () => {
@@ -25,6 +27,21 @@ const DownloadSelector: React.FC = () => {
     })();
   }, []);
 
+  const addToQueue = async () => {
+    setLoading(true);
+    const res = await messageHandler?.resolveItems(store.downloadOptions);
+    if (!res || !res.isOk) {
+      window.alert(res?.reason.message ?? 'Unable to resolve data');
+    } else {
+      dispatch({
+        type: 'queue',
+        payload: res.value
+      });
+    }
+    setLoading(false);
+  }
+
+  console.log(store.queue);
 
   return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
     <Box sx={{ m: 2, gap: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -69,8 +86,9 @@ const DownloadSelector: React.FC = () => {
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, all: !store.downloadOptions.all } })} variant={store.downloadOptions.all ? 'contained' : 'outlined'}>Download all</Button>
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, but: !store.downloadOptions.but } })} variant={store.downloadOptions.but ? 'contained' : 'outlined'}>Download all but</Button>
     </Box>
-    <Box sx={{ flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
-      <Button variant='contained'>Add to Queue</Button>
+    <Box sx={{ gap: 2, flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
+      <LoadingButton loading={loading} onClick={addToQueue} variant='contained'>Search for episodes</LoadingButton>
+      <LoadingButton loading={loading} onClick={addToQueue} variant='contained'>Add to Queue</LoadingButton>
     </Box>
   </Box> 
 };

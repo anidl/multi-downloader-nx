@@ -1,4 +1,4 @@
-import { AuthData, CheckTokenResponse, MessageHandler, SearchData, SearchResponse } from '../../../../@types/messageHandler';
+import { AuthData, CheckTokenResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Funimation from '../../../../funi';
 import { getDefault } from '../../../../modules/module.args';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
@@ -17,6 +17,23 @@ class FunimationHandler extends Base implements MessageHandler {
 
   public async availableDubCodes(): Promise<string[]> {
     return dubLanguageCodes;
+  }
+
+  public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
+    const res = await this.funi.getShow(false, { ...data, id: parseInt(data.id) });
+    if (!res.isOk)
+      return res;
+    return { isOk: true, value: res.value.map(a => {
+      return {
+        ids: [a.episodeID],
+        title: a.title,
+        parent: {
+          title: a.seasonTitle,
+          season: a.seasonNumber
+        },
+        ...data
+      };
+    }) };
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {

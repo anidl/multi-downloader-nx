@@ -1,13 +1,21 @@
 import React from 'react';
 import {Divider, Box, Button, Typography} from '@mui/material';
+import useStore from '../hooks/useStore';
+import { StoreState } from './Store';
 
 type Services = 'funi'|'crunchy';
 
 export const serviceContext = React.createContext<Services|undefined>(undefined);
 
 const ServiceProvider: React.FC = ({ children }) => {
-  const [service, setService] = React.useState<Services|undefined>();
+  const [ { service }, dispatch ] = useStore();
 
+  const setService = (s: StoreState['service']) => {
+    dispatch({
+      type: 'service',
+      payload: s
+    });
+  }
 
   return service === undefined ? 
     <Box>
