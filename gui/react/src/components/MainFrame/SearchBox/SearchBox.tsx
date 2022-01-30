@@ -48,8 +48,8 @@ const SearchBox: React.FC = () => {
       <List>
         {searchResult && searchResult.isOk ?
           searchResult.value.map((a, ind, arr) => {
-            return <>
-              <ListItem className='listitem-hover' key={a.id} onClick={() => selectItem(a.id)}>
+            return <Box key={a.id}>
+              <ListItem className='listitem-hover' onClick={() => selectItem(a.id)}>
                 <Box sx={{ display: 'flex' }}>
                   <Box sx={{ width: '20%', height: '100%', pr: 2 }}>
                     <img src={a.image} style={{ width: '100%', height: '100%' }}/>
@@ -70,8 +70,8 @@ const SearchBox: React.FC = () => {
                   </Box>
                 </Box>
               </ListItem>
-              {(ind < arr.length - 1) && <Divider key={`${a.id}Divider`} />}
-            </>
+              {(ind < arr.length - 1) && <Divider />}
+            </Box>
           })
         : <></>}
       </List>

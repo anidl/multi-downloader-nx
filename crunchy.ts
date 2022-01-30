@@ -42,7 +42,7 @@ import { AuthData, AuthResponse, ResponseBase, SearchData, SearchResponse, Searc
 import { ServiceClass } from './@types/serviceClassInterface';
 
 export default class Crunchy implements ServiceClass {
-  private cfg: yamlCfg.ConfigObject;
+  public cfg: yamlCfg.ConfigObject;
   private token: Record<string, any>;
   private req: reqModule.Req;
   private cmsToken: {
@@ -226,10 +226,10 @@ export default class Crunchy implements ServiceClass {
     yamlCfg.saveCRToken(this.token);
   }
 
-  public async getProfile() {
+  public async getProfile() : Promise<boolean> {
     if(!this.token.access_token){
       console.log('[ERROR] No access token!');
-      return;
+      return false;
     }
     const profileReqOptions = {
       headers: {
@@ -240,10 +240,11 @@ export default class Crunchy implements ServiceClass {
     const profileReq = await this.req.getData(api.beta_profile, profileReqOptions);
     if(!profileReq.ok || !profileReq.res){
       console.log('[ERROR] Get profile failed!');
-      return;
+      return false;
     }
     const profile = JSON.parse(profileReq.res.body);
     console.log('[INFO] USER: %s (%s)', profile.username, profile.email);
+    return true;
   }
 
   public async refreshToken(){
@@ -1231,6 +1232,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async muxStreams(data: DownloadedMedia[], options: CrunchyMuxOptions) {
+    this.cfg.bin = await yamlCfg.loadBinCfg();
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
       return console.log('[INFO] Skip muxing since no vids are downloaded');
     const merger = new Merger({

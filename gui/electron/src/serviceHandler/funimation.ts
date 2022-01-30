@@ -1,14 +1,21 @@
 import { AuthData, CheckTokenResponse, MessageHandler, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Funimation from '../../../../funi';
+import { getDefault } from '../../../../modules/module.args';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
+import Base from './base';
 
-class FunimationHandler implements MessageHandler {
+class FunimationHandler extends Base implements MessageHandler {
   private funi: Funimation;
   constructor() {
+    super();
     this.funi = new Funimation();
   }
   
-  public async dubLangCodes(): Promise<string[]> {
+  public async handleDefault(name: string) {
+    return getDefault(name, this.funi.cfg.cli);
+  }
+
+  public async availableDubCodes(): Promise<string[]> {
     return dubLanguageCodes;
   }
 

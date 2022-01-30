@@ -6,7 +6,8 @@ export interface MessageHandler {
   auth: (data: AuthData) => Promise<AuthResponse>;
   checkToken: () => Promise<CheckTokenResponse>;
   search: (data: SearchData) => Promise<SearchResponse>,
-  dubLangCodes: () => Promise<string[]>
+  availableDubCodes: () => Promise<string[]>,
+  handleDefault: (name: string) => Promise<any>
 }
 
 export type SearchResponseItem = {

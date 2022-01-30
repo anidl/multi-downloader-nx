@@ -1,19 +1,27 @@
 import { AuthData, CheckTokenResponse, MessageHandler, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Crunchy from '../../../../crunchy';
 import Funimation from '../../../../funi';
+import { getDefault } from '../../../../modules/module.args';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
+import Base from './base';
 
-class CrunchyHandler implements MessageHandler {
+class CrunchyHandler extends Base implements MessageHandler {
   private crunchy: Crunchy;
   constructor() {
+    super();
     this.crunchy = new Crunchy();
   }
   
-  public async dubLangCodes(): Promise<string[]> {
+  public async handleDefault(name: string) {
+    return getDefault(name, this.crunchy.cfg.cli);
+  }
+
+  public async availableDubCodes(): Promise<string[]> {
     return dubLanguageCodes;
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
+    this.crunchy.refreshToken();
     const funiSearch = await this.crunchy.doSearch(data);
     if (!funiSearch.isOk)
       return funiSearch;
@@ -21,7 +29,7 @@ class CrunchyHandler implements MessageHandler {
   }
 
   public async checkToken(): Promise<CheckTokenResponse> {
-    if (this.crunchy.checkToken()) {
+    if (await this.crunchy.getProfile()) {
       return { isOk: true, value: undefined };
     } else {
       return { isOk: false, reason: new Error('') };

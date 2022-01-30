@@ -19,7 +19,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     auth: async (data) => await ipcRenderer.invoke('auth', data),
     checkToken: async () => await ipcRenderer.invoke('checkToken'),
     search: async (data) => await ipcRenderer.invoke('search', data),
-    dubLangCodes: async () => await ipcRenderer.invoke('dubLangCodes')
+    handleDefault: async (data) => await ipcRenderer.invoke('default', data),
+    availableDubCodes: async () => await ipcRenderer.invoke('availableDubCodes')
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

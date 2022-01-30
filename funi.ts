@@ -52,7 +52,7 @@ let  fnEpNum: string|number = 0,
   stDlPath: Subtitle[] = [];
 
 export default class Funi implements ServiceClass {
-  private cfg: yamlCfg.ConfigObject;
+  public cfg: yamlCfg.ConfigObject;
   private token: string | boolean;
 
   constructor(private debug = false) {
@@ -63,10 +63,6 @@ export default class Funi implements ServiceClass {
   public checkToken(): CheckTokenResponse {
     const isOk = typeof this.token === 'string';
     return isOk ? { isOk, value: undefined } : { isOk, reason: new Error('Not authenticated') };
-  }
-
-  public async init() {
-    this.cfg.bin = await yamlCfg.loadBinCfg();
   }
 
   public async cli() : Promise<boolean|undefined> {
@@ -757,6 +753,7 @@ export default class Funi implements ServiceClass {
     }
       
     // check exec
+    this.cfg.bin = await yamlCfg.loadBinCfg();
     const mergerBin = merger.checkMerger(this.cfg.bin, data.mp4, data.forceMuxer);
       
     if ( data.novids ){

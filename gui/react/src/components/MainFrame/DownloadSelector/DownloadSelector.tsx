@@ -8,14 +8,23 @@ import { Check, Close } from "@mui/icons-material";
 const DownloadSelector: React.FC = () => {
   const messageHandler = React.useContext(messageChannelContext);
   const [store, dispatch] = useStore();
-  const [dubLangCodes, setDubLangCodes] = React.useState<string[]>([]);
+  const [availableDubs, setAvailableDubs] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     (async () => {
-      const codes = await messageHandler?.dubLangCodes();
-      setDubLangCodes(codes ?? []);
+      dispatch({
+        type: 'downloadOptions',
+        payload: {
+          ...store.downloadOptions,
+          dubLang: await messageHandler?.handleDefault('dubLang'),
+          q: await messageHandler?.handleDefault('q'),
+          fileName: await messageHandler?.handleDefault('fileName')
+        }
+      });
+      setAvailableDubs(await messageHandler?.availableDubCodes() ?? []);
     })();
   }, []);
+
 
   return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
     <Box sx={{ m: 2, gap: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -42,7 +51,7 @@ const DownloadSelector: React.FC = () => {
       }} label='Episode Select' />
       <MultiSelect
         title='Dub Languages'
-        values={dubLangCodes}
+        values={availableDubs}
         selected={store.downloadOptions.dubLang}
         onChange={(e) => {
           dispatch({
