@@ -30,7 +30,17 @@ const createWindow = async () => {
   if (!process.env.USE_BROWSER) {
     const app = express();
 
-    app.use(express.static(path.join('gui', 'electron', 'build')));
+    // Path.sep seems to return / on windows with electron 
+    // \\ in Filename on Linux is possible but I don't see another way rn
+    const sep = __dirname.indexOf('\\') == -1 ? '/' : '\\';
+
+    const p = __dirname.split(sep);
+    p.pop();
+    p.push('build');
+
+    console.log(p.join(sep));
+
+    app.use(express.static(p.join(sep)));
 
     await new Promise((resolve) => {
       app.listen(3000, () => {
