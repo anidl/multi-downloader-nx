@@ -6,7 +6,7 @@ import { removeSync, copyFileSync } from 'fs-extra';
 const argv = process.argv.slice(2);
 let buildIgnore: string[] = [];
 
-const isTest = !(argv.length > 0 && argv[0] !== 'test');
+const isTest = argv.length > 0 && argv[0] === 'test';
 
 if (!isTest)
   buildIgnore = [
