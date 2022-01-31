@@ -52,6 +52,12 @@ export { ignore };
   
   if (!isTest) {
     process.stdout.write('✓\nBuilding react... ');
+    const installReactDependencies = exec('npm install', {
+      cwd: path.join(__dirname, 'gui', 'react'),
+    });
+
+    await waitForProcess(installReactDependencies);
+  
     const react = exec('npm run build', {
       cwd: path.join(__dirname, 'gui', 'react'),
     });
