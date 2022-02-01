@@ -45,7 +45,7 @@ const EpisodeListing: React.FC = () => {
         <AccordionDetails>
           {items.map((item, index) => {
             return <Typography key={`Season_Item_${index}`} sx={{ paddingBottom: 1 }}>
-              {`[${item.e}] [S${item.season}E${item.episode}] ${item.name} ( ${item.lang.join(', ')} ) `}
+              {`[${item.e}] - ${item.name} ( ${item.lang.join(', ')} ) `}
             </Typography>
           })}
         </AccordionDetails>
