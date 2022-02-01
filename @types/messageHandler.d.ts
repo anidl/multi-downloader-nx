@@ -8,7 +8,8 @@ export interface MessageHandler {
   search: (data: SearchData) => Promise<SearchResponse>,
   availableDubCodes: () => Promise<string[]>,
   handleDefault: (name: string) => Promise<any>,
-  resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>
+  resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>,
+  listEpisodes: (id: string) => Promise<EpisodeListResponse>
 }
 
 export type QueueItem = {
@@ -42,7 +43,18 @@ export type SearchResponseItem = {
   rating: number
 };
 
+export type Episode = {
+  e: string,
+  lang: string[],
+  name: string,
+  season: string,
+  seasonTitle: string,
+  episode: string,
+  id: string
+}
+
 export type SearchResponse = ResponseBase<SearchResponseItem[]>
+export type EpisodeListResponse = ResponseBase<Episode[]>
 
 export type FuniEpisodeData = {
   title: string,

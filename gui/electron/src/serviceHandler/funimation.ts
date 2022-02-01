@@ -1,4 +1,4 @@
-import { AuthData, CheckTokenResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
+import { AuthData, CheckTokenResponse, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Funimation from '../../../../funi';
 import { getDefault } from '../../../../modules/module.args';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
@@ -9,6 +9,24 @@ class FunimationHandler extends Base implements MessageHandler {
   constructor() {
     super();
     this.funi = new Funimation();
+  }
+
+  public async listEpisodes (id: string) : Promise<EpisodeListResponse> {
+    const parse = parseInt(id);
+    if (isNaN(parse) || parse <= 0)
+      return { isOk: false, reason: new Error('The ID is invalid') };
+    const request = await this.funi.listShowItems(parse);
+    if (!request.isOk)
+      return request;
+    return { isOk: true, value: request.value.map(item => ({
+      e: item.id_split.join(''),
+      lang: item.audio ?? [],
+      name: item.episodeSlug,
+      season: item.seasonNum,
+      seasonTitle: item.seasonTitle,
+      episode: item.episodeNum,
+      id: item.id
+    })) }
   }
   
   public async handleDefault(name: string) {

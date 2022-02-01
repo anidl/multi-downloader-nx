@@ -38,7 +38,7 @@ import { PlaybackData } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
-import { AuthData, AuthResponse, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
+import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
 
 export default class Crunchy implements ServiceClass {
@@ -1279,10 +1279,14 @@ export default class Crunchy implements ServiceClass {
       merger.cleanUp();
   }
 
-  public async downloadFromSeriesID(id: string, data: CurnchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
+  public async listSeriesID(id: string): Promise<{ list: Episode[], data: Record<string, {
+    items: Item[];
+    langs: langsData.LanguageItem[];
+  }>}> {
+    await this.refreshToken();
     const parsed = await this.parseSeriesById(id);
     if (!parsed)
-      return { isOk: false, reason: new Error('Parse Error') };
+      throw new Error('Unable to parse')
     const result = this.parseSeriesResult(parsed);
     const episodes : Record<string, {
       items: Item[],
@@ -1331,6 +1335,22 @@ export default class Crunchy implements ServiceClass {
         }).join(', ')
       }]`);
     }
+
+    return { data: episodes, list: Object.entries(episodes).map(([key, value]) => {
+      return {
+        e: key.startsWith('E') ? key.slice(1) : key,
+        lang: value.langs.map(a => a.code),
+        name: value.items[0].title,
+        season: value.items[0].season_number.toString(),
+        seasonTitle: value.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
+        episode: value.items[0].episode_number?.toString() ?? value.items[0].episode ?? '?',
+        id: value.items[0].season_id
+      }
+    })};
+  }
+
+  public async downloadFromSeriesID(id: string, data: CurnchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
+    const { data: episodes } = await this.listSeriesID(id);
     console.log();
     console.log('-'.repeat(30));
     console.log();

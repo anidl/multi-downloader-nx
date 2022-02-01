@@ -28,7 +28,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     search: async (data) => await ipcRenderer.invoke('search', data),
     handleDefault: async (data) => await ipcRenderer.invoke('default', data),
     availableDubCodes: async () => await ipcRenderer.invoke('availableDubCodes'),
-    resolveItems: async (data) => await ipcRenderer.invoke('resolveItems', data)
+    resolveItems: async (data) => await ipcRenderer.invoke('resolveItems', data),
+    listEpisodes: async (data) => await ipcRenderer.invoke('listEpisodes', data)
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

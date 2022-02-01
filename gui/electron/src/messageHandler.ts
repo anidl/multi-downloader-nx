@@ -20,4 +20,5 @@ export default () => {
   ipcMain.handle('default', async (_, data) => handler?.handleDefault(data));
   ipcMain.handle('availableDubCodes', async () => handler?.availableDubCodes());
   ipcMain.handle('resolveItems', async (_, data) => handler?.resolveItems(data));
+  ipcMain.handle('listEpisodes', async (_, data) => handler?.listEpisodes(data));
 };

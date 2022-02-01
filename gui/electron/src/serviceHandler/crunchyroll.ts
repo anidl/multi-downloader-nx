@@ -1,4 +1,4 @@
-import { AuthData, CheckTokenResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
+import { AuthData, CheckTokenResponse, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Crunchy from '../../../../crunchy';
 import Funimation from '../../../../funi';
 import { getDefault } from '../../../../modules/module.args';
@@ -10,6 +10,10 @@ class CrunchyHandler extends Base implements MessageHandler {
   constructor() {
     super();
     this.crunchy = new Crunchy();
+  }
+  
+  public async listEpisodes (id: string): Promise<EpisodeListResponse> {
+    return { isOk: true, value: (await this.crunchy.listSeriesID(id)).list };
   }
   
   public async handleDefault(name: string) {

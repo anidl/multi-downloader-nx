@@ -37,7 +37,7 @@ import { FunimationMediaDownload } from './@types/funiTypes';
 import * as langsData from './modules/module.langsData';
 import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
-import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData, FuniEpisodeData } from './@types/messageHandler';
+import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData, FuniEpisodeData, ResponseBase } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
 // check page
 
@@ -52,6 +52,9 @@ let  fnEpNum: string|number = 0,
   stDlPath: Subtitle[] = [];
 
 export default class Funi implements ServiceClass {
+  public static epIdLen = 4;
+  public static typeIdLen = 0;
+
   public cfg: yamlCfg.ConfigObject;
   private token: string | boolean;
 
@@ -170,10 +173,10 @@ export default class Funi implements ServiceClass {
     return { isOk: true, value: searchDataJSON };
   }
 
-  public async getShow(log: boolean, data: FuniGetShowData) : Promise<FuniShowResponse>  {
+  public async listShowItems(id: number) : Promise<ResponseBase<Item[]>> {
     const showData = await getData({
       baseUrl: api_host,
-      url: `/source/catalog/title/${data.id}`,
+      url: `/source/catalog/title/${id}`,
       token: this.token,
       useToken: true,
       debug: this.debug,
@@ -182,8 +185,7 @@ export default class Funi implements ServiceClass {
     if(!showData.ok || !showData.res){ return { isOk: false, reason: new Error('ShowData is not ok') }; }
     const showDataJSON = JSON.parse(showData.res.body);
     if(showDataJSON.status){
-      if (log)
-        console.log('[ERROR] Error #%d: %s\n', showDataJSON.status, showDataJSON.data.errors[0].detail);
+      console.log('[ERROR] Error #%d: %s\n', showDataJSON.status, showDataJSON.data.errors[0].detail);
       return { isOk: false, reason: new Error(showDataJSON.data.errors[0].detail) };
     }
     else if(!showDataJSON.items || showDataJSON.items.length<1){
@@ -191,8 +193,7 @@ export default class Funi implements ServiceClass {
       return { isOk: false, reason: new Error('Show not found') };
     }
     const showDataItem = showDataJSON.items[0];
-    if (log)
-      console.log('[#%s] %s (%s)',showDataItem.id,showDataItem.title,showDataItem.releaseYear);
+    console.log('[#%s] %s (%s)',showDataItem.id,showDataItem.title,showDataItem.releaseYear);
     // show episodes
     const qs: {
           limit: number,
@@ -200,7 +201,7 @@ export default class Funi implements ServiceClass {
           sort_direction: string,
           title_id: number,
           language?: string
-      } = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: data.id };
+      } = { limit: -1, sort: 'order', sort_direction: 'ASC', title_id: id };
     const episodesData = await getData({
       baseUrl: api_host,
       url: '/funimation/episodes/',
@@ -213,7 +214,6 @@ export default class Funi implements ServiceClass {
       
     let epsDataArr: Item[] = JSON.parse(episodesData.res.body).items;
     const epNumRegex = /^([A-Z0-9]*[A-Z])?(\d+)$/i;
-    const epSelEpsTxt = []; let typeIdLen = 0, epIdLen = 4;
       
     const parseEpStr = (epStr: string) => {
       const match = epStr.match(epNumRegex);
@@ -234,23 +234,18 @@ export default class Funi implements ServiceClass {
       e.id = baseId.replace(new RegExp('^' + e.ids.externalShowId), '');
       if(e.id.match(epNumRegex)){
         const epMatch = parseEpStr(e.id);
-        epIdLen = epMatch[1].length > epIdLen ? epMatch[1].length : epIdLen;
-        typeIdLen = epMatch[0].length > typeIdLen ? epMatch[0].length : typeIdLen;
+        Funi.epIdLen = epMatch[1].length > Funi.epIdLen ? epMatch[1].length : Funi.epIdLen;
+        Funi.typeIdLen = epMatch[0].length > Funi.typeIdLen ? epMatch[0].length : Funi.typeIdLen;
         e.id_split = epMatch;
       }
       else{
-        typeIdLen = 3 > typeIdLen? 3 : typeIdLen;
+        Funi.typeIdLen = 3 > Funi.typeIdLen? 3 : Funi.typeIdLen;
         console.log('[ERROR] FAILED TO PARSE: ', e.id);
         e.id_split = [ 'ZZZ', 9999 ];
       }
       return e;
     });
       
-    const epSelList = parseSelect(data.e as string, data.but);
-  
-    const fnSlug: FuniEpisodeData[] = []; let is_selected = false;
-      
-    const eps = epsDataArr;
     epsDataArr.sort((a, b) => {
       if (a.item.seasonOrder < b.item.seasonOrder && a.id.localeCompare(b.id) < 0) {
         return -1;
@@ -260,9 +255,21 @@ export default class Funi implements ServiceClass {
       }
       return 0;
     });
+
+    return { isOk: true, value: epsDataArr };
+  }
+
+  public async getShow(log: boolean, data: FuniGetShowData) : Promise<FuniShowResponse>  {
+    const showList = await this.listShowItems(data.id);
+    if (!showList.isOk)
+      return showList;
+    const eps = showList.value;
+    const epSelList = parseSelect(data.e as string, data.but);
+    const fnSlug: FuniEpisodeData[] = [], epSelEpsTxt = []; let is_selected = false;
+
       
     for(const e in eps){
-      eps[e].id_split[1] = parseInt(eps[e].id_split[1].toString()).toString().padStart(epIdLen, '0');
+      eps[e].id_split[1] = parseInt(eps[e].id_split[1].toString()).toString().padStart(Funi.epIdLen, '0');
       let epStrId = eps[e].id_split.join('');
       // select
       is_selected = false;
@@ -283,7 +290,7 @@ export default class Funi implements ServiceClass {
       const aud_str = eps[e].audio.length > 0 ? `, ${eps[e].audio.join(', ')}` : '';
       const rtm_str = eps[e].item.runtime !== '' ? eps[e].item.runtime : '??:??';
       // console string
-      eps[e].id_split[0] = eps[e].id_split[0].toString().padStart(typeIdLen, ' ');
+      eps[e].id_split[0] = eps[e].id_split[0].toString().padStart(Funi.typeIdLen, ' ');
       epStrId = eps[e].id_split.join('');
       let conOut  = `[${epStrId}] `;
       conOut += `${eps[e].item.titleName+tx_snum} - ${tx_type+tx_enum} ${eps[e].item.episodeName} `;

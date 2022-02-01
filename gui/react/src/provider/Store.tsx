@@ -1,5 +1,5 @@
 import React from 'react';
-import { QueueItem } from '../../../../@types/messageHandler';
+import { Episode, QueueItem } from '../../../../@types/messageHandler';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
 
 export type DownloadOptions = {
@@ -14,6 +14,7 @@ export type DownloadOptions = {
 
 export type StoreState = {
   queue: QueueItem[],
+  episodeListing: Episode[];
   downloadOptions: DownloadOptions,
   service: 'crunchy'|'funi'|undefined
 }
@@ -43,7 +44,8 @@ const initialState: StoreState = {
     all: false,
     but: false
   },
-  service: undefined
+  service: undefined,
+  episodeListing: []
 };
 
 const Store: React.FC = ({children}) => {
