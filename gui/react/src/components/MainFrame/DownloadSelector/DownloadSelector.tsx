@@ -105,6 +105,7 @@ const DownloadSelector: React.FC = () => {
             payload: { ...store.downloadOptions, dubLang: e }
           });
         }}
+        allOption
       />
       <TextField value={store.downloadOptions.fileName} onChange={e => {
         dispatch({

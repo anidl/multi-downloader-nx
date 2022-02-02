@@ -5,7 +5,8 @@ export type MultiSelectProps = {
   values: string[],
   selected: string[],
   onChange: (values: string[]) => unknown,
-  title: string
+  title: string,
+  allOption?: boolean
 }
 
 const ITEM_HEIGHT = 48;
@@ -39,7 +40,17 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
         id="multi-select"
         multiple
         value={props.selected}
-        onChange={e => props.onChange(typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value)}
+        onChange={e => {
+          const val = typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value;
+          if (props.allOption && val.includes('all')) {
+            if (props.values.length === val.length - 1)
+              props.onChange([]);
+            else 
+              props.onChange(props.values);
+          } else {
+            props.onChange(val);
+          }
+        }}
         input={<OutlinedInput id="select-multiple-chip" label={props.title} />}
         renderValue={(selected) => (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
@@ -50,7 +61,7 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
         )}
         MenuProps={MenuProps}
       >
-        {props.values.map((name) => (
+        {props.values.concat(props.allOption ? 'all' : []). map((name) => (
           <MenuItem
             key={name}
             value={name}
