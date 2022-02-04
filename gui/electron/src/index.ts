@@ -13,10 +13,13 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+let mainWindow: BrowserWindow|undefined = undefined;
+export { mainWindow };
+
 const createWindow = async () => {
   registerMessageHandler();
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
     title: json.name,

@@ -1,16 +1,56 @@
 import React from 'react';
 import type { MessageHandler } from '../../../../@types/messageHandler';
-import type { IpcRenderer } from "electron";
+import type { IpcRenderer, IpcRendererEvent } from "electron";
 import useStore from '../hooks/useStore';
 
+import type { RandomEvents } from '../../../../@types/randomEvents';
 
-export const messageChannelContext = React.createContext<MessageHandler|undefined>(undefined);
+export type Handler<T> = (data: T) => unknown;
+
+export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler });
+
+export class RandomEventHandler {
+  private handler: {
+    [eventName in keyof RandomEvents]: Handler<RandomEvents[eventName]>[]
+  } = {
+    progress: []
+  };
+  private allHandler: Handler<unknown>[] = [];
+
+  public on<T extends keyof RandomEvents>(name: T, listener: Handler<RandomEvents[T]>) {
+    if (Object.prototype.hasOwnProperty.call(this.handler, name)) {
+      this.handler[name].push(listener);
+    } else {
+      this.handler[name] = [ listener ];
+    }
+  }
+
+  public emit<T extends keyof RandomEvents>(name: T, data: RandomEvents[T]) {
+    (this.handler[name] ?? []).forEach(handler => handler(data));
+    this.allHandler.forEach(handler => handler(data));
+  }
+
+  public removeListener<T extends keyof RandomEvents>(name: T, listener: Handler<RandomEvents[T]>) {
+    this.handler[name] = this.handler[name].filter(a => a !== listener);
+  }
+
+  public onAll(listener: Handler<unknown>) {
+    this.allHandler.push(listener);
+  }
+
+  public removeAllListener(listener: Handler<unknown>) {
+    this.allHandler = this.allHandler.filter(a => a !== listener);
+  }
+}
+
+export const messageChannelContext = React.createContext<FrontEndMessanges|undefined>(undefined);
 
 const MessageChannelProvider: React.FC = ({ children }) => {
 
   const [store, dispatch] = useStore();
 
   const { ipcRenderer } = (window as any).Electron as { ipcRenderer: IpcRenderer };
+  const [ randomEventHandler ] = React.useState(new RandomEventHandler());
 
   React.useEffect(() => {
     (async () => {
@@ -22,14 +62,22 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     })();
   }, [store.service])
 
-  const messageHandler: MessageHandler = {
+  React.useEffect(() => {
+    const listener = (_: IpcRendererEvent, ...data: any[]) => randomEventHandler.emit('progress', data.length === 0 ? undefined : data[0]);
+    ipcRenderer.on('progress', listener);
+    return () => ipcRenderer.removeListener('progress', listener) as unknown as void;
+  }, [ ipcRenderer ]);
+
+
+  const messageHandler: FrontEndMessanges = {
     auth: async (data) => await ipcRenderer.invoke('auth', data),
     checkToken: async () => await ipcRenderer.invoke('checkToken'),
     search: async (data) => await ipcRenderer.invoke('search', data),
     handleDefault: async (data) => await ipcRenderer.invoke('default', data),
     availableDubCodes: async () => await ipcRenderer.invoke('availableDubCodes'),
     resolveItems: async (data) => await ipcRenderer.invoke('resolveItems', data),
-    listEpisodes: async (data) => await ipcRenderer.invoke('listEpisodes', data)
+    listEpisodes: async (data) => await ipcRenderer.invoke('listEpisodes', data),
+    randomEvents: randomEventHandler
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

@@ -3,6 +3,7 @@ import React from "react";
 import Bottom from "./Bottom/Bottom";
 import DownloadSelector from "./DownloadSelector/DownloadSelector";
 import './MainFrame.css';
+import Progress from "./Progress/Progress";
 import SearchBox from "./SearchBox/SearchBox";
 
 const MainFrame: React.FC = () => {
@@ -12,6 +13,7 @@ const MainFrame: React.FC = () => {
     <DownloadSelector />
     <Divider variant='middle' className="divider-width" light />
     <Bottom />
+    <Progress />
   </Box>
 }
 

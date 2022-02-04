@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { MessageHandler } from '../../../@types/messageHandler';
 import Crunchy from './serviceHandler/crunchyroll';
 import Funimation from './serviceHandler/funimation';
+import { mainWindow } from './';
 
 export default () => {
   let handler: MessageHandler|undefined;
@@ -21,4 +22,8 @@ export default () => {
   ipcMain.handle('availableDubCodes', async () => handler?.availableDubCodes());
   ipcMain.handle('resolveItems', async (_, data) => handler?.resolveItems(data));
   ipcMain.handle('listEpisodes', async (_, data) => handler?.listEpisodes(data));
+
+  setInterval(() => {
+    mainWindow?.webContents.send('progress', { hello: 'World' });
+  }, 1000);
 };
