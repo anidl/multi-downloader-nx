@@ -1,11 +1,5 @@
-export type ProgressData = {
-  total: number,
-  cur: number,
-  percent: number|string,
-  time: number,
-  downloadSpeed: number
-};
 declare module 'hls-download' {
+  import type { ProgressData } from './messageHandler';
   export type HLSCallback = (data: ProgressData) => unknown;
   export default class hlsDownload {
     constructor(options: {

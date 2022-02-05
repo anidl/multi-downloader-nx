@@ -253,7 +253,7 @@ export default class Crunchy implements ServiceClass {
     }
     else{
       if(Date.now() > new Date(this.token.expires).getTime()){
-        console.log('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
+        //console.log('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
       }
       const authData = new URLSearchParams({
         'refresh_token': this.token.refresh_token,
@@ -387,7 +387,6 @@ export default class Crunchy implements ServiceClass {
     const toSend = searchResults.items.filter(a => a.type === 'series' || a.type === 'movie_listing');
     return { isOk: true, value: toSend.map(a => {
       return a.items.map((a): SearchResponseItem => {
-        fs.writeFileSync('../test.json', JSON.stringify(a.images.poster_tall, null, 2));
         const images = (a.images.poster_tall ?? [[ { source: '/notFound.png' } ]])[0];
         return {
           id: a.id,
@@ -723,24 +722,6 @@ export default class Crunchy implements ServiceClass {
       if(item.season_title == '' && item.series_title == ''){
         item.season_title = 'NO_TITLE';
       }
-      // set data
-      const epMeta: CrunchyEpMeta = {
-        data: [
-          {
-            mediaId: item.id
-          }
-        ],
-        seasonTitle:   item.season_title,
-        episodeNumber: item.episode,
-        episodeTitle:  item.title,
-        seasonID: item.season_id,
-        season: item.season_number,
-        showID: id
-      };
-      if(item.playback){
-        epMeta.data[0].playback = item.playback;
-      }
-      // find episode numbers
       const epNum = item.episode;
       let isSpecial = false;
       item.isSelected = false;
@@ -756,6 +737,25 @@ export default class Crunchy implements ServiceClass {
           ? 'S' + epNumList.sp.toString().padStart(epNumLen, '0')
           : ''  + parseInt(epNum, 10).toString().padStart(epNumLen, '0')
       );
+      // set data
+      const epMeta: CrunchyEpMeta = {
+        data: [
+          {
+            mediaId: item.id
+          }
+        ],
+        seasonTitle:   item.season_title,
+        episodeNumber: item.episode,
+        episodeTitle:  item.title,
+        seasonID: item.season_id,
+        season: item.season_number,
+        showID: id,
+        e: selEpId
+      };
+      if(item.playback){
+        epMeta.data[0].playback = item.playback;
+      }
+      // find episode numbers
       if((but && item.playback && !doEpsFilter.isSelected([selEpId, item.id])) || (all && item.playback) || (!but && doEpsFilter.isSelected([selEpId, item.id]) && !item.isSelected && item.playback)){
         selectedMedia.push(epMeta);
         item.isSelected = true;
@@ -1239,7 +1239,7 @@ export default class Crunchy implements ServiceClass {
       onlyVid: [],
       skipSubMux: options.skipSubMux,
       onlyAudio: [],
-      output: `${options}.${options.mp4 ? 'mp4' : 'mkv'}`,
+      output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
         if (a.type === 'Video')
           throw new Error('Never');
@@ -1388,6 +1388,7 @@ export default class Crunchy implements ServiceClass {
         if(item.season_title == '' && item.series_title == ''){
           item.season_title = 'NO_TITLE';
         }
+        const epNum = key.startsWith('E') ? key.slice(1) : key;
         // set data
         const epMeta: CrunchyEpMeta = {
           data: [
@@ -1400,12 +1401,12 @@ export default class Crunchy implements ServiceClass {
           episodeTitle: item.title,
           seasonID: item.season_id,
           season: item.season_number,
-          showID: item.series_id
+          showID: item.series_id,
+          e: epNum
         };
         if(item.playback){
           epMeta.data[0].playback = item.playback;
         }
-        const epNum = key.startsWith('E') ? key.slice(1) : key;
         // find episode numbers
         if(item.playback && ((but && !doEpsFilter.isSelected([epNum, item.id])) || (all || (doEpsFilter.isSelected([epNum, item.id])) && !but))) {
           if (Object.prototype.hasOwnProperty.call(ret, key)) {

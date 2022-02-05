@@ -1,13 +1,15 @@
-import { AuthData, CheckTokenResponse, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
+import { BrowserWindow } from 'electron';
+import { AuthData, CheckTokenResponse, DownloadData, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Funimation from '../../../../funi';
-import { getDefault } from '../../../../modules/module.args';
+import { ArgvType } from '../../../../modules/module.app-args';
+import { buildDefault, getDefault } from '../../../../modules/module.args';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
 import Base from './base';
 
 class FunimationHandler extends Base implements MessageHandler {
   private funi: Funimation;
-  constructor() {
-    super();
+  constructor(window: BrowserWindow) {
+    super(window);
     this.funi = new Funimation();
   }
 
@@ -43,13 +45,14 @@ class FunimationHandler extends Base implements MessageHandler {
       return res;
     return { isOk: true, value: res.value.map(a => {
       return {
+        ...data,
         ids: [a.episodeID],
         title: a.title,
         parent: {
           title: a.seasonTitle,
           season: a.seasonNumber
         },
-        ...data
+        e: a.episodeID
       };
     }) };
   }
@@ -75,6 +78,20 @@ class FunimationHandler extends Base implements MessageHandler {
   public auth(data: AuthData) {
     return this.funi.auth(data);
   }
+
+  public async downloadItem(data: DownloadData) {
+    this.setDownloading(true);
+    const res = await this.funi.getShow(false, { all: false, but: false, id: parseInt(data.id), e: data.e });
+    const _default = buildDefault() as ArgvType;
+    if (!res.isOk)
+      return this.alertError(res.reason);
+
+    for (const ep of res.value) {
+      await this.funi.getEpisode(false, { dubLang: data.dubLang, fnSlug: ep, s: data.id, subs: { dlsubs: ['all'], sub: false }, callback: this.handleProgress.bind(this) }, { ..._default, ass: true, callback: this.handleProgress.bind(this), fileName: data.fileName, q: data.q })
+    }
+    this.getWindow().webContents.send('finish');
+    this.setDownloading(false);
+  };
 }
 
 export default FunimationHandler;

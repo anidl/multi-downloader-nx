@@ -3,7 +3,6 @@ import { Box, Button, Checkbox, Chip, FormControl, FormControlLabel, IconButton,
 import useStore from "../../../hooks/useStore";
 import MultiSelect from "../../MultiSelect";
 import { messageChannelContext } from "../../../provider/MessageChannel";
-import { Check, Close } from "@mui/icons-material";
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useSnackbar } from "notistack";
 

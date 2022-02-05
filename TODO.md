@@ -1,0 +1,3 @@
+- [ ] Hls-Download force yes or no on rewrite promt
+- [ ] Pick up if a download is currently in progress
+- [ ] Send more information with the progress event like the title and image to display more information

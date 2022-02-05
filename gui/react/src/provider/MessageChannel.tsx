@@ -13,7 +13,8 @@ export class RandomEventHandler {
   private handler: {
     [eventName in keyof RandomEvents]: Handler<RandomEvents[eventName]>[]
   } = {
-    progress: []
+    progress: [],
+    finish: []
   };
   private allHandler: Handler<unknown>[] = [];
 
@@ -52,6 +53,10 @@ const MessageChannelProvider: React.FC = ({ children }) => {
   const { ipcRenderer } = (window as any).Electron as { ipcRenderer: IpcRenderer };
   const [ randomEventHandler ] = React.useState(new RandomEventHandler());
 
+  const buildListener = (event: keyof RandomEvents) => {
+    return (_: IpcRendererEvent, ...data: any[]) => randomEventHandler.emit(event, data.length === 0 ? undefined : data[0]);
+  }
+
   React.useEffect(() => {
     (async () => {
       const currentService = await ipcRenderer.invoke('type');
@@ -63,9 +68,14 @@ const MessageChannelProvider: React.FC = ({ children }) => {
   }, [store.service])
 
   React.useEffect(() => {
-    const listener = (_: IpcRendererEvent, ...data: any[]) => randomEventHandler.emit('progress', data.length === 0 ? undefined : data[0]);
-    ipcRenderer.on('progress', listener);
-    return () => ipcRenderer.removeListener('progress', listener) as unknown as void;
+    const progressListener = buildListener('progress');
+    const finishListener = buildListener('finish');
+    ipcRenderer.on('progress', progressListener);
+    ipcRenderer.on('finish', finishListener);
+    return () => {
+      ipcRenderer.removeListener('progress', progressListener);
+      ipcRenderer.removeListener('finish', finishListener);
+    };
   }, [ ipcRenderer ]);
 
 
@@ -77,7 +87,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     availableDubCodes: async () => await ipcRenderer.invoke('availableDubCodes'),
     resolveItems: async (data) => await ipcRenderer.invoke('resolveItems', data),
     listEpisodes: async (data) => await ipcRenderer.invoke('listEpisodes', data),
-    randomEvents: randomEventHandler
+    randomEvents: randomEventHandler,
+    downloadItem: (data) => ipcRenderer.invoke('downloadItem', data)
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

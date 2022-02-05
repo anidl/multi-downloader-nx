@@ -9,7 +9,8 @@ export interface MessageHandler {
   availableDubCodes: () => Promise<string[]>,
   handleDefault: (name: string) => Promise<any>,
   resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>,
-  listEpisodes: (id: string) => Promise<EpisodeListResponse>
+  listEpisodes: (id: string) => Promise<EpisodeListResponse>,
+  downloadItem: (data) => void
 }
 
 export type QueueItem = {
@@ -61,7 +62,7 @@ export type FuniEpisodeData = {
   episode: string,
   episodeID: string,
   seasonTitle: string,
-  seasonNumber: string
+  seasonNumber: string,
 };
 
 export type AuthData = { username: string, password: string };
@@ -72,12 +73,14 @@ export type FuniStreamData = { q: number, callback?: HLSCallback, x: number, fil
   timeout: number, partsize: number, fsRetryTime: number, noaudio?: boolean, mp4: boolean, ass: boolean, fontSize: number, fontName?: string, skipmux?: boolean,
   forceMuxer: AvailableMuxer | undefined, simul: boolean, skipSubMux: boolean, nocleanup: boolean }
 export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[] }
+export type DownloadData = { id: string, e: string, dubLang: string[], fileName: string, q: number }
 
 export type AuthResponse = ResponseBase<undefined>;
 export type FuniSearchReponse = ResponseBase<FunimationSearch>;
 export type FuniShowResponse = ResponseBase<FuniEpisodeData[]>;
 export type FuniGetEpisodeResponse = ResponseBase<undefined>;
 export type CheckTokenResponse = ResponseBase<undefined>;
+
 
 export type ResponseBase<T> = ({
   isOk: true,
@@ -86,5 +89,13 @@ export type ResponseBase<T> = ({
   isOk: false,
   reason: Error
 });
+
+export type ProgressData = {
+  total: number,
+  cur: number,
+  percent: number|string,
+  time: number,
+  downloadSpeed: number
+};
 
 export type PossibleMessanges = keyof ServiceHandler;

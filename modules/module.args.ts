@@ -588,9 +588,27 @@ const getDefault = <T extends boolean|string|number|unknown[]>(name: string, cfg
   }
 };
 
+const buildDefault = () => {
+  const data: Record<string, unknown> = {}
+  const defaultArgs = args.filter(a => a.default);
+  defaultArgs.forEach(item => {
+    if (typeof item.default === 'object') {
+      if (Array.isArray(item.default)) {
+        data[item.name] = item.default;
+      } else {
+        data[item.default.name ?? item.name] = item.default.default;
+      }
+    } else {
+      data[item.name] = item.default;
+    }
+  })
+  return data;
+}
+
 export {
   TAppArg,
   getDefault,
+  buildDefault,
   args,
   groups,
   availableFilenameVars

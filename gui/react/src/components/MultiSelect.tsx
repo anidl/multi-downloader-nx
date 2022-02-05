@@ -23,7 +23,7 @@ const MenuProps = {
 function getStyles(name: string, personName: readonly string[], theme: Theme) {
   return {
     fontWeight:
-      personName.indexOf(name) === -1
+      (personName ?? []).indexOf(name) === -1
         ? theme.typography.fontWeightRegular
         : theme.typography.fontWeightMedium
   };
@@ -39,7 +39,7 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
         labelId="multi-select-label"
         id="multi-select"
         multiple
-        value={props.selected}
+        value={(props.selected ?? [])}
         onChange={e => {
           const val = typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value;
           if (props.allOption && val.includes('all')) {

@@ -17,7 +17,6 @@ let mainWindow: BrowserWindow|undefined = undefined;
 export { mainWindow };
 
 const createWindow = async () => {
-  registerMessageHandler();
   // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 600,
@@ -29,6 +28,7 @@ const createWindow = async () => {
     },
   });
 
+  registerMessageHandler(mainWindow);
   
   if (!process.env.USE_BROWSER) {
     const app = express();
