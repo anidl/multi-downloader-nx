@@ -17,7 +17,8 @@ export type StoreState = {
   episodeListing: Episode[];
   downloadOptions: DownloadOptions,
   service: 'crunchy'|'funi'|undefined,
-  currentDownload?: QueueItem
+  currentDownload?: QueueItem,
+  finish?: undefined
 }
 
 export type StoreAction<T extends keyof StoreState> = {
@@ -28,12 +29,20 @@ export type StoreAction<T extends keyof StoreState> = {
 const Reducer = <T extends keyof StoreState,>(state: StoreState, action: StoreAction<T>): StoreState => {
   switch(action.type) {
     case "queue":
-      let queue = state.queue.concat(action.payload as QueueItem[]);
-      if (!state.currentDownload && queue.length > 0) {
-        state.currentDownload = queue[0];
-        queue = queue.slice(1);
+      state.queue = state.queue.concat(action.payload as QueueItem[]);
+      if (state.currentDownload === undefined && state.queue.length > 0) {
+        state.currentDownload = state.queue[0];
+        state.queue = state.queue.slice(1);
       }
-      return { ...state, queue };
+      return { ...state };
+    case "finish":
+      if (state.queue.length > 0) {
+        state.currentDownload = state.queue[0];
+        state.queue = state.queue.slice(1);
+      } else {
+        state.currentDownload = undefined;
+      }
+      return { ...state }
     default:
       return { ...state, [action.type]: action.payload }
   }
@@ -51,7 +60,7 @@ const initialState: StoreState = {
     but: false
   },
   service: undefined,
-  episodeListing: []
+  episodeListing: [],
 };
 
 const Store: React.FC = ({children}) => {

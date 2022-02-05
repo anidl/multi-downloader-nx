@@ -3,7 +3,8 @@ import { LanguageItem } from '../modules/module.langsData';
 export type FunimationMediaDownload = {
   id: string,
   title: string,
-  showTitle: string
+  showTitle: string,
+  image: string
 }
 
 export type Subtitle = {

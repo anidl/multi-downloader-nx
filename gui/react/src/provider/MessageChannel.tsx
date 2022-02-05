@@ -3,44 +3,33 @@ import type { MessageHandler } from '../../../../@types/messageHandler';
 import type { IpcRenderer, IpcRendererEvent } from "electron";
 import useStore from '../hooks/useStore';
 
-import type { RandomEvents } from '../../../../@types/randomEvents';
+import type { Handler, RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
 
-export type Handler<T> = (data: T) => unknown;
 
 export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler });
 
 export class RandomEventHandler {
   private handler: {
-    [eventName in keyof RandomEvents]: Handler<RandomEvents[eventName]>[]
+    [eventName in keyof RandomEvents]: Handler<eventName>[]
   } = {
     progress: [],
     finish: []
   };
-  private allHandler: Handler<unknown>[] = [];
 
-  public on<T extends keyof RandomEvents>(name: T, listener: Handler<RandomEvents[T]>) {
+  public on<T extends keyof RandomEvents>(name: T, listener: Handler<T>) {
     if (Object.prototype.hasOwnProperty.call(this.handler, name)) {
-      this.handler[name].push(listener);
+      this.handler[name].push(listener as any);
     } else {
-      this.handler[name] = [ listener ];
+      this.handler[name] = [ listener as any ];
     }
   }
 
-  public emit<T extends keyof RandomEvents>(name: T, data: RandomEvents[T]) {
-    (this.handler[name] ?? []).forEach(handler => handler(data));
-    this.allHandler.forEach(handler => handler(data));
+  public emit<T extends keyof RandomEvents>(name: keyof RandomEvents, data: RandomEvent<T>) {
+    (this.handler[name] ?? []).forEach(handler => handler(data as any));
   }
 
-  public removeListener<T extends keyof RandomEvents>(name: T, listener: Handler<RandomEvents[T]>) {
-    this.handler[name] = this.handler[name].filter(a => a !== listener);
-  }
-
-  public onAll(listener: Handler<unknown>) {
-    this.allHandler.push(listener);
-  }
-
-  public removeAllListener(listener: Handler<unknown>) {
-    this.allHandler = this.allHandler.filter(a => a !== listener);
+  public removeListener<T extends keyof RandomEvents>(name: T, listener: Handler<T>) {
+    this.handler[name] = (this.handler[name] as Handler<T>[]).filter(a => a !== listener) as any;
   }
 }
 
@@ -53,10 +42,6 @@ const MessageChannelProvider: React.FC = ({ children }) => {
   const { ipcRenderer } = (window as any).Electron as { ipcRenderer: IpcRenderer };
   const [ randomEventHandler ] = React.useState(new RandomEventHandler());
 
-  const buildListener = (event: keyof RandomEvents) => {
-    return (_: IpcRendererEvent, ...data: any[]) => randomEventHandler.emit(event, data.length === 0 ? undefined : data[0]);
-  }
-
   React.useEffect(() => {
     (async () => {
       const currentService = await ipcRenderer.invoke('type');
@@ -68,13 +53,16 @@ const MessageChannelProvider: React.FC = ({ children }) => {
   }, [store.service])
 
   React.useEffect(() => {
-    const progressListener = buildListener('progress');
-    const finishListener = buildListener('finish');
-    ipcRenderer.on('progress', progressListener);
-    ipcRenderer.on('finish', finishListener);
+    /* finish is a placeholder */
+    const listener = (_: IpcRendererEvent, initalData: RandomEvent<'finish'>) => {
+      const eventName = initalData.name as keyof RandomEvents;
+      const data = initalData as unknown as RandomEvent<typeof eventName>;
+
+      randomEventHandler.emit(data.name, data);
+    }
+    ipcRenderer.on('randomEvent', listener);
     return () => {
-      ipcRenderer.removeListener('progress', progressListener);
-      ipcRenderer.removeListener('finish', finishListener);
+      ipcRenderer.removeListener('randomEvent', listener);
     };
   }, [ ipcRenderer ]);
 
@@ -88,7 +76,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     resolveItems: async (data) => await ipcRenderer.invoke('resolveItems', data),
     listEpisodes: async (data) => await ipcRenderer.invoke('listEpisodes', data),
     randomEvents: randomEventHandler,
-    downloadItem: (data) => ipcRenderer.invoke('downloadItem', data)
+    downloadItem: (data) => ipcRenderer.invoke('downloadItem', data),
+    isDownloading: () => ipcRenderer.sendSync('isDownloading')
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

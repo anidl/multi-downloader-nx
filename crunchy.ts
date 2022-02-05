@@ -738,6 +738,7 @@ export default class Crunchy implements ServiceClass {
           : ''  + parseInt(epNum, 10).toString().padStart(epNumLen, '0')
       );
       // set data
+      const images = (item.images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
       const epMeta: CrunchyEpMeta = {
         data: [
           {
@@ -750,7 +751,8 @@ export default class Crunchy implements ServiceClass {
         seasonID: item.season_id,
         season: item.season_number,
         showID: id,
-        e: selEpId
+        e: selEpId,
+        image: images[Math.floor(images.length / 2)].source
       };
       if(item.playback){
         epMeta.data[0].playback = item.playback;
@@ -779,7 +781,7 @@ export default class Crunchy implements ServiceClass {
     if (res === undefined) {
       return false;
     } else {
-      this.muxStreams(res.data, { ...options, output: res.fileName });
+      await this.muxStreams(res.data, { ...options, output: res.fileName });
       downloaded({
         service: 'crunchy',
         type: 's'
@@ -1138,7 +1140,14 @@ export default class Crunchy implements ServiceClass {
                 // baseurl: chunkPlaylist.baseUrl,
                 threads: options.partsize,
                 fsRetryTime: options.fsRetryTime * 1000,
-                callback: options.callback
+                callback: options.callbackMaker ? options.callbackMaker({
+                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                  image: medias.image,
+                  parent: {
+                    title: medias.seasonTitle
+                  },
+                  title: medias.episodeTitle
+                }) : undefined
               }).download();
               if(!dlStreamByPl.ok){
                 console.log(`[ERROR] DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
@@ -1390,6 +1399,7 @@ export default class Crunchy implements ServiceClass {
         }
         const epNum = key.startsWith('E') ? key.slice(1) : key;
         // set data
+        const images = (item.images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
         const epMeta: CrunchyEpMeta = {
           data: [
             {
@@ -1402,7 +1412,8 @@ export default class Crunchy implements ServiceClass {
           seasonID: item.season_id,
           season: item.season_number,
           showID: item.series_id,
-          e: epNum
+          e: epNum,
+          image: images[Math.floor(images.length / 2)].source
         };
         if(item.playback){
           epMeta.data[0].playback = item.playback;
@@ -1529,11 +1540,3 @@ export default class Crunchy implements ServiceClass {
   }
 
 }
-/*
-
-// MULTI DOWNLOADING
-
-const 
-
-const
-*/

@@ -449,7 +449,8 @@ export default class Funi implements ServiceClass {
         const res = await this.downloadStreams(true, {
           id: data.fnSlug.episodeID,
           title: ep.title,
-          showTitle: ep.parent.title
+          showTitle: ep.parent.title,
+          image: ep.thumb
         }, downloadData);
         if (res === true) {
           downloaded({
@@ -671,7 +672,14 @@ export default class Funi implements ServiceClass {
         const chunkList = m3u8(reqVideo.res.body);
               
         const tsFile = path.join(this.cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}`);
-        dlFailed = !await this.downloadFile(tsFile, chunkList, data.timeout, data.partsize, data.fsRetryTime, data.callback);
+        dlFailed = !await this.downloadFile(tsFile, chunkList, data.timeout, data.partsize, data.fsRetryTime, data.callbackMaker ? data.callbackMaker({
+          fileName: `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}.ts`,
+          parent: {
+            title: epsiode.showTitle
+          },
+          title: epsiode.title,
+          image: epsiode.image
+        }) : undefined);
         if (!dlFailed) {
           if (plAud) {
             purvideo.push({
@@ -704,7 +712,14 @@ export default class Funi implements ServiceClass {
       
         const tsFileA = path.join(this.cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.audio.${plAud.language.code}`);
       
-        dlFailedA = !await this.downloadFile(tsFileA, chunkListA, data.timeout, data.partsize, data.fsRetryTime, data.callback);
+        dlFailedA = !await this.downloadFile(tsFileA, chunkListA, data.timeout, data.partsize, data.fsRetryTime, data.callbackMaker ? data.callbackMaker({
+          fileName: `${fnOutput.slice(-1)}.audio.${plAud.language.code}.ts`,
+          parent: {
+            title: epsiode.showTitle
+          },
+          title: epsiode.title,
+          image: epsiode.image
+        }) : undefined);
         if (!dlFailedA)
           puraudio.push({
             path: `${tsFileA}.ts`,

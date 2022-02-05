@@ -1,5 +1,6 @@
 import { BrowserWindow, dialog } from "electron";
-import { ProgressData } from "../../../../@types/messageHandler";
+import { DownloadInfo, ExtendedProgress, ProgressData } from "../../../../@types/messageHandler";
+import { RandomEvent, RandomEvents } from "../../../../@types/randomEvents";
 
 export default class Base {
 
@@ -24,12 +25,28 @@ export default class Base {
     })
   }
 
-  handleProgress(data: ProgressData) {
-    this.window.webContents.send('progress', data);
+  makeProgressHandler(videoInfo: DownloadInfo) {
+    return ((data: ProgressData) => {
+      this.sendMessage({
+        name: 'progress',
+        data: {
+          downloadInfo: videoInfo,
+          progress: data
+        }
+      })
+    }).bind(this);
   }
 
   getWindow() {
     return this.window;
+  }
+
+  sendMessage<T extends keyof RandomEvents>(data: RandomEvent<T>) {
+    this.window.webContents.send('randomEvent', data);
+  }
+
+  isDownloading() {
+    return this.downloading;
   }
 
 }

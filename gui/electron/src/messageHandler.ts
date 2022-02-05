@@ -22,9 +22,5 @@ export default (window: BrowserWindow) => {
   ipcMain.handle('resolveItems', async (_, data) => handler?.resolveItems(data));
   ipcMain.handle('listEpisodes', async (_, data) => handler?.listEpisodes(data));
   ipcMain.handle('downloadItem', async (_, data) => handler?.downloadItem(data));
-  /*
-  setInterval(() => {
-    mainWindow?.webContents.send('progress', { hello: 'World' });
-  }, 1000);
-  */
+  ipcMain.on('isDownloading', (ev) => ev.returnValue = handler?.isDownloading());
 };

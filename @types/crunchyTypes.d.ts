@@ -1,6 +1,7 @@
 import { HLSCallback } from 'hls-download';
 import { sxItem } from '../crunchy';
 import { LanguageItem } from '../modules/module.langsData';
+import { DownloadInfo } from './messageHandler';
 
 export type CrunchyDownloadOptions = {
   hslang: string,
@@ -11,7 +12,7 @@ export type CrunchyDownloadOptions = {
   fileName: string,
   numbers: number,
   partsize: number,
-  callback?: HLSCallback,
+  callbackMaker?: (data: DownloadInfo) => HLSCallback,
   timeout: number,
   fsRetryTime: number,
   dlsubs: string[],
@@ -47,7 +48,8 @@ export type CrunchyEpMeta = {
   seasonID: string,
   season: number,
   showID: string,
-  e: string
+  e: string,
+  image: string
 }
 
 export type DownloadedMedia = {

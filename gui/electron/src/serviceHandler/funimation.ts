@@ -87,9 +87,9 @@ class FunimationHandler extends Base implements MessageHandler {
       return this.alertError(res.reason);
 
     for (const ep of res.value) {
-      await this.funi.getEpisode(false, { dubLang: data.dubLang, fnSlug: ep, s: data.id, subs: { dlsubs: ['all'], sub: false }, callback: this.handleProgress.bind(this) }, { ..._default, ass: true, callback: this.handleProgress.bind(this), fileName: data.fileName, q: data.q })
+      await this.funi.getEpisode(false, { dubLang: data.dubLang, fnSlug: ep, s: data.id, subs: { dlsubs: ['all'], sub: false } }, { ..._default, callbackMaker: this.makeProgressHandler.bind(this), ass: true, fileName: data.fileName, q: data.q })
     }
-    this.getWindow().webContents.send('finish');
+    this.sendMessage({ name: 'finish', data: undefined })
     this.setDownloading(false);
   };
 }

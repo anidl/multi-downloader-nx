@@ -7,13 +7,17 @@ import Progress from "./Progress/Progress";
 import SearchBox from "./SearchBox/SearchBox";
 
 const MainFrame: React.FC = () => {
-  return <Box sx={{ border: '2px solid white', width: '75%' }}>
-    <SearchBox />
-    <Divider variant='middle' className="divider-width" light sx={{ color: 'text.primary', fontSize: '1.2rem' }}>Options</Divider>
-    <DownloadSelector />
-    <Divider variant='middle' className="divider-width" light />
-    <Bottom />
-    <Progress />
+  return <Box sx={{ display: 'grid', gridTemplateColumns: '3fr 1fr', borderCollapse: 'collapse' }}>
+    <Box sx={{ border: '2px solid white' }}>
+      <SearchBox />
+      <Divider variant='middle' className="divider-width" light sx={{ color: 'text.primary', fontSize: '1.2rem' }}>Options</Divider>
+      <DownloadSelector />
+      <Divider variant='middle' className="divider-width" light />
+      <Bottom />
+    </Box>
+    <Box sx={{ marginLeft: 1 }}>
+     <Progress />
+    </Box>
   </Box>
 }
 

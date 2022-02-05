@@ -1,5 +1,6 @@
 import React from "react";
-import { ProgressData } from "../../../../../../@types/messageHandler";
+import { ExtendedProgress, ProgressData } from "../../../../../../@types/messageHandler";
+import { RandomEvent } from "../../../../../../@types/randomEvents";
 import useStore from "../../../hooks/useStore";
 import { messageChannelContext } from "../../../provider/MessageChannel";
 
@@ -7,17 +8,21 @@ const useDownloadManager = () => {
   const [ { currentDownload }, dispatch ] = useStore();
   const messageHandler = React.useContext(messageChannelContext);
 
-  const [progressData, setProgressData] = React.useState<ProgressData|undefined>();
+  const [progressData, setProgressData] = React.useState<ExtendedProgress|undefined>();
   
   React.useEffect(() => {
-    const handler = (data: ProgressData) => {
-      console.log(data);
-      setProgressData(data);
+    const handler = (ev: RandomEvent<'progress'>) => {
+      console.log(ev.data);
+      setProgressData(ev.data);
     }
     messageHandler?.randomEvents.on('progress', handler);
 
     const finishHandler = () => {
-      console.log('DONE');
+      setProgressData(undefined);
+      dispatch({
+        type: 'finish',
+        payload: undefined
+      })
     }
 
     messageHandler?.randomEvents.on('finish', finishHandler);
@@ -29,6 +34,8 @@ const useDownloadManager = () => {
 
   React.useEffect(() => {
     if (!currentDownload)
+      return;
+    if (messageHandler?.isDownloading())
       return;
     messageHandler?.downloadItem(currentDownload);
   }, [currentDownload]);
