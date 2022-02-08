@@ -16,6 +16,7 @@ export interface MessageHandler {
 
 export type QueueItem = {
   title: string,
+  episode: string,
   ids: string[],
   fileName: string,
   parent: {

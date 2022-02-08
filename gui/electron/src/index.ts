@@ -1,10 +1,10 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 import path from 'path/posix';
-import json from '../../../package.json';
 import registerMessageHandler from './messageHandler';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import express from "express";
+import { Console } from 'console';
 
 if (fs.existsSync(path.join(__dirname, '.env')))
   dotenv.config({ path: path.join(__dirname, '.env'), debug: true });
@@ -13,20 +13,77 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+const isWindows = __dirname.indexOf('\\') !== -1;
+
 let mainWindow: BrowserWindow|undefined = undefined;
 export { mainWindow };
 
+const icon = path.join(__dirname, 'images', `Logo_Inverted.${isWindows ? 'ico' : 'png'}`);
+
+if (!process.env.TEST) {
+  console = ((oldConsole: Console) => {
+    const logFolder = path.join(__dirname, 'logs');
+    if (!fs.existsSync(logFolder))
+      fs.mkdirSync(logFolder);
+    return new Console(fs.createWriteStream(path.join(logFolder, `${Date.now()}.log`)));
+    
+    const writeLogFile = (type: 'log'|'info'|'warn'|'error', args: any[]) => {
+      const file = path.join(logFolder, `${type}.log`);
+
+      args = args.map(a => {
+        const type = typeof a;
+        if (type === 'function' || type === 'symbol')
+          return '';
+        if (type === 'object') 
+          return JSON.stringify(a);
+        if (type === 'undefined')
+          return 'undefined';
+        return a;
+      });
+
+      fs.appendFileSync(file, args.join(' ') + '\n');
+    } 
+    
+    return {
+      ...oldConsole,
+      log: (...data: any[]) => writeLogFile('log', data),
+      info: (...data: any[]) => writeLogFile('info', data),
+      warn: (...data: any[]) => writeLogFile('warn', data),
+      error: (...data: any[]) => writeLogFile('error', data),
+    } as Console;
+  })(console);
+}
+
 const createWindow = async () => {
+  
   // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
-    title: json.name,
+    title: 'AniDL GUI BETA',
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js')
     },
+    icon,
   });
+
+  if (!process.env.TEST) {
+    const response = dialog.showMessageBoxSync(mainWindow, {
+      title: 'Test Version Information',
+      message: 'I understand that this is a test version that is subject to changes and most certainly contains errors.' 
+        + '\nI understand that I am using this tool at my own risk.'
+        + '\nI know that bugs or suggestions should be made to Izuco on Discord or under github@izuco.dev'
+        + '\nI understand that I should thank Darekon for the art works and the concept art if I see him',
+      buttons: [
+        'Cancel',
+        'I understand'
+      ],
+      type: 'info'
+    });
+    if (response !== 1)
+      app.quit();
+  }
 
   registerMessageHandler(mainWindow);
   
@@ -35,7 +92,7 @@ const createWindow = async () => {
 
     // Path.sep seems to return / on windows with electron 
     // \\ in Filename on Linux is possible but I don't see another way rn
-    const sep = __dirname.indexOf('\\') == -1 ? '/' : '\\';
+    const sep = isWindows ? '\\' : '/';
 
     const p = __dirname.split(sep);
     p.pop();

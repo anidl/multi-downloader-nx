@@ -40,7 +40,8 @@ class CrunchyHandler extends Base implements MessageHandler {
           title: a.seasonTitle,
           season: a.season.toString()
         },
-        e: a.e
+        e: a.e,
+        episode: a.episodeNumber
       };
     }) };
   }

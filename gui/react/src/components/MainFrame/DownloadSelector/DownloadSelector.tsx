@@ -116,7 +116,7 @@ const DownloadSelector: React.FC = () => {
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, but: !store.downloadOptions.but } })} variant={store.downloadOptions.but ? 'contained' : 'outlined'}>Download all but</Button>
     </Box>
     <Box sx={{ gap: 2, flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
-      <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>Search for episodes</LoadingButton>
+      <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>List episodes</LoadingButton>
       <LoadingButton loading={loading} onClick={addToQueue} variant='contained'>Add to Queue</LoadingButton>
     </Box>
   </Box> 

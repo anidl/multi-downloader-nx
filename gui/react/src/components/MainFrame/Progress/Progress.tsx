@@ -1,5 +1,5 @@
 import { Close } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import React from "react";
 import { messageChannelContext } from "../../../provider/MessageChannel";
 import LinearProgressWithLabel from "../../reusable/LinearProgressWithLabel";
@@ -73,8 +73,11 @@ const Progress: React.FC = () => {
         </Box>
       </Box>
     </Box>
-  </Box> : <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-    <Close color='primary' fontSize="large"/>
+  </Box> : <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
+    <Skeleton animation={false} variant="rectangular" sx={{ width: '100%', height: '60%', maxHeight: 200 }}/>
+    <Skeleton animation={false} variant="text"/>
+    <Skeleton animation={false} variant="text" />
+    <Skeleton animation={false} variant="text" />
   </Box>
 }
 
