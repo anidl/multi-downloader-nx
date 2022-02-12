@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog } from "electron";
+import { BrowserWindow, clipboard, dialog } from "electron";
 import { DownloadInfo, ExtendedProgress, ProgressData } from "../../../../@types/messageHandler";
 import { RandomEvent, RandomEvents } from "../../../../@types/randomEvents";
 
@@ -48,5 +48,10 @@ export default class Base {
   isDownloading() {
     return this.downloading;
   }
+
+  async writeToClipboard(text: string) {
+    clipboard.writeText(text, 'clipboard');
+    return true;
+  } 
 
 }

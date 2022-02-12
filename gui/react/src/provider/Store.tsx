@@ -55,7 +55,7 @@ const initialState: StoreState = {
     q: 0,
     e: '',
     dubLang: [ 'jpn' ],
-    fileName: '[${service}] ${showTitle} - S${season}E${episode} [${height}p]',
+    fileName: '',
     all: false,
     but: false
   },

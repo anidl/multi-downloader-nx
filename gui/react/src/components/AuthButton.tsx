@@ -28,7 +28,7 @@ const AuthButton: React.FC = () => {
     setAuthed((await messageChannel?.checkToken())?.isOk ?? false);
   }
 
-  React.useEffect(() => { checkAuth(); return () => {}; }, []);
+  React.useEffect(() => { checkAuth() }, []);
 
   const handleSubmit = async () => {
     if (!messageChannel)

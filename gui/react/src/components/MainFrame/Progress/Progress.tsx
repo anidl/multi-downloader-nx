@@ -9,7 +9,7 @@ import useDownloadManager from "../DownloadManager/DownloadManager";
 const Progress: React.FC = () => {
   const data = useDownloadManager();
   
-  return data ? <Box sx={{ display: 'grid', gridTemplateRows: '1fr 2fr', height: '100%' }}>
+  return data ? <Box sx={{ display: 'grid', gridTemplateRows: '1fr 2fr', height: 'auto' }}>
     <img style={{ maxWidth: '100%', maxHeight: '100%', border: '2px solid white', padding: 8 }} src={data.downloadInfo.image}></img>
     <Box sx={{ display: 'grid', gridTemplateRows: '1ft fit-content', gap: 1 }}>
       <table>

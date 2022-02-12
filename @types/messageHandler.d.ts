@@ -11,7 +11,8 @@ export interface MessageHandler {
   resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>,
   listEpisodes: (id: string) => Promise<EpisodeListResponse>,
   downloadItem: (data) => void,
-  isDownloading: () => boolean
+  isDownloading: () => boolean,
+  writeToClipboard: (text: string) => void
 }
 
 export type QueueItem = {
@@ -53,7 +54,10 @@ export type Episode = {
   season: string,
   seasonTitle: string,
   episode: string,
-  id: string
+  id: string,
+  img: string,
+  description: string,
+  time: string
 }
 
 export type SearchResponse = ResponseBase<SearchResponseItem[]>

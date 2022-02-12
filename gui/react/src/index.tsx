@@ -8,6 +8,7 @@ import { IconButton } from "@mui/material";
 import { CloseOutlined } from "@mui/icons-material";
 import { SnackbarProvider, SnackbarKey } from 'notistack';
 import Store from './provider/Store';
+import ErrorHandler from './provider/ErrorHandler';
 
 const notistackRef = React.createRef<SnackbarProvider>();
 const onClickDismiss = (key: SnackbarKey | undefined) => () => { 
@@ -17,24 +18,26 @@ const onClickDismiss = (key: SnackbarKey | undefined) => () => {
 
 ReactDOM.render(
   <React.StrictMode>
-    <Store>
-      <SnackbarProvider
-        ref={notistackRef}
-        action={(key) => (
-          <IconButton onClick={onClickDismiss(key)} color="inherit">
-            <CloseOutlined />
-          </IconButton>
-        )}
-        >
-        <Style>
-          <MessageChannel>
-            <ServiceProvider>
-              <App />
-            </ServiceProvider>
-          </MessageChannel>
-        </Style>
-      </SnackbarProvider>
-    </Store>
+    <ErrorHandler>
+      <Store>
+        <SnackbarProvider
+          ref={notistackRef}
+          action={(key) => (
+            <IconButton onClick={onClickDismiss(key)} color="inherit">
+              <CloseOutlined />
+            </IconButton>
+          )}
+          >
+          <Style>
+            <MessageChannel>
+              <ServiceProvider>
+                <App />
+              </ServiceProvider>
+            </MessageChannel>
+          </Style>
+        </SnackbarProvider>
+      </Store>
+    </ErrorHandler>
   </React.StrictMode>,
   document.getElementById('root')
 );

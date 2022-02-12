@@ -4,6 +4,7 @@ import type { IpcRenderer, IpcRendererEvent } from "electron";
 import useStore from '../hooks/useStore';
 
 import type { Handler, RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
+import { Backdrop, Typography } from '@mui/material';
 
 
 export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler });
@@ -77,7 +78,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     listEpisodes: async (data) => await ipcRenderer.invoke('listEpisodes', data),
     randomEvents: randomEventHandler,
     downloadItem: (data) => ipcRenderer.invoke('downloadItem', data),
-    isDownloading: () => ipcRenderer.sendSync('isDownloading')
+    isDownloading: () => ipcRenderer.sendSync('isDownloading'),
+    writeToClipboard: async (data) => await ipcRenderer.invoke('writeToClipboard', data)
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

@@ -53,11 +53,7 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
         }}
         input={<OutlinedInput id="select-multiple-chip" label={props.title} />}
         renderValue={(selected) => (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {selected.map((value) => (
-              <Chip key={value} label={value} />
-            ))}
-          </Box>
+          selected.join(', ')
         )}
         MenuProps={MenuProps}
       >

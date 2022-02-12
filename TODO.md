@@ -1,4 +1,12 @@
 - [ ] Hls-Download force yes or no on rewrite promt as well as for mkvmerge/ffmpeg
 - [x] Pick up if a download is currently in progress
 - [x] Send more information with the progress event like the title and image to display more information
-- [ ] Use Click away listener for the search popup
+- [x] Use Click away listener for the search popup
+- [x] Quality select button is uncrontrolled/controlled
+- [ ] Set Options font in divider
+- [x] Window title
+- [x] Only open dev tools in test version
+- [ ] Add help information (version, contributor, documentation...)
+- [ ] App Icon with electron-forge make
+- [x] ContextMenu
+- [x] Better episode listing with selectio via left mouse button

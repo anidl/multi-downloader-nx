@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Checkbox, Chip, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, OutlinedInput, Select, TextField } from "@mui/material";
+import { Backdrop, Box, Button, Checkbox, Chip, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, OutlinedInput, Select, TextField } from "@mui/material";
 import useStore from "../../../hooks/useStore";
 import MultiSelect from "../../reusable/MultiSelect";
 import { messageChannelContext } from "../../../provider/MessageChannel";
@@ -15,13 +15,20 @@ const DownloadSelector: React.FC = () => {
 
   React.useEffect(() => {
     (async () => {
+      /* If we don't wait the response is undefined? */
+      await new Promise((resolve) => setTimeout(() => resolve(undefined), 100));
+      const dubLang = messageHandler?.handleDefault('dubLang');
+      const q = messageHandler?.handleDefault('q');
+      const fileName = messageHandler?.handleDefault('fileName');
+      const result = await Promise.all([dubLang, q, fileName]);
+      console.log(result);
       dispatch({
         type: 'downloadOptions',
         payload: {
           ...store.downloadOptions,
-          dubLang: await messageHandler?.handleDefault('dubLang'),
-          q: await messageHandler?.handleDefault('q'),
-          fileName: await messageHandler?.handleDefault('fileName')
+          dubLang: result[0],
+          q: result[1],
+          fileName: result[2]
         }
       });
       setAvailableDubs(await messageHandler?.availableDubCodes() ?? []);
@@ -68,8 +75,6 @@ const DownloadSelector: React.FC = () => {
     }
     setLoading(false);
   }
-
-  console.log(store.queue, store.currentDownload);
 
   return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
     <Box sx={{ m: 2, gap: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>

@@ -23,11 +23,14 @@ class FunimationHandler extends Base implements MessageHandler {
     return { isOk: true, value: request.value.map(item => ({
       e: item.id_split.join(''),
       lang: item.audio ?? [],
-      name: item.episodeSlug,
-      season: item.seasonNum,
+      name: item.title,
+      season: item.seasonNum ?? item.seasonTitle ?? item.item.seasonNum ?? item.item.seasonTitle,
       seasonTitle: item.seasonTitle,
       episode: item.episodeNum,
-      id: item.id
+      id: item.id,
+      img: item.thumb,
+      description: item.synopsis,
+      time: item.runtime ?? item.item.runtime
     })) }
   }
   

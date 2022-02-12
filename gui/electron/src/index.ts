@@ -5,6 +5,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import express from "express";
 import { Console } from 'console';
+import './menu';
 
 if (fs.existsSync(path.join(__dirname, '.env')))
   dotenv.config({ path: path.join(__dirname, '.env'), debug: true });
@@ -21,37 +22,12 @@ export { mainWindow };
 const icon = path.join(__dirname, 'images', `Logo_Inverted.${isWindows ? 'ico' : 'png'}`);
 
 if (!process.env.TEST) {
-  console = ((oldConsole: Console) => {
+  console = (() => {
     const logFolder = path.join(__dirname, 'logs');
     if (!fs.existsSync(logFolder))
       fs.mkdirSync(logFolder);
     return new Console(fs.createWriteStream(path.join(logFolder, `${Date.now()}.log`)));
-    
-    const writeLogFile = (type: 'log'|'info'|'warn'|'error', args: any[]) => {
-      const file = path.join(logFolder, `${type}.log`);
-
-      args = args.map(a => {
-        const type = typeof a;
-        if (type === 'function' || type === 'symbol')
-          return '';
-        if (type === 'object') 
-          return JSON.stringify(a);
-        if (type === 'undefined')
-          return 'undefined';
-        return a;
-      });
-
-      fs.appendFileSync(file, args.join(' ') + '\n');
-    } 
-    
-    return {
-      ...oldConsole,
-      log: (...data: any[]) => writeLogFile('log', data),
-      info: (...data: any[]) => writeLogFile('info', data),
-      warn: (...data: any[]) => writeLogFile('warn', data),
-      error: (...data: any[]) => writeLogFile('error', data),
-    } as Console;
-  })(console);
+  })();
 }
 
 const createWindow = async () => {
@@ -62,7 +38,7 @@ const createWindow = async () => {
     width: 800,
     title: 'AniDL GUI BETA',
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
       preload: path.join(__dirname, 'preload.js')
     },
     icon,
@@ -112,7 +88,8 @@ const createWindow = async () => {
   }
   
   mainWindow.loadURL('http://localhost:3000');
-  mainWindow.webContents.openDevTools();
+  if (process.env.TEST)
+    mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', createWindow);

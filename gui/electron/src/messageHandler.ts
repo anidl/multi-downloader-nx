@@ -22,5 +22,6 @@ export default (window: BrowserWindow) => {
   ipcMain.handle('resolveItems', async (_, data) => handler?.resolveItems(data));
   ipcMain.handle('listEpisodes', async (_, data) => handler?.listEpisodes(data));
   ipcMain.handle('downloadItem', async (_, data) => handler?.downloadItem(data));
+  ipcMain.handle('writeToClipboard', async (_, data) => handler?.writeToClipboard(data));
   ipcMain.on('isDownloading', (ev) => ev.returnValue = handler?.isDownloading());
 };

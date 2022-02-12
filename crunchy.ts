@@ -1346,6 +1346,8 @@ export default class Crunchy implements ServiceClass {
     }
 
     return { data: episodes, list: Object.entries(episodes).map(([key, value]) => {
+      const images = (value.items[0].images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
+      const seconds = Math.floor(value.items[0].duration_ms / 1000);
       return {
         e: key.startsWith('E') ? key.slice(1) : key,
         lang: value.langs.map(a => a.code),
@@ -1353,7 +1355,10 @@ export default class Crunchy implements ServiceClass {
         season: value.items[0].season_number.toString(),
         seasonTitle: value.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
         episode: value.items[0].episode_number?.toString() ?? value.items[0].episode ?? '?',
-        id: value.items[0].season_id
+        id: value.items[0].season_id,
+        img: images[Math.floor(images.length / 2)].source,
+        description: value.items[0].description,
+        time: `${Math.floor(seconds / 60)}:${seconds % 60}`
       }
     })};
   }

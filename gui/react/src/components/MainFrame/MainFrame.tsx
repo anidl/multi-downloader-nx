@@ -2,6 +2,7 @@ import { Box, Divider } from "@mui/material";
 import React from "react";
 import Bottom from "./Bottom/Bottom";
 import DownloadSelector from "./DownloadSelector/DownloadSelector";
+import EpisodeListing from "./Listing/EpisodeListing";
 import './MainFrame.css';
 import Progress from "./Progress/Progress";
 import SearchBox from "./SearchBox/SearchBox";
@@ -18,6 +19,7 @@ const MainFrame: React.FC = () => {
     <Box sx={{ marginLeft: 1 }}>
      <Progress />
     </Box>
+    <EpisodeListing />
   </Box>
 }
 
