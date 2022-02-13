@@ -3,11 +3,15 @@ import { ExpandMore } from '@mui/icons-material'
 import React from "react";
 import useStore from "../../../hooks/useStore";
 import { Episode } from "../../../../../../@types/messageHandler";
+import ContextMenu from "../../reusable/ContextMenu";
+import { messageChannelContext } from "../../../provider/MessageChannel";
 
 const EpisodeListing: React.FC = () => {
   const [store, dispatch] = useStore();
 
   const [season, setSeason] = React.useState<'all'|string>('all');
+
+  const messageHandler = React.useContext(messageChannelContext);
 
   const seasons = React.useMemo(() => {
     const s: string[] = [];
@@ -58,9 +62,10 @@ const EpisodeListing: React.FC = () => {
       </Box>
       <List>
         {store.episodeListing.filter((a) => season === 'all' ? true : a.season === season).map((item, index, { length }) => {
+          const ref = React.createRef<HTMLDivElement>();
           const e = isNaN(parseInt(item.e)) ? item.e : parseInt(item.e);
           const isSelected = selected.includes(e.toString());
-          return <Box key={`Episode_List_Item_${index}`} sx={{
+          return <Box ref={ref} key={`Episode_List_Item_${index}`} sx={{
               backdropFilter: isSelected ? 'brightness(1.5)' : '',
               '&:hover': {
                 backdropFilter: 'brightness(1.5)'
@@ -94,6 +99,13 @@ const EpisodeListing: React.FC = () => {
                 </Typography>
               </Box>
             </ListItem>
+            <ContextMenu popupItem={ref} options={[
+              { text: 'Copy title', onClick: () => messageHandler?.writeToClipboard(item.name) },
+              { text: 'Copy description', onClick: () => messageHandler?.writeToClipboard(item.description) },
+              { text: 'Copy image URL', onClick: () => messageHandler?.writeToClipboard(item.img) },
+              "divider",
+              { text: 'Copy everything', onClick: () => messageHandler?.writeToClipboard(JSON.stringify(item, null, 2)) },
+            ]} />
             {index < length - 1 && <Divider />}
           </Box>
         })}

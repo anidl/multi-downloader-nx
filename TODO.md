@@ -10,3 +10,4 @@
 - [ ] App Icon with electron-forge make
 - [x] ContextMenu
 - [x] Better episode listing with selectio via left mouse button
+- [x] Use Child for Context Menu

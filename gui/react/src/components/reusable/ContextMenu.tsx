@@ -44,7 +44,7 @@ function ContextMenu<T extends HTMLElement, >(props: ContextMenuProps<T>) {
     };
   }, [ props.popupItem ])
 
-  return show ? <Box sx={{ p: 1, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(5px)', position: 'fixed', left: anchor.x, top: anchor.y }}>
+  return show ? <Box sx={{ zIndex: 9999, p: 1, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(5px)', position: 'fixed', left: anchor.x, top: anchor.y }}>
     <List sx={{ p: 0, m: 0 }}>
       {props.options.map((item, i) => {
         return item === 'divider' ? <Divider key={`ContextMenu_Divider_${i}_${item}`}/> : 

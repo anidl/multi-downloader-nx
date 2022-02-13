@@ -1,6 +1,7 @@
-import { BrowserWindow, clipboard, dialog } from "electron";
-import { DownloadInfo, ExtendedProgress, ProgressData } from "../../../../@types/messageHandler";
+import { BrowserWindow, clipboard, dialog, shell } from "electron";
+import { DownloadInfo, ProgressData } from "../../../../@types/messageHandler";
 import { RandomEvent, RandomEvents } from "../../../../@types/randomEvents";
+import { isWindows } from "..";
 
 export default class Base {
 
@@ -53,5 +54,13 @@ export default class Base {
     clipboard.writeText(text, 'clipboard');
     return true;
   } 
+
+  async openFolder(subPath: string[]) {
+    const sep = isWindows ? '\\' : '/';
+
+    const p = __dirname.split(sep).slice(0, -4); // gui/electron/src/serviceHandler
+    p.push(...subPath);
+    shell.openPath(p.join(sep));
+  }
 
 }

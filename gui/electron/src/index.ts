@@ -14,7 +14,7 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
-const isWindows = __dirname.indexOf('\\') !== -1;
+export const isWindows = __dirname.indexOf('\\') !== -1;
 
 let mainWindow: BrowserWindow|undefined = undefined;
 export { mainWindow };

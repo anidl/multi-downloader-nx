@@ -37,6 +37,9 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
         click: () => {
           shell.openPath(path.join(__dirname, 'logs'))
         }
+      },
+      {
+        role: 'forceReload'
       }
     ]
   },

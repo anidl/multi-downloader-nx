@@ -79,7 +79,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     randomEvents: randomEventHandler,
     downloadItem: (data) => ipcRenderer.invoke('downloadItem', data),
     isDownloading: () => ipcRenderer.sendSync('isDownloading'),
-    writeToClipboard: async (data) => await ipcRenderer.invoke('writeToClipboard', data)
+    writeToClipboard: async (data) => await ipcRenderer.invoke('writeToClipboard', data),
+    openFolder: async (data) => await ipcRenderer.invoke('openFolder', data)
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

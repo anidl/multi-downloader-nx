@@ -5,6 +5,7 @@ import MultiSelect from "../../reusable/MultiSelect";
 import { messageChannelContext } from "../../../provider/MessageChannel";
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useSnackbar } from "notistack";
+import { Folder } from "@mui/icons-material";
 
 const DownloadSelector: React.FC = () => {
   const messageHandler = React.useContext(messageChannelContext);
@@ -21,7 +22,6 @@ const DownloadSelector: React.FC = () => {
       const q = messageHandler?.handleDefault('q');
       const fileName = messageHandler?.handleDefault('fileName');
       const result = await Promise.all([dubLang, q, fileName]);
-      console.log(result);
       dispatch({
         type: 'downloadOptions',
         payload: {
@@ -123,6 +123,7 @@ const DownloadSelector: React.FC = () => {
     <Box sx={{ gap: 2, flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
       <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>List episodes</LoadingButton>
       <LoadingButton loading={loading} onClick={addToQueue} variant='contained'>Add to Queue</LoadingButton>
+      <Button variant="contained" startIcon={<Folder />} onClick={() => messageHandler?.openFolder(['videos'])}>Open Output Directory</Button>
     </Box>
   </Box> 
 };
