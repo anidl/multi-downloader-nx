@@ -91,7 +91,7 @@
     "eslint": "eslint *.js modules",
     "eslint-fix": "eslint *.js modules --fix",
     "pretest": "npm run tsc",
-    "test": "cd lib && node modules/build win64 && node modules/build ubuntu64 && node modules/build macos64"
+    "test": "cd lib && node modules/build windows64 && node modules/build ubuntu64 && node modules/build macos64"
   },
   "config": {
     "forge": {
