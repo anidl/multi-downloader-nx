@@ -76,16 +76,22 @@
     "start": "cd lib && electron-forge start",
     "docs": "ts-node modules/build-docs.ts",
     "tsc": "ts-node tsc.ts",
-    "prebuild-win64": "npm run tsc",
-    "prebuild-linux64": "npm run tsc",
-    "prebuild-macos64": "npm run tsc",
-    "build-win64": "cd lib && node modules/build win64",
-    "build-linux64": "cd lib && node modules/build linux64",
-    "build-macos64": "cd lib && node modules/build macos64",
+    "prebuild-windows-cli": "npm run tsc false false",
+    "prebuild-ubuntu-cli": "npm run tsc false false",
+    "prebuild-macos-cli": "npm run tsc false false",
+    "build-windows-cli": "cd lib && node modules/build windows64",
+    "build-ubuntu-cli": "cd lib && node modules/build ubuntu64",
+    "build-macos-cli": "cd lib && node modules/build macos64",
+    "prebuild-windows-gui": "npm run tsc",
+    "prebuild-ubuntu-gui": "npm run tsc",
+    "prebuild-macos-gui": "npm run tsc",
+    "build-windows-gui": "cd lib && node modules/build windows64 true",
+    "build-ubuntu-gui": "cd lib && node modules/build ubuntu64 true",
+    "build-macos-gui": "cd lib && node modules/build macos64 true",
     "eslint": "eslint *.js modules",
     "eslint-fix": "eslint *.js modules --fix",
     "pretest": "npm run tsc",
-    "test": "cd lib && node modules/build win64 && node modules/build linux64 && node modules/build macos64"
+    "test": "cd lib && node modules/build windows64 && node modules/build ubuntu64 && node modules/build macos64"
   },
   "config": {
     "forge": {
@@ -105,10 +111,6 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
           "config": {}
         }
       ]
