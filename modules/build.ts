@@ -26,7 +26,7 @@ async function buildGUI() {
 // main
 async function buildBinary(buildType: string) {
   const buildStr = `${pkg.name}-${pkg.version}`;
-  const acceptableBuilds = ['win64','linux64','macos64'];
+  const acceptableBuilds = ['windows64','ubuntu64','macos64'];
   if(!acceptableBuilds.includes(buildType)){
     console.error('[ERROR] unknown build type!');
     process.exit(1);
@@ -72,9 +72,9 @@ async function buildBinary(buildType: string) {
 
 function getTarget(bt: string) : string {
   switch(bt){
-  case 'win64':
+  case 'windows64':
     return 'windows-x64';
-  case 'linux64':
+  case 'ubuntu64':
     return 'linux-x64';
   case 'macos64':
     return 'macos-x64';

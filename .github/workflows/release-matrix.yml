@@ -18,13 +18,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
           check-latest: true
 
       - name: Install Node modules
         run: |
           npm install
-          cd gui/react && npm install
 
       - name: Get name and version from package.json
         run: |
@@ -39,8 +38,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_name: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ env.BUILD_TYPE }}.7z
-          asset_path: ./lib/_builds/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ env.BUILD_TYPE }}.7z
+          asset_name: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ matrix.build_type }}.7z
+          asset_path: ./lib/_builds/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}-${{ matrix.build_type }}64.7z
           asset_content_type: application/x-7z-compressed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

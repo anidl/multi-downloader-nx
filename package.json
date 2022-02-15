@@ -79,19 +79,19 @@
     "prebuild-windows-false": "npm run tsc false false",
     "prebuild-ubuntu-false": "npm run tsc false false",
     "prebuild-macos-false": "npm run tsc false false",
-    "build-windows-false": "cd lib && node modules/build win64",
-    "build-ubuntu-false": "cd lib && node modules/build linux64",
+    "build-windows-false": "cd lib && node modules/build windows64",
+    "build-ubuntu-false": "cd lib && node modules/build ubuntu64",
     "build-macos-false": "cd lib && node modules/build macos64",
     "prebuild-windows-true": "npm run tsc",
     "prebuild-ubuntu-true": "npm run tsc",
     "prebuild-macos-true": "npm run tsc",
-    "build-windows-true": "cd lib && node modules/build true",
-    "build-ubuntu-true": "cd lib && node modules/build true",
-    "build-macos-true": "cd lib && node modules/build true",
+    "build-windows-true": "cd lib && node modules/build notNeeded true",
+    "build-ubuntu-true": "cd lib && node modules/build notNeeded true",
+    "build-macos-true": "cd lib && node modules/build notNeeded true",
     "eslint": "eslint *.js modules",
     "eslint-fix": "eslint *.js modules --fix",
     "pretest": "npm run tsc",
-    "test": "cd lib && node modules/build win64 && node modules/build linux64 && node modules/build macos64"
+    "test": "cd lib && node modules/build win64 && node modules/build ubuntu64 && node modules/build macos64"
   },
   "config": {
     "forge": {
