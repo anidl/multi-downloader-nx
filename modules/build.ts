@@ -4,6 +4,7 @@ import pkg from '../package.json';
 import modulesCleanup from 'removeNPMAbsolutePaths';
 import { exec } from 'pkg';
 import { execSync } from 'child_process';
+import { sep } from 'path';
 
 const buildsDir = './_builds';
 const nodeVer = 'node16-';
@@ -13,19 +14,32 @@ const nodeVer = 'node16-';
   const isGUI = process.argv[3] === 'true';
 
   if (isGUI) {
-    buildGUI();
+    buildGUI(buildType);
   } else {
     buildBinary(buildType);
   }
 })();
 
-async function buildGUI() {
+async function buildGUI(buildType: string) {
   execSync('npx electron-forge make');
+  const path = ['out', 'make'];
+  const makerDir = fs.readdirSync(path.join(sep));
+  if (makerDir.length !== 1)
+    throw new Error(`Illegal state ${makerDir.join(sep)}`);
+  path.push(makerDir[0]);
+  const arch = fs.readdirSync(path.join(sep));
+  if (arch.length !== 1)
+    throw new Error(`Illegal state ${arch.join(sep)}`);
+  path.push(arch[0]);
+  execSync(`7z a -t7z "../../../../${buildsDir}/multi-downloader-nx-${buildType}-gui.7z" .`,{
+    stdio:[0,1,2],
+    cwd: path.join(sep)
+  });
 }
 
 // main
 async function buildBinary(buildType: string) {
-  const buildStr = `${pkg.name}-${pkg.version}`;
+  const buildStr = `multi-downloader-nx`;
   const acceptableBuilds = ['windows64','ubuntu64','macos64'];
   if(!acceptableBuilds.includes(buildType)){
     console.error('[ERROR] unknown build type!');
@@ -35,7 +49,7 @@ async function buildBinary(buildType: string) {
   if(!fs.existsSync(buildsDir)){
     fs.mkdirSync(buildsDir);
   }
-  const buildFull = `${buildStr}-${buildType}`;
+  const buildFull = `${buildStr}-${buildType}-cli`;
   const buildDir = `${buildsDir}/${buildFull}`;
   if(fs.existsSync(buildDir)){
     fs.removeSync(buildDir);
