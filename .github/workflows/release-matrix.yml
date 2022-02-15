@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_name: multi-downloader-nx-${{ matrix.build_type }}-{{ matrix.gui }}.7z
+          asset_name: multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.gui }}.7z
           asset_path: ./lib/_builds/multi-downloader-nx-${{ matrix.build_type }}64-${{ matrix.gui }}.7z
           asset_content_type: application/x-7z-compressed
         env:
