@@ -21,7 +21,7 @@ const nodeVer = 'node16-';
 })();
 
 async function buildGUI(buildType: string) {
-  execSync('npx electron-forge make');
+  execSync('npx electron-forge make', { stdio: [0,1,2] });
   const path = ['out', 'make'];
   const makerDir = fs.readdirSync(path.join(sep));
   if (makerDir.length !== 1)
