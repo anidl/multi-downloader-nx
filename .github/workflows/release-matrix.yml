@@ -6,14 +6,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        build_type: [ linux64, macos64, win64 ]
+        build_type: [ ubuntu, macos, windows ]
+        gui: [ true, false ]
+    runs-on: ${{ matrix.build_type }}-latest
     steps:
-      - name: Set build type
-        run: |
-          echo BUILD_TYPE=${{ matrix.build_type }} >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -35,7 +33,7 @@ jobs:
           echo PACKAGE_NAME=$(node -p -e "require('./package.json').name") >> $GITHUB_ENV &&
           echo PACKAGE_VERSION=$(node -p -e "require('./package.json').version") >> $GITHUB_ENV || exit 1
       - name: Make build
-        run: npm run build-${{ env.BUILD_TYPE }}
+        run: npm run build-${{ matrix.build_type }}-${{ matrix.gui }}
 
       - name: Upload release
         uses: actions/upload-release-asset@v1

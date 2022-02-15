@@ -1,17 +1,26 @@
 import { ChildProcess, exec } from 'child_process';
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import { removeSync, copyFileSync } from 'fs-extra';
+import packageJSON from './package.json';
 
 const argv = process.argv.slice(2);
 let buildIgnore: string[] = [];
 
 const isTest = argv.length > 0 && argv[0] === 'test';
+const isGUI = !(argv.length > 1 && argv[1] === 'false');
 
 if (!isTest)
   buildIgnore = [
-    '*/\\.env'
+    '*/\\.env',
+    '*/node_modules/*'
   ];
+
+if (!isGUI)
+  buildIgnore = buildIgnore.concat([
+    './gui*'
+  ])
+
 
 const ignore = [
   ...buildIgnore,
@@ -50,8 +59,14 @@ export { ignore };
 
   await waitForProcess(tsc);
   
-  if (!isTest) {
+  if (!isGUI) {
+    fs.emptyDirSync(path.join('lib', 'gui'));
+    fs.rmdirSync(path.join('lib', 'gui'));
+  }
+
+  if (!isTest && isGUI) {
     process.stdout.write('✓\nBuilding react... ');
+
     const installReactDependencies = exec('npm install', {
       cwd: path.join(__dirname, 'gui', 'react'),
     });
@@ -64,9 +79,9 @@ export { ignore };
   
     await waitForProcess(react);
   }
-  
+
   process.stdout.write('✓\nCopying files... ');
-  if (!isTest) {
+  if (!isTest && isGUI) {
     copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'electron', 'build'));
   }
 
@@ -80,8 +95,23 @@ export { ignore };
       copyFileSync(item.path, itemPath);
     }
   });
+
+  process.stdout.write('✓\nInstalling dependencies');
+  if (!isTest && !isGUI) {
+    alterJSON();
+  }
+  const dependencies = exec(`npm install ${isGUI ? '' : '--production'}`, {
+    cwd: path.join(__dirname, 'lib')
+  });
+  await waitForProcess(dependencies);
+
   process.stdout.write('✓\n');
 })();
+
+function alterJSON() {
+  packageJSON.main = 'index.js';
+  fs.writeFileSync(path.join('lib', 'package.json'), JSON.stringify(packageJSON, null, 4));
+}
 
 function readDir (dir: string): {
   path: string,

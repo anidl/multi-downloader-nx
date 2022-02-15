@@ -8,11 +8,25 @@ import { execSync } from 'child_process';
 const buildsDir = './_builds';
 const nodeVer = 'node16-';
 
+(async () => {
+  const buildType = process.argv[2];
+  const isGUI = process.argv[3] === 'true';
+
+  if (isGUI) {
+    buildGUI();
+  } else {
+    buildBinary(buildType);
+  }
+})();
+
+async function buildGUI() {
+  execSync('npx electron-forge make');
+}
+
 // main
-(async function(){
+async function buildBinary(buildType: string) {
   const buildStr = `${pkg.name}-${pkg.version}`;
   const acceptableBuilds = ['win64','linux64','macos64'];
-  const buildType = process.argv[2];
   if(!acceptableBuilds.includes(buildType)){
     console.error('[ERROR] unknown build type!');
     process.exit(1);
@@ -54,7 +68,7 @@ const nodeVer = 'node16-';
     fs.removeSync(`${buildsDir}/${buildFull}.7z`);
   }
   execSync(`7z a -t7z "${buildsDir}/${buildFull}.7z" "${buildDir}"`,{stdio:[0,1,2]});
-}());
+};
 
 function getTarget(bt: string) : string {
   switch(bt){
