@@ -34,7 +34,7 @@ export interface Item {
   mostRecentSvodUs:                       MostRecent;
   item:                                   Item;
   mostRecentSvodEngAllTerrStartTimestamp: number;
-  audio:                                  Audio[];
+  audio:                                  string[];
   mostRecentAvod:                         MostRecent;
 }
 

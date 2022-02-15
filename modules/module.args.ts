@@ -569,8 +569,46 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
   }
 ];
 
+const getDefault = <T extends boolean|string|number|unknown[]>(name: string, cfg: Record<string, T>): T => {
+  const option = args.find(item => item.name === name);
+  if (!option)
+    throw new Error(`Unable to find option ${name}`);
+  if (option.default === undefined) 
+    throw new Error(`Option ${name} has no default`);
+  if (typeof option.default === 'object') {
+    if (Array.isArray(option.default))
+      return option.default as T;
+    if (Object.prototype.hasOwnProperty.call(cfg, option.default.name ?? option.name)) {
+      return cfg[option.default.name ?? option.name];
+    } else {
+      return option.default.default as T;
+    }
+  } else {
+    return option.default as T;
+  }
+};
+
+const buildDefault = () => {
+  const data: Record<string, unknown> = {}
+  const defaultArgs = args.filter(a => a.default);
+  defaultArgs.forEach(item => {
+    if (typeof item.default === 'object') {
+      if (Array.isArray(item.default)) {
+        data[item.name] = item.default;
+      } else {
+        data[item.default.name ?? item.name] = item.default.default;
+      }
+    } else {
+      data[item.name] = item.default;
+    }
+  })
+  return data;
+}
+
 export {
   TAppArg,
+  getDefault,
+  buildDefault,
   args,
   groups,
   availableFilenameVars

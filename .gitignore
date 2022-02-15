@@ -1,7 +1,7 @@
 /bin/ff*
 /bin/mkv*
 /_builds/*
-/node_modules/
+**/node_modules/
 /videos/*.json
 /videos/*.ts
 .DS_Store
@@ -23,3 +23,7 @@ funi_token.yml
 cr_token.yml
 archive.json
 fonts
+.webpack/
+out/
+dist/
+build/

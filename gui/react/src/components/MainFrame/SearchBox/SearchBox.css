@@ -1,0 +1,8 @@
+.listitem-hover:hover {
+  -webkit-filter: brightness(70%);
+  filter: brightness(70%);
+}
+
+.listitem-hover {
+  transition: filter 0.1s ease-in;
+}

@@ -1,5 +1,40 @@
+import { HLSCallback } from 'hls-download';
 import { sxItem } from '../crunchy';
 import { LanguageItem } from '../modules/module.langsData';
+import { DownloadInfo } from './messageHandler';
+
+export type CrunchyDownloadOptions = {
+  hslang: string,
+  kstream: number,
+  novids?: boolean,
+  x: number,
+  q: number,
+  fileName: string,
+  numbers: number,
+  partsize: number,
+  callbackMaker?: (data: DownloadInfo) => HLSCallback,
+  timeout: number,
+  fsRetryTime: number,
+  dlsubs: string[],
+  skipsubs: boolean,
+  mp4: boolean
+}
+
+export type CurnchyMultiDownload = {
+  dubLang: string[],
+  all?: boolean,
+  but?: boolean,
+  e?: string
+}
+
+export type CrunchyMuxOptions = {
+  output: string,
+  skipSubMux?: boolean
+  novids?: boolean,
+  mp4: boolean,
+  forceMuxer?: 'ffmpeg'|'mkvmerge',
+  nocleanup?: boolean
+}
 
 export type CrunchyEpMeta = {
   data: {
@@ -11,7 +46,10 @@ export type CrunchyEpMeta = {
   episodeNumber: string,
   episodeTitle: string,
   seasonID: string,
-  season: number
+  season: number,
+  showID: string,
+  e: string,
+  image: string
 }
 
 export type DownloadedMedia = {
