@@ -5,7 +5,44 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import express from "express";
 import { Console } from 'console';
+import json from '../../../package.json';
+
+const getDataDirectory = () => {
+  switch (process.platform) {
+    case "darwin": {
+      if (!process.env.HOME) {
+        console.error('Unknown home directory');
+        process.exit(1);
+      }
+      return path.join(process.env.HOME, "Library", "Application Support", json.name);
+    }
+    case "win32": {
+      if (!process.env.APPDATA) {
+        console.error('Unknown home directory');
+        process.exit(1);
+      }
+      return path.join(process.env.APPDATA, json.name);
+    }
+    case "linux": {
+      if (!process.env.HOME) {
+        console.error('Unknown home directory');
+        process.exit(1);
+      }
+      return path.join(process.env.HOME, `.${json.name}`);
+    }
+    default: {
+      console.error("Unsupported platform!");
+      process.exit(1);
+    }  
+  }
+}
+if (!fs.existsSync(getDataDirectory()))
+  fs.mkdirSync(getDataDirectory());
+
+export { getDataDirectory };
+
 import './menu';
+
 
 if (fs.existsSync(path.join(__dirname, '.env')))
   dotenv.config({ path: path.join(__dirname, '.env'), debug: true });
@@ -14,7 +51,7 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
-export const isWindows = __dirname.indexOf('\\') !== -1;
+export const isWindows = process.platform === 'win32';
 
 let mainWindow: BrowserWindow|undefined = undefined;
 export { mainWindow };
@@ -23,7 +60,7 @@ const icon = path.join(__dirname, 'images', `Logo_Inverted.${isWindows ? 'ico' :
 
 if (!process.env.TEST) {
   console = (() => {
-    const logFolder = path.join(__dirname, 'logs');
+    const logFolder = path.join(getDataDirectory(), 'logs');
     if (!fs.existsSync(logFolder))
       fs.mkdirSync(logFolder);
     return new Console(fs.createWriteStream(path.join(logFolder, `${Date.now()}.log`)));

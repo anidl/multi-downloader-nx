@@ -1,5 +1,6 @@
 import { Menu, MenuItem, MenuItemConstructorOptions, shell } from "electron";
 import path from 'path';
+import { getDataDirectory } from ".";
 import json from '../../../package.json';
 
 const template: (MenuItemConstructorOptions | MenuItem)[] = [
@@ -35,7 +36,7 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
       {
         label: 'Open log folder',
         click: () => {
-          shell.openPath(path.join(__dirname, 'logs'))
+          shell.openPath(path.join(getDataDirectory(), 'logs'))
         }
       },
       {

@@ -96,14 +96,16 @@ export { ignore };
     }
   });
 
-  process.stdout.write('✓\nInstalling dependencies');
+  process.stdout.write('✓\nInstalling dependencies... ');
   if (!isTest && !isGUI) {
     alterJSON();
   }
-  const dependencies = exec(`npm install ${isGUI ? '' : '--production'}`, {
-    cwd: path.join(__dirname, 'lib')
-  });
-  await waitForProcess(dependencies);
+  if (!isTest) {
+    const dependencies = exec(`npm install ${isGUI ? '' : '--production'}`, {
+      cwd: path.join(__dirname, 'lib')
+    });
+    await waitForProcess(dependencies);
+  }
 
   process.stdout.write('✓\n');
 })();
