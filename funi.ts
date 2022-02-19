@@ -111,7 +111,7 @@ export default class Funi implements ServiceClass {
       return ok;
     }
     else{
-      appYargs.showHelp();
+      console.log(`[INFO] No option selected or invalid value entered. Try --help.`);
     }
   }
   public async auth(data: AuthData): Promise<AuthResponse> {

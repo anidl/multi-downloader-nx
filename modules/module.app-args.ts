@@ -27,12 +27,9 @@ const overrideArguments = (cfg: { [key:string]: unknown }, override: Partial<typ
   }).parseSync();
   argvC = argv;
 };
-
-const showHelp = yargs.showHelp;
     
 export {
   appArgv,
-  showHelp,
   overrideArguments
 };
     
@@ -50,7 +47,7 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
   })
     .wrap(yargs.terminalWidth())
     .usage('Usage: $0 [options]')
-    .help(false).version(false);
+    .help(true).version(false);
   const data = args.map(a => {
     return {
       ...a,

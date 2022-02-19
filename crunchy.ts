@@ -144,7 +144,7 @@ export default class Crunchy implements ServiceClass {
       return true;
     }
     else{
-      yargs.showHelp();
+      console.log(`[INFO] No option selected or invalid value entered. Try --help.`);
     }
   }
 
