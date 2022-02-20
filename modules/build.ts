@@ -32,33 +32,33 @@ async function buildGUI(buildType: BuildTypes) {
 
 function getCommand(buildType: BuildTypes) {
   switch (buildType) {
-    case 'ubuntu64':
-      return `--linux --arm64`
-    case 'windows64':
-      return '--win';
-    case 'macos64':
-      return '--mac dmg';
-    default:
-      return '--error'
+  case 'ubuntu64':
+    return '--linux --arm64';
+  case 'windows64':
+    return '--win';
+  case 'macos64':
+    return '--mac dmg';
+  default:
+    return '--error';
   }
 }
 
 function getOutputFileName(buildType: BuildTypes) {
   switch (buildType) {
-    case 'ubuntu64':
-      return `${pkg.name}_${pkg.version}_arm64.deb`;
-    case 'windows64':
-      return `${pkg.name} Setup ${pkg.version}.exe`;
-    case 'macos64':
-      return `${pkg.name}-${pkg.version}.dmg`;
-    default:
-      throw new Error(`Unknown build type ${buildType}`);
+  case 'ubuntu64':
+    return `${pkg.name}_${pkg.version}_arm64.deb`;
+  case 'windows64':
+    return `${pkg.name} Setup ${pkg.version}.exe`;
+  case 'macos64':
+    return `${pkg.name}-${pkg.version}.dmg`;
+  default:
+    throw new Error(`Unknown build type ${buildType}`);
   }
 }
 
 // main
 async function buildBinary(buildType: BuildTypes) {
-  const buildStr = `multi-downloader-nx`;
+  const buildStr = 'multi-downloader-nx';
   const acceptableBuilds = ['windows64','ubuntu64','macos64'];
   if(!acceptableBuilds.includes(buildType)){
     console.error('[ERROR] unknown build type!');
@@ -101,7 +101,7 @@ async function buildBinary(buildType: BuildTypes) {
     fs.removeSync(`${buildsDir}/${buildFull}.7z`);
   }
   execSync(`7z a -t7z "${buildsDir}/${buildFull}.7z" "${buildDir}"`,{stdio:[0,1,2]});
-};
+}
 
 function getTarget(bt: string) : string {
   switch(bt){

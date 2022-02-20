@@ -3,7 +3,7 @@ import path from 'path/posix';
 import registerMessageHandler from './messageHandler';
 import fs from 'fs';
 import dotenv from 'dotenv';
-import express from "express";
+import express from 'express';
 import { Console } from 'console';
 import json from '../../../package.json';
 
@@ -17,33 +17,33 @@ process.on('unhandledRejection', (er, pr) => {
 
 const getDataDirectory = () => {
   switch (process.platform) {
-    case "darwin": {
-      if (!process.env.HOME) {
-        console.error('Unknown home directory');
-        process.exit(1);
-      }
-      return path.join(process.env.HOME, "Library", "Application Support", json.name);
-    }
-    case "win32": {
-      if (!process.env.APPDATA) {
-        console.error('Unknown home directory');
-        process.exit(1);
-      }
-      return path.join(process.env.APPDATA, json.name);
-    }
-    case "linux": {
-      if (!process.env.HOME) {
-        console.error('Unknown home directory');
-        process.exit(1);
-      }
-      return path.join(process.env.HOME, `.${json.name}`);
-    }
-    default: {
-      console.error("Unsupported platform!");
+  case 'darwin': {
+    if (!process.env.HOME) {
+      console.error('Unknown home directory');
       process.exit(1);
-    }  
+    }
+    return path.join(process.env.HOME, 'Library', 'Application Support', json.name);
   }
-}
+  case 'win32': {
+    if (!process.env.APPDATA) {
+      console.error('Unknown home directory');
+      process.exit(1);
+    }
+    return path.join(process.env.APPDATA, json.name);
+  }
+  case 'linux': {
+    if (!process.env.HOME) {
+      console.error('Unknown home directory');
+      process.exit(1);
+    }
+    return path.join(process.env.HOME, `.${json.name}`);
+  }
+  default: {
+    console.error('Unsupported platform!');
+    process.exit(1);
+  }  
+  }
+};
 if (!fs.existsSync(getDataDirectory()))
   fs.mkdirSync(getDataDirectory());
 
@@ -67,6 +67,7 @@ export { mainWindow };
 const icon = path.join(__dirname, 'images', `Logo_Inverted.${isWindows ? 'ico' : 'png'}`);
 
 if (!process.env.TEST) {
+  // eslint-disable-next-line no-global-assign
   console = (() => {
     const logFolder = path.join(getDataDirectory(), 'logs');
     if (!fs.existsSync(logFolder))
@@ -131,7 +132,7 @@ const createWindow = async () => {
         console.log('Express started');
         resolve(undefined);
       });
-    })
+    });
 
   }
   
@@ -150,7 +151,7 @@ app.on('window-all-closed', () => {
 
 app.on('quit', () => {
   process.exit(0);
-})
+});
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {

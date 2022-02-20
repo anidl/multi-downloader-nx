@@ -144,7 +144,7 @@ export default class Crunchy implements ServiceClass {
       return true;
     }
     else{
-      console.log(`[INFO] No option selected or invalid value entered. Try --help.`);
+      console.log('[INFO] No option selected or invalid value entered. Try --help.');
     }
   }
 
@@ -1295,7 +1295,7 @@ export default class Crunchy implements ServiceClass {
     await this.refreshToken();
     const parsed = await this.parseSeriesById(id);
     if (!parsed)
-      throw new Error('Unable to parse')
+      throw new Error('Unable to parse');
     const result = this.parseSeriesResult(parsed);
     const episodes : Record<string, {
       items: Item[],
@@ -1359,7 +1359,7 @@ export default class Crunchy implements ServiceClass {
         img: images[Math.floor(images.length / 2)].source,
         description: value.items[0].description,
         time: `${Math.floor(seconds / 60)}:${seconds % 60}`
-      }
+      };
     })};
   }
 

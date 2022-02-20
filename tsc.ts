@@ -20,7 +20,7 @@ if (!isGUI)
   buildIgnore = buildIgnore.concat([
     './gui*',
     './build*'
-  ])
+  ]);
 
 
 const ignore = [

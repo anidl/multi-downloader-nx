@@ -1,7 +1,7 @@
-import { BrowserWindow, clipboard, dialog, shell } from "electron";
-import { DownloadInfo, ProgressData } from "../../../../@types/messageHandler";
-import { RandomEvent, RandomEvents } from "../../../../@types/randomEvents";
-import { isWindows } from "..";
+import { BrowserWindow, clipboard, dialog, shell } from 'electron';
+import { DownloadInfo, ProgressData } from '../../../../@types/messageHandler';
+import { RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
+import { isWindows } from '..';
 
 export default class Base {
 
@@ -21,9 +21,9 @@ export default class Base {
     dialog.showMessageBoxSync(this.window, {
       message: `${error.name ?? 'An error occured'}\n${error.message}`,
       detail: error.stack,
-      title: `Error`,
+      title: 'Error',
       type: 'error'
-    })
+    });
   }
 
   makeProgressHandler(videoInfo: DownloadInfo) {
@@ -34,7 +34,7 @@ export default class Base {
           downloadInfo: videoInfo,
           progress: data
         }
-      })
+      });
     }).bind(this);
   }
 

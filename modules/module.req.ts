@@ -34,7 +34,7 @@ class Req {
     secure: boolean;
     'Max-Age'?: string
   }> = {};
-  private cfgDir = yamlCfg.cfgDir
+  private cfgDir = yamlCfg.cfgDir;
   private curl: boolean|string = false;
   
   constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false) {}

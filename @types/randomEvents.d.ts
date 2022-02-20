@@ -1,4 +1,4 @@
-import { ExtendedProgress } from "./messageHandler";
+import { ExtendedProgress } from './messageHandler';
 
 export type RandomEvents = {
   progress: ExtendedProgress,

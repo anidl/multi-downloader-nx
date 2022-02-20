@@ -1,6 +1,6 @@
-import { Menu, MenuItem, MenuItemConstructorOptions, shell } from "electron";
+import { Menu, MenuItem, MenuItemConstructorOptions, shell } from 'electron';
 import path from 'path';
-import { getDataDirectory } from ".";
+import { getDataDirectory } from '.';
 import json from '../../../package.json';
 
 const template: (MenuItemConstructorOptions | MenuItem)[] = [
@@ -36,7 +36,7 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
       {
         label: 'Open log folder',
         click: () => {
-          shell.openPath(path.join(getDataDirectory(), 'logs'))
+          shell.openPath(path.join(getDataDirectory(), 'logs'));
         }
       },
       {
@@ -54,13 +54,13 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
       {
         label: 'GitHub',
         click: () => {
-          shell.openExternal('https://github.com/anidl/multi-downloader-nx')
+          shell.openExternal('https://github.com/anidl/multi-downloader-nx');
         }
       },
       {
         label: 'Report a Bug',
         click: () => {
-          shell.openExternal(`https://github.com/anidl/multi-downloader-nx/issues/new?assignees=izu-co&labels=bug&template=bug.yml&title=BUG&version=${json.version}`)
+          shell.openExternal(`https://github.com/anidl/multi-downloader-nx/issues/new?assignees=izu-co&labels=bug&template=bug.yml&title=BUG&version=${json.version}`);
         }
       },
       {
@@ -69,17 +69,17 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
       {
         label: 'Contributors',
         click: () => {
-          shell.openExternal('https://github.com/anidl/multi-downloader-nx/graphs/contributors')
+          shell.openExternal('https://github.com/anidl/multi-downloader-nx/graphs/contributors');
         }
       },
       {
         label: 'Discord',
         click: () => {
-          shell.openExternal('https://discord.gg/qEpbWen5vq')
+          shell.openExternal('https://discord.gg/qEpbWen5vq');
         }
       }
     ]
   }
-]
+];
 
 Menu.setApplicationMenu(Menu.buildFromTemplate(template));

@@ -85,7 +85,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     } else {
       this.alertError(res.reason);
     }
-    this.sendMessage({ name: 'finish', data: undefined })
+    this.sendMessage({ name: 'finish', data: undefined });
     this.setDownloading(false);
   }
 }

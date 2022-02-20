@@ -589,7 +589,7 @@ const getDefault = <T extends boolean|string|number|unknown[]>(name: string, cfg
 };
 
 const buildDefault = () => {
-  const data: Record<string, unknown> = {}
+  const data: Record<string, unknown> = {};
   const defaultArgs = args.filter(a => a.default);
   defaultArgs.forEach(item => {
     if (typeof item.default === 'object') {
@@ -601,9 +601,9 @@ const buildDefault = () => {
     } else {
       data[item.name] = item.default;
     }
-  })
+  });
   return data;
-}
+};
 
 export {
   TAppArg,

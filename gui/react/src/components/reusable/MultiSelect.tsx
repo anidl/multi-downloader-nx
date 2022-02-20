@@ -57,7 +57,7 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
         )}
         MenuProps={MenuProps}
       >
-        {props.values.concat(props.allOption ? 'all' : []). map((name) => (
+        {props.values.concat(props.allOption ? 'all' : []).map((name) => (
           <MenuItem
             key={name}
             value={name}
