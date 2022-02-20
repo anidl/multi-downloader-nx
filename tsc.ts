@@ -18,7 +18,8 @@ if (!isTest)
 
 if (!isGUI)
   buildIgnore = buildIgnore.concat([
-    './gui*'
+    './gui*',
+    './build*'
   ])
 
 

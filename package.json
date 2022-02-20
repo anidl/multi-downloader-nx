@@ -14,7 +14,7 @@
     "utility",
     "cli"
   ],
-  "author": "Izu-co",
+  "author": "Izu-co <github@izuco.dev> ",
   "homepage": "https://github.com/anidl/multi-downloader-nx",
   "repository": {
     "type": "git",
@@ -44,12 +44,6 @@
     "yargs": "^17.2.1"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.61",
-    "@electron-forge/maker-deb": "^6.0.0-beta.61",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.61",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
-    "@electron-forge/maker-zip": "^6.0.0-beta.61",
-    "@electron-forge/plugin-webpack": "^6.0.0-beta.61",
     "@types/fs-extra": "^9.0.13",
     "@types/json5": "^2.2.0",
     "@types/node": "^16.11.9",
@@ -93,27 +87,32 @@
     "pretest": "npm run tsc",
     "test": "cd lib && node modules/build windows64 && node modules/build ubuntu64 && node modules/build macos64"
   },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
+  "build": {
+    "appId": "github.com/anidl",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "iconSize": 160,
+      "contents": [
         {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "electron"
-          }
+          "x": 180,
+          "y": 170
         },
         {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
+          "x": 480,
+          "y": 170,
+          "type": "link",
+          "path": "/Applications"
         }
       ]
+    },
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "category": "Development"
     }
   }
 }

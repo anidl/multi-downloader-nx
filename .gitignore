@@ -26,4 +26,4 @@ fonts
 .webpack/
 out/
 dist/
-build/
+gui/react/build/

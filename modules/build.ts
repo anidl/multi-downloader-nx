@@ -4,13 +4,15 @@ import pkg from '../package.json';
 import modulesCleanup from 'removeNPMAbsolutePaths';
 import { exec } from 'pkg';
 import { execSync } from 'child_process';
-import { sep } from 'path';
+import path from 'path';
 
 const buildsDir = './_builds';
 const nodeVer = 'node16-';
 
+type BuildTypes = `${'ubuntu'|'windows'|'macos'}64`
+
 (async () => {
-  const buildType = process.argv[2];
+  const buildType = process.argv[2] as BuildTypes;
   const isGUI = process.argv[3] === 'true';
 
   if (isGUI) {
@@ -20,25 +22,42 @@ const nodeVer = 'node16-';
   }
 })();
 
-async function buildGUI(buildType: string) {
-  execSync('npx electron-forge make', { stdio: [0,1,2] });
-  const path = ['out', 'make'];
-  const makerDir = fs.readdirSync(path.join(sep));
-  if (makerDir.length !== 1)
-    throw new Error(`Illegal state ${makerDir.join(sep)}`);
-  path.push(makerDir[0]);
-  const arch = fs.readdirSync(path.join(sep));
-  if (arch.length !== 1)
-    throw new Error(`Illegal state ${arch.join(sep)}`);
-  path.push(arch[0]);
-  execSync(`7z a -t7z "../../../../${buildsDir}/multi-downloader-nx-${buildType}-gui.7z" .`,{
+async function buildGUI(buildType: BuildTypes) {
+  execSync(`npx electron-builder build ${getCommand(buildType)}`, { stdio: [0,1,2] });
+  execSync(`7z a -t7z "../${buildsDir}/multi-downloader-nx-${buildType}-gui.7z" "${getOutputFileName(buildType)}"`,{
     stdio:[0,1,2],
-    cwd: path.join(sep)
+    cwd: path.join('dist')
   });
 }
 
+function getCommand(buildType: BuildTypes) {
+  switch (buildType) {
+    case 'ubuntu64':
+      return `--linux --arm64`
+    case 'windows64':
+      return '--win';
+    case 'macos64':
+      return '--mac';
+    default:
+      return '--error'
+  }
+}
+
+function getOutputFileName(buildType: BuildTypes) {
+  switch (buildType) {
+    case 'ubuntu64':
+      return `${pkg.name}_${pkg.version}_arm64.deb`;
+    case 'windows64':
+      return `${pkg.name} Setup ${pkg.version}.exe`;
+    case 'macos64':
+      return '';
+    default:
+      throw new Error(`Unknown build type ${buildType}`);
+  }
+}
+
 // main
-async function buildBinary(buildType: string) {
+async function buildBinary(buildType: BuildTypes) {
   const buildStr = `multi-downloader-nx`;
   const acceptableBuilds = ['windows64','ubuntu64','macos64'];
   if(!acceptableBuilds.includes(buildType)){

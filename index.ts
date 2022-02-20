@@ -1,5 +1,5 @@
 import { ServiceClass } from './@types/serviceClassInterface';
-import { appArgv, overrideArguments, showHelp } from './modules/module.app-args';
+import { appArgv, overrideArguments } from './modules/module.app-args';
 import * as yamlCfg from './modules/module.cfg-loader';
 import { makeCommand, addToArchive } from './modules/module.downloadArchive';
 
@@ -56,8 +56,6 @@ import update from './modules/module.updater';
     } else if (argv.service === 'crunchy') {
       const crunchy = new (await import('./crunchy')).default();
       await crunchy.cli();
-    } else {
-      showHelp();
     }
   }
 })();
