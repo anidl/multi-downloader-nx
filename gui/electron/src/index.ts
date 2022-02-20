@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, } from 'electron';
 import path from 'path/posix';
 import registerMessageHandler from './messageHandler';
 import fs from 'fs';
@@ -6,6 +6,14 @@ import dotenv from 'dotenv';
 import express from "express";
 import { Console } from 'console';
 import json from '../../../package.json';
+
+process.on('uncaughtException', (er, or) => {
+  console.error(er, or);
+});
+
+process.on('unhandledRejection', (er, pr) => {
+  console.log(er, pr);
+});
 
 const getDataDirectory = () => {
   switch (process.platform) {
@@ -81,6 +89,8 @@ const createWindow = async () => {
     icon,
   });
 
+  mainWindow.webContents.on('crashed', (e) => console.log(e));
+
   if (!process.env.TEST) {
     const response = dialog.showMessageBoxSync(mainWindow, {
       title: 'Test Version Information',
@@ -94,7 +104,8 @@ const createWindow = async () => {
       ],
       type: 'info'
     });
-    if (response !== 1)
+    console.log(`[INFO] Popup response: ${response}`);
+    if (response !== 1 && response !== -1)
       app.quit();
   }
 

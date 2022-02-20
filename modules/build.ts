@@ -37,7 +37,7 @@ function getCommand(buildType: BuildTypes) {
     case 'windows64':
       return '--win';
     case 'macos64':
-      return '--mac';
+      return '--mac dmg';
     default:
       return '--error'
   }
@@ -50,7 +50,7 @@ function getOutputFileName(buildType: BuildTypes) {
     case 'windows64':
       return `${pkg.name} Setup ${pkg.version}.exe`;
     case 'macos64':
-      return '';
+      return `${pkg.name}-${pkg.version}.dmg`;
     default:
       throw new Error(`Unknown build type ${buildType}`);
   }
