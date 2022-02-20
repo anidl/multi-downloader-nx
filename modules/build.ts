@@ -23,7 +23,7 @@ type BuildTypes = `${'ubuntu'|'windows'|'macos'}64`
 })();
 
 async function buildGUI(buildType: BuildTypes) {
-  execSync(`npx electron-builder build ${getCommand(buildType)}`, { stdio: [0,1,2] });
+  execSync(`npx electron-builder build --publish=never ${getCommand(buildType)}`, { stdio: [0,1,2] });
   execSync(`7z a -t7z "../${buildsDir}/multi-downloader-nx-${buildType}-gui.7z" "${getOutputFileName(buildType)}"`,{
     stdio:[0,1,2],
     cwd: path.join('dist')
