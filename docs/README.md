@@ -28,3 +28,13 @@ After installing NodeJS with NPM go to directory with `package.json` file and ty
 
 ## CLI Options
 See [the documentation](https://github.com/anidl/multi-downloader-nx/blob/master/docs/DOCUMENTATION.md)
+
+## Build instructions
+
+Please note that nodejs and npm must be installed in your system.
+First clone this repo `git clone https://github.com/anidl/multi-downloader-nx.git`.
+`cd` into the cloned directory and run `npm i`.
+Afterwards run `npm run tsc false [true if you want gui, false otherwise]`.
+If you want the `js` files you are done. Just `cd` into the `lib` folder.
+If you want to package the application, please also `cd` into the `lib` folder and run `npx electron-builder build --publish=never [Your Options]` for the gui build. You may find the options [here](https://www.electron.build/cli).
+Since the cli tool requires some more configuration, please see the `modules/build.ts` file and run the commands under `buildBinary`.
