@@ -1273,12 +1273,10 @@ export default class Crunchy implements ServiceClass {
     // mergers
     let isMuxed = false;
     if (bin.MKVmerge) {
-      const command = merger.MkvMerge();
-      shlp.exec('mkvmerge', `"${bin.MKVmerge}"`, command);
+      await merger.merge('mkvmerge', bin.MKVmerge);
       isMuxed = true;
     } else if (bin.FFmpeg) {
-      const command = merger.FFmpeg();
-      shlp.exec('ffmpeg', `"${bin.FFmpeg}"`, command);
+      await merger.merge('ffmpeg', bin.FFmpeg);
       isMuxed = true;
     } else{
       console.log('\n[INFO] Done!\n');

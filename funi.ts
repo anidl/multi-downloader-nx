@@ -798,12 +798,10 @@ export default class Funi implements ServiceClass {
     });
   
     if(mergerBin.MKVmerge){
-      const command = mergeInstance.MkvMerge();
-      shlp.exec('mkvmerge', `"${mergerBin.MKVmerge}"`, command);
+      await mergeInstance.merge('mkvmerge', mergerBin.MKVmerge);
     }
     else if(mergerBin.FFmpeg){
-      const command = mergeInstance.FFmpeg();
-      shlp.exec('ffmpeg',`"${mergerBin.FFmpeg}"`,command);
+      await mergeInstance.merge('ffmpeg', mergerBin.FFmpeg);
     }
     else{
       if (log)

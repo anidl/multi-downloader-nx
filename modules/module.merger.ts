@@ -4,6 +4,8 @@ import path from 'path';
 import fs from 'fs';
 import { LanguageItem } from './module.langsData';
 import { AvailableMuxer } from './module.args';
+import { exec } from './sei-helper-fixes';
+import { PromiseWithChild } from 'child_process';
 
 export type MergerInput = {
   path: string,
@@ -275,6 +277,32 @@ class Merger {
       }
     }
     return fontsList;
+  }
+
+  public async merge(type: 'ffmpeg'|'mkvmerge', bin: string) {
+    let command: string|undefined = undefined;
+    switch (type) {
+    case 'ffmpeg':
+      command = this.FFmpeg();
+      break;
+    case 'mkvmerge':
+      command = this.MkvMerge();
+      break;
+    }
+    if (command === undefined) {
+      console.log('[WARN] Unable to merge files.');
+      return;
+    }
+    console.log(`[INFO][${type}] Started merging`);
+    const res = exec(type, `"${bin}"`, command);
+    if (!res.isOk && type === 'mkvmerge' && res.err.code === 1) {
+      console.log(`[INFO][${type}] Mkvmerge finished with at least one warning`);
+    } else if (!res.isOk) {
+      console.log(res.err);
+      console.log(`[ERROR][${type}] Merging failed with exit code ${res.err.code}`);
+    } else {
+      console.log(`[INFO][${type} Done]`);
+    }
   }
 
   public cleanUp() {
