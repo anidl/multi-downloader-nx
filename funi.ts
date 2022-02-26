@@ -39,6 +39,7 @@ import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
 import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData, FuniEpisodeData, ResponseBase } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
+import { SubtitleRequest } from './@types/funiSubtitleRequest';
 // check page
 
 // fn variables
@@ -274,7 +275,18 @@ export default class Funi implements ServiceClass {
       // select
       is_selected = false;
       if (data.all || epSelList.isSelected(epStrId)) {
-        fnSlug.push({title:eps[e].item.titleSlug,episode:eps[e].item.episodeSlug, episodeID:epStrId, seasonTitle: eps[e].item.seasonTitle, seasonNumber: eps[e].item.seasonNum});
+        fnSlug.push({
+          title:eps[e].item.titleSlug,
+          episode:eps[e].item.episodeSlug,
+          episodeID:epStrId,
+          seasonTitle: eps[e].item.seasonTitle,
+          seasonNumber: eps[e].item.seasonNum,
+          ids: {
+            episode: eps[e].ids.externalEpisodeId,
+            season: eps[e].ids.externalSeasonId,
+            show: eps[e].ids.externalShowId
+          }
+        });
         epSelEpsTxt.push(epStrId);
         is_selected = true;
       }
@@ -347,7 +359,7 @@ export default class Funi implements ServiceClass {
       console.log('[INFO] Available streams (Non-Encrypted):');
     }
     // map medias
-    const media = ep.media.map((m) =>{
+    const media = await Promise.all(ep.media.map(async (m) =>{
       if(m.mediaType == 'experience'){
         if(m.version.match(/uncut/i) && m.language){
           uncut[m.language] = true;
@@ -357,13 +369,13 @@ export default class Funi implements ServiceClass {
           language: m.language,
           version: m.version,
           type: m.experienceType,
-          subtitles: this.getSubsUrl(m.mediaChildren, m.language, data.subs)
+          subtitles: await this.getSubsUrl(m.mediaChildren, m.language, data.subs, ep.ids.externalEpisodeId)
         };
       }
       else{
         return { id: 0, type: '' };
       }
-    });
+    }));
       
     // select
     stDlPath = [];
@@ -389,10 +401,16 @@ export default class Funi implements ServiceClass {
             selected = true;
           }
         }
-        if (log)
+        if (log) {
+          const subsToDisplay: langsData.LanguageItem[] = [];
+          localSubs.forEach(a => {
+            if (!subsToDisplay.includes(a.lang))
+              subsToDisplay.push(a.lang);
+          });
           console.log(`[#${m.id}] ${dub_type} [${m.version}]${(selected?' (selected)':'')}${
-            localSubs && localSubs.length > 0 && selected ? ` (using ${localSubs.map(a => `'${a.lang.name}'`).join(', ')} for subtitles)` : ''
+            localSubs && localSubs.length > 0 && selected ? ` (using ${subsToDisplay.map(a => `'${a.name}'`).join(', ')} for subtitles)` : ''
           }`);
+        }
       }
     }
   
@@ -832,31 +850,60 @@ export default class Funi implements ServiceClass {
       
     return downloadStatus.ok;
   }
-  public getSubsUrl(m: MediaChild[], parentLanguage: TitleElement|undefined, data: FuniSubsData) : Subtitle[] {
+
+  public async getSubsUrl(m: MediaChild[], parentLanguage: TitleElement|undefined, data: FuniSubsData, episodeID: string) : Promise<Subtitle[]> {
     if((data.nosubs && !data.sub) || data.dlsubs.includes('none')){
       return [];
     }
   
-    const found: Subtitle[] = [];
-  
-    const media = m.filter(a => a.filePath.split('.').pop() === 'vtt');
-    for (const me of media) {
-      const lang = langsData.languages.find(a => me.language === (a.funi_name || a.name));
-      if (!lang) {
-        continue;
-      }
-      const pLang = langsData.languages.find(a => (a.funi_name || a.name) === parentLanguage);
-      if (data.dlsubs.includes('all') || data.dlsubs.some(a => a === lang.locale)) {
-        found.push({
-          url: me.filePath,
-          ext: `.${lang.code}${pLang?.code === lang.code ? '.cc' : ''}`,
-          lang,
-          closedCaption: pLang?.code === lang.code
-        });
-      }
+    const subs = await getData({
+      baseUrl: 'https://playback.prd.funimationsvc.com/v1/play',
+      url: `/${episodeID}`,
+      token: this.token,
+      useToken: true,
+      debug: this.debug,
+      querystring: { deviceType: 'web' }
+    });
+    if (!subs.ok || !subs.res || !subs.res.body) {
+      console.log('[ERROR] Subtitle Request failed.');
+      return [];
     }
-  
-    return found;
+    const parsed: SubtitleRequest = JSON.parse(subs.res.body);
+    
+    const found: {
+      isCC: boolean;
+      url: string;
+      lang: langsData.LanguageItem;
+    }[] = parsed.primary.subtitles.filter(a => a.fileExt === 'vtt').map(subtitle => {
+      return {
+        isCC: subtitle.contentType === 'cc',
+        url: subtitle.filePath,
+        lang: langsData.languages.find(a => a.funi_locale ?? a.locale === subtitle.languageCode)
+      };
+    }).concat(m.filter(a => a.filePath.split('.').pop() === 'vtt').map(media => {
+      const lang = langsData.languages.find(a => media.language === (a.funi_name || a.name));
+      const pLang = langsData.languages.find(a => (a.funi_name || a.name) === parentLanguage);
+      return {
+        isCC: pLang?.code === lang?.code,
+        url: media.filePath,
+        lang
+      };
+    })).filter((a) => a.lang !== undefined) as {
+      isCC: boolean;
+      url: string;
+      lang: langsData.LanguageItem;
+    }[];
+
+    const ret = found.filter(item => {
+      return data.dlsubs.includes('all') || data.dlsubs.some(a => a === item.lang.locale);
+    });
+
+    return ret.map(a => ({
+      ext: `.${a.lang.code}${a.isCC ? '.cc' : ''}`,
+      lang: a.lang,
+      url: a.url,
+      closedCaption: a.isCC
+    }));
   }
   
 }

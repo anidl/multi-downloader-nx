@@ -70,6 +70,11 @@ export type FuniEpisodeData = {
   episodeID: string,
   seasonTitle: string,
   seasonNumber: string,
+  ids: {
+    episode: string,
+    show: string,
+    season: string
+  }
 };
 
 export type AuthData = { username: string, password: string };
