@@ -32,6 +32,7 @@ export type MergerOptions = {
   onlyAudio: MergerInput[],
   subtitles: SubtitleInput[],
   output: string,
+  videoTitle: string,
   simul?: boolean,
   fonts?: ParsedFont[],
   skipSubMux?: boolean,
@@ -43,6 +44,7 @@ class Merger {
   constructor(private options: MergerOptions) {
     if (this.options.skipSubMux)
       this.options.subtitles = [];
+    this.options.videoTitle = this.options.videoTitle.replace(/\"/g, '\'');
   }
 
   public FFmpeg() : string {
@@ -58,7 +60,7 @@ class Merger {
       if (!hasVideo) {
         metaData.push(`-map ${index}:a -map ${index}:v`);
         metaData.push(`-metadata:s:a:${audioIndex} language=${vid.lang.code}`);
-        metaData.push(`-metadata:s:v:${index} title="[Video Stream]"`);
+        metaData.push(`-metadata:s:v:${index} title="${this.options.videoTitle}"`);
         hasVideo = true;
       } else {
         metaData.push(`-map ${index}:a`);
@@ -72,7 +74,7 @@ class Merger {
       if (!hasVideo) {
         args.push(`-i "${vid.path}"`);
         metaData.push(`-map ${index} -map -${index}:a`);
-        metaData.push(`-metadata:s:v:${index} title="[Video Stream]"`);
+        metaData.push(`-metadata:s:v:${index} title="${this.options.videoTitle}"`);
         hasVideo = true;
         index++;
       }

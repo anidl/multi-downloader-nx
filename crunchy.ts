@@ -1266,7 +1266,8 @@ export default class Crunchy implements ServiceClass {
           lang: a.lang,
           path: a.path,
         };
-      })
+      }),
+      videoTitle: options.videoTitle
     });
     const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);
     // collect fonts info

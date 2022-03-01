@@ -812,7 +812,8 @@ export default class Funi implements ServiceClass {
       }),
       videoAndAudio: audioAndVideo,
       simul: data.simul,
-      skipSubMux: data.skipSubMux
+      skipSubMux: data.skipSubMux,
+      videoTitle: data.videoTitle
     });
   
     if(mergerBin.MKVmerge){

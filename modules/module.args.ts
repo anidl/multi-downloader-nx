@@ -574,10 +574,20 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'fileName',
     service: 'both',
     type: 'array',
-    usage: '--override "toOverride=\'VALUE\'"',
+    usage: '"${toOverride}=\'${value}\'"',
     default: {
       default: [ ]
     }
+  },
+  {
+    name: 'videoTitle',
+    describe: 'Set the video track name of the merged file\nFFmpeg only',
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'string',
+    usage: '${title}',
+    default: 'Video Track',
   }
 ];
 
