@@ -264,6 +264,13 @@ Skip muxing the subtitles
 | Both | `--forceMuxer ${muxer}` | `string` | `No`| `NaN` | [`ffmpeg`, `mkvmerge`] | `undefined`| `forceMuxer: ` |
 
 Force the program to use said muxer or don't mux if the given muxer is not present
+#### `--videoTitle`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--videoTitle ${title}` | `string` | `No`| `NaN` | `Video Track`| `NaN` |
+
+Set the video track name of the merged file
+FFmpeg only
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
@@ -285,7 +292,7 @@ Set in config: 1; Episode number: 20; Output: 20
 #### `--override`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--override --override "toOverride='VALUE'"` | `array` | `No`| `NaN` | ``| `override: ` |
+| Both | `--override "${toOverride}='${value}'"` | `array` | `No`| `NaN` | ``| `override: ` |
 
 Override a template variable
 ### Debug
