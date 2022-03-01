@@ -32,7 +32,7 @@ export type MergerOptions = {
   onlyAudio: MergerInput[],
   subtitles: SubtitleInput[],
   output: string,
-  videoTitle: string,
+  videoTitle?: string,
   simul?: boolean,
   fonts?: ParsedFont[],
   skipSubMux?: boolean,
@@ -44,7 +44,8 @@ class Merger {
   constructor(private options: MergerOptions) {
     if (this.options.skipSubMux)
       this.options.subtitles = [];
-    this.options.videoTitle = this.options.videoTitle.replace(/\"/g, '\'');
+    if (this.options.videoTitle)
+      this.options.videoTitle = this.options.videoTitle.replace(/\"/g, '\'');
   }
 
   public FFmpeg() : string {
@@ -146,7 +147,7 @@ class Merger {
           '--video-tracks 0',
           '--no-audio'
         );
-        const trackName = (vid.lang.name + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
+        const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
         args.push('--track-name', `0:"${trackName}"`);
         args.push(`--language 0:${vid.lang.code}`);
         hasVideo = true;
@@ -160,7 +161,7 @@ class Merger {
           '--video-tracks 0',
           '--audio-tracks 1'
         );
-        const trackName = (vid.lang.name + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
+        const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
         args.push('--track-name', `0:"${trackName}"`);
         args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${vid.lang.code}`);
@@ -170,8 +171,7 @@ class Merger {
           '--no-video',
           '--audio-tracks 1'
         );
-        const trackName = (vid.lang.name + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
-        args.push('--track-name', `1:"${trackName}"`);
+        args.push('--track-name', `1:"${vid.lang.name}"`);
         args.push(`--language 1:${vid.lang.code}`);
       }
       args.push(`"${vid.path}"`);

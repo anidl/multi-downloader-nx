@@ -581,13 +581,12 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
   },
   {
     name: 'videoTitle',
-    describe: 'Set the video track name of the merged file\nFFmpeg only',
+    describe: 'Set the video track name of the merged file',
     docDescribe: true,
     group: 'mux',
     service: 'both',
     type: 'string',
-    usage: '${title}',
-    default: 'Video Track',
+    usage: '${title}'
   }
 ];
 
