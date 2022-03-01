@@ -282,6 +282,12 @@ Set how long a number in the title should be at least.
 Set in config: 3; Episode number: 5; Output: 005
 Set in config: 2; Episode number: 1; Output: 01
 Set in config: 1; Episode number: 20; Output: 20
+#### `--override`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--override --override "toOverride='VALUE'"` | `array` | `No`| `NaN` | ``| `override: ` |
+
+Override a template variable
 ### Debug
 #### `--nosess`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
