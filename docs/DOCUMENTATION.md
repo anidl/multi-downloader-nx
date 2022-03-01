@@ -265,12 +265,11 @@ Skip muxing the subtitles
 
 Force the program to use said muxer or don't mux if the given muxer is not present
 #### `--videoTitle`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
-| --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--videoTitle ${title}` | `string` | `No`| `NaN` | `Video Track`| `NaN` |
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Both | `--videoTitle ${title}` | `string` | `No`| `NaN` | `NaN` |
 
 Set the video track name of the merged file
-FFmpeg only
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
