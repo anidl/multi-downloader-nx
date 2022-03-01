@@ -566,6 +566,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     default: {
       default: 5
     },
+  },
+  {
+    name: 'override',
+    describe: 'Override a template variable',
+    docDescribe: true,
+    group: 'fileName',
+    service: 'both',
+    type: 'array',
+    usage: '--override "toOverride=\'VALUE\'"',
+    default: {
+      default: [ ]
+    }
   }
 ];
 

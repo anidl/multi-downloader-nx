@@ -652,7 +652,7 @@ export default class Funi implements ServiceClass {
             replaceWith: a[1],
             type: typeof a[1],
           } as Variable;
-        }), data.numbers);
+        }), data.numbers, data.override);
         if (fnOutput.length < 1)
           throw new Error(`Invalid path generated for input ${data.fileName}`);
         if (log)

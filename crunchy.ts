@@ -1112,8 +1112,8 @@ export default class Crunchy implements ServiceClass {
             console.log(`[INFO] Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
             console.log('[INFO] Stream URL:', selPlUrl);
             // TODO check filename
-            fileName = parseFileName(options.fileName, variables, options.numbers).join(path.sep);
-            const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers).join(path.sep);
+            fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+            const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
             console.log(`[INFO] Output filename: ${outFile}`);
             const chunkPage = await this.req.getData(selPlUrl);
             if(!chunkPage.ok || !chunkPage.res){
@@ -1167,7 +1167,7 @@ export default class Crunchy implements ServiceClass {
         }
       }
       else if(options.novids){
-        fileName = parseFileName(options.fileName, variables, options.numbers).join(path.sep);
+        fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
         console.log('[INFO] Downloading skipped!');
       }
       

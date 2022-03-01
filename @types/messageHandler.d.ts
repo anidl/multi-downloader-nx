@@ -83,7 +83,7 @@ export type FuniGetShowData = { id: number, e?: string, but: boolean, all: boole
 export type FuniGetEpisodeData = { subs: FuniSubsData, fnSlug: FuniEpisodeData, simul?: boolean; dubLang: string[], s: string }
 export type FuniStreamData = { callbackMaker?: (data: DownloadInfo) => HLSCallback, q: number, x: number, fileName: string, numbers: number, novids?: boolean,
   timeout: number, partsize: number, fsRetryTime: number, noaudio?: boolean, mp4: boolean, ass: boolean, fontSize: number, fontName?: string, skipmux?: boolean,
-  forceMuxer: AvailableMuxer | undefined, simul: boolean, skipSubMux: boolean, nocleanup: boolean }
+  forceMuxer: AvailableMuxer | undefined, simul: boolean, skipSubMux: boolean, nocleanup: boolean, override: string[] }
 export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[] }
 export type DownloadData = { id: string, e: string, dubLang: string[], fileName: string, q: number }
 
