@@ -43,45 +43,45 @@ const parseOverride = (variables: Variable[], override: string[]): Variable<stri
   const vars: Variable<string>[] = variables;
   override.forEach(item => {
     console.log(item);
-    let index = item.indexOf('=');
+    const index = item.indexOf('=');
     if (index === -1)
       return logError(item, 'invalid');
-    let parts = [ item.slice(0, index), item.slice(index + 1) ];
+    const parts = [ item.slice(0, index), item.slice(index + 1) ];
     if (!(parts[1].startsWith('\'') && parts[1].endsWith('\'') && parts[1].length >= 2)) 
       return logError(item, 'invalid');
     parts[1] = parts[1].slice(1, -1);
-    let already = vars.findIndex(a => a.name === parts[0]);
+    const already = vars.findIndex(a => a.name === parts[0]);
     console.log(parts);
     if (already > -1) {
       if (vars[already].type === 'number') {
         if (isNaN(parseFloat(parts[1])))
           return logError(item, 'wrongType');
-          vars[already].replaceWith = parseFloat(parts[1]);
+        vars[already].replaceWith = parseFloat(parts[1]);
       } else {
         vars[already].replaceWith = parts[1];
       }
     } else {
-      let isNumber = !isNaN(parseFloat(parts[1]));
+      const isNumber = !isNaN(parseFloat(parts[1]));
       vars.push({
         name: parts[0],
         replaceWith: isNumber ? parseFloat(parts[1]) : parts[1],
         type: isNumber ? 'number' : 'string'
-      } as Variable<string>)
+      } as Variable<string>);
     }
-  })
+  });
 
   return variables;
-}
+};
 
 const logError = (override: string, reason: 'invalid'|'wrongType') => {
   switch (reason) {
-    case 'wrongType':
-      console.error(`[ERROR] Invalid type on \`${override}\`. Expected number but found string. It has been ignored`);
-      break;
-    case 'invalid':
-    default:
-      console.error(`[ERROR] Invalid override \`${override}\`. It has been ignored`);
+  case 'wrongType':
+    console.error(`[ERROR] Invalid type on \`${override}\`. Expected number but found string. It has been ignored`);
+    break;
+  case 'invalid':
+  default:
+    console.error(`[ERROR] Invalid override \`${override}\`. It has been ignored`);
   }
-}
+};
 
 export default parseFileName;
