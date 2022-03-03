@@ -6,7 +6,10 @@ import { lookpath } from 'lookpath';
 // new-cfg
 const workingDir = (process as NodeJS.Process & {
   pkg?: unknown
-}).pkg ? path.dirname(process.execPath) : path.join(__dirname, '/..');
+}).pkg ? path.dirname(process.execPath) : process.env.contentDirectory ? process.env.contentDirectory : path.join(__dirname, '/..');
+
+console.log(workingDir, process.env.contentDirectory);
+
 const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
@@ -37,7 +40,8 @@ export type ConfigObject = {
   dir: {
     content: string,
     trash: string,
-    fonts: string; 
+    fonts: string;
+    config: string;
   },
   bin: {
     ffmpeg?: string,
@@ -56,6 +60,7 @@ const loadCfg = () : ConfigObject => {
       content: string,
       trash: string,
       fonts: string
+      config: string
     }>(dirCfgFile),
     cli: loadYamlCfgFile<{
       [key: string]: any
@@ -65,6 +70,7 @@ const loadCfg = () : ConfigObject => {
     fonts: '${wdir}/fonts/',
     content: '${wdir}/videos/',
     trash: '${wdir}/videos/_trash/',
+    config: '${wdir}/config'
   };
   if (typeof defaultCfg.dir !== 'object' || defaultCfg.dir === null || Array.isArray(defaultCfg.dir)) {
     defaultCfg.dir = defaultDirs;
@@ -79,7 +85,7 @@ const loadCfg = () : ConfigObject => {
       defaultCfg.dir[key] = path.join(workingDir, defaultCfg.dir[key].replace(/^\${wdir}/, ''));
     }
   }
-  
+  console.log(JSON.stringify(defaultCfg, null, 2));
   if(!fs.existsSync(defaultCfg.dir.content)){
     try{
       fs.ensureDirSync(defaultCfg.dir.content);

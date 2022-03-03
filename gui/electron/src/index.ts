@@ -1,11 +1,11 @@
 import { app, BrowserWindow, dialog, } from 'electron';
 import path from 'path/posix';
-import registerMessageHandler from './messageHandler';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import express from 'express';
 import { Console } from 'console';
 import json from '../../../package.json';
+
 
 process.on('uncaughtException', (er, or) => {
   console.error(er, or);
@@ -29,6 +29,7 @@ const getDataDirectory = () => {
       console.error('Unknown home directory');
       process.exit(1);
     }
+    console.log('Appdata', process.env.APPDATA)
     return path.join(process.env.APPDATA, json.name);
   }
   case 'linux': {
@@ -48,6 +49,7 @@ if (!fs.existsSync(getDataDirectory()))
   fs.mkdirSync(getDataDirectory());
 
 export { getDataDirectory };
+process.env.contentDirectory = getDataDirectory();
 
 import './menu';
 
@@ -110,7 +112,7 @@ const createWindow = async () => {
       app.quit();
   }
 
-  registerMessageHandler(mainWindow);
+  (await import('./messageHandler')).default(mainWindow);
   
   if (!process.env.USE_BROWSER) {
     const app = express();

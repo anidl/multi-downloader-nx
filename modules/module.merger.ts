@@ -163,7 +163,7 @@ class Merger {
         );
         const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
         args.push('--track-name', `0:"${trackName}"`);
-        args.push('--track-name', `1:"${trackName}"`);
+        //args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${vid.lang.code}`);
         hasVideo = true;
       } else {

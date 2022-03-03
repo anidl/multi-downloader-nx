@@ -1,7 +1,7 @@
 import { BrowserWindow, clipboard, dialog, shell } from 'electron';
-import { DownloadInfo, ProgressData } from '../../../../@types/messageHandler';
+import { DownloadInfo, FolderTypes, ProgressData } from '../../../../@types/messageHandler';
 import { RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
-import { isWindows } from '..';
+import { loadCfg } from "../../../../modules/module.cfg-loader";
 
 export default class Base {
 
@@ -55,12 +55,16 @@ export default class Base {
     return true;
   } 
 
-  async openFolder(subPath: string[]) {
-    const sep = isWindows ? '\\' : '/';
-
-    const p = __dirname.split(sep).slice(0, -4); // gui/electron/src/serviceHandler
-    p.push(...subPath);
-    shell.openPath(p.join(sep));
+  async openFolder(folderType: FolderTypes) {
+    const conf = loadCfg();
+    switch (folderType) {
+      case 'content':
+        shell.openPath(conf.dir.content);
+        break;
+      case 'config':
+        shell.openPath(conf.dir.config);
+        break;
+    }
   }
 
 }
