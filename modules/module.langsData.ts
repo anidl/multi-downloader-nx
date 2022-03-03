@@ -7,11 +7,12 @@ export type LanguageItem = {
   name: string,
   language?: string,
   funi_locale?: string,
-  funi_name?: string
+  funi_name?: string,
+  funi_name_lagacy?: string
 }
 
 const languages: LanguageItem[] = [
-  { cr_locale: 'es-LA',  funi_name: 'Spanish (Latin Am)', funi_locale: 'esLA', locale: 'es-419', code: 'spa', name: 'Spanish',    language: 'Latin American Spanish' },
+  { cr_locale: 'es-LA',  funi_name: 'Spanish (LAS)', funi_name_lagacy: 'Spanish (Latin Am)', funi_locale: 'esLA', locale: 'es-419', code: 'spa', name: 'Spanish',    language: 'Latin American Spanish' },
   { cr_locale: 'es-419', locale: 'es-419', code: 'spa', name: 'Spanish',    language: 'Latin American Spanish' },
   { cr_locale: 'es-ES',  locale: 'es',     code: 'spa', name: 'Spanish'                                        },
   { cr_locale: 'pt-BR',  funi_name: 'Portuguese (Brazil)', funi_locale: 'ptBR', locale: 'pt-BR',  code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese'   },

@@ -8,8 +8,6 @@ const workingDir = (process as NodeJS.Process & {
   pkg?: unknown
 }).pkg ? path.dirname(process.execPath) : process.env.contentDirectory ? process.env.contentDirectory : path.join(__dirname, '/..');
 
-console.log(workingDir, process.env.contentDirectory);
-
 const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
@@ -85,7 +83,6 @@ const loadCfg = () : ConfigObject => {
       defaultCfg.dir[key] = path.join(workingDir, defaultCfg.dir[key].replace(/^\${wdir}/, ''));
     }
   }
-  console.log(JSON.stringify(defaultCfg, null, 2));
   if(!fs.existsSync(defaultCfg.dir.content)){
     try{
       fs.ensureDirSync(defaultCfg.dir.content);

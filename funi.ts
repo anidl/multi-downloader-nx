@@ -391,7 +391,7 @@ export default class Funi implements ServiceClass {
           : (!uncut[dub_type] || data.simul && m.version?.match(/simulcast/i) ? true : false);
         for (const curDub of data.dubLang) {
           const item = langsData.languages.find(a => a.code === curDub);
-          if(item && dub_type == (item.funi_name || item.name) && selUncut){
+          if(item && (dub_type === item.funi_name_lagacy || dub_type === (item.funi_name ?? item.name)) && selUncut){
             streamIds.push({
               id: m.id,
               lang: item
@@ -533,7 +533,7 @@ export default class Funi implements ServiceClass {
           const audioData = audioDataParts[audioEl[0]];
           let language = langsData.languages.find(a => a.locale === audioData.language);
           if (!language) {
-            language = langsData.languages.find(a => a.funi_name || a.name === audioEl[0]);
+            language = langsData.languages.find(a => a.funi_name_lagacy === audioEl[0] || ((a.funi_name ?? a.name) === audioEl[0]));
             if (!language) {
               if (log)
                 console.log(`[ERROR] Unable to find language for locale ${audioData.language} or name ${audioEl[0]}`);
@@ -882,8 +882,8 @@ export default class Funi implements ServiceClass {
         lang: langsData.languages.find(a => a.funi_locale ?? a.locale === subtitle.languageCode)
       };
     }).concat(m.filter(a => a.filePath.split('.').pop() === 'vtt').map(media => {
-      const lang = langsData.languages.find(a => media.language === (a.funi_name || a.name));
-      const pLang = langsData.languages.find(a => (a.funi_name || a.name) === parentLanguage);
+      const lang = langsData.languages.find(a => media.language === a.funi_name_lagacy || media.language === (a.funi_name || a.name));
+      const pLang = langsData.languages.find(a =>  parentLanguage === a.funi_name_lagacy || (a.funi_name || a.name) === parentLanguage);
       return {
         isCC: pLang?.code === lang?.code,
         url: media.filePath,

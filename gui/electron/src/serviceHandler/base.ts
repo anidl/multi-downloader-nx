@@ -1,7 +1,7 @@
 import { BrowserWindow, clipboard, dialog, shell } from 'electron';
 import { DownloadInfo, FolderTypes, ProgressData } from '../../../../@types/messageHandler';
 import { RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
-import { loadCfg } from "../../../../modules/module.cfg-loader";
+import { loadCfg } from '../../../../modules/module.cfg-loader';
 
 export default class Base {
 
@@ -58,12 +58,12 @@ export default class Base {
   async openFolder(folderType: FolderTypes) {
     const conf = loadCfg();
     switch (folderType) {
-      case 'content':
-        shell.openPath(conf.dir.content);
-        break;
-      case 'config':
-        shell.openPath(conf.dir.config);
-        break;
+    case 'content':
+      shell.openPath(conf.dir.content);
+      break;
+    case 'config':
+      shell.openPath(conf.dir.config);
+      break;
     }
   }
 

@@ -29,7 +29,7 @@ const getDataDirectory = () => {
       console.error('Unknown home directory');
       process.exit(1);
     }
-    console.log('Appdata', process.env.APPDATA)
+    console.log('Appdata', process.env.APPDATA);
     return path.join(process.env.APPDATA, json.name);
   }
   case 'linux': {

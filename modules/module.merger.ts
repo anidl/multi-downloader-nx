@@ -5,7 +5,6 @@ import fs from 'fs';
 import { LanguageItem } from './module.langsData';
 import { AvailableMuxer } from './module.args';
 import { exec } from './sei-helper-fixes';
-import { PromiseWithChild } from 'child_process';
 
 export type MergerInput = {
   path: string,
@@ -45,7 +44,7 @@ class Merger {
     if (this.options.skipSubMux)
       this.options.subtitles = [];
     if (this.options.videoTitle)
-      this.options.videoTitle = this.options.videoTitle.replace(/\"/g, '\'');
+      this.options.videoTitle = this.options.videoTitle.replace(/"/g, '\'');
   }
 
   public FFmpeg() : string {
