@@ -531,7 +531,7 @@ export default class Funi implements ServiceClass {
           const audioDataParts = plQualityLinkList.mediaGroups.AUDIO[audioKey],
             audioEl = Object.keys(audioDataParts);
           const audioData = audioDataParts[audioEl[0]];
-          let language = langsData.languages.find(a => a.locale === audioData.language);
+          let language = langsData.languages.find(a => a.code === audioData.language || a.locale === audioData.language);
           if (!language) {
             language = langsData.languages.find(a => a.funi_name_lagacy === audioEl[0] || ((a.funi_name ?? a.name) === audioEl[0]));
             if (!language) {
