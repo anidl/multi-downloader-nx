@@ -883,7 +883,7 @@ export default class Crunchy implements ServiceClass {
     data: DownloadedMedia[],
     fileName: string
   } | undefined> {
-  
+    console.log(options.dlsubs);
     let mediaName = '...';
     let fileName;
     const variables: Variable[] = [];

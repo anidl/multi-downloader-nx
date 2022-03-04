@@ -3,7 +3,7 @@ import { AuthData, CheckTokenResponse, DownloadData, EpisodeListResponse, Messag
 import Funimation from '../../../../funi';
 import { ArgvType } from '../../../../modules/module.app-args';
 import { buildDefault, getDefault } from '../../../../modules/module.args';
-import { dubLanguageCodes } from '../../../../modules/module.langsData';
+import { languages, subtitleLanguagesFilter } from '../../../../modules/module.langsData';
 import Base from './base';
 
 class FunimationHandler extends Base implements MessageHandler {
@@ -39,7 +39,16 @@ class FunimationHandler extends Base implements MessageHandler {
   }
 
   public async availableDubCodes(): Promise<string[]> {
-    return dubLanguageCodes;
+    const dubLanguageCodesArray = [];
+    for(const language of languages){
+      if (language.funi_locale)
+        dubLanguageCodesArray.push(language.code);
+    }
+    return [...new Set(dubLanguageCodesArray)];
+  }
+
+  public async availableSubCodes(): Promise<string[]> {
+    return subtitleLanguagesFilter;
   }
 
   public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
@@ -91,7 +100,7 @@ class FunimationHandler extends Base implements MessageHandler {
       return this.alertError(res.reason);
 
     for (const ep of res.value) {
-      await this.funi.getEpisode(false, { dubLang: data.dubLang, fnSlug: ep, s: data.id, subs: { dlsubs: ['all'], sub: false } }, { ..._default, callbackMaker: this.makeProgressHandler.bind(this), ass: true, fileName: data.fileName, q: data.q });
+      await this.funi.getEpisode(false, { dubLang: data.dubLang, fnSlug: ep, s: data.id, subs: { dlsubs: data.dlsubs, sub: false } }, { ..._default, callbackMaker: this.makeProgressHandler.bind(this), ass: true, fileName: data.fileName, q: data.q });
     }
     this.sendMessage({ name: 'finish', data: undefined });
     this.setDownloading(false);

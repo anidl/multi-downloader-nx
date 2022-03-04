@@ -70,7 +70,7 @@
   },
   "scripts": {
     "prestart": "npm run tsc test",
-    "start": "cd lib && electron-forge start",
+    "start": "cd lib && npx electron .",
     "docs": "ts-node modules/build-docs.ts",
     "tsc": "ts-node tsc.ts",
     "prebuild-windows-cli": "npm run tsc false false",

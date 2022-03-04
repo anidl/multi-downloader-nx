@@ -7,6 +7,7 @@ export interface MessageHandler {
   checkToken: () => Promise<CheckTokenResponse>;
   search: (data: SearchData) => Promise<SearchResponse>,
   availableDubCodes: () => Promise<string[]>,
+  availableSubCodes: () => Promise<string[]>,
   handleDefault: (name: string) => Promise<any>,
   resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>,
   listEpisodes: (id: string) => Promise<EpisodeListResponse>,
@@ -23,6 +24,7 @@ export type QueueItem = {
   episode: string,
   ids: string[],
   fileName: string,
+  dlsubs: string[],
   parent: {
     title: string,
     season: string
@@ -38,7 +40,8 @@ export type ResolveItemsData = {
   but: boolean,
   e: string,
   fileName: string,
-  q: number
+  q: number,
+  dlsubs: string[]
 }
 
 export type SearchResponseItem = {
@@ -87,7 +90,7 @@ export type FuniStreamData = { callbackMaker?: (data: DownloadInfo) => HLSCallba
   timeout: number, partsize: number, fsRetryTime: number, noaudio?: boolean, mp4: boolean, ass: boolean, fontSize: number, fontName?: string, skipmux?: boolean,
   forceMuxer: AvailableMuxer | undefined, simul: boolean, skipSubMux: boolean, nocleanup: boolean, override: string[], videoTitle: string }
 export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[] }
-export type DownloadData = { id: string, e: string, dubLang: string[], fileName: string, q: number }
+export type DownloadData = { id: string, e: string, dubLang: string[], dlsubs: string[], fileName: string, q: number }
 
 export type AuthResponse = ResponseBase<undefined>;
 export type FuniSearchReponse = ResponseBase<FunimationSearch>;

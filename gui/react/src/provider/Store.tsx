@@ -7,6 +7,7 @@ export type DownloadOptions = {
   id: string,
   e: string,
   dubLang: typeof dubLanguageCodes,
+  dlsubs: string[],
   fileName: string,
   all: boolean,
   but: boolean
@@ -55,6 +56,7 @@ const initialState: StoreState = {
     q: 0,
     e: '',
     dubLang: [ 'jpn' ],
+    dlsubs: [ 'all' ],
     fileName: '',
     all: false,
     but: false

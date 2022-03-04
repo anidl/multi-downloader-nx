@@ -227,7 +227,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     type: 'array',
     choices: subtitleLanguagesFilter,
     default: {
-      default: 'all'
+      default: [ 'all' ]
     },
     usage: '${sub1} ${sub2}'
   },

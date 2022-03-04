@@ -41,7 +41,7 @@ const MessageChannelProvider: React.FC = ({ children }) => {
   const [store, dispatch] = useStore();
 
   const { ipcRenderer } = (window as any).Electron as { ipcRenderer: IpcRenderer };
-  const [ randomEventHandler ] = React.useState(new RandomEventHandler());
+  const randomEventHandler = React.useMemo(() => new RandomEventHandler(), []);
 
   React.useEffect(() => {
     (async () => {
@@ -51,7 +51,7 @@ const MessageChannelProvider: React.FC = ({ children }) => {
       if (store.service !== currentService) 
         ipcRenderer.invoke('setup', store.service)
     })();
-  }, [store.service])
+  }, [store.service, dispatch, ipcRenderer])
 
   React.useEffect(() => {
     /* finish is a placeholder */
@@ -74,6 +74,7 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     search: async (data) => await ipcRenderer.invoke('search', data),
     handleDefault: async (data) => await ipcRenderer.invoke('default', data),
     availableDubCodes: async () => await ipcRenderer.invoke('availableDubCodes'),
+    availableSubCodes: async () => await ipcRenderer.invoke('availableSubCodes'),
     resolveItems: async (data) => await ipcRenderer.invoke('resolveItems', data),
     listEpisodes: async (data) => await ipcRenderer.invoke('listEpisodes', data),
     randomEvents: randomEventHandler,

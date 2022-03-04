@@ -1,11 +1,9 @@
 import { BrowserWindow } from 'electron';
-import { CrunchyDownloadOptions } from '../../../../@types/crunchyTypes';
 import { AuthData, CheckTokenResponse, DownloadData, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
 import Crunchy from '../../../../crunchy';
-import Funimation from '../../../../funi';
 import { ArgvType } from '../../../../modules/module.app-args';
 import { buildDefault, getDefault } from '../../../../modules/module.args';
-import { dubLanguageCodes } from '../../../../modules/module.langsData';
+import { languages, subtitleLanguagesFilter } from '../../../../modules/module.langsData';
 import Base from './base';
 
 class CrunchyHandler extends Base implements MessageHandler {
@@ -24,7 +22,16 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async availableDubCodes(): Promise<string[]> {
-    return dubLanguageCodes;
+    const dubLanguageCodesArray = [];
+    for(const language of languages){
+      if (language.cr_locale)
+        dubLanguageCodesArray.push(language.code);
+    }
+    return [...new Set(dubLanguageCodesArray)];
+  }
+
+  public async availableSubCodes(): Promise<string[]> {
+    return subtitleLanguagesFilter;
   }
 
   public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
@@ -76,7 +83,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     });
     if (res.isOk) {
       for (const select of res.value) {
-        if (!(await this.crunchy.downloadEpisode(select, {..._default, skipsubs: false, callbackMaker: this.makeProgressHandler.bind(this), q: data.q, fileName: data.fileName }))) {
+        if (!(await this.crunchy.downloadEpisode(select, {..._default, skipsubs: false, callbackMaker: this.makeProgressHandler.bind(this), q: data.q, fileName: data.fileName, dlsubs: data.dlsubs }))) {
           const er = new Error(`Unable to download episode ${data.e} from ${data.id}`);
           er.name = 'Download error';
           this.alertError(er);

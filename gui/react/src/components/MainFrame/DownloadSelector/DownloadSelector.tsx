@@ -11,6 +11,7 @@ const DownloadSelector: React.FC = () => {
   const messageHandler = React.useContext(messageChannelContext);
   const [store, dispatch] = useStore();
   const [availableDubs, setAvailableDubs] = React.useState<string[]>([]);
+  const [availableSubs, setAvailableSubs ] = React.useState<string[]>([]);
   const [ loading, setLoading ] = React.useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -19,19 +20,22 @@ const DownloadSelector: React.FC = () => {
       /* If we don't wait the response is undefined? */
       await new Promise((resolve) => setTimeout(() => resolve(undefined), 100));
       const dubLang = messageHandler?.handleDefault('dubLang');
+      const subLang = messageHandler?.handleDefault('dlsubs');
       const q = messageHandler?.handleDefault('q');
       const fileName = messageHandler?.handleDefault('fileName');
-      const result = await Promise.all([dubLang, q, fileName]);
+      const result = await Promise.all([dubLang, subLang, q, fileName]);
       dispatch({
         type: 'downloadOptions',
         payload: {
           ...store.downloadOptions,
           dubLang: result[0],
-          q: result[1],
-          fileName: result[2]
+          dlsubs: result[1],
+          q: result[2],
+          fileName: result[3],
         }
       });
       setAvailableDubs(await messageHandler?.availableDubCodes() ?? []);
+      setAvailableSubs(await messageHandler?.availableSubCodes() ?? []);
     })();
   }, []);
 
@@ -110,6 +114,17 @@ const DownloadSelector: React.FC = () => {
           });
         }}
         allOption
+      />
+      <MultiSelect
+        title='Sub Languages'
+        values={availableSubs}
+        selected={store.downloadOptions.dlsubs}
+        onChange={(e) => {
+          dispatch({
+            type: 'downloadOptions',
+            payload: { ...store.downloadOptions, dlsubs: e }
+          });
+        }}
       />
       <TextField value={store.downloadOptions.fileName} onChange={e => {
         dispatch({
