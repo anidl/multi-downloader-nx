@@ -17,7 +17,29 @@ body:
       description: "Which version of the program do you use?"
       placeholder: "1.0.0"
     validations:
-      required: true  
+      required: true
+    body:
+  - type: dropdown
+    id: opsystem
+    attributes:
+      label: Operating System
+      description: "Please tell us what OS you are using."
+      options:
+        - Windows
+        - Linux
+        - MacOS
+    validations:
+      required: true
+  - type: dropdown
+    id: gui
+    attributes:
+      label: Type
+      description: "Please tell us if you are using the gui or the cli version."
+      options:
+        - Cli
+        - Gui
+    validations:
+      required: true    
   - type: dropdown
     id: service
     attributes:
@@ -57,7 +79,7 @@ body:
     id: output
     attributes:
       label: Console Output
-      description: "Please paste the console output from the beginning till termination here."
+      description: "Please paste the console output from the beginning till termination here. If you are using the gui open the log folder under 'Debug > Open Log Folder' in the Menu. Please copy the content of the file with the highest number here."
     validations:
       required: true
   - type: textarea
