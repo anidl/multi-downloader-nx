@@ -7,7 +7,7 @@ import type { Handler, RandomEvent, RandomEvents } from '../../../../@types/rand
 import { Backdrop, Typography } from '@mui/material';
 
 
-export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler });
+export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler, logout: () => boolean });
 
 export class RandomEventHandler {
   private handler: {
@@ -81,7 +81,8 @@ const MessageChannelProvider: React.FC = ({ children }) => {
     downloadItem: (data) => ipcRenderer.invoke('downloadItem', data),
     isDownloading: () => ipcRenderer.sendSync('isDownloading'),
     writeToClipboard: async (data) => await ipcRenderer.invoke('writeToClipboard', data),
-    openFolder: async (data) => await ipcRenderer.invoke('openFolder', data)
+    openFolder: async (data) => await ipcRenderer.invoke('openFolder', data),
+    logout: () => ipcRenderer.sendSync('changeProvider')
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

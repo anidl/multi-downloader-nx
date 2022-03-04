@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedProgress, ProgressData } from "../../../../../../@types/messageHandler";
+import { ExtendedProgress } from "../../../../../../@types/messageHandler";
 import { RandomEvent } from "../../../../../../@types/randomEvents";
 import useStore from "../../../hooks/useStore";
 import { messageChannelContext } from "../../../provider/MessageChannel";

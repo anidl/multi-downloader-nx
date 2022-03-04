@@ -14,6 +14,8 @@ export default (window: BrowserWindow) => {
   });
 
   ipcMain.on('changeProvider', (ev) => {
+    if (handler?.isDownloading())
+      return ev.returnValue = false;
     handler = undefined;
     ev.returnValue = true;
   })

@@ -14,7 +14,7 @@ export interface MessageHandler {
   downloadItem: (data) => void,
   isDownloading: () => boolean,
   writeToClipboard: (text: string) => void,
-  openFolder: (path: FolderTypes) => void
+  openFolder: (path: FolderTypes) => void,
 }
 
 export type FolderTypes = 'content' | 'config';
