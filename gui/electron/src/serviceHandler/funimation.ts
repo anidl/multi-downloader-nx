@@ -65,7 +65,7 @@ class FunimationHandler extends Base implements MessageHandler {
           season: a.seasonNumber
         },
         e: a.episodeID,
-        episode: a.seasonNumber
+        episode: a.epsiodeNumber,
       };
     }) };
   }

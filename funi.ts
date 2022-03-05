@@ -279,6 +279,7 @@ export default class Funi implements ServiceClass {
           title:eps[e].item.titleSlug,
           episode:eps[e].item.episodeSlug,
           episodeID:epStrId,
+          epsiodeNumber: eps[e].item.episodeNum,
           seasonTitle: eps[e].item.seasonTitle,
           seasonNumber: eps[e].item.seasonNum,
           ids: {
@@ -289,9 +290,6 @@ export default class Funi implements ServiceClass {
         });
         epSelEpsTxt.push(epStrId);
         is_selected = true;
-      }
-      else{
-        is_selected = false;
       }
       // console vars
       const tx_snum = eps[e].item.seasonNum=='1'?'':` S${eps[e].item.seasonNum}`;

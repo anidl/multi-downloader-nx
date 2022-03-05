@@ -72,6 +72,7 @@ export type EpisodeListResponse = ResponseBase<Episode[]>
 export type FuniEpisodeData = {
   title: string,
   episode: string,
+  epsiodeNumber: string,
   episodeID: string,
   seasonTitle: string,
   seasonNumber: string,
