@@ -1454,6 +1454,8 @@ export default class Crunchy implements ServiceClass {
           ret[item.season_number][lang.code] = item;
         } else if (item.is_subbed && !item.is_dubbed && lang.code == 'jpn') {
           ret[item.season_number][lang.code] = item;
+        } else if (item.is_dubbed && lang.code === 'eng') { // Dubbed with no more infos will be treated as eng dubs
+          ret[item.season_number][lang.code] = item;
         }
       }
     }
