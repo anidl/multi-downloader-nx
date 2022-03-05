@@ -117,7 +117,7 @@ For special episodes: S1-4 OR S1,S2,S3,S4 where S is the special letter
 #### `-q`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Both | `-q ${qualityLevel}` | `number` | `No`| `NaN` | `7`| `q: ` |
+| Both | `-q ${qualityLevel}` | `number` | `No`| `NaN` | `0`| `q: ` |
 
 Set the quality level. Use 0 to use the maximum quality.
 #### `-x`
