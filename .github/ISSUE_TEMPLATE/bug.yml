@@ -18,7 +18,6 @@ body:
       placeholder: "1.0.0"
     validations:
       required: true
-    body:
   - type: dropdown
     id: opsystem
     attributes:
