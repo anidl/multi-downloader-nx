@@ -168,7 +168,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'dl',
     describe: 'Set the quality level. Use 0 to use the maximum quality.',
     default: {
-      default: 7
+      default: 0
     },
     docDescribe: true,
     service: 'both',
