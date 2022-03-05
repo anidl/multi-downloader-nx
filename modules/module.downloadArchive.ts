@@ -1,10 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { ArgvType } from './module.app-args';
+import { workingDir } from './module.cfg-loader';
 
-const workingDir = (process as NodeJS.Process & {
-  pkg?: unknown
-}).pkg ? path.dirname(process.execPath) : path.join(__dirname, '/..');
 export const archiveFile = path.join(workingDir, 'config', 'archive.json');
 
 export type ItemType = {

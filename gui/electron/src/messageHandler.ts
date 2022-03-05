@@ -18,7 +18,7 @@ export default (window: BrowserWindow) => {
       return ev.returnValue = false;
     handler = undefined;
     ev.returnValue = true;
-  })
+  });
   
   ipcMain.handle('type', async () => handler === undefined ? undefined : handler instanceof Funimation ? 'funi' : 'crunchy');
   ipcMain.handle('auth', async (_, data) => handler?.auth(data));
