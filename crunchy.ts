@@ -1293,7 +1293,7 @@ export default class Crunchy implements ServiceClass {
     await this.refreshToken();
     const parsed = await this.parseSeriesById(id);
     if (!parsed)
-      throw new Error('Unable to parse');
+      return { data: {}, list: [] };
     const result = this.parseSeriesResult(parsed);
     const episodes : Record<string, {
       items: Item[],

@@ -8,6 +8,8 @@ const workingDir = (process as NodeJS.Process & {
   pkg?: unknown
 }).pkg ? path.dirname(process.execPath) : process.env.contentDirectory ? process.env.contentDirectory : path.join(__dirname, '/..');
 
+export { workingDir };
+
 const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
