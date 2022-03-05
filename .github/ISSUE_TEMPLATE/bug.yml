@@ -78,7 +78,7 @@ body:
     id: output
     attributes:
       label: Console Output
-      description: "Please paste the console output from the beginning till termination here. If you are using the gui open the log folder under 'Debug > Open Log Folder' in the Menu. Please copy the content of the file with the highest number here."
+      description: "Please paste the console output from the beginning till termination here. If you are using the gui open the log folder under 'Debug > Open Log Folder' in the Menu. Please copy the content of latest.log here."
     validations:
       required: true
   - type: textarea

@@ -74,7 +74,9 @@ if (!process.env.TEST) {
     const logFolder = path.join(getDataDirectory(), 'logs');
     if (!fs.existsSync(logFolder))
       fs.mkdirSync(logFolder);
-    return new Console(fs.createWriteStream(path.join(logFolder, `${Date.now()}.log`)));
+    if (fs.existsSync(path.join(logFolder, 'latest.log')))
+      fs.renameSync(path.join(logFolder, 'latest.log'), path.join(logFolder, `${Date.now()}.log`));
+    return new Console(fs.createWriteStream(path.join(logFolder, `latest.log`)));
   })();
 }
 
