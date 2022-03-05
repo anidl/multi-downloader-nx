@@ -28,6 +28,9 @@ export default class Base {
 
   makeProgressHandler(videoInfo: DownloadInfo) {
     return ((data: ProgressData) => {
+      const progress = (typeof data.percent === 'string' ?
+      parseFloat(data.percent) : data.percent) / 100;
+      this.window.setProgressBar(progress === 1 ? -1 : progress);
       this.sendMessage({
         name: 'progress',
         data: {
