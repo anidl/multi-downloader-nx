@@ -19,6 +19,7 @@ jobs:
     - uses: mr-smithers-excellent/docker-build-push@v5
       name: Build & push Docker image
       with:
+        push: ${{ github.ref == 'refs/heads/main' }}
         image: izuco/multi-downloader-nx
         tags: v1, latest
         registry: docker.io
