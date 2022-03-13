@@ -14,7 +14,6 @@ RUN echo 'ffmpeg: "./bin/ffmpeg/ffmpeg"\nmkvmerge: "./bin/mkvtoolnix/mkvmerge"' 
 #Build AniDL
 
 RUN npm i
-RUN npm run tsc false
 RUN npm run build-ubuntu-cli
 
 # Move build to new Clean Image
