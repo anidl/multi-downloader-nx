@@ -778,7 +778,7 @@ export default class Crunchy implements ServiceClass {
 
   public async downloadEpisode(data: CrunchyEpMeta, options: CrunchyDownloadOptions): Promise<boolean> {
     const res = await this.downloadMediaList(data, options);
-    if (res === undefined) {
+    if (res === undefined || res.error) {
       return false;
     } else {
       await this.muxStreams(res.data, { ...options, output: res.fileName });
@@ -881,7 +881,8 @@ export default class Crunchy implements ServiceClass {
 
   public async downloadMediaList(medias: CrunchyEpMeta, options: CrunchyDownloadOptions) : Promise<{
     data: DownloadedMedia[],
-    fileName: string
+    fileName: string,
+    error: boolean
   } | undefined> {
     let mediaName = '...';
     let fileName;
@@ -896,6 +897,8 @@ export default class Crunchy implements ServiceClass {
       console.log('[WARN] Video not available!');
       return undefined;
     }
+
+    let dlFailed = false;
     
     for (const mMeta of medias.data) {
       console.log(`[INFO] Requesting: [${mMeta.mediaId}] ${mediaName}`);
@@ -958,8 +961,6 @@ export default class Crunchy implements ServiceClass {
         s.type = `${s.format}/${s.audio_lang}/${s.hardsub_lang}`;
         return s;
       });
-        
-      let dlFailed = false;
         
       if(options.hslang != 'none'){
         if(hsLangs.indexOf(options.hslang) > -1){
@@ -1234,6 +1235,7 @@ export default class Crunchy implements ServiceClass {
       }
     }
     return {
+      error: dlFailed,
       data: files,
       fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName)) || './unknown' : './unknown'
     };
