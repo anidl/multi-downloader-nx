@@ -320,6 +320,12 @@ Set the service you want to use
 | Both | `--update ` | `boolean` | `No`| `NaN` | `NaN` |
 
 Force the tool to check for updates (code version only)
+#### `--skipUpdate`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--skipUpdate ` | `boolean` | `No`| `NaN` | `false`| `skipUpdate: ` |
+
+If true, the tool won't check for updates
 ### Help
 #### `--help`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
