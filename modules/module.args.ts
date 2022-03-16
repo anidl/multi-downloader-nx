@@ -587,6 +587,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     service: 'both',
     type: 'string',
     usage: '${title}'
+  },
+  {
+    name: 'skipUpdate',
+    describe: 'If true, the tool won\'t check for updates',
+    docDescribe: true,
+    group: 'util',
+    service: 'both',
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
   }
 ];
 

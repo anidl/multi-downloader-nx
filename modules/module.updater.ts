@@ -8,9 +8,7 @@ import { CompilerOptions, transpileModule } from 'typescript';
 import tsConfig from '../tsconfig.json';
 import fsextra from 'fs-extra';
 import seiHelper from 'sei-helper';
-const workingDir = (process as NodeJS.Process & {
-  pkg?: unknown
-}).pkg ? path.dirname(process.execPath) : path.join(__dirname, '/..');
+import { workingDir } from './module.cfg-loader';
 const updateFilePlace = path.join(workingDir, 'config', 'updates.json');
 
 const updateIgnore = [
@@ -44,7 +42,7 @@ export type ApplyItem = {
 export default (async (force = false) => {
   const isPackaged = (process as NodeJS.Process & {
     pkg?: unknown
-  }).pkg ? true : false;
+  }).pkg ? true : !!process.env.contentDirectory;
   if (isPackaged) {
     return;
   }
@@ -91,13 +89,13 @@ export default (async (force = false) => {
 
     const remove: string[] = [];
 
-    changedFiles.filter(a => a.status !== 'added').forEach(async a => {
+    for (const a of changedFiles.filter(a => a.status !== 'added')) {
       if (!askBeforeUpdate.some(pattern => matchString(pattern, a.filename)))
         return;
       const answer = await seiHelper.question(`The developer decided that the file '${a.filename}' may contain information you changed yourself. Should they be overriden to be updated? [y/N]`);
       if (answer.toLowerCase() === 'y')
         remove.push(a.sha);
-    });
+    }
 
     const changesToApply = await Promise.all(changedFiles.filter(a => !remove.includes(a.sha)).map(async (a): Promise<ApplyItem> => {
       if (a.filename.endsWith('.ts')) {
@@ -108,7 +106,7 @@ export default (async (force = false) => {
           }).outputText,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
         };
-        console.log('✓ transpiled %s', ret.path);
+        console.log('✓ Transpiled %s', ret.path);
         return ret;
       } else {
         const ret = {
@@ -116,15 +114,19 @@ export default (async (force = false) => {
           content: (await got(a.raw_url)).body,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
         };
-        console.log('✓ transpiled %s', ret.path);
+        console.log('✓ Got %s', ret.path);
         return ret;
       }
     }));
 
     changesToApply.forEach(a => {
-      fsextra.ensureDirSync(path.dirname(a.path));
-      fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
-      console.log('✓ written %s', a.path);
+      try {
+        fsextra.ensureDirSync(path.dirname(a.path));
+        fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
+        console.log('✓ Written %s', a.path);
+      } catch (er) {
+        console.log('✗ Error while writing %s', a.path)
+      }
     });
 
     console.log('[INFO] Done');
