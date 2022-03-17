@@ -23,7 +23,7 @@ export const ensureConfig = () => {
   if (process.env.contentDirectory)
     [binCfgFile, dirCfgFile, cliCfgFile].forEach(a => {
       if (!fs.existsSync(`${a}.yml`)) 
-        fs.copyFileSync(path.join('config', `${path.basename(a)}.yml`), `${a}.yml`);
+        fs.copyFileSync(path.join(__dirname, '..', 'config', `${path.basename(a)}.yml`), `${a}.yml`);
     })
 }
 
