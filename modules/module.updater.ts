@@ -125,7 +125,7 @@ export default (async (force = false) => {
         fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
         console.log('✓ Written %s', a.path);
       } catch (er) {
-        console.log('✗ Error while writing %s', a.path)
+        console.log('✗ Error while writing %s', a.path);
       }
     });
 

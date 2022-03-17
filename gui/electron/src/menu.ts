@@ -50,7 +50,7 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
       {
         label: 'Open settings folder',
         click: () => {
-          shell.openPath(path.join(getDataDirectory(), 'config'))
+          shell.openPath(path.join(getDataDirectory(), 'config'));
         }
       },
       {
@@ -59,20 +59,20 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
           {
             label: 'FFmpeg/Mkvmerge path',
             click: () => {
-              shell.openPath(path.join(getDataDirectory(), 'config', 'bin-path.yml'))
+              shell.openPath(path.join(getDataDirectory(), 'config', 'bin-path.yml'));
             }
           },
           {
             label: 'Advanced options',
             sublabel: 'See the documention for the options you may enter here',
             click: () => {
-              shell.openPath(path.join(getDataDirectory(), 'config', 'cli-defaults.yml'))
+              shell.openPath(path.join(getDataDirectory(), 'config', 'cli-defaults.yml'));
             }
           },
           {
             label: 'Output path',
             click: () => {
-              shell.openPath(path.join(getDataDirectory(), 'config', 'dir-path.yml'))
+              shell.openPath(path.join(getDataDirectory(), 'config', 'dir-path.yml'));
             }
           }
         ]

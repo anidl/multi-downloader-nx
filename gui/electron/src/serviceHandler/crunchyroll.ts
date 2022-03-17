@@ -36,7 +36,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
-    console.log(`[DEBUG] Got resolve options: ${JSON.stringify(data)}`)
+    console.log(`[DEBUG] Got resolve options: ${JSON.stringify(data)}`);
     const res = await this.crunchy.downloadFromSeriesID(data.id, data);
     if (!res.isOk)
       return res;
@@ -56,7 +56,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
-    console.log(`[DEBUG] Got search options: ${JSON.stringify(data)}`)
+    console.log(`[DEBUG] Got search options: ${JSON.stringify(data)}`);
     const crunchySearch = await this.crunchy.doSearch(data);
     if (!crunchySearch.isOk)
       return crunchySearch;
@@ -76,7 +76,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async downloadItem(data: DownloadData) {
-    console.log(`[DEBUG] Got download options: ${JSON.stringify(data)}`)
+    console.log(`[DEBUG] Got download options: ${JSON.stringify(data)}`);
     this.setDownloading(true);
     const _default = buildDefault() as ArgvType;
     const res = await this.crunchy.downloadFromSeriesID(data.id, {

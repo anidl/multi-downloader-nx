@@ -24,8 +24,8 @@ export const ensureConfig = () => {
     [binCfgFile, dirCfgFile, cliCfgFile].forEach(a => {
       if (!fs.existsSync(`${a}.yml`)) 
         fs.copyFileSync(path.join(__dirname, '..', 'config', `${path.basename(a)}.yml`), `${a}.yml`);
-    })
-}
+    });
+};
 
 const loadYamlCfgFile = <T extends Record<string, any>>(file: string, isSess?: boolean): T => {
   if(fs.existsSync(`${file}.user.yml`) && !isSess){
