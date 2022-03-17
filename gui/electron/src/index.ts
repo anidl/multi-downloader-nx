@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, } from 'electron';
+import { app, BrowserWindow, dialog, screen } from 'electron';
 import path from 'path/posix';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -86,9 +86,9 @@ const createWindow = async () => {
   (await import('../../../modules/module.cfg-loader')).ensureConfig();
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
-    title: 'AniDL GUI BETA',
+    width: screen.getPrimaryDisplay().bounds.width,
+    height: screen.getPrimaryDisplay().bounds.height,
+    title: `AniDL GUI BETA ${json.version}`,
     webPreferences: {
       nodeIntegration: false,
       preload: path.join(__dirname, 'preload.js')

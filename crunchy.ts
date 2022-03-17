@@ -1452,11 +1452,11 @@ export default class Crunchy implements ServiceClass {
       for (const lang of langsData.languages) {
         if (!Object.prototype.hasOwnProperty.call(ret, item.season_number))
           ret[item.season_number] = {};
-        if (item.title.includes(`(${lang.name} Dub)`)) {
+        if (item.title.includes(`(${lang.name} Dub)`) || item.title.includes(`(${lang.name})`)) {
           ret[item.season_number][lang.code] = item;
         } else if (item.is_subbed && !item.is_dubbed && lang.code == 'jpn') {
           ret[item.season_number][lang.code] = item;
-        } else if (item.is_dubbed && lang.code === 'eng' && !langsData.languages.some(a => item.title.includes(`(${a.name} Dub)`))) { // Dubbed with no more infos will be treated as eng dubs
+        } else if (item.is_dubbed && lang.code === 'eng' && !langsData.languages.some(a => item.title.includes(`(${a.name})`) || item.title.includes(`(${a.name} Dub)`))) { // Dubbed with no more infos will be treated as eng dubs
           ret[item.season_number][lang.code] = item;
         }
       }
