@@ -19,6 +19,14 @@ const tokenFile    = {
   cr: path.join(workingDir, 'config', 'cr_token')
 };
 
+export const ensureConfig = () => {
+  if (process.env.contentDirectory)
+    [binCfgFile, dirCfgFile, cliCfgFile].forEach(a => {
+      if (!fs.existsSync(`${a}.yml`)) 
+        fs.copyFileSync(path.join('config', `${path.basename(a)}.yml`), `${a}.yml`);
+    })
+}
+
 const loadYamlCfgFile = <T extends Record<string, any>>(file: string, isSess?: boolean): T => {
   if(fs.existsSync(`${file}.user.yml`) && !isSess){
     file += '.user';

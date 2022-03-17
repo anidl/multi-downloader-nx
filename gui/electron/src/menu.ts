@@ -45,6 +45,41 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
     ]
   },
   {
+    label: 'Settings',
+    submenu: [
+      {
+        label: 'Open settings folder',
+        click: () => {
+          shell.openPath(path.join(getDataDirectory(), 'config'))
+        }
+      },
+      {
+        label: 'Open settings file...',
+        submenu: [
+          {
+            label: 'FFmpeg/Mkvmerge path',
+            click: () => {
+              shell.openPath(path.join(getDataDirectory(), 'config', 'bin-path.yml'))
+            }
+          },
+          {
+            label: 'Advanced options',
+            sublabel: 'See the documention for the options you may enter here',
+            click: () => {
+              shell.openPath(path.join(getDataDirectory(), 'config', 'cli-defaults.yml'))
+            }
+          },
+          {
+            label: 'Output path',
+            click: () => {
+              shell.openPath(path.join(getDataDirectory(), 'config', 'dir-path.yml'))
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
     label: 'Help',
     submenu: [
       {

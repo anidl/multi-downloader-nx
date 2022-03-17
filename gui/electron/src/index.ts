@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { Console } from 'console';
 import json from '../../../package.json';
-
+import { ensureConfig } from '../../../modules/module.cfg-loader';
 
 process.on('uncaughtException', (er, or) => {
   console.error(er, or);
@@ -50,7 +50,7 @@ if (!fs.existsSync(getDataDirectory()))
 
 export { getDataDirectory };
 process.env.contentDirectory = getDataDirectory();
-
+ensureConfig();
 import './menu';
 
 
