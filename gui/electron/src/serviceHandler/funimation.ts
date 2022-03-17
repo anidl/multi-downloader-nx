@@ -52,6 +52,7 @@ class FunimationHandler extends Base implements MessageHandler {
   }
 
   public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
+    console.log(`[DEBUG] Got resolve options: ${JSON.stringify(data)}`)
     const res = await this.funi.getShow(false, { ...data, id: parseInt(data.id) });
     if (!res.isOk)
       return res;
@@ -71,6 +72,7 @@ class FunimationHandler extends Base implements MessageHandler {
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
+    console.log(`[DEBUG] Got search options: ${JSON.stringify(data)}`)
     const funiSearch = await this.funi.searchShow(false, data);
     if (!funiSearch.isOk)
       return funiSearch;
@@ -94,6 +96,7 @@ class FunimationHandler extends Base implements MessageHandler {
 
   public async downloadItem(data: DownloadData) {
     this.setDownloading(true);
+    console.log(`[DEBUG] Got download options: ${JSON.stringify(data)}`)
     const res = await this.funi.getShow(false, { all: false, but: false, id: parseInt(data.id), e: data.e });
     const _default = buildDefault() as ArgvType;
     if (!res.isOk)
