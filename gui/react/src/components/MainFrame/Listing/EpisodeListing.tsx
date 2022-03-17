@@ -1,17 +1,13 @@
-import { Accordion, AccordionSummary, AccordionDetails, Box, List, ListItem, Typography, Backdrop, Divider, Container, Dialog, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
-import { ExpandMore } from '@mui/icons-material'
+import { Box, List, ListItem, Typography, Divider, Dialog, Select, MenuItem, FormControl, InputLabel, Checkbox } from "@mui/material";
+import { CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material'
 import React from "react";
 import useStore from "../../../hooks/useStore";
-import { Episode } from "../../../../../../@types/messageHandler";
-import ContextMenu from "../../reusable/ContextMenu";
-import { messageChannelContext } from "../../../provider/MessageChannel";
+
 
 const EpisodeListing: React.FC = () => {
   const [store, dispatch] = useStore();
 
   const [season, setSeason] = React.useState<'all'|string>('all');
-
-  const messageHandler = React.useContext(messageChannelContext);
 
   const seasons = React.useMemo(() => {
     const s: string[] = [];
@@ -61,11 +57,23 @@ const EpisodeListing: React.FC = () => {
         </FormControl>
       </Box>
       <List>
+        <ListItem sx={{ display: 'grid', gridTemplateColumns: '25px 1fr 5fr' }}>
+          <Checkbox
+            indeterminate={store.episodeListing.some(a => selected.includes(a.e)) && !store.episodeListing.every(a => selected.includes(a.e))}
+            checked={store.episodeListing.every(a => selected.includes(a.e))}
+            onChange={() => {
+              if (selected.length > 0) {
+                setSelected([]);
+              } else {
+                setSelected(store.episodeListing.map(a => a.e));
+              }
+            }}
+          />
+        </ListItem>
         {store.episodeListing.filter((a) => season === 'all' ? true : a.season === season).map((item, index, { length }) => {
-          const ref = React.createRef<HTMLDivElement>();
           const e = isNaN(parseInt(item.e)) ? item.e : parseInt(item.e);
           const isSelected = selected.includes(e.toString());
-          return <Box ref={ref} key={`Episode_List_Item_${index}`} sx={{
+          return <Box {...{ mouseData: isSelected }} key={`Episode_List_Item_${index}`} sx={{
               backdropFilter: isSelected ? 'brightness(1.5)' : '',
               '&:hover': {
                 backdropFilter: 'brightness(1.5)'
@@ -74,17 +82,18 @@ const EpisodeListing: React.FC = () => {
             onClick={() => {
               let arr: string[] = [];
               if (isSelected) {
-                arr = [...selected.filter(a => a !== e)];
+                arr = [...selected.filter(a => a !== e.toString())];
               } else {
                 arr = [...selected, e.toString()];
               }
-              setSelected(arr);
+              setSelected(arr.filter(a => a.length > 0));
             }}>
-            <ListItem sx={{ display: 'grid', gridTemplateColumns: '50px 1fr 5fr' }}>
+            <ListItem sx={{ display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }}>
+              { isSelected ? <CheckBox /> : <CheckBoxOutlineBlank /> }
               <Typography color='text.primary' sx={{ textAlign: 'center' }}>
                 {e}
               </Typography>
-              <img style={{ width: 'inherit', maxHeight: '200px' }} src={item.img}></img>
+              <img style={{ width: 'inherit', maxHeight: '200px', minWidth: '150px' }} src={item.img}></img>
               <Box sx={{ display: 'flex', flexDirection: 'column', pl: 1 }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr min-content' }}>
                   <Typography color='text.primary' variant="h5">
@@ -99,13 +108,6 @@ const EpisodeListing: React.FC = () => {
                 </Typography>
               </Box>
             </ListItem>
-            <ContextMenu popupItem={ref} options={[
-              { text: 'Copy title', onClick: () => messageHandler?.writeToClipboard(item.name) },
-              { text: 'Copy description', onClick: () => messageHandler?.writeToClipboard(item.description) },
-              { text: 'Copy image URL', onClick: () => messageHandler?.writeToClipboard(item.img) },
-              "divider",
-              { text: 'Copy everything', onClick: () => messageHandler?.writeToClipboard(JSON.stringify(item, null, 2)) },
-            ]} />
             {index < length - 1 && <Divider />}
           </Box>
         })}
