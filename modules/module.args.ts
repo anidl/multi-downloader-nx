@@ -599,6 +599,16 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     default: {
       default: false
     }
+  },
+  {
+    name: 'force',
+    describe: 'Set the default option for the \'alredy exists\' prompt',
+    docDescribe: 'If a file already exists, the tool will ask you how to proceed. With this, you can answer in advance.',
+    group: 'dl',
+    service: 'both',
+    type: 'string',
+    usage: '${option}',
+    choices: [ 'y', 'Y', 'n', 'N', 'c', 'C' ]
   }
 ];
 

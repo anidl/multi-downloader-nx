@@ -688,7 +688,7 @@ export default class Funi implements ServiceClass {
         const chunkList = m3u8(reqVideo.res.body);
               
         const tsFile = path.join(this.cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}`);
-        dlFailed = !await this.downloadFile(tsFile, chunkList, data.timeout, data.partsize, data.fsRetryTime, data.callbackMaker ? data.callbackMaker({
+        dlFailed = !await this.downloadFile(tsFile, chunkList, data.timeout, data.partsize, data.fsRetryTime, data.force, data.callbackMaker ? data.callbackMaker({
           fileName: `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}.ts`,
           parent: {
             title: epsiode.showTitle
@@ -728,7 +728,7 @@ export default class Funi implements ServiceClass {
       
         const tsFileA = path.join(this.cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.audio.${plAud.language.code}`);
       
-        dlFailedA = !await this.downloadFile(tsFileA, chunkListA, data.timeout, data.partsize, data.fsRetryTime, data.callbackMaker ? data.callbackMaker({
+        dlFailedA = !await this.downloadFile(tsFileA, chunkListA, data.timeout, data.partsize, data.fsRetryTime, data.force, data.callbackMaker ? data.callbackMaker({
           fileName: `${fnOutput.slice(-1)}.audio.${plAud.language.code}.ts`,
           parent: {
             title: epsiode.showTitle
@@ -837,13 +837,14 @@ export default class Funi implements ServiceClass {
   
   public async downloadFile(filename: string, chunkList: {
     segments: Record<string, unknown>[],
-  }, timeout: number, partsize: number, fsRetryTime: number, callback?: HLSCallback) {
+  }, timeout: number, partsize: number, fsRetryTime: number, override?: "Y" | "y" | "N" | "n" | "C" | "c", callback?: HLSCallback) {
     const downloadStatus = await new hlsDownload({
       m3u8json: chunkList,
       output: `${filename + '.ts'}`,
       timeout: timeout,
       threads: partsize,
       fsRetryTime: fsRetryTime * 1000,
+      override,
       callback
     }).download();
       

@@ -19,7 +19,8 @@ export type CrunchyDownloadOptions = {
   skipsubs: boolean,
   mp4: boolean,
   override: string[],
-  videoTitle: string
+  videoTitle: string,
+  force: 'Y'|'y'|'N'|'n'|'C'|'c'
 }
 
 export type CurnchyMultiDownload = {

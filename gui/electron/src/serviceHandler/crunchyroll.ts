@@ -85,7 +85,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     });
     if (res.isOk) {
       for (const select of res.value) {
-        if (!(await this.crunchy.downloadEpisode(select, {..._default, skipsubs: false, callbackMaker: this.makeProgressHandler.bind(this), q: data.q, fileName: data.fileName, dlsubs: data.dlsubs }))) {
+        if (!(await this.crunchy.downloadEpisode(select, {..._default, skipsubs: false, callbackMaker: this.makeProgressHandler.bind(this), q: data.q, fileName: data.fileName, dlsubs: data.dlsubs, force: 'y' }))) {
           const er = new Error(`Unable to download episode ${data.e} from ${data.id}`);
           er.name = 'Download error';
           this.alertError(er);

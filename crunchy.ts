@@ -1140,6 +1140,7 @@ export default class Crunchy implements ServiceClass {
                 // baseurl: chunkPlaylist.baseUrl,
                 threads: options.partsize,
                 fsRetryTime: options.fsRetryTime * 1000,
+                override: options.force,
                 callback: options.callbackMaker ? options.callbackMaker({
                   fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
                   image: medias.image,

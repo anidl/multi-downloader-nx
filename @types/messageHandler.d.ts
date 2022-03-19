@@ -87,7 +87,7 @@ export type AuthData = { username: string, password: string };
 export type SearchData = { search: string, page?: number, 'search-type'?: string, 'search-locale'?: string };
 export type FuniGetShowData = { id: number, e?: string, but: boolean, all: boolean };
 export type FuniGetEpisodeData = { subs: FuniSubsData, fnSlug: FuniEpisodeData, simul?: boolean; dubLang: string[], s: string }
-export type FuniStreamData = { callbackMaker?: (data: DownloadInfo) => HLSCallback, q: number, x: number, fileName: string, numbers: number, novids?: boolean,
+export type FuniStreamData = { force?: 'Y'|'y'|'N'|'n'|'C'|'c', callbackMaker?: (data: DownloadInfo) => HLSCallback, q: number, x: number, fileName: string, numbers: number, novids?: boolean,
   timeout: number, partsize: number, fsRetryTime: number, noaudio?: boolean, mp4: boolean, ass: boolean, fontSize: number, fontName?: string, skipmux?: boolean,
   forceMuxer: AvailableMuxer | undefined, simul: boolean, skipSubMux: boolean, nocleanup: boolean, override: string[], videoTitle: string }
 export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[] }
