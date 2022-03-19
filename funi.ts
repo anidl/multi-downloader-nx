@@ -837,7 +837,7 @@ export default class Funi implements ServiceClass {
   
   public async downloadFile(filename: string, chunkList: {
     segments: Record<string, unknown>[],
-  }, timeout: number, partsize: number, fsRetryTime: number, override?: "Y" | "y" | "N" | "n" | "C" | "c", callback?: HLSCallback) {
+  }, timeout: number, partsize: number, fsRetryTime: number, override?: 'Y' | 'y' | 'N' | 'n' | 'C' | 'c', callback?: HLSCallback) {
     const downloadStatus = await new hlsDownload({
       m3u8json: chunkList,
       output: `${filename + '.ts'}`,
