@@ -233,6 +233,12 @@ If you have a good connection try incresing this number to get a higher overall 
 | Both | `--fsRetryTime ${time in seconds}` | `number` | `No`| `NaN` | `5`| `fsRetryTime: ` |
 
 Set the time the downloader waits before retrying if an error while writing the file occurs
+#### `--force`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--force ${option}` | `string` | `No`| `NaN` | [`y`, `Y`, `n`, `N`, `c`, `C`] | `NaN` |
+
+If a file already exists, the tool will ask you how to proceed. With this, you can answer in advance.
 ### Muxing
 #### `--mp4`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
