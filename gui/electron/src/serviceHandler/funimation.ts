@@ -65,6 +65,7 @@ class FunimationHandler extends Base implements MessageHandler {
           title: a.seasonTitle,
           season: a.seasonNumber
         },
+        image: a.image,
         e: a.episodeID,
         episode: a.epsiodeNumber,
       };

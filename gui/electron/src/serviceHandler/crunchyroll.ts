@@ -11,10 +11,10 @@ class CrunchyHandler extends Base implements MessageHandler {
   constructor(window: BrowserWindow) {
     super(window);
     this.crunchy = new Crunchy();
-    this.crunchy.refreshToken();
   }
   
   public async listEpisodes (id: string): Promise<EpisodeListResponse> {
+    await this.crunchy.refreshToken(true);
     return { isOk: true, value: (await this.crunchy.listSeriesID(id)).list };
   }
   
@@ -36,6 +36,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
+    await this.crunchy.refreshToken(true);
     console.log(`[DEBUG] Got resolve options: ${JSON.stringify(data)}`);
     const res = await this.crunchy.downloadFromSeriesID(data.id, data);
     if (!res.isOk)
@@ -50,12 +51,14 @@ class CrunchyHandler extends Base implements MessageHandler {
           season: a.season.toString()
         },
         e: a.e,
+        image: a.image,
         episode: a.episodeNumber
       };
     }) };
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
+    await this.crunchy.refreshToken(true);
     console.log(`[DEBUG] Got search options: ${JSON.stringify(data)}`);
     const crunchySearch = await this.crunchy.doSearch(data);
     if (!crunchySearch.isOk)
@@ -76,6 +79,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async downloadItem(data: DownloadData) {
+    await this.crunchy.refreshToken(true);
     console.log(`[DEBUG] Got download options: ${JSON.stringify(data)}`);
     this.setDownloading(true);
     const _default = buildDefault() as ArgvType;

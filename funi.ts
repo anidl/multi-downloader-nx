@@ -286,7 +286,8 @@ export default class Funi implements ServiceClass {
             episode: eps[e].ids.externalEpisodeId,
             season: eps[e].ids.externalSeasonId,
             show: eps[e].ids.externalShowId
-          }
+          },
+          image: eps[e].item.poster
         });
         epSelEpsTxt.push(epStrId);
         is_selected = true;
@@ -694,7 +695,8 @@ export default class Funi implements ServiceClass {
             title: epsiode.showTitle
           },
           title: epsiode.title,
-          image: epsiode.image
+          image: epsiode.image,
+          language: streamPath.lang,
         }) : undefined);
         if (!dlFailed) {
           if (plAud) {
@@ -734,7 +736,8 @@ export default class Funi implements ServiceClass {
             title: epsiode.showTitle
           },
           title: epsiode.title,
-          image: epsiode.image
+          image: epsiode.image,
+          language: plAud.language
         }) : undefined);
         if (!dlFailedA)
           puraudio.push({

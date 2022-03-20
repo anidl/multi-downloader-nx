@@ -247,11 +247,13 @@ export default class Crunchy implements ServiceClass {
     return true;
   }
 
-  public async refreshToken(){
+  public async refreshToken( ifNeeded = false ){
     if(!this.token.access_token && !this.token.refresh_token || this.token.access_token && !this.token.refresh_token){
       await this.doAnonymousAuth();
     }
     else{
+      if (ifNeeded)
+        return;
       if(Date.now() > new Date(this.token.expires).getTime()){
         //console.log('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
       }
@@ -1147,7 +1149,8 @@ export default class Crunchy implements ServiceClass {
                   parent: {
                     title: medias.seasonTitle
                   },
-                  title: medias.episodeTitle
+                  title: medias.episodeTitle,
+                  language: lang
                 }) : undefined
               }).download();
               if(!dlStreamByPl.ok){

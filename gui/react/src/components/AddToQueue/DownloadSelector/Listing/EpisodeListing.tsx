@@ -1,7 +1,7 @@
 import { Box, List, ListItem, Typography, Divider, Dialog, Select, MenuItem, FormControl, InputLabel, Checkbox } from "@mui/material";
 import { CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material'
 import React from "react";
-import useStore from "../../../hooks/useStore";
+import useStore from "../../../../hooks/useStore";
 
 
 const EpisodeListing: React.FC = () => {

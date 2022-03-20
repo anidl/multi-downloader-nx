@@ -1,6 +1,7 @@
 import { HLSCallback } from 'hls-download';
 import type { FunimationSearch } from './funiSearch';
 import type { AvailableMuxer } from '../modules/module.args';
+import { LanguageItem } from '../modules/module.langsData';
 
 export interface MessageHandler {
   auth: (data: AuthData) => Promise<AuthResponse>;
@@ -31,6 +32,7 @@ export type QueueItem = {
   },
   q: number,
   dubLang: string[],
+  image: string
 }
 
 export type ResolveItemsData = {
@@ -80,7 +82,8 @@ export type FuniEpisodeData = {
     episode: string,
     show: string,
     season: string
-  }
+  },
+  image: string
 };
 
 export type AuthData = { username: string, password: string };
@@ -124,6 +127,7 @@ export type DownloadInfo = {
     title: string
   },
   title: string,
+  language: LanguageItem,
   fileName: string
 }
 
