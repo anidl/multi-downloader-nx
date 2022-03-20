@@ -878,7 +878,7 @@ export default class Funi implements ServiceClass {
       return {
         isCC: subtitle.contentType === 'cc',
         url: subtitle.filePath,
-        lang: langsData.languages.find(a => a.funi_locale ?? a.locale === subtitle.languageCode)
+        lang: langsData.languages.find(a => a.funi_locale === subtitle.languageCode || a.locale === subtitle.languageCode)
       };
     }).concat(m.filter(a => a.filePath.split('.').pop() === 'vtt').map(media => {
       const lang = langsData.languages.find(a => media.language === a.funi_name_lagacy || media.language === (a.funi_name || a.name));
