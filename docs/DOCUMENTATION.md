@@ -135,13 +135,13 @@ Select specific stream
 #### `--hslang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--hslang ${hslang}` | `string` | `No`| `NaN` | [`none`, `es-419`, `es`, `pt-BR`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `zh`, `en`, `ja`] | `none`| `hslang: ` |
+| Crunchyroll | `--hslang ${hslang}` | `string` | `No`| `NaN` | [`none`, `es-419`, `es`, `pt`, `pt-BR`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `zh`, `en`, `ja`] | `none`| `hslang: ` |
 
 Download video with specific hardsubs
 #### `--dlsubs`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--dlsubs ${sub1} ${sub2}` | `array` | `No`| `NaN` | [`all`, `none`, `es-419`, `es`, `pt-BR`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `zh`, `en`, `ja`] | `all`| `dlsubs: ` |
+| Both | `--dlsubs ${sub1} ${sub2}` | `array` | `No`| `NaN` | [`all`, `none`, `es-419`, `es`, `pt`, `pt-BR`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `zh`, `en`, `ja`] | `all`| `dlsubs: ` |
 
 Download subtitles by language tag (space-separated)
 Funi Only: zh
