@@ -1,4 +1,4 @@
-# multi-downloader-nx (3.0.4v)
+# multi-downloader-nx (3.0.5v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -193,7 +193,7 @@ If selected, all available dubs will get downloaded
 #### `--timeout`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--timeout ${timeout}` | `number` | `No`| `NaN` | `60000`| `timeout: ` |
+| Both | `--timeout ${timeout}` | `number` | `No`| `NaN` | `15000`| `timeout: ` |
 
 Set the timeout of all download reqests. Set in millisecods
 #### `--simul`
