@@ -11,6 +11,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   constructor(window: BrowserWindow) {
     super(window);
     this.crunchy = new Crunchy();
+    this.crunchy.refreshToken();
   }
   
   public async listEpisodes (id: string): Promise<EpisodeListResponse> {
@@ -61,8 +62,10 @@ class CrunchyHandler extends Base implements MessageHandler {
     await this.crunchy.refreshToken(true);
     console.log(`[DEBUG] Got search options: ${JSON.stringify(data)}`);
     const crunchySearch = await this.crunchy.doSearch(data);
-    if (!crunchySearch.isOk)
+    if (!crunchySearch.isOk) {
+      this.crunchy.refreshToken();
       return crunchySearch;
+    }
     return { isOk: true, value: crunchySearch.value };
   }
 
