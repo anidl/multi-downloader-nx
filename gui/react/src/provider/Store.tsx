@@ -22,15 +22,16 @@ export type StoreState = {
   finish?: undefined
 }
 
-export type StoreAction<T extends keyof StoreState> = {
+export type StoreAction<T extends (keyof StoreState)> = {
   type: T,
-  payload: StoreState[T]
+  payload: StoreState[T],
+  extraInfo?: Record<string, unknown>
 }
 
 const Reducer = <T extends keyof StoreState,>(state: StoreState, action: StoreAction<T>): StoreState => {
   switch(action.type) {
     case "queue":
-      state.queue = state.queue.concat(action.payload as QueueItem[]);
+      state.queue = action.extraInfo?.force ? action.payload as QueueItem[] : state.queue.concat(action.payload as QueueItem[]);
       if (state.currentDownload === undefined && state.queue.length > 0) {
         state.currentDownload = state.queue[0];
         state.queue = state.queue.slice(1);

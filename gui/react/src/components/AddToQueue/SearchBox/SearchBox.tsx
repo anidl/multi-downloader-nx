@@ -42,12 +42,11 @@ const SearchBox: React.FC = () => {
   }, [search]);
 
   const anchorBounding = anchor.current?.getBoundingClientRect();
-
   return <ClickAwayListener onClickAway={() => setFocus(false)}>
     <Box sx={{ m: 2 }}>
       <TextField ref={anchor} value={search} onClick={() => setFocus(true)} onChange={e => setSearch(e.target.value)} variant='outlined' label='Search' fullWidth  />
       {searchResult !== undefined && searchResult.isOk && searchResult.value.length > 0 && focus &&
-      <Paper sx={{ position: 'absolute', maxHeight: '50%', width: `${anchorBounding?.width}px`, 
+      <Paper sx={{ position: 'fixed', maxHeight: '50%', width: `${anchorBounding?.width}px`, 
         left: anchorBounding?.x, top: (anchorBounding?.y ?? 0) + (anchorBounding?.height ?? 0), zIndex: 99, overflowY: 'scroll'}}>
         <List>
           {searchResult && searchResult.isOk ?

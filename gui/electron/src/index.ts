@@ -79,16 +79,13 @@ if (!process.env.TEST) {
   })();
 }
 
-
-
-
 const createWindow = async () => {
   (await import('../../../modules/module.cfg-loader')).ensureConfig();
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: screen.getPrimaryDisplay().bounds.width,
     height: screen.getPrimaryDisplay().bounds.height,
-    title: `AniDL GUI BETA ${json.version}`,
+    title: `AniDL GUI v${json.version}`,
     webPreferences: {
       nodeIntegration: false,
       preload: path.join(__dirname, 'preload.js')
@@ -97,24 +94,6 @@ const createWindow = async () => {
   });
 
   mainWindow.webContents.on('crashed', (e) => console.log(e));
-
-  if (!process.env.TEST) {
-    const response = dialog.showMessageBoxSync(mainWindow, {
-      title: 'Test Version Information',
-      message: 'I understand that this is a test version that is subject to changes and most certainly contains errors.' 
-        + '\nI understand that I am using this tool at my own risk.'
-        + '\nI know that bugs or suggestions should be made to Izuco on Discord or under github@izuco.dev'
-        + '\nI understand that I should thank Darekon for the art works and the concept art if I see him',
-      buttons: [
-        'Cancel',
-        'I understand'
-      ],
-      type: 'info'
-    });
-    console.log(`[INFO] Popup response: ${response}`);
-    if (response !== 1 && response !== -1)
-      app.quit();
-  }
 
   (await import('./messageHandler')).default(mainWindow);
   

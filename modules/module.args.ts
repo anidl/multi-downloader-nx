@@ -315,7 +315,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     service: 'both',
     usage: '${timeout}',
     default: {
-      default: 60 * 1000
+      default: 15 * 1000
     }
   },
   {

@@ -7,7 +7,11 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { useSnackbar } from "notistack";
 import { Folder } from "@mui/icons-material";
 
-const DownloadSelector: React.FC = () => {
+type DownloadSelectorProps = {
+  onFinish?: () => unknown
+}
+
+const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
   const messageHandler = React.useContext(messageChannelContext);
   const [store, dispatch] = useStore();
   const [availableDubs, setAvailableDubs] = React.useState<string[]>([]);
@@ -55,6 +59,8 @@ const DownloadSelector: React.FC = () => {
       });
     }
     setLoading(false);
+    if (onFinish)
+      onFinish();
   }
 
   const listEpisodes = async () => {
@@ -138,7 +144,6 @@ const DownloadSelector: React.FC = () => {
     <Box sx={{ gap: 2, flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
       <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>List episodes</LoadingButton>
       <LoadingButton loading={loading} onClick={addToQueue} variant='contained'>Add to Queue</LoadingButton>
-      <Button variant="contained" startIcon={<Folder />} onClick={() => messageHandler?.openFolder('content')}>Open Output Directory</Button>
     </Box>
   </Box> 
 };
