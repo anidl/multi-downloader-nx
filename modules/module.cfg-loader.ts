@@ -20,6 +20,8 @@ const tokenFile    = {
 };
 
 export const ensureConfig = () => {
+  if (!fs.existsSync(path.join(workingDir, 'config')))
+    fs.mkdirSync(path.join(workingDir, 'config'));
   if (process.env.contentDirectory)
     [binCfgFile, dirCfgFile, cliCfgFile].forEach(a => {
       if (!fs.existsSync(`${a}.yml`)) 
