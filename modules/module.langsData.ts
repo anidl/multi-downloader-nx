@@ -27,6 +27,7 @@ const languages: LanguageItem[] = [
   { funi_locale: 'zhMN', locale: 'zh',     code: 'cmn', name: 'Chinese (Mandarin, PRC)'                                             },
   { cr_locale: 'en-US',  funi_locale: 'enUS', locale: 'en',     code: 'eng', name: 'English'                                        },
   { cr_locale: 'ja-JP',  funi_locale: 'jaJP', locale: 'ja',     code: 'jpn', name: 'Japanese'                                       },
+  { cr_locale: 'ko-KR', locale: 'ko', code: 'kor', name: 'Korean' }
 ];
 
 // add en language names
