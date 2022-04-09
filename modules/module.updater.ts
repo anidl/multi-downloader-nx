@@ -91,16 +91,17 @@ export default (async (force = false) => {
 
     for (const a of changedFiles.filter(a => a.status !== 'added')) {
       if (!askBeforeUpdate.some(pattern => matchString(pattern, a.filename)))
-        return;
+        continue;
       const answer = await seiHelper.question(`The developer decided that the file '${a.filename}' may contain information you changed yourself. Should they be overriden to be updated? [y/N]`);
       if (answer.toLowerCase() === 'y')
         remove.push(a.sha);
     }
 
     const changesToApply = await Promise.all(changedFiles.filter(a => !remove.includes(a.sha)).map(async (a): Promise<ApplyItem> => {
-      if (a.filename.endsWith('.ts')) {
+      if (a.filename.endsWith('.ts') || a.filename.endsWith('tsx')) {
+        const isTSX = a.filename.endsWith('tsx');
         const ret = {
-          path: a.filename.slice(0, -2) + 'js',
+          path: a.filename.slice(0, isTSX ? -3 : -2) + `js${isTSX ? 'x' : ''}`,
           content: transpileModule((await got(a.raw_url)).body, {
             compilerOptions: tsConfig.compilerOptions as unknown as CompilerOptions
           }).outputText,
