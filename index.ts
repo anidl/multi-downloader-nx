@@ -49,12 +49,7 @@ import update from './modules/module.updater';
       await service.cli();
     }
   } else {
-    if (argv.service === 'funi') {
-      const funi = new (await import('./funi')).default();
-      await funi.cli();
-    } else if (argv.service === 'crunchy') {
-      const crunchy = new (await import('./crunchy')).default();
-      await crunchy.cli();
-    }
+    let service = argv.service === 'funi' ? new (await import('./funi')).default() : new (await import('./crunchy')).default() as ServiceClass;
+    await service.cli();
   }
 })();
