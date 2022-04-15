@@ -31,7 +31,7 @@ const addToArchive = (kind: {
   
   if (Object.prototype.hasOwnProperty.call(data, kind.service)) {
     const items = kind.service === 'crunchy' ? data[kind.service][kind.type] : data[kind.service][kind.type];
-    if (items.findIndex(a => a.id === ID) < 0) // Prevent duplicate
+    if (items.findIndex(a => a.id === ID) >= 0) // Prevent duplicate
       return;
     items.push({
       id: ID,
