@@ -1205,7 +1205,7 @@ export default class Crunchy implements ServiceClass {
             sxData.language = langItem;
             sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem);
             sxData.path = path.join(this.cfg.dir.content, sxData.file);
-            if (files.some(a => a.type === 'Subtitle' && (a.language.code == langItem.code || a.language.locale == langItem.locale)))
+            if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale)))
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
               const subsAssReq = await this.req.getData(subsItem.url);
