@@ -24,10 +24,10 @@ const languages: LanguageItem[] = [
   { cr_locale: 'it-IT',  locale: 'it',     code: 'ita', name: 'Italian'                                        },
   { cr_locale: 'ru-RU',  locale: 'ru',     code: 'rus', name: 'Russian'                                        },
   { cr_locale: 'tr-TR',  locale: 'tr',     code: 'tur', name: 'Turkish'                                        },
-  { funi_locale: 'zhMN', locale: 'zh',     code: 'cmn', name: 'Chinese (Mandarin, PRC)'                                             },
-  { cr_locale: 'en-US',  funi_locale: 'enUS', locale: 'en',     code: 'eng', name: 'English'                                        },
-  { cr_locale: 'ja-JP',  funi_locale: 'jaJP', locale: 'ja',     code: 'jpn', name: 'Japanese'                                       },
-  { cr_locale: 'ko-KR', locale: 'ko', code: 'kor', name: 'Korean' }
+  { funi_locale: 'zhMN', locale: 'zh',     code: 'cmn', name: 'Chinese (Mandarin, PRC)'                        },
+  { cr_locale: 'ko-KR', locale: 'ko', code: 'kor', name: 'Korean'                                              },
+  { cr_locale: 'en-US',  funi_locale: 'enUS', locale: 'en',     code: 'eng', name: 'English'                   },
+  { cr_locale: 'ja-JP',  funi_locale: 'jaJP', locale: 'ja',     code: 'jpn', name: 'Japanese'                  },
 ];
 
 // add en language names
