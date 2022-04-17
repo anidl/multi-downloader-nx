@@ -37,6 +37,7 @@ const addToArchive = (kind: {
       id: ID,
       already: []
     });
+    (data as any)[kind.service][kind.type] = items;
   } else {
     if (kind.service === 'funi') {
       data['funi'] = {
@@ -71,7 +72,8 @@ const downloaded = (kind: {
   type: 's'|'srz'
 }, ID: string, episode: string[]) => {
   let data = loadData();
-  if (!Object.prototype.hasOwnProperty.call(data, kind.service)) {
+  if (!Object.prototype.hasOwnProperty.call(data, kind.service) || !Object.prototype.hasOwnProperty.call(data[kind.service], kind.type) 
+      || !Object.prototype.hasOwnProperty.call((data as any)[kind.service][kind.type], ID)) {
     addToArchive(kind, ID);
     data = loadData(); // Load updated version
   }
