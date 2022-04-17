@@ -123,8 +123,11 @@ const loadBinCfg = async () => {
     if(!Object.prototype.hasOwnProperty.call(binCfg, dir) || typeof binCfg[dir] != 'string'){
       binCfg[dir] = defaultBin[dir];
     }
-    if (!path.isAbsolute(binCfg[dir] as string) && (binCfg[dir] as string).match(/^\${wdir}/)){
+    if ((binCfg[dir] as string).match(/^\${wdir}/)) {
       binCfg[dir] = (binCfg[dir] as string).replace(/^\${wdir}/, '');
+      binCfg[dir] = path.join(workingDir, binCfg[dir] as string);
+    }
+    if (!path.isAbsolute(binCfg[dir] as string)){
       binCfg[dir] = path.join(workingDir, binCfg[dir] as string);
     }
     binCfg[dir] = await lookpath(binCfg[dir] as string);
