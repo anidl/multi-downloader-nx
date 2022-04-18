@@ -42,7 +42,6 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
 const parseOverride = (variables: Variable[], override: string[]): Variable<string>[] => {
   const vars: Variable<string>[] = variables;
   override.forEach(item => {
-    console.log(item);
     const index = item.indexOf('=');
     if (index === -1)
       return logError(item, 'invalid');
@@ -51,7 +50,6 @@ const parseOverride = (variables: Variable[], override: string[]): Variable<stri
       return logError(item, 'invalid');
     parts[1] = parts[1].slice(1, -1);
     const already = vars.findIndex(a => a.name === parts[0]);
-    console.log(parts);
     if (already > -1) {
       if (vars[already].type === 'number') {
         if (isNaN(parseFloat(parts[1])))
