@@ -12,6 +12,7 @@ export type LanguageItem = {
 }
 
 const languages: LanguageItem[] = [
+  { cr_locale: 'en-US',  funi_locale: 'enUS', locale: 'en',     code: 'eng', name: 'English'                   },
   { cr_locale: 'es-LA',  funi_name: 'Spanish (LAS)', funi_name_lagacy: 'Spanish (Latin Am)', funi_locale: 'esLA', locale: 'es-419', code: 'spa', name: 'Spanish',    language: 'Latin American Spanish' },
   { cr_locale: 'es-419', locale: 'es-419', code: 'spa', name: 'Spanish',    language: 'Latin American Spanish' },
   { cr_locale: 'es-ES',  locale: 'es',     code: 'spa', name: 'Spanish'                                        },
@@ -26,7 +27,6 @@ const languages: LanguageItem[] = [
   { cr_locale: 'tr-TR',  locale: 'tr',     code: 'tur', name: 'Turkish'                                        },
   { funi_locale: 'zhMN', locale: 'zh',     code: 'cmn', name: 'Chinese (Mandarin, PRC)'                        },
   { cr_locale: 'ko-KR', locale: 'ko', code: 'kor', name: 'Korean'                                              },
-  { cr_locale: 'en-US',  funi_locale: 'enUS', locale: 'en',     code: 'eng', name: 'English'                   },
   { cr_locale: 'ja-JP',  funi_locale: 'jaJP', locale: 'ja',     code: 'jpn', name: 'Japanese'                  },
 ];
 
