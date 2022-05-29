@@ -814,7 +814,11 @@ export default class Funi implements ServiceClass {
       videoAndAudio: audioAndVideo,
       simul: data.simul,
       skipSubMux: data.skipSubMux,
-      videoTitle: data.videoTitle
+      videoTitle: data.videoTitle,
+      options: {
+        ffmpeg: data.ffmpegOptions,
+        mkvmerge: data.mkvmergeOptions
+      }
     });
   
     if(mergerBin.MKVmerge){

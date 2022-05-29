@@ -609,6 +609,34 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     type: 'string',
     usage: '${option}',
     choices: [ 'y', 'Y', 'n', 'N', 'c', 'C' ]
+  },
+  {
+    name: 'mkvmergeOptions',
+    describe: 'Set the options given to mkvmerge',
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'array',
+    usage: '${args}',
+    default: {
+      default: [
+        '--no-date',
+        '--disable-track-statistics-tags',
+        '--engage no_variable_data'
+      ]
+    }
+  },
+  {
+    name: 'ffmpegOptions',
+    describe: 'Set the options given to ffmpeg',
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'array',
+    usage: '${args}',
+    default: {
+      default: []
+    }
   }
 ];
 

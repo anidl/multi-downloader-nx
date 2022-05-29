@@ -35,7 +35,10 @@ export type MergerOptions = {
   simul?: boolean,
   fonts?: ParsedFont[],
   skipSubMux?: boolean,
-  coustomOptions?: string,
+  options: {
+    ffmpeg: string[],
+    mkvmerge: string[]
+  },
 }
 
 class Merger {
@@ -110,9 +113,9 @@ class Merger {
       this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass',
       ...this.options.subtitles.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
         (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ' CC' : ''}`
-      }" -metadata:s:s:${subindex} language=${sub.language.code}`),
-      this.options.coustomOptions ?? ''
+      }" -metadata:s:s:${subindex} language=${sub.language.code}`)
     );
+    args.push(...this.options.options.ffmpeg);
     args.push(`"${this.options.output}"`);
     return args.join(' ');
   }
@@ -134,11 +137,7 @@ class Merger {
     let hasVideo = false;
 
     args.push(`-o "${this.options.output}"`);
-    args.push(
-      '--no-date',
-      '--disable-track-statistics-tags',
-      '--engage no_variable_data',
-    );
+    args.push(...this.options.options.mkvmerge);
 
     for (const vid of this.options.onlyVid) {
       if (!hasVideo) {

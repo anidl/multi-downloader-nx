@@ -20,7 +20,9 @@ export type CrunchyDownloadOptions = {
   mp4: boolean,
   override: string[],
   videoTitle: string,
-  force: 'Y'|'y'|'N'|'n'|'C'|'c'
+  force: 'Y'|'y'|'N'|'n'|'C'|'c',
+  ffmpegOptions: string[],
+  mkvmergeOptions: string[]
 }
 
 export type CurnchyMultiDownload = {
@@ -37,7 +39,9 @@ export type CrunchyMuxOptions = {
   mp4: boolean,
   forceMuxer?: 'ffmpeg'|'mkvmerge',
   nocleanup?: boolean,
-  videoTitle: string
+  videoTitle: string,
+  ffmpegOptions: string[],
+  mkvmergeOptions: string[]
 }
 
 export type CrunchyEpMeta = {

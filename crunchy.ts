@@ -62,7 +62,6 @@ export default class Crunchy implements ServiceClass {
   public async cli() {
     console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
-    this.debug = argv.debug ?? false;
 
     // load binaries
     this.cfg.bin = await yamlCfg.loadBinCfg();
@@ -1272,7 +1271,11 @@ export default class Crunchy implements ServiceClass {
           path: a.path,
         };
       }),
-      videoTitle: options.videoTitle
+      videoTitle: options.videoTitle,
+      options: {
+        ffmpeg: options.ffmpegOptions,
+        mkvmerge: options.mkvmergeOptions
+      }
     });
     const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);
     // collect fonts info
