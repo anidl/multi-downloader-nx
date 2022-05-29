@@ -276,6 +276,18 @@ Force the program to use said muxer or don't mux if the given muxer is not prese
 | Both | `--videoTitle ${title}` | `string` | `No`| `NaN` | `NaN` |
 
 Set the video track name of the merged file
+#### `--mkvmergeOptions`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--mkvmergeOptions ${args}` | `array` | `No`| `NaN` | `--no-date,--disable-track-statistics-tags,--engage no_variable_data`| `mkvmergeOptions: ` |
+
+Set the options given to mkvmerge
+#### `--ffmpegOptions`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--ffmpegOptions ${args}` | `array` | `No`| `NaN` | ``| `ffmpegOptions: ` |
+
+Set the options given to ffmpeg
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
