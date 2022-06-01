@@ -95,7 +95,7 @@ export type FuniStreamData = { force?: 'Y'|'y'|'N'|'n'|'C'|'c', callbackMaker?: 
   forceMuxer: AvailableMuxer | undefined, simul: boolean, skipSubMux: boolean, nocleanup: boolean, override: string[], videoTitle: string,
   ffmpegOptions: string[], mkvmergeOptions: string[] }
 export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[] }
-export type DownloadData = { id: string, e: string, dubLang: string[], dlsubs: string[], fileName: string, q: number }
+export type DownloadData = { id: string, e: string, dubLang: string[], dlsubs: string[], fileName: string, q: number, novids: boolean, noaudio: boolean }
 
 export type AuthResponse = ResponseBase<undefined>;
 export type FuniSearchReponse = ResponseBase<FunimationSearch>;

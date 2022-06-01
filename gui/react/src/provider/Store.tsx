@@ -10,7 +10,9 @@ export type DownloadOptions = {
   dlsubs: string[],
   fileName: string,
   all: boolean,
-  but: boolean
+  but: boolean,
+  novids: boolean,
+  noaudio: boolean
 }
 
 export type StoreState = {
@@ -60,7 +62,9 @@ const initialState: StoreState = {
     dlsubs: [ 'all' ],
     fileName: '',
     all: false,
-    but: false
+    but: false,
+    noaudio: false,
+    novids: false
   },
   service: undefined,
   episodeListing: [],

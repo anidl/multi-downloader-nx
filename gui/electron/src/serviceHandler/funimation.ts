@@ -104,7 +104,8 @@ class FunimationHandler extends Base implements MessageHandler {
       return this.alertError(res.reason);
 
     for (const ep of res.value) {
-      await this.funi.getEpisode(false, { dubLang: data.dubLang, fnSlug: ep, s: data.id, subs: { dlsubs: data.dlsubs, sub: false } }, { ..._default, callbackMaker: this.makeProgressHandler.bind(this), ass: true, fileName: data.fileName, q: data.q, force: 'y' });
+      await this.funi.getEpisode(false, { dubLang: data.dubLang, fnSlug: ep, s: data.id, subs: { dlsubs: data.dlsubs, sub: false } }, { ..._default, callbackMaker: this.makeProgressHandler.bind(this), ass: true, fileName: data.fileName, q: data.q, force: 'y',
+        noaudio: data.noaudio, novids: data.novids });
     }
     this.sendMessage({ name: 'finish', data: undefined });
     this.setDownloading(false);

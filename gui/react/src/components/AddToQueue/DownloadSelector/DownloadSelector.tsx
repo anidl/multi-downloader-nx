@@ -140,6 +140,8 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
       }} sx={{ width: '50%' }} label='Filename' />
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, all: !store.downloadOptions.all } })} variant={store.downloadOptions.all ? 'contained' : 'outlined'}>Download all</Button>
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, but: !store.downloadOptions.but } })} variant={store.downloadOptions.but ? 'contained' : 'outlined'}>Download all but</Button>
+      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, noaudio: !store.downloadOptions.noaudio } })} variant={store.downloadOptions.noaudio ? 'contained' : 'outlined'}>Skip Audio</Button>
+      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, novids: !store.downloadOptions.novids } })} variant={store.downloadOptions.novids ? 'contained' : 'outlined'}>Skip Video</Button>
     </Box>
     <Box sx={{ gap: 2, flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
       <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>List episodes</LoadingButton>
