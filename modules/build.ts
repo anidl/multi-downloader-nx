@@ -9,7 +9,7 @@ import path from 'path';
 const buildsDir = './_builds';
 const nodeVer = 'node16-';
 
-type BuildTypes = `${'ubuntu'|'windows'|'macos'}64`
+type BuildTypes = `${'ubuntu'|'windows'|'macos'|'arm'}64`
 
 (async () => {
   const buildType = process.argv[2] as BuildTypes;
@@ -32,8 +32,10 @@ async function buildGUI(buildType: BuildTypes) {
 
 function getCommand(buildType: BuildTypes) {
   switch (buildType) {
+  case 'arm64':
+    return '--linux --arm64';
   case 'ubuntu64':
-    return '--linux --arm64 --x64';
+    return '--linux --x64';
   case 'windows64':
     return '--win';
   case 'macos64':
@@ -45,10 +47,13 @@ function getCommand(buildType: BuildTypes) {
 
 function getOutputFileName(buildType: BuildTypes): string[] {
   switch (buildType) {
+  case 'arm64':
+    return [
+      `${pkg.name}_${pkg.version}_arm64.deb`
+    ];
   case 'ubuntu64':
     return [
-      `${pkg.name}_${pkg.version}_arm64.deb`,
-      `${pkg.name}_${pkg.version}_x64.deb`
+      `${pkg.name}_${pkg.version}_amd64.deb`
     ];
   case 'windows64':
     return [
