@@ -33,7 +33,7 @@ async function buildGUI(buildType: BuildTypes) {
 function getCommand(buildType: BuildTypes) {
   switch (buildType) {
   case 'ubuntu64':
-    return '--linux --arm64';
+    return '--linux --arm64 --x64';
   case 'windows64':
     return '--win';
   case 'macos64':
