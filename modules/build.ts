@@ -24,7 +24,7 @@ type BuildTypes = `${'ubuntu'|'windows'|'macos'}64`
 
 async function buildGUI(buildType: BuildTypes) {
   execSync(`npx electron-builder build --publish=never ${getCommand(buildType)}`, { stdio: [0,1,2] });
-  execSync(`7z a -t7z "../${buildsDir}/multi-downloader-nx-${buildType}-gui.7z" "${getOutputFileName(buildType)}"`,{
+  execSync(`7z a -t7z "../${buildsDir}/multi-downloader-nx-${buildType}-gui.7z" ${getOutputFileName(buildType).map(a => `"${a}"`).join(" ")}`,{
     stdio:[0,1,2],
     cwd: path.join('dist')
   });
@@ -43,14 +43,21 @@ function getCommand(buildType: BuildTypes) {
   }
 }
 
-function getOutputFileName(buildType: BuildTypes) {
+function getOutputFileName(buildType: BuildTypes): string[] {
   switch (buildType) {
   case 'ubuntu64':
-    return `${pkg.name}_${pkg.version}_arm64.deb`;
+    return [
+      `${pkg.name}_${pkg.version}_arm64.deb`,
+      `${pkg.name}_${pkg.version}_x64.deb`
+    ];
   case 'windows64':
-    return `${pkg.name} Setup ${pkg.version}.exe`;
+    return [
+      `${pkg.name} Setup ${pkg.version}.exe`
+    ];
   case 'macos64':
-    return `${pkg.name}-${pkg.version}.dmg`;
+    return [
+      `${pkg.name}-${pkg.version}.dmg`
+    ];
   default:
     throw new Error(`Unknown build type ${buildType}`);
   }

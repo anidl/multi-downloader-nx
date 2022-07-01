@@ -131,7 +131,7 @@ const sortTags = (data: string[]) => {
 
 const subsFile = (fnOutput:string, subsIndex: string, langItem: LanguageItem) => {
   subsIndex = (parseInt(subsIndex) + 1).toString().padStart(2, '0');
-  return `${fnOutput}.${subsIndex} ${langItem.code} ${langItem.language}.ass`;
+  return `${fnOutput}.${subsIndex}.${langItem.code}.${langItem.language}.ass`;
 };
 
 // construct dub langs const
