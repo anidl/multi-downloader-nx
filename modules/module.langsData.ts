@@ -26,6 +26,7 @@ const languages: LanguageItem[] = [
   { cr_locale: 'ru-RU',  locale: 'ru',     code: 'rus', name: 'Russian'                                        },
   { cr_locale: 'tr-TR',  locale: 'tr',     code: 'tur', name: 'Turkish'                                        },
   { funi_locale: 'zhMN', locale: 'zh',     code: 'cmn', name: 'Chinese (Mandarin, PRC)'                        },
+  { cr_locale: 'zh-CN', locale: 'zh',     code: 'zho', name: 'Chinese (Mainland China)'                        },
   { cr_locale: 'ko-KR', locale: 'ko', code: 'kor', name: 'Korean'                                              },
   { cr_locale: 'ja-JP',  funi_locale: 'jaJP', locale: 'ja',     code: 'jpn', name: 'Japanese'                  },
 ];
