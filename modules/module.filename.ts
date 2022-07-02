@@ -10,7 +10,8 @@ export type Variable<T extends string = AvailableFilenameVars> = ({
   type: 'string',
   replaceWith: string
 }) & {
-  name: T
+  name: T,
+  sanitize?: boolean
 }
 
 const parseFileName = (input: string, variables: Variable[], numbers: number, override: string[]): string[] => {
@@ -33,6 +34,8 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
       const replaceStr = len < numbers ? '0'.repeat(numbers - len) + use.replaceWith : use.replaceWith.toFixed(0);
       input = input.replace(type, replaceStr); 
     } else {
+      if (use.sanitize) 
+        use.replaceWith = shlp.cleanupFilename(use.replaceWith);
       input = input.replace(type, use.replaceWith);
     }
   }

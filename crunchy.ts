@@ -913,16 +913,17 @@ export default class Crunchy implements ServiceClass {
       const pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
     
       variables.push(...([
-        ['title', medias.episodeTitle],
-        ['episode', isNaN(parseInt(medias.episodeNumber)) ? medias.episodeNumber : parseInt(medias.episodeNumber)],
-        ['service', 'CR'],
-        ['showTitle', medias.seasonTitle],
-        ['season', medias.season]
-      ] as [AvailableFilenameVars, string|number][]).map((a): Variable => {
+        ['title', medias.episodeTitle, true],
+        ['episode', isNaN(parseInt(medias.episodeNumber)) ? medias.episodeNumber : parseInt(medias.episodeNumber), false],
+        ['service', 'CR', false],
+        ['showTitle', medias.seasonTitle, true],
+        ['season', medias.season, false]
+      ] as [AvailableFilenameVars, string|number, boolean][]).map((a): Variable => {
         return {
           name: a[0],
           replaceWith: a[1],
-          type: typeof a[1]
+          type: typeof a[1],
+          sanitize: a[2]
         } as Variable;
       }));
     

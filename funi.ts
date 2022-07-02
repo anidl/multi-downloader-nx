@@ -638,18 +638,19 @@ export default class Funi implements ServiceClass {
         }
       
         fnOutput = parseFileName(data.fileName, ([
-          ['episode', isNaN(parseInt(fnEpNum as string)) ? fnEpNum : parseInt(fnEpNum as string)],
-          ['title', epsiode.title],
-          ['showTitle', epsiode.showTitle],
-          ['season', season],
-          ['width', plLayersRes[selectedQuality].width],
-          ['height', plLayersRes[selectedQuality].height],
-          ['service', 'Funimation']
-        ] as [AvailableFilenameVars, string|number][]).map((a): Variable => {
+          ['episode', isNaN(parseInt(fnEpNum as string)) ? fnEpNum : parseInt(fnEpNum as string), true],
+          ['title', epsiode.title, true],
+          ['showTitle', epsiode.showTitle, true],
+          ['season', season, false],
+          ['width', plLayersRes[selectedQuality].width, false],
+          ['height', plLayersRes[selectedQuality].height, false],
+          ['service', 'Funimation', false]
+        ] as [AvailableFilenameVars, string|number, boolean][]).map((a): Variable => {
           return {
             name: a[0],
             replaceWith: a[1],
             type: typeof a[1],
+            sanitize: a[2]
           } as Variable;
         }), data.numbers, data.override);
         if (fnOutput.length < 1)
