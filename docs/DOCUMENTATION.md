@@ -77,7 +77,7 @@ The output is organized in pages. Use this command to output the items for the g
 #### `--search-locale`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--search-locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `ko-KR`] | ``| `search-locale: ` |
+| Crunchyroll | `--search-locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `zh-CN`, `ko-KR`] | ``| `search-locale: ` |
 
 Set the search local that will be used for searching for items.
 #### `--new`
@@ -145,7 +145,7 @@ Download video with specific hardsubs
 
 Download subtitles by language tag (space-separated)
 Funi Only: zh
-Crunchy Only: es-419, es, fr, de, ar, ar, it, ru, tr, ko
+Crunchy Only: es-419, es, fr, de, ar, ar, it, ru, tr, zh, ko
 #### `--novids`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -167,11 +167,11 @@ Skip downloading subtitles
 #### `--dubLang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa`, `por`, `fra`, `deu`, `ara`, `ita`, `rus`, `tur`, `cmn`, `kor`, `jpn`] | `jpn`| `dubLang: ` |
+| Both | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa`, `por`, `fra`, `deu`, `ara`, `ita`, `rus`, `tur`, `cmn`, `zho`, `kor`, `jpn`] | `jpn`| `dubLang: ` |
 
 Set the language to download: 
 Funi Only: cmn
-Crunchy Only: spa, spa, fra, deu, ara, ara, ita, rus, tur, kor
+Crunchy Only: spa, spa, fra, deu, ara, ara, ita, rus, tur, zho, kor
 #### `--all`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
