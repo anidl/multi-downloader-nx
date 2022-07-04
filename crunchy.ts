@@ -90,7 +90,7 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.new){
       await this.refreshToken();
-      await this.getNewlyAdded();
+      await this.getNewlyAdded(argv.page);
     }
     else if(argv.search && argv.search.length > 2){
       await this.refreshToken();
@@ -651,8 +651,8 @@ export default class Crunchy implements ServiceClass {
     }
     // calculate pages
     const itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.api_beta).searchParams.get('start') as string);
-    const pageCur = itemPad > 0 ? Math.ceil(itemPad/5) + 1 : 1;
-    const pageMax = Math.ceil(newlyAddedResults.total/5);
+    const pageCur = itemPad > 0 ? Math.ceil(itemPad/25) + 1 : 1;
+    const pageMax = Math.ceil(newlyAddedResults.total/25);
     console.log(`  [INFO] Total results: ${newlyAddedResults.total} (Page: ${pageCur}/${pageMax})`);
   }
 

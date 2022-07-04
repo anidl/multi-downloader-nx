@@ -2,7 +2,8 @@ name: Bug
 description: File a bug report
 assignees: 
   - izu-co
-labels: bug
+labels:
+  - bug
 title: "BUG"
 body:
   - type: markdown
