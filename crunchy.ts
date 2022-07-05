@@ -1185,7 +1185,6 @@ export default class Crunchy implements ServiceClass {
         options.skipsubs = true;
       }
   
-  
       if(!options.skipsubs && options.dlsubs.indexOf('none') == -1){
         if(pbData.subtitles && Object.values(pbData.subtitles).length > 0){
           const subsData = Object.values(pbData.subtitles);
@@ -1203,9 +1202,10 @@ export default class Crunchy implements ServiceClass {
             const langItem = subsItem.locale;
             const sxData: Partial<sxItem> = {};
             sxData.language = langItem;
-            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem);
+            const isCC = langItem.code === audDub
+            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC);
             sxData.path = path.join(this.cfg.dir.content, sxData.file);
-            if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale)))
+            if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC))
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
               const subsAssReq = await this.req.getData(subsItem.url);
@@ -1221,7 +1221,8 @@ export default class Crunchy implements ServiceClass {
                 console.log(`[INFO] Subtitle downloaded: ${sxData.file}`);
                 files.push({
                   type: 'Subtitle',
-                  ...sxData as sxItem
+                  ...sxData as sxItem,
+                  cc: isCC
                 });
               }
               else{
@@ -1259,7 +1260,8 @@ export default class Crunchy implements ServiceClass {
           throw new Error('Never');
         return {
           file: a.path,
-          language: a.language
+          language: a.language,
+          closedCaption: a.cc
         };
       }),
       simul: false,

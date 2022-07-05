@@ -130,9 +130,9 @@ const sortTags = (data: string[]) => {
   return sort.map(e => e.locale as string);
 };
 
-const subsFile = (fnOutput:string, subsIndex: string, langItem: LanguageItem) => {
+const subsFile = (fnOutput:string, subsIndex: string, langItem: LanguageItem, isCC: boolean) => {
   subsIndex = (parseInt(subsIndex) + 1).toString().padStart(2, '0');
-  return `${fnOutput}.${subsIndex}.${langItem.code}.${langItem.language}.ass`;
+  return `${fnOutput}.${subsIndex}.${langItem.code}.${langItem.language}${isCC ? '.cc' : ''}.ass`;
 };
 
 // construct dub langs const

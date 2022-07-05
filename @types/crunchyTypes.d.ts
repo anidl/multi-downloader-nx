@@ -65,7 +65,8 @@ export type DownloadedMedia = {
   lang: LanguageItem,
   path: string
 } | ({
-  type: 'Subtitle'
+  type: 'Subtitle',
+  cc: boolean
 } & sxItem )
 
 export type ParseItem = {
