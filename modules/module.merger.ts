@@ -39,6 +39,10 @@ export type MergerOptions = {
     ffmpeg: string[],
     mkvmerge: string[]
   },
+  defaults: {
+    audio: LanguageItem,
+    sub: LanguageItem
+  }
 }
 
 class Merger {
@@ -163,12 +167,22 @@ class Merger {
         args.push('--track-name', `0:"${trackName}"`);
         //args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${vid.lang.code}`);
+        if (this.options.defaults.audio.code === vid.lang.code) {
+          args.push('--default-track 1');
+        } else {
+          args.push('--default-track 1:0')
+        }
         hasVideo = true;
       } else {
         args.push(
           '--no-video',
           '--audio-tracks 1'
         );
+        if (this.options.defaults.audio.code === vid.lang.code) {
+          args.push(`--default-track 1`)
+        } else {
+          args.push('--default-track 1:0')
+        }
         args.push('--track-name', `1:"${vid.lang.name}"`);
         args.push(`--language 1:${vid.lang.code}`);
       }
@@ -183,6 +197,11 @@ class Merger {
         '--no-video',
         '--audio-tracks 0'
       );
+      if (this.options.defaults.audio.code === aud.lang.code) {
+        args.push('--default-track 0');
+      } else {
+        args.push('--default-track 0:0')
+      }
       args.push(`"${aud.path}"`);
     }
 
@@ -190,6 +209,11 @@ class Merger {
       for (const subObj of this.options.subtitles) {
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ' CC' : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
+        if (this.options.defaults.sub.code === subObj.language.code) {
+          args.push('--default-track 0');
+        } else {
+          args.push('--default-track 0:0')
+        }
         args.push(`"${subObj.file}"`);
       }
     } else {

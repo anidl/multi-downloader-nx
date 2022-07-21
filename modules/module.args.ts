@@ -27,7 +27,7 @@ const availableFilenameVars: AvailableFilenameVars[] = [
 export type AvailableMuxer = 'ffmpeg' | 'mkvmerge'
 export const muxer: AvailableMuxer[] = [ 'ffmpeg', 'mkvmerge' ];
 
-type TAppArg<T extends boolean|string|number|unknown[]> = {
+type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
   name: string,
   group: keyof typeof groups,
   type: 'boolean'|'string'|'number'|'array',
@@ -41,7 +41,8 @@ type TAppArg<T extends boolean|string|number|unknown[]> = {
   },
   service: 'funi'|'crunchy'|'both',
   usage: string // -(-)${name} will be added for each command,
-  demandOption?: true
+  demandOption?: true,
+  transformer?: (value: T) => K
 }
 
 const args: TAppArg<boolean|number|string|unknown[]>[] = [
@@ -637,7 +638,45 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     default: {
       default: []
     }
-  }
+  },
+  {
+    name: 'defaultAudio',
+    describe: `Set the default audio track by language code\nPossible Values: ${languages.map(a => a.code).join(', ')}`,
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'string',
+    usage: '${args}',
+    default: {
+      default: 'eng'
+    },
+    transformer: (val) => {
+      const item = languages.find(a => a.code === val);
+      if (!item) {
+        throw new Error(`Unable to find language code ${val}!`);
+      }
+      return item;
+    }
+  },
+  {
+    name: 'defaultSub',
+    describe: `Set the default subtitle track by language code\nPossible Values: ${languages.map(a => a.code).join(', ')}`,
+    docDescribe: true,
+    group: 'mux',
+    service: 'both',
+    type: 'string',
+    usage: '${args}',
+    default: {
+      default: 'eng'
+    },
+    transformer: (val) => {
+      const item = languages.find(a => a.code === val);
+      if (!item) {
+        throw new Error(`Unable to find language code ${val}!`);
+      }
+      return item;
+    }
+  },
 ];
 
 const getDefault = <T extends boolean|string|number|unknown[]>(name: string, cfg: Record<string, T>): T => {

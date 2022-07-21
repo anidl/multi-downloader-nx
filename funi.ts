@@ -819,6 +819,10 @@ export default class Funi implements ServiceClass {
       options: {
         ffmpeg: data.ffmpegOptions,
         mkvmerge: data.mkvmergeOptions
+      },
+      defaults: {
+        audio: data.defaultAudio,
+        sub: data.defaultSub
       }
     });
   
