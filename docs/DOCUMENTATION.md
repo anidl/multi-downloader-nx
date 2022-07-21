@@ -288,6 +288,20 @@ Set the options given to mkvmerge
 | Both | `--ffmpegOptions ${args}` | `array` | `No`| `NaN` | ``| `ffmpegOptions: ` |
 
 Set the options given to ffmpeg
+#### `--defaultAudio`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--defaultAudio ${args}` | `string` | `No`| `NaN` | `eng`| `defaultAudio: ` |
+
+Set the default audio track by language code
+Possible Values: eng, spa, spa, spa, por, por, fra, deu, ara, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
+#### `--defaultSub`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--defaultSub ${args}` | `string` | `No`| `NaN` | `eng`| `defaultSub: ` |
+
+Set the default subtitle track by language code
+Possible Values: eng, spa, spa, spa, por, por, fra, deu, ara, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
