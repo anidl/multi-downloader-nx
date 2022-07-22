@@ -326,6 +326,12 @@ Set in config: 1; Episode number: 20; Output: 20
 | Both | `--override "${toOverride}='${value}'"` | `array` | `No`| `NaN` | ``| `override: ` |
 
 Override a template variable
+#### `--ccTag`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--ccTag ${tag}` | `string` | `No`| `NaN` | `cc`| `ccTag: ` |
+
+Used to set the name for subtitles that contain tranlations for none verbal communication (e.g. signs)
 ### Debug
 #### `--nosess`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
