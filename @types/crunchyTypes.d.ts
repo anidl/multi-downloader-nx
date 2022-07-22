@@ -24,7 +24,8 @@ export type CrunchyDownloadOptions = {
   ffmpegOptions: string[],
   mkvmergeOptions: string[],
   defaultSub: LanguageItem,
-  defaultAudio: LanguageItem
+  defaultAudio: LanguageItem,
+  ccTag: string
 }
 
 export type CurnchyMultiDownload = {
@@ -45,7 +46,8 @@ export type CrunchyMuxOptions = {
   ffmpegOptions: string[],
   mkvmergeOptions: string[],
   defaultSub: LanguageItem,
-  defaultAudio: LanguageItem
+  defaultAudio: LanguageItem,
+  ccTag: string
 }
 
 export type CrunchyEpMeta = {

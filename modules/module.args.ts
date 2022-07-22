@@ -677,6 +677,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
       return item;
     }
   },
+  {
+    name: 'ccTag',
+    describe: 'Used to set the name for subtitles that contain tranlations for none verbal communication (e.g. signs)',
+    docDescribe: true,
+    group: 'fileName',
+    service: 'both',
+    type: 'string',
+    usage: '${tag}',
+    default: {
+      default: 'cc'
+    }
+  }
 ];
 
 const getDefault = <T extends boolean|string|number|unknown[]>(name: string, cfg: Record<string, T>): T => {

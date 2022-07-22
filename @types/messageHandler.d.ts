@@ -93,8 +93,8 @@ export type FuniGetEpisodeData = { subs: FuniSubsData, fnSlug: FuniEpisodeData, 
 export type FuniStreamData = { force?: 'Y'|'y'|'N'|'n'|'C'|'c', callbackMaker?: (data: DownloadInfo) => HLSCallback, q: number, x: number, fileName: string, numbers: number, novids?: boolean,
   timeout: number, partsize: number, fsRetryTime: number, noaudio?: boolean, mp4: boolean, ass: boolean, fontSize: number, fontName?: string, skipmux?: boolean,
   forceMuxer: AvailableMuxer | undefined, simul: boolean, skipSubMux: boolean, nocleanup: boolean, override: string[], videoTitle: string,
-  ffmpegOptions: string[], mkvmergeOptions: string[], defaultAudio: LanguageItem, defaultSub: LanguageItem }
-export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[] }
+  ffmpegOptions: string[], mkvmergeOptions: string[], defaultAudio: LanguageItem, defaultSub: LanguageItem, ccTag: string }
+export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[], ccTag: string }
 export type DownloadData = { id: string, e: string, dubLang: string[], dlsubs: string[], fileName: string, q: number, novids: boolean, noaudio: boolean }
 
 export type AuthResponse = ResponseBase<undefined>;
