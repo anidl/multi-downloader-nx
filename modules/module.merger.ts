@@ -171,7 +171,7 @@ class Merger {
         if (this.options.defaults.audio.code === vid.lang.code) {
           args.push('--default-track 1');
         } else {
-          args.push('--default-track 1:0')
+          args.push('--default-track 1:0');
         }
         hasVideo = true;
       } else {
@@ -180,9 +180,9 @@ class Merger {
           '--audio-tracks 1'
         );
         if (this.options.defaults.audio.code === vid.lang.code) {
-          args.push(`--default-track 1`)
+          args.push('--default-track 1');
         } else {
-          args.push('--default-track 1:0')
+          args.push('--default-track 1:0');
         }
         args.push('--track-name', `1:"${vid.lang.name}"`);
         args.push(`--language 1:${vid.lang.code}`);
@@ -201,7 +201,7 @@ class Merger {
       if (this.options.defaults.audio.code === aud.lang.code) {
         args.push('--default-track 0');
       } else {
-        args.push('--default-track 0:0')
+        args.push('--default-track 0:0');
       }
       args.push(`"${aud.path}"`);
     }
@@ -213,7 +213,7 @@ class Merger {
         if (this.options.defaults.sub.code === subObj.language.code) {
           args.push('--default-track 0');
         } else {
-          args.push('--default-track 0:0')
+          args.push('--default-track 0:0');
         }
         args.push(`"${subObj.file}"`);
       }
