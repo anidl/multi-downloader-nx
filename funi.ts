@@ -103,7 +103,7 @@ export default class Funi implements ServiceClass {
       }
       let ok = true;
       for (const episodeData of data.value) {
-        if ((await this.getEpisode(true, { subs: { dlsubs: argv.dlsubs, nosubs: argv.nosubs, sub: false }, dubLang: argv.dubLang, fnSlug: episodeData, s: argv.s, simul: argv.simul }, {
+        if ((await this.getEpisode(true, { subs: { dlsubs: argv.dlsubs, nosubs: argv.nosubs, sub: false, ccTag: argv.ccTag }, dubLang: argv.dubLang, fnSlug: episodeData, s: argv.s, simul: argv.simul }, {
           ass: false,
           ...argv
         })).isOk !== true)
@@ -368,7 +368,7 @@ export default class Funi implements ServiceClass {
           language: m.language,
           version: m.version,
           type: m.experienceType,
-          subtitles: await this.getSubsUrl(m.mediaChildren, m.language, data.subs, ep.ids.externalEpisodeId)
+          subtitles: await this.getSubsUrl(m.mediaChildren, m.language, data.subs, ep.ids.externalEpisodeId, data.subs.ccTag)
         };
       }
       else{
@@ -481,7 +481,7 @@ export default class Funi implements ServiceClass {
     }
   }
   
-  public async downloadStreams(log: boolean, epsiode: FunimationMediaDownload, data: FuniStreamData): Promise<boolean|void> {
+  public async downloadStreams(log: boolean, episode: FunimationMediaDownload, data: FuniStreamData): Promise<boolean|void> {
     
     // req playlist
   
@@ -639,8 +639,8 @@ export default class Funi implements ServiceClass {
       
         fnOutput = parseFileName(data.fileName, ([
           ['episode', isNaN(parseInt(fnEpNum as string)) ? fnEpNum : parseInt(fnEpNum as string), true],
-          ['title', epsiode.title, true],
-          ['showTitle', epsiode.showTitle, true],
+          ['title', episode.title, true],
+          ['showTitle', episode.showTitle, true],
           ['season', season, false],
           ['width', plLayersRes[selectedQuality].width, false],
           ['height', plLayersRes[selectedQuality].height, false],
@@ -693,10 +693,10 @@ export default class Funi implements ServiceClass {
         dlFailed = !await this.downloadFile(tsFile, chunkList, data.timeout, data.partsize, data.fsRetryTime, data.force, data.callbackMaker ? data.callbackMaker({
           fileName: `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}.ts`,
           parent: {
-            title: epsiode.showTitle
+            title: episode.showTitle
           },
-          title: epsiode.title,
-          image: epsiode.image,
+          title: episode.title,
+          image: episode.image,
           language: streamPath.lang,
         }) : undefined);
         if (!dlFailed) {
@@ -734,10 +734,10 @@ export default class Funi implements ServiceClass {
         dlFailedA = !await this.downloadFile(tsFileA, chunkListA, data.timeout, data.partsize, data.fsRetryTime, data.force, data.callbackMaker ? data.callbackMaker({
           fileName: `${fnOutput.slice(-1)}.audio.${plAud.language.code}.ts`,
           parent: {
-            title: epsiode.showTitle
+            title: episode.showTitle
           },
-          title: epsiode.title,
-          image: epsiode.image,
+          title: episode.title,
+          image: episode.image,
           language: plAud.language
         }) : undefined);
         if (!dlFailedA)
@@ -819,7 +819,12 @@ export default class Funi implements ServiceClass {
       options: {
         ffmpeg: data.ffmpegOptions,
         mkvmerge: data.mkvmergeOptions
-      }
+      },
+      defaults: {
+        audio: data.defaultAudio,
+        sub: data.defaultSub
+      },
+      ccTag: data.ccTag
     });
   
     if(mergerBin.MKVmerge){
@@ -859,7 +864,7 @@ export default class Funi implements ServiceClass {
     return downloadStatus.ok;
   }
 
-  public async getSubsUrl(m: MediaChild[], parentLanguage: TitleElement|undefined, data: FuniSubsData, episodeID: string) : Promise<Subtitle[]> {
+  public async getSubsUrl(m: MediaChild[], parentLanguage: TitleElement|undefined, data: FuniSubsData, episodeID: string, ccTag: string) : Promise<Subtitle[]> {
     if((data.nosubs && !data.sub) || data.dlsubs.includes('none')){
       return [];
     }
@@ -907,7 +912,7 @@ export default class Funi implements ServiceClass {
     });
 
     return ret.map(a => ({
-      ext: `.${a.lang.code}${a.isCC ? '.cc' : ''}`,
+      ext: `.${a.lang.code}${a.isCC ? `.${ccTag}` : ''}`,
       lang: a.lang,
       url: a.url,
       closedCaption: a.isCC

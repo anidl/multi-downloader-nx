@@ -22,7 +22,10 @@ export type CrunchyDownloadOptions = {
   videoTitle: string,
   force: 'Y'|'y'|'N'|'n'|'C'|'c',
   ffmpegOptions: string[],
-  mkvmergeOptions: string[]
+  mkvmergeOptions: string[],
+  defaultSub: LanguageItem,
+  defaultAudio: LanguageItem,
+  ccTag: string
 }
 
 export type CurnchyMultiDownload = {
@@ -41,7 +44,10 @@ export type CrunchyMuxOptions = {
   nocleanup?: boolean,
   videoTitle: string,
   ffmpegOptions: string[],
-  mkvmergeOptions: string[]
+  mkvmergeOptions: string[],
+  defaultSub: LanguageItem,
+  defaultAudio: LanguageItem,
+  ccTag: string
 }
 
 export type CrunchyEpMeta = {

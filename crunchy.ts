@@ -1202,8 +1202,8 @@ export default class Crunchy implements ServiceClass {
             const langItem = subsItem.locale;
             const sxData: Partial<sxItem> = {};
             sxData.language = langItem;
-            const isCC = langItem.code === audDub
-            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC);
+            const isCC = langItem.code === audDub;
+            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC, options.ccTag);
             sxData.path = path.join(this.cfg.dir.content, sxData.file);
             if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC))
               continue;
@@ -1278,7 +1278,12 @@ export default class Crunchy implements ServiceClass {
       options: {
         ffmpeg: options.ffmpegOptions,
         mkvmerge: options.mkvmergeOptions
-      }
+      },
+      defaults: {
+        audio: options.defaultAudio,
+        sub: options.defaultSub
+      },
+      ccTag: options.ccTag
     });
     const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);
     // collect fonts info

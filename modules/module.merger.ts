@@ -30,6 +30,7 @@ export type MergerOptions = {
   onlyVid: MergerInput[],
   onlyAudio: MergerInput[],
   subtitles: SubtitleInput[],
+  ccTag: string,
   output: string,
   videoTitle?: string,
   simul?: boolean,
@@ -39,6 +40,10 @@ export type MergerOptions = {
     ffmpeg: string[],
     mkvmerge: string[]
   },
+  defaults: {
+    audio: LanguageItem,
+    sub: LanguageItem
+  }
 }
 
 class Merger {
@@ -112,7 +117,7 @@ class Merger {
       '-c:a copy',
       this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass',
       ...this.options.subtitles.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
-        (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ' CC' : ''}`
+        (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ` ${this.options.ccTag}` : ''}`
       }" -metadata:s:s:${subindex} language=${sub.language.code}`)
     );
     args.push(...this.options.options.ffmpeg);
@@ -163,12 +168,22 @@ class Merger {
         args.push('--track-name', `0:"${trackName}"`);
         //args.push('--track-name', `1:"${trackName}"`);
         args.push(`--language 1:${vid.lang.code}`);
+        if (this.options.defaults.audio.code === vid.lang.code) {
+          args.push('--default-track 1');
+        } else {
+          args.push('--default-track 1:0')
+        }
         hasVideo = true;
       } else {
         args.push(
           '--no-video',
           '--audio-tracks 1'
         );
+        if (this.options.defaults.audio.code === vid.lang.code) {
+          args.push(`--default-track 1`)
+        } else {
+          args.push('--default-track 1:0')
+        }
         args.push('--track-name', `1:"${vid.lang.name}"`);
         args.push(`--language 1:${vid.lang.code}`);
       }
@@ -183,13 +198,23 @@ class Merger {
         '--no-video',
         '--audio-tracks 0'
       );
+      if (this.options.defaults.audio.code === aud.lang.code) {
+        args.push('--default-track 0');
+      } else {
+        args.push('--default-track 0:0')
+      }
       args.push(`"${aud.path}"`);
     }
 
     if (this.options.subtitles.length > 0) {
       for (const subObj of this.options.subtitles) {
-        args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ' CC' : ''}`}"`);
+        args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
+        if (this.options.defaults.sub.code === subObj.language.code) {
+          args.push('--default-track 0');
+        } else {
+          args.push('--default-track 0:0')
+        }
         args.push(`"${subObj.file}"`);
       }
     } else {
