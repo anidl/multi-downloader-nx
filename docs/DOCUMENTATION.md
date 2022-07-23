@@ -167,11 +167,11 @@ Skip downloading subtitles
 #### `--dubLang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa`, `por`, `fra`, `deu`, `ara`, `ita`, `rus`, `tur`, `hin`, `cmn`, `zho`, `kor`, `jpn`] | `jpn`| `dubLang: ` |
+| Both | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa-419`, `spa-ES`, `por`, `fra`, `deu`, `ara`, `ita`, `rus`, `tur`, `hin`, `cmn`, `zho`, `kor`, `jpn`] | `jpn`| `dubLang: ` |
 
 Set the language to download: 
 Funi Only: cmn
-Crunchy Only: spa, spa, fra, deu, ara, ara, ita, rus, tur, hin, zho, kor
+Crunchy Only: spa-419, spa-ES, fra, deu, ara, ara, ita, rus, tur, hin, zho, kor
 #### `--all`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
