@@ -34,4 +34,4 @@ RUN apt-get install ffmpeg -y
 RUN mv /usr/bin/mkvmerge /app/bin/mkvtoolnix/mkvmerge
 RUN mv /usr/bin/ffmpeg /app/bin/ffmpeg/ffmpeg
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+CMD [ "/bin/bash" ]

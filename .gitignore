@@ -27,3 +27,4 @@ fonts
 out/
 dist/
 gui/react/build/
+docker-compose.yml
