@@ -62,7 +62,7 @@
     "fork-ts-checker-webpack-plugin": "^6.5.0",
     "node-loader": "^2.0.0",
     "pkg": "^5.4.1",
-    "removeNPMAbsolutePaths": "^2.0.0",
+    "removeNPMAbsolutePaths": "^3.0.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
     "ts-node": "^10.4.0",
