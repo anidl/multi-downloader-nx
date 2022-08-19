@@ -48,7 +48,7 @@
     "@types/fs-extra": "^9.0.13",
     "@types/json5": "^2.2.0",
     "@types/node": "^16.11.9",
-    "@types/yargs": "^17.0.7",
+    "@types/yargs": "^17.0.11",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
     "@vercel/webpack-asset-relocator-loader": "^1.7.0",
