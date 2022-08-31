@@ -27,7 +27,7 @@
   "main": "gui/electron/src/index.js",
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
-    "dotenv": "^14.3.2",
+    "dotenv": "^16.0.2",
     "electron-squirrel-startup": "^1.0.0",
     "eslint-plugin-import": "^2.25.4",
     "express": "^4.17.2",
