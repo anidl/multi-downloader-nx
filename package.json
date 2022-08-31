@@ -59,7 +59,7 @@
     "eslint-config-react-app": "^7.0.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-react": "^7.28.0",
-    "fork-ts-checker-webpack-plugin": "^6.5.0",
+    "fork-ts-checker-webpack-plugin": "^7.2.13",
     "node-loader": "^2.0.0",
     "pkg": "^5.4.1",
     "removeNPMAbsolutePaths": "^3.0.0",
