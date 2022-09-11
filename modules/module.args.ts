@@ -188,7 +188,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
       + '\nThis will speed up the download speed, if multiple languages are selected.',
     usage: '',
     default: {
-      default: true
+      default: false
     }
   },
   {

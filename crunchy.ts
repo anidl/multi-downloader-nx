@@ -1100,8 +1100,6 @@ export default class Crunchy implements ServiceClass {
           if(dlVideoOnce && options.dlVideoOnce) {
             // Select the lowest resolution with the same codecs
             while(quality !=1 && plQuality[quality - 1].CODECS == plQuality[quality - 2].CODECS) {
-              console.log(quality);
-              console.log(plQuality[quality - 1].CODECS == plQuality[quality - 2].CODECS);
               quality--;
             }
           }
