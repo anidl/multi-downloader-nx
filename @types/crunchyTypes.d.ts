@@ -25,7 +25,8 @@ export type CrunchyDownloadOptions = {
   mkvmergeOptions: string[],
   defaultSub: LanguageItem,
   defaultAudio: LanguageItem,
-  ccTag: string
+  ccTag: string,
+  dlVideoOnce: boolean
 }
 
 export type CurnchyMultiDownload = {

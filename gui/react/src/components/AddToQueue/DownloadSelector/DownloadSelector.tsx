@@ -27,7 +27,8 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
       const subLang = messageHandler?.handleDefault('dlsubs');
       const q = messageHandler?.handleDefault('q');
       const fileName = messageHandler?.handleDefault('fileName');
-      const result = await Promise.all([dubLang, subLang, q, fileName]);
+      const dlVideoOnce = messageHandler?.handleDefault('dlVideoOnce');
+      const result = await Promise.all([dubLang, subLang, q, fileName, dlVideoOnce]);
       dispatch({
         type: 'downloadOptions',
         payload: {
@@ -36,6 +37,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
           dlsubs: result[1],
           q: result[2],
           fileName: result[3],
+          dlVideoOnce: result[4],
         }
       });
       setAvailableDubs(await messageHandler?.availableDubCodes() ?? []);
@@ -142,6 +144,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, but: !store.downloadOptions.but } })} variant={store.downloadOptions.but ? 'contained' : 'outlined'}>Download all but</Button>
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, noaudio: !store.downloadOptions.noaudio } })} variant={store.downloadOptions.noaudio ? 'contained' : 'outlined'}>Skip Audio</Button>
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, novids: !store.downloadOptions.novids } })} variant={store.downloadOptions.novids ? 'contained' : 'outlined'}>Skip Video</Button>
+      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, dlVideoOnce: !store.downloadOptions.dlVideoOnce } })} variant={store.downloadOptions.dlVideoOnce ? 'contained' : 'outlined'}>Skip unnecessary Downloads</Button>
     </Box>
     <Box sx={{ gap: 2, flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
       <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>List episodes</LoadingButton>

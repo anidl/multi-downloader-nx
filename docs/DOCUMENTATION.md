@@ -120,6 +120,15 @@ For special episodes: S1-4 OR S1,S2,S3,S4 where S is the special letter
 | Both | `-q ${qualityLevel}` | `number` | `No`| `NaN` | `0`| `q: ` |
 
 Set the quality level. Use 0 to use the maximum quality.
+#### `--dlVideoOnce`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Both | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `true`| `dlVideoOnce: ` |
+
+If selected, the best selected quality will be downloaded only for the first language,
+then the worst video quality with the same audio quality will be downloaded for every other language.
+By the later merge of the videos, no quality difference will be present.
+This will speed up the download speed, if multiple languages are selected.
 #### `-x`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
