@@ -181,7 +181,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Download only once the video with the best selected quality',
     type: 'boolean',
     group: 'dl',
-    service: 'both',
+    service: 'crunchy',
     docDescribe: 'If selected, the best selected quality will be downloaded only for the first language,'
       + '\nthen the worst video quality with the same audio quality will be downloaded for every other language.'
       + '\nBy the later merge of the videos, no quality difference will be present.'
