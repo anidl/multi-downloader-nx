@@ -62,7 +62,7 @@ export default class Crunchy implements ServiceClass {
   public async cli() {
     console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
-
+  
     // load binaries
     this.cfg.bin = await yamlCfg.loadBinCfg();
     if (argv.allDubs) {
@@ -900,6 +900,7 @@ export default class Crunchy implements ServiceClass {
     }
 
     let dlFailed = false;
+    let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
     
     for (const mMeta of medias.data) {
       console.log(`[INFO] Requesting: [${mMeta.mediaId}] ${mediaName}`);
@@ -1030,6 +1031,7 @@ export default class Crunchy implements ServiceClass {
             plQuality: {
                       str: string,
                       dim: string,
+                      CODECS: string,
                       RESOLUTION: {
                         width: number,
                         height: number
@@ -1039,6 +1041,8 @@ export default class Crunchy implements ServiceClass {
             // set quality
             const plResolution     = pl.attributes.RESOLUTION;
             const plResolutionText = `${plResolution.width}x${plResolution.height}`;
+            // set codecs
+            const plCodecs     = pl.attributes.CODECS;
             // parse uri
             const plUri = new URL(pl.uri);
             let plServer = plUri.hostname;
@@ -1072,27 +1076,34 @@ export default class Crunchy implements ServiceClass {
               plQuality.push({
                 str: qualityStrAdd,
                 dim: plResolutionText,
+                CODECS: plCodecs,
                 RESOLUTION: plResolution
               });
             }
           }
                 
           options.x = options.x > plServerList.length ? 1 : options.x;
-                
+
           const plSelectedServer = plServerList[options.x - 1];
           const plSelectedList   = plStreams[plSelectedServer];
           plQuality.sort((a, b) => {
-            const aMatch = a.dim.match(/[0-9]+/) || [];
-            const bMatch = b.dim.match(/[0-9]+/) || [];
+            const aMatch: RegExpMatchArray | never[] = a.dim.match(/[0-9]+/) || [];
+            const bMatch: RegExpMatchArray | never[] = b.dim.match(/[0-9]+/) || [];
             return parseInt(aMatch[0]) - parseInt(bMatch[0]);
           });
-          let quality = options.q;
-          if (quality > plQuality.length) {
+          let quality = options.q === 0 ? plQuality.length : options.q;
+          if(quality > plQuality.length) {
             console.log(`[WARN] The requested quality of ${options.q} is greater than the maximun ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
             quality = plQuality.length;
           }
-          const selPlUrl = quality === 0 ? plSelectedList[plQuality[plQuality.length - 1].dim as string] :
-            plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
+          // When best selected video quality is already downloaded
+          if(dlVideoOnce && options.dlVideoOnce) {
+            // Select the lowest resolution with the same codecs
+            while(quality !=1 && plQuality[quality - 1].CODECS == plQuality[quality - 2].CODECS) {
+              quality--;
+            }
+          }
+          const selPlUrl = plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
           console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
           console.log(`[INFO] Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
     
@@ -1162,6 +1173,7 @@ export default class Crunchy implements ServiceClass {
                 path: `${tsFile}.ts`,
                 lang: lang
               });
+              dlVideoOnce = true;
             }
           }
           else{

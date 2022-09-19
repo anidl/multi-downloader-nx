@@ -177,6 +177,21 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${qualityLevel}'
   },
   {
+    name: 'dlVideoOnce',
+    describe: 'Download only once the video with the best selected quality',
+    type: 'boolean',
+    group: 'dl',
+    service: 'crunchy',
+    docDescribe: 'If selected, the best selected quality will be downloaded only for the first language,'
+      + '\nthen the worst video quality with the same audio quality will be downloaded for every other language.'
+      + '\nBy the later merge of the videos, no quality difference will be present.'
+      + '\nThis will speed up the download speed, if multiple languages are selected.',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
     name: 'x',
     group: 'dl',
     describe: 'Select the server to use',
