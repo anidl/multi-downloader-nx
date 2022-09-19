@@ -123,7 +123,7 @@ Set the quality level. Use 0 to use the maximum quality.
 #### `--dlVideoOnce`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `true`| `dlVideoOnce: ` |
+| Crunchyroll | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `false`| `dlVideoOnce: ` |
 
 If selected, the best selected quality will be downloaded only for the first language,
 then the worst video quality with the same audio quality will be downloaded for every other language.
