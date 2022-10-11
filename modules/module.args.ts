@@ -162,7 +162,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     service: 'both',
     type: 'string',
     usage: '${selection}',
-    alias: 'epsisode'
+    alias: 'episode'
   },
   {
     name: 'q',
