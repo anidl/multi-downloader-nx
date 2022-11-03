@@ -109,7 +109,7 @@ Used to set the season ID to download from
 #### `-e`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
-| Both | `-e ${selection}` | `string` | `No`| `--epsisode` | `NaN` |
+| Both | `-e ${selection}` | `string` | `No`| `--episode` | `NaN` |
 
 Set the episode(s) to download from any given show.
 For multiple selection: 1-4 OR 1,2,3,4 
