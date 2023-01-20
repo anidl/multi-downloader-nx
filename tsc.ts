@@ -38,6 +38,7 @@ const ignore = [
   '*/*\\.tsx?$',
   './fonts*',
   './gui/react*',
+  './dev.js$'
 ].map(a => a.replace(/\*/g, '[^]*').replace(/\.\//g, escapeRegExp(__dirname) + '/').replace(/\//g, path.sep === '\\' ? '\\\\' : '/')).map(a => new RegExp(a, 'i'));
 
 export { ignore };
