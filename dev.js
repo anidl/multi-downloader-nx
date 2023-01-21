@@ -1,6 +1,6 @@
-const { exec } = require('child_process')
+const { exec } = require('child_process');
 const path = require('path');
-const toRun = process.argv.slice(2).join(" ").split('---');
+const toRun = process.argv.slice(2).join(' ').split('---');
 
 const waitForProcess = async (proc) => {
   return new Promise((resolve, reject) => {
@@ -16,6 +16,6 @@ const waitForProcess = async (proc) => {
   for (let command of toRun) {
     await waitForProcess(exec(`node index.js --service crunchy ${command}`, {
       cwd: path.join(__dirname, 'lib')
-    }))
+    }));
   }
 })();
