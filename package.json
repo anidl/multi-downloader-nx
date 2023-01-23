@@ -14,7 +14,15 @@
     "utility",
     "cli"
   ],
-  "author": "Izu-co <github@izuco.dev> ",
+  "author": "AnidlSupport",
+  "contributors": [
+    {
+      "name": "AnimeDL"
+    },
+    {
+      "name": "AniDL"
+    }
+  ],
   "homepage": "https://github.com/anidl/multi-downloader-nx",
   "repository": {
     "type": "git",
