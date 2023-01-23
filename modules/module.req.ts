@@ -86,7 +86,7 @@ class Req {
     }
     // try do request
     try {
-      const res = await got(loc, options) as unknown as Response<T>;
+      const res = await got(durl.toString(), options) as unknown as Response<T>;
       return {
         ok: true,
         res
