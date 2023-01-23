@@ -95,7 +95,7 @@ const template: (MenuItemConstructorOptions | MenuItem)[] = [
       {
         label: 'Report a Bug',
         click: () => {
-          shell.openExternal(`https://github.com/anidl/multi-downloader-nx/issues/new?assignees=izu-co&labels=bug&template=bug.yml&title=BUG&version=${json.version}`);
+          shell.openExternal(`https://github.com/anidl/multi-downloader-nx/issues/new?assignees=AnimeDL,AnidlSupport&labels=bug&template=bug.yml&title=BUG&version=${json.version}`);
         }
       },
       {

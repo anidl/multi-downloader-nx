@@ -56,8 +56,7 @@ export type CrunchyEpMeta = {
     mediaId: string,
     lang?: LanguageItem,
     playback?: string,
-    streams?: string,
-    videoStreams?: string
+    versions?: EpisodeVersion[] | null
   }[],
   seasonTitle: string,
   episodeNumber: string,
@@ -66,7 +65,7 @@ export type CrunchyEpMeta = {
   season: number,
   showID: string,
   e: string,
-  image: string
+  image: string,
 }
 
 export type DownloadedMedia = {
@@ -95,52 +94,85 @@ export type ParseItem = {
   ep_num?: string
   last_public?: string,
   subtitle_locales?: string[],
-  availability_notes?: string
+  availability_notes?: string,
+  identifier?: string,
+  versions?: Version[] | null,
 }
 
 export interface SeriesSearch {
-  __class__:        string;
-  __href__:         string;
-  __resource_key__: string;
-  __links__:        Actions;
-  __actions__:      Actions;
-  total:            number;
-  items:            SeriesSearchItem[];
+  total: number;
+  data:  SeriesSearchItem[];
+  meta:  Meta;
 }
 
 export interface SeriesSearchItem {
-  __class__:          string;
-  __href__:           string;
-  __resource_key__:   string;
-  __links__:          Links;
-  __actions__:        string[];
-  id:                 string;
-  channel_id:         string;
-  title:              string;
-  slug_title:         string;
-  series_id:          string;
-  season_number:      number;
-  is_complete:        boolean;
-  description:        string;
-  keywords:           any[];
-  season_tags:        string[];
-  images:             Actions;
-  is_mature:          boolean;
-  mature_blocked:     boolean;
-  is_subbed:          boolean;
-  is_dubbed:          boolean;
-  is_simulcast:       boolean;
-  seo_title:          string;
-  seo_description:    string;
-  availability_notes: string;
+  description:              string;
+  seo_description:          string;
+  number_of_episodes:       number;
+  is_dubbed:                boolean;
+  identifier:               string;
+  channel_id:               string;
+  slug_title:               string;
+  season_sequence_number:   number;
+  season_tags:              string[];
+  extended_maturity_rating: Record<unknown>;
+  is_mature:                boolean;
+  audio_locale:             string;
+  season_number:            number;
+  images:                   Record<unknown>;
+  mature_blocked:           boolean;
+  versions:                 Version[];
+  title:                    string;
+  is_subbed:                boolean;
+  id:                       string;
+  audio_locales:            string[];
+  subtitle_locales:         string[];
+  availability_notes:       string;
+  series_id:                string;
+  season_display_number:    string;
+  is_complete:              boolean;
+  keywords:                 any[];
+  maturity_ratings:         string[];
+  is_simulcast:             boolean;
+  seo_title:                string;
+}
+export interface Version {
+  audio_locale: Locale;
+  guid:         string;
+  original:     boolean;
+  variant:      string;
 }
 
-export interface Links {
-  'season/channel':  Season;
-  'season/episodes': Season;
-  'season/series':   Season;
+export interface EpisodeVersion {
+  audio_locale: Locale;
+  guid: string;
+  is_premium_only: boolean;
+  media_guid: string;
+  original: boolean;
+  season_guid: string;
+  variant: string;
 }
 
-export interface Season {
-  href: string;
+export enum Locale {
+  enUS = 'en-US',
+  esLA = 'es-LA',
+  es419 = 'es-419',
+  esES = 'es-ES',
+  ptBR = 'pt-BR',
+  ptBR = 'pt-BR',
+  frFR = 'fr-FR',
+  deDE = 'de-DE',
+  arME = 'ar-ME',
+  arSA = 'ar-SA',
+  itIT = 'it-IT',
+  ruRU = 'ru-RU',
+  trTR = 'tr-TR',
+  hiIN = 'hi-IN',
+  zhCN = 'zh-CN',
+  koKR = 'ko-KR',
+  jaJP = 'ja-JP',
+}
+
+export interface Meta {
+  versions_considered: boolean;
 }

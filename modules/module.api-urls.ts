@@ -27,7 +27,8 @@ export type APIType = {
   beta_authBasicMob: string
   beta_profile: string
   beta_cmsToken: string
-  beta_search: string
+  search: string
+  cms: string
   beta_browse: string
   beta_cms: string,
   beta_authHeader: Headers,
@@ -55,7 +56,8 @@ const api: APIType = {
   beta_authBasicMob: 'Basic YTZ5eGxvYW04c2VqaThsZDhldnc6aFQ3d2FjWHhNaURJcDhSNE9kekJybWVoQUtLTEVKUEE=',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
-  beta_search:       `${domain.api_beta}/content/v1/search`,
+  search:            `${domain.api_beta}/content/v2/discover/search`,
+  cms:               `${domain.api_beta}/content/v2/cms`,
   beta_browse:       `${domain.api_beta}/content/v1/browse`,
   beta_cms:          `${domain.api_beta}/cms/v2`,
   beta_authHeader: {},
