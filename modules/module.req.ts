@@ -2,7 +2,7 @@ import shlp from 'sei-helper';
 import got, { Headers, Method, Options, ReadError, Response } from 'got';
 import cookieFile from './module.cookieFile';
 import * as yamlCfg from './module.cfg-loader';
-import curlReq from './module.curl-req';
+//import curlReq from './module.curl-req';
 
 export type Params = {
   method?: Method,
@@ -86,7 +86,7 @@ class Req {
     }
     // try do request
     try {
-      const res = await got(durl.toString(), options) as unknown as Response<T>;
+      const res = await got(loc, options) as unknown as Response<T>;
       return {
         ok: true,
         res
