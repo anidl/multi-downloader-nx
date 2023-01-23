@@ -14,13 +14,16 @@
     "utility",
     "cli"
   ],
-  "author": "AnidlSupport",
+  "author": "AnimeDL <AnimeDL@users.noreply.github.com>",
   "contributors": [
     {
-      "name": "AnimeDL"
+      "name": "AnimeDL <AnimeDL@users.noreply.github.com>"
     },
     {
-      "name": "AniDL"
+      "name": "AniDL <AniDL@users.noreply.github.com>"
+    }, 
+    {
+      "name": "AnidlSupport <AnidlSupport@users.noreply.github.com>"
     }
   ],
   "homepage": "https://github.com/anidl/multi-downloader-nx",
