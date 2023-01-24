@@ -1386,19 +1386,37 @@ export default class Crunchy implements ServiceClass {
         const s = result[season][key];
         (await this.getSeasonDataById(s))?.data?.forEach(episode => {
           //TODO: fix this
-          const item = episodes[`S${episode.season_number}E${episode.episode_number || episode.episode}`] = {
-            items: [] as CrunchyEpisode[],
-            langs: [] as langsData.LanguageItem[]
-          };
+          //TODO: this is likely where cour 2 gets cut
+          //Prepare the episode array
+          let item;
+          if (!(Object.prototype.hasOwnProperty.call(episodes, `S${episode.season_number}E${episode.episode_number || episode.episode}`))) {
+            item = episodes[`S${episode.season_number}E${episode.episode_number || episode.episode}`] = {
+              items: [] as CrunchyEpisode[],
+              langs: [] as langsData.LanguageItem[]
+            };
+          } else {
+            item = episodes[`S${episode.season_number}E${episode.episode_number || episode.episode}`];
+          }
+
           if (episode.versions) {
+            //Iterate over episode versions for audio languages
             for (const version of episode.versions) {
-              item.items.push(episode);
-              item.langs.push(langsData.languages.find(a => a.cr_locale == version.audio_locale) as langsData.LanguageItem);
+              //Make sure there is only one of the same language
+              if (!item.langs.find(a => a.cr_locale == version.audio_locale)) {
+                //Push to arrays if there is no duplicates of the same language.
+                item.items.push(episode);
+                item.langs.push(langsData.languages.find(a => a.cr_locale == version.audio_locale) as langsData.LanguageItem);
+              }
             }
           } else {
+            //Episode didn't have versions, mark it as such to be logged.
             serieshasversions = false;
-            item.items.push(episode);
-            item.langs.push(langsData.languages.find(a => a.cr_locale == episode.audio_locale) as langsData.LanguageItem);
+            //Make sure there is only one of the same language
+            if (!item.langs.find(a => a.cr_locale == episode.audio_locale)) {
+              //Push to arrays if there is no duplicates of the same language.
+              item.items.push(episode);
+              item.langs.push(langsData.languages.find(a => a.cr_locale == episode.audio_locale) as langsData.LanguageItem);
+            }
           }
         });
       }
