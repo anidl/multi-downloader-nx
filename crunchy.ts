@@ -1380,7 +1380,7 @@ export default class Crunchy implements ServiceClass {
     items: CrunchyEpisode[];
     langs: langsData.LanguageItem[];
   }>}> {
-    await this.refreshToken();
+    await this.refreshToken(true, true);
     let serieshasversions = true;
     const parsed = await this.parseSeriesById(id);
     if (!parsed)
