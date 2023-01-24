@@ -1,4 +1,4 @@
-# multi-downloader-nx (3.3.1v)
+# multi-downloader-nx (3.3.2v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -77,7 +77,7 @@ The output is organized in pages. Use this command to output the items for the g
 #### `--search-locale`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--search-locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `ko-KR`] | ``| `search-locale: ` |
+| Crunchyroll | `--search-locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `ko-KR`] | ``| `search-locale: ` |
 
 Set the search local that will be used for searching for items.
 #### `--new`
@@ -154,7 +154,7 @@ Download video with specific hardsubs
 
 Download subtitles by language tag (space-separated)
 Funi Only: zh
-Crunchy Only: es-419, es-ES, fr, de, ar, ar, it, ru, tr, hi, zh, ko
+Crunchy Only: en, es-419, es-ES, fr, de, ar, ar, it, ru, tr, hi, zh, ko
 #### `--novids`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -180,7 +180,7 @@ Skip downloading subtitles
 
 Set the language to download: 
 Funi Only: cmn
-Crunchy Only: spa-419, spa-ES, fra, deu, ara, ara, ita, rus, tur, hin, zho, kor
+Crunchy Only: eng, spa-419, spa-ES, fra, deu, ara, ara, ita, rus, tur, hin, zho, kor
 #### `--all`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -303,14 +303,14 @@ Set the options given to ffmpeg
 | Both | `--defaultAudio ${args}` | `string` | `No`| `NaN` | `eng`| `defaultAudio: ` |
 
 Set the default audio track by language code
-Possible Values: eng, spa-419, spa-419, spa-ES, por, por, fra, deu, ara, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
+Possible Values: eng, eng, spa-419, spa-419, spa-ES, por, por, fra, deu, ara, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
 #### `--defaultSub`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
 | Both | `--defaultSub ${args}` | `string` | `No`| `NaN` | `eng`| `defaultSub: ` |
 
 Set the default subtitle track by language code
-Possible Values: eng, spa-419, spa-419, spa-ES, por, por, fra, deu, ara, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
+Possible Values: eng, eng, spa-419, spa-419, spa-ES, por, por, fra, deu, ara, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
