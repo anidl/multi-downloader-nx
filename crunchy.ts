@@ -246,14 +246,16 @@ export default class Crunchy implements ServiceClass {
     return true;
   }
 
-  public async refreshToken( ifNeeded = false ){
+  public async refreshToken(ifNeeded = false,  silent = false) {
     if(!this.token.access_token && !this.token.refresh_token || this.token.access_token && !this.token.refresh_token){
       await this.doAnonymousAuth();
     }
     else{
-      if (ifNeeded)
+      /*if (ifNeeded)
+        return;*/
+      if (!(Date.now() > new Date(this.token.expires).getTime()) && ifNeeded) {
         return;
-      if(Date.now() > new Date(this.token.expires).getTime()){
+      } else {
         //console.log('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
       }
       const authData = new URLSearchParams({
@@ -275,10 +277,10 @@ export default class Crunchy implements ServiceClass {
       this.token.expires = new Date(Date.now() + this.token.expires_in);
       yamlCfg.saveCRToken(this.token);
     }
-    if(this.token.refresh_token){
-      await this.getProfile();
-    }
-    else{
+    if(this.token.refresh_token) {
+      if (!silent)
+        await this.getProfile();
+    } else {
       console.log('[INFO] USER: Anonymous');
     }
     await this.getCMStoken();
@@ -920,16 +922,19 @@ export default class Crunchy implements ServiceClass {
     let dlFailed = false;
     let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
     
-    const AuthHeaders = {
-      headers: {
-        Authorization: `Bearer ${this.token.access_token}`,
-      },
-      useProxy: true
-    };
 
     for (const mMeta of medias.data) {
       console.log(`[INFO] Requesting: [${mMeta.mediaId}] ${mediaName}`);
       
+      //Make sure token is up to date
+      await this.refreshToken(true, true);
+      const AuthHeaders = {
+        headers: {
+          Authorization: `Bearer ${this.token.access_token}`,
+        },
+        useProxy: true
+      };
+
       //Get Media GUID
       let mediaId = mMeta.mediaId;
       if (mMeta.versions && mMeta.lang) {
