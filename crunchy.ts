@@ -418,10 +418,10 @@ export default class Crunchy implements ServiceClass {
     //TODO: look into better methods of getting item type
     let iType = item.type;
     if (!iType) {
-      if (item.season_number) {
-        iType = 'season';
-      } else if (item.episode_number) {
+      if (item.episode_number) {
         iType = 'episode';
+      } else if (item.season_number) {
+        iType = 'season';
       } else if (item.season_count) {
         iType = 'series';
       } else {
