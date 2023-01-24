@@ -1385,17 +1385,17 @@ export default class Crunchy implements ServiceClass {
       for (const key of Object.keys(result[season])) {
         const s = result[season][key];
         (await this.getSeasonDataById(s))?.data?.forEach(episode => {
-          //TODO: fix this
-          //TODO: this is likely where cour 2 gets cut
+          //TODO: Make sure the below code is ok
           //Prepare the episode array
           let item;
-          if (!(Object.prototype.hasOwnProperty.call(episodes, `S${episode.season_number}E${episode.episode_number || episode.episode}`))) {
-            item = episodes[`S${episode.season_number}E${episode.episode_number || episode.episode}`] = {
+          const seasonIdentifier = s.identifier ? s.identifier.split('|')[1] : `S${episode.season_number}`;
+          if (!(Object.prototype.hasOwnProperty.call(episodes, `${seasonIdentifier}E${episode.episode_number || episode.episode}`))) {
+            item = episodes[`${seasonIdentifier}E${episode.episode_number || episode.episode}`] = {
               items: [] as CrunchyEpisode[],
               langs: [] as langsData.LanguageItem[]
             };
           } else {
-            item = episodes[`S${episode.season_number}E${episode.episode_number || episode.episode}`];
+            item = episodes[`${seasonIdentifier}E${episode.episode_number || episode.episode}`];
           }
 
           if (episode.versions) {
@@ -1426,6 +1426,7 @@ export default class Crunchy implements ServiceClass {
       sp: 1,
       no: 1
     };
+
     for (const key of Object.keys(episodes)) {
       const item = episodes[key];
       const isSpecial = !item.items[0].episode.match(/^\d+$/);
@@ -1447,7 +1448,9 @@ export default class Crunchy implements ServiceClass {
         }).join(', ')
       }]`);
     }
-    
+
+    //TODO: Sort episodes to have specials at the end
+
     if (!serieshasversions) {
       console.log('[WARN] Couldn\'t find versions on some episodes, fell back to old method.');
     }
@@ -1555,21 +1558,15 @@ export default class Crunchy implements ServiceClass {
   
   public parseSeriesResult (seasonsList: SeriesSearch) : Record<number, Record<string, SeriesSearchItem>> {
     const ret: Record<number, Record<string, SeriesSearchItem>> = {};
+    let i = 0;
     for (const item of seasonsList.data) {
+      i++;
       for (const lang of langsData.languages) {
-        const season_number = item.season_number;
-        //TODO: Implement below code for missing episodes when seasons are the same
-        /*
+        //TODO: Make sure the below code is fine
         let season_number = item.season_number;
-        const seasondetails = item.identifier.split('|')[1];
-        //check if episode has no versions and is a cour/movie
-        if (item.versions && (seasondetails.match('C') || seasondetails.match('M'))) {
-          //if above conditions are true, make sure all seasons are unique
-          while (Object.prototype.hasOwnProperty.call(ret, season_number) ? Object.keys(ret[season_number]).length !== 0 : false) {
-            season_number++;
-          }
+        if (item.versions) {
+          season_number = i;
         }
-        */
         if (!Object.prototype.hasOwnProperty.call(ret, season_number))
           ret[season_number] = {};
         if (item.title.includes(`(${lang.name} Dub)`) || item.title.includes(`(${lang.name})`)) {
