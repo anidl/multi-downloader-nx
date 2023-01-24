@@ -413,6 +413,29 @@ export default class Crunchy implements ServiceClass {
     if(!item.type) {
       item.type = item.__class__;
     }
+
+    //guess item type
+    let iType = item.type;
+    if (!iType) {
+      if (item.identifier !== '') {
+        const iTypeCheck = item.identifier?.split('|');
+        if (iTypeCheck) {
+          if (iTypeCheck[1] == 'M') {
+            iType = 'movie';
+          } else if (!iTypeCheck[2]) {
+            iType = 'season';
+          } else {
+            iType = 'episode';
+          }
+        } else {
+          iType = 'series';
+        }
+      } else {
+        iType = 'movie_listing';
+      }
+      item.type = iType;
+    }
+
     const oTypes = {
       'series': 'Z',        // SRZ
       'season': 'S',        // VOL
@@ -428,7 +451,7 @@ export default class Crunchy implements ServiceClass {
       tMetadata = item.type + '_metadata',
       iMetadata = (Object.prototype.hasOwnProperty.call(item, tMetadata) ? item[tMetadata as keyof ParseItem] : item) as Record<string, any>,
       iTitle = [ item.title ];
-    let iType = item.type;
+    
     const audio_languages = [];
 
     // set object booleans
@@ -492,25 +515,7 @@ export default class Crunchy implements ServiceClass {
     const showObjectBooleans = oBooleans.length > 0 && !iMetadata.hide_metadata ? true : false;
     // make obj ids
     const objects_ids = [];
-    if (!iType) {
-      if (item.identifier !== '') {
-        const iTypeCheck = item.identifier?.split('|');
-        if (iTypeCheck) {
-          if (iTypeCheck[1] == 'M') {
-            iType = 'movie';
-          } else if (!iTypeCheck[2]) {
-            iType = 'season';
-          } else {
-            iType = 'episode';
-          }
-        } else {
-          iType = 'series';
-        }
-      } else {
-        iType = 'movie_listing';
-      }
-    }
-    objects_ids.push(oTypes[iType as keyof typeof oTypes] + ':' + item.id);
+    objects_ids.push(oTypes[item.type as keyof typeof oTypes] + ':' + item.id);
     if(item.seq_id){
       objects_ids.unshift(item.seq_id);
     }
@@ -526,7 +531,7 @@ export default class Crunchy implements ServiceClass {
     if(item.ep_num){
       objects_ids.push(item.ep_num);
     }
-    
+
     // show entry
     console.log(
       '%s%s[%s] %s%s%s',
@@ -704,7 +709,7 @@ export default class Crunchy implements ServiceClass {
       return { isOk: false, reason: new Error('Show request failed. No more information provided.') };
     }
     const showInfo = JSON.parse(showInfoReq.res.body);
-    this.logObject(showInfo, 0);
+    this.logObject(showInfo.data[0], 0);
 
     //get episode info
     const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
