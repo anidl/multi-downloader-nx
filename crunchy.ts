@@ -415,23 +415,32 @@ export default class Crunchy implements ServiceClass {
     }
 
     //guess item type
+    //TODO: look into better methods of getting item type
     let iType = item.type;
     if (!iType) {
-      if (item.identifier !== '') {
-        const iTypeCheck = item.identifier?.split('|');
-        if (iTypeCheck) {
-          if (iTypeCheck[1] == 'M') {
-            iType = 'movie';
-          } else if (!iTypeCheck[2]) {
-            iType = 'season';
+      if (item.season_number) {
+        iType = 'season';
+      } else if (item.episode_number) {
+        iType = 'episode';
+      } else if (item.season_count) {
+        iType = 'series';
+      } else {
+        if (item.identifier !== '') {
+          const iTypeCheck = item.identifier?.split('|');
+          if (iTypeCheck) {
+            if (iTypeCheck[1] == 'M') {
+              iType = 'movie';
+            } else if (!iTypeCheck[2]) {
+              iType = 'season';
+            } else {
+              iType = 'episode';
+            }
           } else {
-            iType = 'episode';
+            iType = 'series';
           }
         } else {
-          iType = 'series';
+          iType = 'movie_listing';
         }
-      } else {
-        iType = 'movie_listing';
       }
       item.type = iType;
     }

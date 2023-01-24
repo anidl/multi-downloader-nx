@@ -85,6 +85,8 @@ export type ParseItem = {
   title: string,
   playback?: string,
   season_number?: number|string,
+  episode_number?: number|string,
+  season_count?: number|string,
   is_premium_only?: boolean,
   hide_metadata?: boolean,
   seq_id?: string,
