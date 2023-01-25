@@ -5,7 +5,7 @@ assignees:
   - AnidlSupport
 labels:
   - bug
-title: "BUG"
+title: "[BUG]: "
 body:
   - type: markdown
     attributes:
@@ -37,8 +37,8 @@ body:
       label: Type
       description: "Please tell us if you are using the gui or the cli version."
       options:
-        - Cli
-        - Gui
+        - CLI
+        - GUI
     validations:
       required: true    
   - type: dropdown
@@ -81,6 +81,7 @@ body:
     attributes:
       label: Console Output
       description: "Please paste the console output from the beginning till termination here. If you are using the gui open the log folder under 'Debug > Open Log Folder' in the Menu. Please copy the content of latest.log here."
+      render: shell
     validations:
       required: true
   - type: textarea
@@ -88,4 +89,3 @@ body:
     attributes:
       label: Additional Information
       description: "Do you have any additional information you can provide?"
-      render: Text
