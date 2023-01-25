@@ -20,7 +20,7 @@ body:
         - Both
     validations:
       required: true    
-  - type: input
+  - type: textarea
     id: suggestion
     attributes:
       label: Suggestion
