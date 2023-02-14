@@ -786,8 +786,12 @@ export default class Crunchy implements ServiceClass {
         e: selEpId,
         image: images[Math.floor(images.length / 2)].source
       };
-      if(item.playback){
+      // Check for streams_link and update playback var if needed
+      if (item.streams_link) {
         epMeta.data[0].playback = item.streams_link;
+        if(!item.playback) {
+          item.playback = item.streams_link;
+        }
       }
       if (item.versions) {
         epMeta.data[0].versions = item.versions;
