@@ -891,6 +891,7 @@ export default class Crunchy implements ServiceClass {
         epMeta.seasonTitle = item.episode_metadata.season_title;
         epMeta.episodeNumber = item.episode_metadata.episode;
         epMeta.episodeTitle = item.title;
+        epMeta.season = item.episode_metadata.season_number;
       } else if (item.movie_listing_metadata) {
         item.f_num = 'F:' + item.id;
         epMeta.data = [
@@ -965,6 +966,10 @@ export default class Crunchy implements ServiceClass {
           return undefined;
         }
       }
+
+      // If for whatever reason mediaId has a :, return the ID only
+      if (mediaId.includes(':'))
+        mediaId = mediaId.split(':')[1];
 
       let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
       if(!playbackReq.ok || !playbackReq.res){
