@@ -960,6 +960,10 @@ export default class Crunchy implements ServiceClass {
       let mediaId = mMeta.mediaId;
       if (mMeta.versions && mMeta.lang) {
         mediaId = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale)?.media_guid as string;
+        if (!mediaId) {
+          console.log('[ERROR] Selected language not found.');
+          return undefined;
+        }
       }
 
       let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
