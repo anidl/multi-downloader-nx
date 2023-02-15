@@ -902,8 +902,11 @@ export default class Crunchy implements ServiceClass {
         epMeta.episodeNumber = 'Movie';
         epMeta.episodeTitle = item.title;
       }
-      if(item.playback) {
+      if (item.streams_link) {
         epMeta.data[0].playback = item.streams_link;
+        if(!item.playback) {
+          item.playback = item.streams_link;
+        }
         selectedMedia.push(epMeta);
         item.isSelected = true;
       }
@@ -1544,8 +1547,11 @@ export default class Crunchy implements ServiceClass {
           e: epNum,
           image: images[Math.floor(images.length / 2)].source,
         };
-        if(item.playback){
+        if (item.streams_link) {
           epMeta.data[0].playback = item.streams_link;
+          if(!item.playback) {
+            item.playback = item.streams_link;
+          }
         }
         // find episode numbers
         if(item.playback && ((but && !doEpsFilter.isSelected([epNum, item.id])) || (all || (doEpsFilter.isSelected([epNum, item.id])) && !but))) {
