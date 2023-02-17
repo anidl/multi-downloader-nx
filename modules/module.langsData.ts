@@ -17,7 +17,6 @@ const languages: LanguageItem[] = [
   { cr_locale: 'es-LA', funi_name: 'Spanish (LAS)', funi_name_lagacy: 'Spanish (Latin Am)', funi_locale: 'esLA', locale: 'es-419', code: 'spa', name: 'Spanish', language: 'Latin American Spanish' },
   { cr_locale: 'es-419', locale: 'es-419', code: 'spa-419', name: 'Spanish', language: 'Latin American Spanish' },
   { cr_locale: 'es-ES', locale: 'es-ES', code: 'spa-ES', name: 'Castilian', language: 'European Spanish' },
-  { cr_locale: 'pt-BR', funi_name: 'Portuguese (Brazil)', funi_locale: 'ptBR', locale: 'pt', code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese' },
   { cr_locale: 'pt-BR', funi_name: 'Portuguese (Brazil)', funi_locale: 'ptBR', locale: 'pt-BR', code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese' },
   { cr_locale: 'pt-PT', locale: 'pt-PT', code: 'por', name: 'Portuguese (Portugal)', language: 'Portugues (Portugal)' },
   { cr_locale: 'fr-FR', locale: 'fr', code: 'fra', name: 'French' },
