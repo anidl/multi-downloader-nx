@@ -20,10 +20,13 @@ jobs:
         with:
           node-version: 16
           check-latest: true
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6.0.2
 
       - name: Install Node modules
         run: |
-          npm install
+          pnpm install
 
       - name: Get name and version from package.json
         run: |
@@ -32,7 +35,7 @@ jobs:
           echo PACKAGE_NAME=$(node -p -e "require('./package.json').name") >> $GITHUB_ENV &&
           echo PACKAGE_VERSION=$(node -p -e "require('./package.json').version") >> $GITHUB_ENV || exit 1
       - name: Make build
-        run: npm run build-${{ matrix.build_type }}-${{ matrix.gui }}
+        run: pnpm run build-${{ matrix.build_type }}-${{ matrix.gui }}
 
       - name: Upload release
         uses: actions/upload-release-asset@v1

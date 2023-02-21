@@ -106,6 +106,12 @@ const EpisodeListing: React.FC = () => {
                 <Typography color='text.primary'>
                   {item.description}
                 </Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'fit-content 1fr' }}>
+                  <Typography>
+                    <br />
+                    Available audio languages: {item.lang.join(', ')}
+                  </Typography>
+                </Box>
               </Box>
             </ListItem>
             {index < length - 1 && <Divider />}

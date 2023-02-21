@@ -7,7 +7,7 @@ type Services = 'funi'|'crunchy';
 
 export const serviceContext = React.createContext<Services|undefined>(undefined);
 
-const ServiceProvider: React.FC = ({ children }) => {
+const ServiceProvider: FCWithChildren = ({ children }) => {
   const [ { service }, dispatch ] = useStore();
 
   const setService = (s: StoreState['service']) => {

@@ -16,8 +16,11 @@ jobs:
       with:
         node-version: 14
         cache: 'npm'
-    - run: npm i 
-    - run: npx eslint .
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 6.0.2
+    - run: pnpm i 
+    - run: pnpm dlx eslint .
   test: 
     needs: eslint
     runs-on: ubuntu-latest
@@ -28,6 +31,9 @@ jobs:
       with:
         node-version: 14
         cache: 'npm'
-    - run: npm i 
-    - run: npm run test
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 6.0.2
+    - run: pnpm i 
+    - run: pnpm run test
 

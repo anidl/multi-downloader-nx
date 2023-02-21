@@ -8,6 +8,8 @@ const useDownloadManager = () => {
   const [ { currentDownload }, dispatch ] = useStore();
   const messageHandler = React.useContext(messageChannelContext);
 
+  console.log(currentDownload);
+
   const [progressData, setProgressData] = React.useState<ExtendedProgress|undefined>();
   
   React.useEffect(() => {

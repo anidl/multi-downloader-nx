@@ -6,7 +6,7 @@ import useDownloadManager from "../DownloadManager/DownloadManager";
 
 const Queue: React.FC = () => {
   const data = useDownloadManager();
-
+  console.log("data", data)
   const [{ queue }, dispatch] = useStore();
   return data || queue.length > 0 ? <>
     {data && <Box sx={{ mb: 1, height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1 }}>
@@ -33,8 +33,9 @@ const Queue: React.FC = () => {
         </Box>
       </Box>
     </Box>}
-    {queue.length && <Divider variant="fullWidth" />}
+    {queue.length && data && <Divider variant="fullWidth" />}
     {queue.map((queueItem, index, { length }) => {
+      console.log(queueItem);
       return <Box key={`queue_item_${index}`}>
         <Box sx={{ height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1, mb: 1, mt: 1 }}>
           <img src={queueItem.image} height='200px' width='100%' />
@@ -58,6 +59,7 @@ const Queue: React.FC = () => {
             </Typography>
             <Button onClick={() => {
               const override = [...queue];
+              override.splice(index, 1);
               dispatch({
                 type: 'queue',
                 payload: override,

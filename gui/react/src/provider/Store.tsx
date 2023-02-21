@@ -17,6 +17,7 @@ export type DownloadOptions = {
 }
 
 export type StoreState = {
+  downloadQueue: boolean,
   queue: QueueItem[],
   episodeListing: Episode[];
   downloadOptions: DownloadOptions,
@@ -35,25 +36,33 @@ const Reducer = <T extends keyof StoreState,>(state: StoreState, action: StoreAc
   switch(action.type) {
     case "queue":
       state.queue = action.extraInfo?.force ? action.payload as QueueItem[] : state.queue.concat(action.payload as QueueItem[]);
-      if (state.currentDownload === undefined && state.queue.length > 0) {
+      if (state.currentDownload === undefined && state.queue.length > 0 && state.downloadQueue) {
         state.currentDownload = state.queue[0];
         state.queue = state.queue.slice(1);
       }
       return { ...state };
     case "finish":
-      if (state.queue.length > 0) {
+      if (state.queue.length > 0 && state.downloadQueue) {
         state.currentDownload = state.queue[0];
         state.queue = state.queue.slice(1);
       } else {
         state.currentDownload = undefined;
       }
       return { ...state }
+    case 'downloadQueue':
+      state.downloadQueue = action.payload as boolean;
+      if (state.queue.length > 0 && state.downloadQueue && state.currentDownload === undefined) {
+        state.currentDownload = state.queue[1];
+        state.queue = state.queue.slice(1);
+      }
+      return {...state}
     default:
       return { ...state, [action.type]: action.payload }
   }
 };
 
 const initialState: StoreState = {
+  downloadQueue: false,
   queue: [],
   downloadOptions: {
     id: '',
@@ -72,7 +81,7 @@ const initialState: StoreState = {
   episodeListing: [],
 };
 
-const Store: React.FC = ({children}) => {
+const Store: FCWithChildren = ({children}) => {
   const [state, dispatch] = React.useReducer(Reducer, initialState);
   /*React.useEffect(() => {
     if (!state.unsavedChanges.has)

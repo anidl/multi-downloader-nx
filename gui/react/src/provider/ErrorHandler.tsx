@@ -1,14 +1,18 @@
 import { Backdrop, Box, Typography } from "@mui/material";
 import React from "react";
 
-export default class ErrorHandler extends React.Component<{}, {
+export default class ErrorHandler extends React.Component<{
+  children: React.ReactNode|React.ReactNode[]
+}, {
   error?: {
     er: Error,
     stack: React.ErrorInfo
   }
 }> {
   
-  constructor(props: React.PropsWithChildren<{}>) {
+  constructor(props: {
+    children: React.ReactNode|React.ReactNode[]
+  }) {
     super(props);
     this.state = { error: undefined }
   }
