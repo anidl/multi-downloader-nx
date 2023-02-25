@@ -20,7 +20,6 @@ const SearchBox: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const selectItem = (id: string) => {
-    console.log(id);
     dispatch({
       type: 'downloadOptions',
       payload: {

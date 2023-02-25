@@ -52,7 +52,7 @@ const Reducer = <T extends keyof StoreState,>(state: StoreState, action: StoreAc
     case 'downloadQueue':
       state.downloadQueue = action.payload as boolean;
       if (state.queue.length > 0 && state.downloadQueue && state.currentDownload === undefined) {
-        state.currentDownload = state.queue[1];
+        state.currentDownload = state.queue[0];
         state.queue = state.queue.slice(1);
       }
       return {...state}

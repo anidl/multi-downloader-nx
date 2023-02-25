@@ -103,7 +103,7 @@ export { ignore };
     alterJSON();
   }
   if (!isTest) {
-    const dependencies = exec(`npm install ${isGUI ? '' : '--production'}`, {
+    const dependencies = exec(`pnpm install ${isGUI ? '' : '-P'}`, {
       cwd: path.join(__dirname, 'lib')
     });
     await waitForProcess(dependencies);

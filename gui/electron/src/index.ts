@@ -67,17 +67,15 @@ export { mainWindow };
 
 const icon = path.join(__dirname, 'images', `Logo_Inverted.${isWindows ? 'ico' : 'png'}`);
 
-if (!process.env.TEST) {
   // eslint-disable-next-line no-global-assign
-  console = (() => {
-    const logFolder = path.join(getDataDirectory(), 'logs');
-    if (!fs.existsSync(logFolder))
-      fs.mkdirSync(logFolder);
-    if (fs.existsSync(path.join(logFolder, 'latest.log')))
-      fs.renameSync(path.join(logFolder, 'latest.log'), path.join(logFolder, `${Date.now()}.log`));
-    return new Console(fs.createWriteStream(path.join(logFolder, 'latest.log')));
-  })();
-}
+console = (() => {
+  const logFolder = path.join(getDataDirectory(), 'logs');
+  if (!fs.existsSync(logFolder))
+    fs.mkdirSync(logFolder);
+  if (fs.existsSync(path.join(logFolder, 'latest.log')))
+    fs.renameSync(path.join(logFolder, 'latest.log'), path.join(logFolder, `${Date.now()}.log`));
+  return new Console(fs.createWriteStream(path.join(logFolder, 'latest.log')));
+})();
 
 const createWindow = async () => {
   (await import('../../../modules/module.cfg-loader')).ensureConfig();

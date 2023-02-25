@@ -74,7 +74,6 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
     setLoading(true);
     const res = await messageHandler?.listEpisodes(store.downloadOptions.id);
     if (!res || !res.isOk) {
-      console.log(res);
       setLoading(false);
       return enqueueSnackbar('The request failed. Please check if the ID is correct.', {
         variant: 'error'
