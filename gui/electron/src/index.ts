@@ -67,7 +67,7 @@ export { mainWindow };
 
 const icon = path.join(__dirname, 'images', `Logo_Inverted.${isWindows ? 'ico' : 'png'}`);
 
-  // eslint-disable-next-line no-global-assign
+// eslint-disable-next-line no-global-assign
 console = (() => {
   const logFolder = path.join(getDataDirectory(), 'logs');
   if (!fs.existsSync(logFolder))
