@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: 16
           check-latest: true
+          cache: 'pnpm'
       - uses: pnpm/action-setup@v2
         with:
           version: 6.0.2
