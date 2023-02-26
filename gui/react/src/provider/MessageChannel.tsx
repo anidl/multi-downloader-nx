@@ -36,7 +36,7 @@ export class RandomEventHandler {
 
 export const messageChannelContext = React.createContext<FrontEndMessanges|undefined>(undefined);
 
-const MessageChannelProvider: React.FC = ({ children }) => {
+const MessageChannelProvider: FCWithChildren = ({ children }) => {
 
   const [store, dispatch] = useStore();
 

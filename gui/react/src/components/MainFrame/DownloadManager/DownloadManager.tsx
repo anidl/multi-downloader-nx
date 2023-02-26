@@ -30,15 +30,16 @@ const useDownloadManager = () => {
       messageHandler?.randomEvents.removeListener('progress', handler);
       messageHandler?.randomEvents.removeListener('finish', finishHandler)
     };
-  }, [messageHandler]);
+  }, [messageHandler, dispatch]);
 
   React.useEffect(() => {
     if (!currentDownload)
       return;
     if (messageHandler?.isDownloading())
       return;
+    console.log('start download');
     messageHandler?.downloadItem(currentDownload);
-  }, [currentDownload]);
+  }, [currentDownload, messageHandler]);
   
 
   return progressData;

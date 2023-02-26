@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import ServiceProvider from './provider/ServiceProvider';
 import Style from './Style';
@@ -16,7 +16,9 @@ const onClickDismiss = (key: SnackbarKey | undefined) => () => {
     notistackRef.current.closeSnackbar(key);
 };
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container!);
+root.render(
   <React.StrictMode>
     <ErrorHandler>
       <Store>
@@ -38,6 +40,5 @@ ReactDOM.render(
         </SnackbarProvider>
       </Store>
     </ErrorHandler>
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );

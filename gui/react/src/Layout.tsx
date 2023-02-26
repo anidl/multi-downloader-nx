@@ -7,6 +7,7 @@ import AddToQueue from "./components/AddToQueue/AddToQueue";
 import { messageChannelContext } from './provider/MessageChannel';
 import { ClearAll, Folder } from "@mui/icons-material";
 import useStore from "./hooks/useStore";
+import StartQueueButton from "./components/StartQueue";
 
 const Layout: React.FC = () => {
 
@@ -22,6 +23,7 @@ const Layout: React.FC = () => {
         <Button variant="contained" startIcon={<ClearAll />} onClick={() => dispatch({ type: 'queue', payload: [], extraInfo: { force: true } })}>Clear Queue</Button>
       </Box>
       <AddToQueue />
+      <StartQueueButton />
     </Box>
     <MainFrame />
   </Box>;

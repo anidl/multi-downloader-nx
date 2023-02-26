@@ -119,7 +119,8 @@ export type ProgressData = {
   cur: number,
   percent: number|string,
   time: number,
-  downloadSpeed: number
+  downloadSpeed: number,
+  bytes: number
 };
 
 export type PossibleMessanges = keyof ServiceHandler;

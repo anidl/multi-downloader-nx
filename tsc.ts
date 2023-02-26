@@ -13,7 +13,6 @@ const isGUI = !(argv.length > 1 && argv[1] === 'false');
 if (!isTest)
   buildIgnore = [
     '*/\\.env',
-    '*/node_modules/*'
   ];
 
 if (!isGUI)
@@ -38,7 +37,8 @@ const ignore = [
   '*/*\\.tsx?$',
   './fonts*',
   './gui/react*',
-  './dev.js$'
+  './dev.js$',
+  '*/node_modules/*'
 ].map(a => a.replace(/\*/g, '[^]*').replace(/\.\//g, escapeRegExp(__dirname) + '/').replace(/\//g, path.sep === '\\' ? '\\\\' : '/')).map(a => new RegExp(a, 'i'));
 
 export { ignore };
@@ -69,13 +69,13 @@ export { ignore };
   if (!isTest && isGUI) {
     process.stdout.write('✓\nBuilding react... ');
 
-    const installReactDependencies = exec('npm install', {
+    const installReactDependencies = exec('pnpm install', {
       cwd: path.join(__dirname, 'gui', 'react'),
     });
 
     await waitForProcess(installReactDependencies);
   
-    const react = exec('npm run build', {
+    const react = exec('pnpm run build', {
       cwd: path.join(__dirname, 'gui', 'react'),
     });
   
@@ -103,7 +103,7 @@ export { ignore };
     alterJSON();
   }
   if (!isTest) {
-    const dependencies = exec(`npm install ${isGUI ? '' : '--production'}`, {
+    const dependencies = exec(`pnpm install ${isGUI ? '' : '-P'}`, {
       cwd: path.join(__dirname, 'lib')
     });
     await waitForProcess(dependencies);

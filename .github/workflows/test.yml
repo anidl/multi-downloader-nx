@@ -12,12 +12,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js 14
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
-        node-version: 14
-        cache: 'npm'
-    - run: npm i 
-    - run: npx eslint .
+        node-version: 16
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 6.0.2
+    - run: pnpm i 
+    - run: pnpm dlx eslint .
   test: 
     needs: eslint
     runs-on: ubuntu-latest
@@ -28,6 +30,9 @@ jobs:
       with:
         node-version: 14
         cache: 'npm'
-    - run: npm i 
-    - run: npm run test
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 6.0.2
+    - run: pnpm i 
+    - run: pnpm run test
 

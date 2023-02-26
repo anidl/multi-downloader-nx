@@ -6,38 +6,68 @@ import useDownloadManager from "../DownloadManager/DownloadManager";
 
 const Queue: React.FC = () => {
   const data = useDownloadManager();
-
-  const [{ queue }, dispatch] = useStore();
+  const [{ queue, currentDownload }, dispatch] = useStore();
   return data || queue.length > 0 ? <>
-    {data && <Box sx={{ mb: 1, height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1 }}>
-      <img src={data.downloadInfo.image} height='200px' width='100%' />
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr max-content' }}>
-            <Typography variant='h5' color='text.primary'>
-              {data.downloadInfo.title}
-            </Typography>
-            <Typography variant='h5' color='text.primary'>
-              Language: {data.downloadInfo.language.name}
+    {data && <>
+      <Box sx={{ height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1, mb: 1, mt: 1 }}>
+        <img src={data.downloadInfo.image} height='200px' width='100%' alt="Thumbnail" />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr max-content' }}>
+              <Typography variant='h5' color='text.primary'>
+                {data.downloadInfo.title}
+              </Typography>
+              <Typography variant='h5' color='text.primary'>
+                Language: {data.downloadInfo.language.name}
+              </Typography>
+            </Box>
+            <Typography variant='h6' color='text.primary'>
+              {data.downloadInfo.parent.title}
             </Typography>
           </Box>
-          <Typography variant='h6' color='text.primary'>
-            {data.downloadInfo.parent.title}
-          </Typography>
-        </Box>
-        <LinearProgress variant='determinate' sx={{ height: '10px' }} value={(typeof data.progress.percent === 'string' ? parseInt(data.progress.percent) : data.progress.percent)} />
-        <Box> 
-          <Typography variant="body1" color='text.primary'>
-            {data.progress.cur}MB / {(data.progress.total)}MB ({data.progress.percent}% | {formatTime(data.progress.time)} | {(data.progress.downloadSpeed / 1024 / 1024).toFixed(2)} MB/s)
-          </Typography>
+          <LinearProgress variant='determinate' sx={{ height: '10px' }} value={(typeof data.progress.percent === 'string' ? parseInt(data.progress.percent) : data.progress.percent)} />
+          <Box> 
+            <Typography variant="body1" color='text.primary'>
+              {data.progress.cur} / {(data.progress.total)} parts ({data.progress.percent}% | {formatTime(data.progress.time)} | {(data.progress.downloadSpeed / 1024 / 1024).toFixed(2)} MB/s | {(data.progress.bytes / 1024 / 1024).toFixed(2)}MB)
+            </Typography>
+          </Box>
         </Box>
       </Box>
-    </Box>}
-    {queue.length && <Divider variant="fullWidth" />}
+    </>
+    }
+    {
+      !data && currentDownload && <>
+        <Box sx={{ height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1, mb: 1, mt: 1 }}>
+          <img src={currentDownload.image} height='200px' width='100%' alt="Thumbnail" />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr max-content' }}>
+                <Typography variant='h5' color='text.primary'>
+                  {currentDownload.title}
+                </Typography>
+                <Typography variant='h5' color='text.primary'>
+                  Languages: {currentDownload.dubLang}
+                </Typography>
+              </Box>
+              <Typography variant='h6' color='text.primary'>
+                {currentDownload.parent.title}
+              </Typography>
+            </Box>
+            <LinearProgress variant='indeterminate' sx={{ height: '10px' }} />
+            <Box> 
+              <Typography variant="body1" color='text.primary'>
+                Waiting for download to start
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </>
+    }
+    {queue.length && data && <Divider variant="fullWidth" />}
     {queue.map((queueItem, index, { length }) => {
       return <Box key={`queue_item_${index}`}>
         <Box sx={{ height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1, mb: 1, mt: 1 }}>
-          <img src={queueItem.image} height='200px' width='100%' />
+          <img src={queueItem.image} height='200px' width='100%' alt="Thumbnail" />
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 200px' }}>
@@ -58,6 +88,7 @@ const Queue: React.FC = () => {
             </Typography>
             <Button onClick={() => {
               const override = [...queue];
+              override.splice(index, 1);
               dispatch({
                 type: 'queue',
                 payload: override,

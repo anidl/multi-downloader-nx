@@ -1,6 +1,5 @@
-import { Avatar, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, List, ListItem, ListItemAvatar, TextField } from "@mui/material";
-import { grey } from '@mui/material/colors'
-import { Check, Close, CloseOutlined, PortraitOutlined } from '@mui/icons-material'
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Check, Close } from '@mui/icons-material'
 import React from "react";
 import { messageChannelContext } from "../provider/MessageChannel";
 import Require from "./Require";
@@ -24,7 +23,6 @@ const AuthButton: React.FC = () => {
   const [authed, setAuthed] = React.useState(false);
 
   const checkAuth = async () => {
-    console.log(await messageChannel?.checkToken());
     setAuthed((await messageChannel?.checkToken())?.isOk ?? false);
   }
 
