@@ -9,8 +9,8 @@ const StartQueueButton: React.FC = () => {
   const messageChannel = React.useContext(messageChannelContext);
   const [store, dispatch] = useStore();
 
-  const change = () => {
-    if (messageChannel?.isDownloading() && store.downloadQueue)
+  const change = async () => {
+    if (await messageChannel?.isDownloading() && store.downloadQueue)
       alert("The current download will be finished before the queue stops")
     dispatch({
       type: 'downloadQueue',

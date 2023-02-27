@@ -19,26 +19,24 @@ const onClickDismiss = (key: SnackbarKey | undefined) => () => {
 const container = document.getElementById('root');
 const root = createRoot(container!);
 root.render(
-  <React.StrictMode>
-    <ErrorHandler>
-      <Store>
-        <SnackbarProvider
-          ref={notistackRef}
-          action={(key) => (
-            <IconButton onClick={onClickDismiss(key)} color="inherit">
-              <CloseOutlined />
-            </IconButton>
-          )}
-          >
-          <Style>
-            <MessageChannel>
-              <ServiceProvider>
-                <App />
-              </ServiceProvider>
-            </MessageChannel>
-          </Style>
-        </SnackbarProvider>
-      </Store>
-    </ErrorHandler>
-  </React.StrictMode>
+  <ErrorHandler>
+    <Store>
+      <SnackbarProvider
+        ref={notistackRef}
+        action={(key) => (
+          <IconButton onClick={onClickDismiss(key)} color="inherit">
+            <CloseOutlined />
+          </IconButton>
+        )}
+        >
+        <Style>
+          <MessageChannel>
+            <ServiceProvider>
+              <App />
+            </ServiceProvider>
+          </MessageChannel>
+        </Style>
+      </SnackbarProvider>
+    </Store>
+  </ErrorHandler>
 );

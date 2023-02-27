@@ -9,10 +9,10 @@ const LogoutButton: React.FC = () => {
   const messageChannel = React.useContext(messageChannelContext);
   const [, dispatch] = useStore();
 
-  const logout = () => {
-    if (messageChannel?.isDownloading())
+  const logout = async () => {
+    if (await messageChannel?.isDownloading())
       return alert('You are currently downloading. Please finish the download first.');
-    if (messageChannel?.logout())
+    if (await messageChannel?.logout())
       dispatch({
         type: 'service',
         payload: undefined

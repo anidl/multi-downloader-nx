@@ -56,8 +56,8 @@ class Merger {
   }
 
   public FFmpeg() : string {
-    const args = [];
-    const metaData = [];
+    const args: string[] = [];
+    const metaData: string[] = [];
 
     let index = 0;
     let audioIndex = 0;
@@ -137,7 +137,7 @@ class Merger {
   };
 
   public MkvMerge = () => {
-    const args = [];
+    const args: string[] = [];
 
     let hasVideo = false;
 
@@ -272,7 +272,7 @@ class Merger {
     language: LanguageItem,
     fonts: Font[]
   }[]) : ParsedFont[] {
-    let fontsNameList: Font[] = []; const fontsList = [], subsList = []; let isNstr = true;
+    let fontsNameList: Font[] = []; const fontsList: { name: string, path: string, mime: string }[] = [], subsList: string[] = []; let isNstr = true;
     for(const s of subs){
       fontsNameList.push(...s.fonts);
       subsList.push(s.language.locale);

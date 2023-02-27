@@ -15,61 +15,11 @@ type BuildTypes = `${'ubuntu'|'windows'|'macos'|'arm'}64`
   const buildType = process.argv[2] as BuildTypes;
   const isGUI = process.argv[3] === 'true';
 
-  if (isGUI) {
-    buildGUI(buildType);
-  } else {
-    buildBinary(buildType);
-  }
+  buildBinary(buildType, isGUI);
 })();
 
-async function buildGUI(buildType: BuildTypes) {
-  execSync(`npx electron-builder build --publish=never ${getCommand(buildType)}`, { stdio: [0,1,2] });
-  execSync(`7z a -t7z "../${buildsDir}/multi-downloader-nx-${buildType}-gui.7z" ${getOutputFileName(buildType).map(a => `"${a}"`).join(' ')}`,{
-    stdio:[0,1,2],
-    cwd: path.join('dist')
-  });
-}
-
-function getCommand(buildType: BuildTypes) {
-  switch (buildType) {
-  case 'arm64':
-    return '--linux --arm64';
-  case 'ubuntu64':
-    return '--linux --x64';
-  case 'windows64':
-    return '--win';
-  case 'macos64':
-    return '--mac dmg';
-  default:
-    return '--error';
-  }
-}
-
-function getOutputFileName(buildType: BuildTypes): string[] {
-  switch (buildType) {
-  case 'arm64':
-    return [
-      `${pkg.name}_${pkg.version}_arm64.deb`
-    ];
-  case 'ubuntu64':
-    return [
-      `${pkg.name}_${pkg.version}_amd64.deb`
-    ];
-  case 'windows64':
-    return [
-      `${pkg.name} Setup ${pkg.version}.exe`
-    ];
-  case 'macos64':
-    return [
-      `${pkg.name}-${pkg.version}.dmg`
-    ];
-  default:
-    throw new Error(`Unknown build type ${buildType}`);
-  }
-}
-
 // main
-async function buildBinary(buildType: BuildTypes) {
+async function buildBinary(buildType: BuildTypes, gui: boolean) {
   const buildStr = 'multi-downloader-nx';
   const acceptableBuilds = ['windows64','ubuntu64','macos64'];
   if(!acceptableBuilds.includes(buildType)){
@@ -87,7 +37,7 @@ async function buildBinary(buildType: BuildTypes) {
   }
   fs.mkdirSync(buildDir);
   const buildConfig = [
-    pkg.main,
+    gui ? 'gui.js' : 'index.js',
     '--target', nodeVer + getTarget(buildType),
     '--output', `${buildDir}/${pkg.short_name}`,
   ];
@@ -109,6 +59,10 @@ async function buildBinary(buildType: BuildTypes) {
   fs.copySync('./package.json', `${buildDir}/package.json`);
   fs.copySync('./docs/', `${buildDir}/docs/`);
   fs.copySync('./LICENSE.md', `${buildDir}/docs/LICENSE.md`);
+  if (gui) {
+    fs.copySync('./gui', `${buildDir}/gui`)
+    fs.copySync('./node_modules/open/xdg-open', `${buildDir}/xdg-open`)
+  }
   if(fs.existsSync(`${buildsDir}/${buildFull}.7z`)){
     fs.removeSync(`${buildsDir}/${buildFull}.7z`);
   }

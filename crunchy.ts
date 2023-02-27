@@ -455,13 +455,13 @@ export default class Crunchy implements ServiceClass {
       // check title
     item.title = item.title != '' ? item.title : 'NO_TITLE';
     // static data
-    const oMetadata = [],
-      oBooleans = [],
+    const oMetadata: string[] = [],
+      oBooleans: string[] = [],
       tMetadata = item.type + '_metadata',
       iMetadata = (Object.prototype.hasOwnProperty.call(item, tMetadata) ? item[tMetadata as keyof ParseItem] : item) as Record<string, any>,
       iTitle = [ item.title ];
     
-    const audio_languages = [];
+    const audio_languages: string[] = [];
 
     // set object booleans
     if(iMetadata.duration_ms){
@@ -523,7 +523,7 @@ export default class Crunchy implements ServiceClass {
     const showObjectMetadata = oMetadata.length > 0 && !iMetadata.hide_metadata ? true : false;
     const showObjectBooleans = oBooleans.length > 0 && !iMetadata.hide_metadata ? true : false;
     // make obj ids
-    const objects_ids = [];
+    const objects_ids: string[] = [];
     objects_ids.push(oTypes[item.type as keyof typeof oTypes] + ':' + item.id);
     if(item.seq_id){
       objects_ids.unshift(item.seq_id);
@@ -870,7 +870,7 @@ export default class Crunchy implements ServiceClass {
       return objectInfo;
     }
       
-    const selectedMedia = [];
+    const selectedMedia: Partial<CrunchyEpMeta>[] = [];
       
     for(const item of objectInfo.data){
       if(item.type != 'episode' && item.type != 'movie'){
@@ -998,7 +998,7 @@ export default class Crunchy implements ServiceClass {
         } as Variable;
       }));
     
-      let streams = [];
+      let streams: any[] = [];
       let hsLangs: string[] = [];
       const pbStreams = pbData.data[0];
 

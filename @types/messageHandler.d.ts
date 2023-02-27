@@ -13,9 +13,11 @@ export interface MessageHandler {
   resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>,
   listEpisodes: (id: string) => Promise<EpisodeListResponse>,
   downloadItem: (data) => void,
-  isDownloading: () => boolean,
+  isDownloading: () => Promise<boolean>,
   writeToClipboard: (text: string) => void,
   openFolder: (path: FolderTypes) => void,
+  openFile: (data: [FolderTypes, string]) => void,
+  openURL: (data: string) => void;
 }
 
 export type FolderTypes = 'content' | 'config';

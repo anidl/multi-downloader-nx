@@ -19,7 +19,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import vttConvert from './modules/module.vttconvert';
 
 // types
-import { Item } from './@types/items';
+import type { Item } from './@types/items.js';
 
 // params
 
@@ -266,7 +266,7 @@ export default class Funi implements ServiceClass {
       return showList;
     const eps = showList.value;
     const epSelList = parseSelect(data.e as string, data.but);
-    const fnSlug: FuniEpisodeData[] = [], epSelEpsTxt = []; let is_selected = false;
+    const fnSlug: FuniEpisodeData[] = [], epSelEpsTxt: string[] = []; let is_selected = false;
 
       
     for(const e in eps){
@@ -331,7 +331,7 @@ export default class Funi implements ServiceClass {
       debug: this.debug,
     });
     if(!episodeData.ok || !episodeData.res){return { isOk: false, reason: new Error('Unable to get episodeData') }; }
-    const ep = JSON.parse(episodeData.res.body).items[0] as EpisodeData, streamIds = [];
+    const ep = JSON.parse(episodeData.res.body).items[0] as EpisodeData, streamIds: { id: number, lang: langsData.LanguageItem }[] = [];
     // build fn
     season = parseInt(ep.parent.seasonNumber);
     if(ep.mediaCategory != 'Episode'){
@@ -508,7 +508,7 @@ export default class Funi implements ServiceClass {
         plStreams: Record<string|number, {
         [key: string]: string   
       }> = {},
-        plLayersStr  = [],
+        plLayersStr: string[]  = [],
         plLayersRes: Record<string|number, {
         width: number,
         height: number

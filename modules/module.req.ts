@@ -122,7 +122,7 @@ class Req {
     }
   }
   setNewCookie(setCookie: Record<string, string>, isAuth: boolean, fileData?: string){
-    const cookieUpdated = []; let lastExp = 0;
+    const cookieUpdated: string[] = []; let lastExp = 0;
     console.trace('Type of setCookie:', typeof setCookie, setCookie);
     const parsedCookie = fileData ? cookieFile(fileData) : shlp.cookie.parse(setCookie);
     for(const cookieName of Object.keys(parsedCookie)){

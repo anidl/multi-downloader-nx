@@ -33,12 +33,14 @@ const useDownloadManager = () => {
   }, [messageHandler, dispatch]);
 
   React.useEffect(() => {
-    if (!currentDownload)
-      return;
-    if (messageHandler?.isDownloading())
-      return;
-    console.log('start download');
-    messageHandler?.downloadItem(currentDownload);
+    (async () => {
+      if (!currentDownload)
+        return;
+      if (await messageHandler?.isDownloading())
+        return;
+      console.log('start download');
+      messageHandler?.downloadItem(currentDownload);
+    })();
   }, [currentDownload, messageHandler]);
   
 

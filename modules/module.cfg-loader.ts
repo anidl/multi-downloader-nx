@@ -12,6 +12,7 @@ export { workingDir };
 
 const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
+const guiCfgFile   = path.join(workingDir, 'config', 'gui')
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
 const sessCfgFile  = path.join(workingDir, 'config', 'session');
 const tokenFile    = {
@@ -23,7 +24,7 @@ export const ensureConfig = () => {
   if (!fs.existsSync(path.join(workingDir, 'config')))
     fs.mkdirSync(path.join(workingDir, 'config'));
   if (process.env.contentDirectory)
-    [binCfgFile, dirCfgFile, cliCfgFile].forEach(a => {
+    [binCfgFile, dirCfgFile, cliCfgFile, guiCfgFile].forEach(a => {
       if (!fs.existsSync(`${a}.yml`)) 
         fs.copyFileSync(path.join(__dirname, '..', 'config', `${path.basename(a)}.yml`), `${a}.yml`);
     });
@@ -59,6 +60,10 @@ export type ConfigObject = {
   },
   cli: {
     [key: string]: any
+  },
+  gui: {
+    port: number,
+    password: string
   }
 }
 
@@ -75,6 +80,10 @@ const loadCfg = () : ConfigObject => {
     cli: loadYamlCfgFile<{
       [key: string]: any
     }>(cliCfgFile),
+    gui: loadYamlCfgFile<{
+      port: number,
+      password: string
+    }>(guiCfgFile)
   };
   const defaultDirs = {
     fonts: '${wdir}/fonts/',

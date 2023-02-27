@@ -8,14 +8,16 @@ import { messageChannelContext } from './provider/MessageChannel';
 import { ClearAll, Folder } from "@mui/icons-material";
 import useStore from "./hooks/useStore";
 import StartQueueButton from "./components/StartQueue";
+import MenuBar from "./components/MenuBar/MenuBar";
 
 const Layout: React.FC = () => {
 
   const messageHandler = React.useContext(messageChannelContext);
   const [, dispatch] = useStore();
 
-  return <Box>
-    <Box sx={{ height: 50, mb: 4, display: 'flex', gap: 1 }}>
+  return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <MenuBar />
+    <Box sx={{ height: 50, mb: 4, display: 'flex', gap: 1, mt: 3 }}>
       <LogoutButton />
       <AuthButton />
       <Box sx={{ display: 'flex', gap: 1, height: 36 }}>
