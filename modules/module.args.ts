@@ -704,16 +704,6 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     default: {
       default: 'cc'
     }
-  },
-  {
-    name: 'port',
-    describe: 'Set the port for the GUI server',
-    docDescribe: true,
-    group: 'gui',
-    service: 'both',
-    default: 3000,
-    type: 'number',
-    usage: '${port}'
   }
 ];
 
