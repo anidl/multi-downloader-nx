@@ -30,7 +30,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
   if(!fs.existsSync(buildsDir)){
     fs.mkdirSync(buildsDir);
   }
-  const buildFull = `${buildStr}-${buildType}-cli`;
+  const buildFull = `${buildStr}-${buildType}-${gui ? 'gui' : 'cli'}`;
   const buildDir = `${buildsDir}/${buildFull}`;
   if(fs.existsSync(buildDir)){
     fs.removeSync(buildDir);
@@ -54,6 +54,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
   fs.copySync('./config/bin-path.yml', `${buildDir}/config/bin-path.yml`);
   fs.copySync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);
   fs.copySync('./config/dir-path.yml', `${buildDir}/config/dir-path.yml`);
+  fs.copySync('./config/gui.yml', `${buildDir}/config/gui.yml`);
   fs.copySync('./modules/cmd-here.bat', `${buildDir}/cmd-here.bat`);
   fs.copySync('./modules/NotoSans-Regular.ttf', `${buildDir}/NotoSans-Regular.ttf`);
   fs.copySync('./package.json', `${buildDir}/package.json`);
