@@ -381,9 +381,3 @@ If true, the tool won't check for updates
 
 Show the help output
 ### GUI
-#### `--port`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
-| --- | --- | --- | --- | --- | --- | ---| 
-| Both | `--port ${port}` | `number` | `No`| `NaN` | `3000`| `NaN` |
-
-Set the port for the GUI server
