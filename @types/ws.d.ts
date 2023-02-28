@@ -1,3 +1,4 @@
+import { GUIConfig } from "../modules/module.cfg-loader"
 import { AuthResponse, CheckTokenResponse, EpisodeListResponse, FolderTypes, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from "./messageHandler"
 
 export type WSMessage<T extends keyof MessageTypes, P extends 0|1 = 0> = {
@@ -32,5 +33,8 @@ export type MessageTypes = {
   'type': [undefined, 'funi'|'crunchy'|undefined],
   'setup': ['funi'|'crunchy'|undefined, undefined],
   'openFile': [[FolderTypes, string], undefined],
-  'openURL': [string, undefined]
+  'openURL': [string, undefined],
+  'setuped': [undefined, boolean],
+  'setupServer': [GUIConfig, boolean],
+  'requirePassword': [undefined, boolean]
 }

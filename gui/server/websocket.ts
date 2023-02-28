@@ -4,6 +4,7 @@ import { RandomEvent, RandomEvents } from "../../@types/randomEvents";
 import { MessageTypes, UnknownWSMessage, WSMessage } from "../../@types/ws";
 import { EventEmitter } from "events";
 import { cfg } from ".";
+import { isSetuped } from "../../modules/module.cfg-loader";
 
 declare interface ExternalEvent {
   on<T extends keyof MessageTypes>(event: T, listener: (msg: WSMessage<T>, respond: (data: MessageTypes[T][1]) => void) => void): this;
@@ -44,9 +45,12 @@ export default class WebSocketHandler {
     });
 
     server.on('upgrade', (request, socket, head) => {
+      if (!this.wsServer.shouldHandle(request))
+        return;
       if (!this.authenticate(request)) {
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();
+        console.log(`[INFO] [WS] ${request.socket.remoteAddress} tried to connect but used a wrong password.`)
         return;
       }
       this.wsServer.handleUpgrade(request, socket, head, socket => {
@@ -67,8 +71,51 @@ export default class WebSocketHandler {
   }
 
   private authenticate(request: IncomingMessage): boolean {
-    return cfg.gui.password === new URL(`http://${request.headers.host}${request.url}`).searchParams.get('password');
+    const search = new URL(`http://${request.headers.host}${request.url}`).searchParams;
+    return cfg.gui.password === (search.get('password') ?? undefined);
   }
 
 }
 
+export class PublicWebSocket {
+  private wsServer: ws.Server;
+
+  constructor(server: Server) {
+    this.wsServer = new ws.WebSocketServer({ noServer: true, path: '/public' });
+
+    this.wsServer.on('connection', (socket, req) => {
+      console.log(`[INFO] [WS] Connection to public ws from '${req.socket.remoteAddress}'`);
+      socket.on('error', (er) => console.log(`[ERROR] [WS] ${er}`));
+      socket.on('message', (msg) => {       
+        const data = JSON.parse(msg.toString()) as UnknownWSMessage
+        switch (data.name) {
+          case 'setuped':
+            this.send(socket, data.id, data.name, isSetuped());
+            break;
+          case 'requirePassword':
+            this.send(socket, data.id, data.name, cfg.gui.password !== undefined);
+            break;
+        }
+      });
+    });
+
+    server.on('upgrade', (request, socket, head) => {
+      if (!this.wsServer.shouldHandle(request))
+        return;
+      this.wsServer.handleUpgrade(request, socket, head, socket => {
+        this.wsServer.emit('connection', socket, request);
+      });
+    });
+  }
+
+  private send(client: ws.WebSocket, id: string, name: string, data: any) {
+    client.send(JSON.stringify({
+      data,
+      id,
+      name
+    }), (er) => {
+      if (er)
+        console.log(`[ERROR] [WS] ${er}`)
+    });
+  }
+}

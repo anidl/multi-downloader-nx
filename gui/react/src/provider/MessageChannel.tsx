@@ -1,11 +1,13 @@
 import React from 'react';
-import type { AuthData, AuthResponse, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../../@types/messageHandler';
+import type { MessageHandler } from '../../../../@types/messageHandler';
 import useStore from '../hooks/useStore';
 import type { MessageTypes, WSMessage, WSMessageWithID } from '../../../../@types/ws';
 import type { Handler, RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
-import { Backdrop, Typography } from '@mui/material';
+import { Avatar, Box, Button, TextField, Typography } from '@mui/material';
 import { v4 } from "uuid";
-
+import { useSnackbar } from "notistack";
+import { LockOutlined, PowerSettingsNew } from '@mui/icons-material'
+import { GUIConfig } from '../../../../modules/module.cfg-loader';
 
 export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler, logout: () => Promise<boolean> });
 
@@ -58,22 +60,80 @@ async function messageAndResponse<T extends keyof MessageTypes>(socket: WebSocke
 const MessageChannelProvider: FCWithChildren = ({ children }) => {
 
   const [store, dispatch] = useStore();
-  const [socket, setSocket] = React.useState<undefined|WebSocket|null>();
+  const [socket, setSocket] = React.useState<undefined|WebSocket>();
+  const [publicWS, setPublicWS] = React.useState<undefined|WebSocket>();
+  const [usePassword, setUsePassword] = React.useState<'waiting'|'yes'|'no'>('waiting');
+  const [isSetuped, setIsSetuped] = React.useState<'waiting'|'yes'|'no'>('waiting');
+
+  const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    const wws = new WebSocket(`ws://localhost:3000/ws?${new URLSearchParams({
-      password: prompt('This website requires a password') ?? ''
-    })}`, );
+    const wss = new WebSocket(`ws://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/public`);
+    wss.addEventListener('open', () => {
+      setPublicWS(wss);
+    });
+    wss.addEventListener('error', () => {
+      enqueueSnackbar('Unable to connect to server. Please reload the page to try again.', { variant: 'error' });
+    });
+  }, []);
+
+  React.useEffect(() => {
+    (async () => {
+      if (!publicWS)
+        return;
+      setUsePassword((await messageAndResponse(publicWS, { name: 'requirePassword', data: undefined })).data ? 'yes' : 'no');
+      setIsSetuped((await messageAndResponse(publicWS, { name: 'setuped', data: undefined })).data ? 'yes' : 'no');
+    })();
+  }, [publicWS]);
+
+  const connect = (ev?: React.FormEvent<HTMLFormElement>) => {
+    let search = new URLSearchParams();
+    if (ev) {
+      ev.preventDefault();
+      const formData = new FormData(ev.currentTarget);
+      const password = formData.get('password')?.toString();
+      if (!password)
+        return enqueueSnackbar('Please provide both a username and password', {
+          variant: 'error'
+        });
+      search = new URLSearchParams({
+        password
+      });
+    }
+
+    const wws = new WebSocket(`ws://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/ws?${search}`, );
     wws.addEventListener('open', () => {
       console.log('[INFO] [WS] Connected');
       setSocket(wws);
     });
     wws.addEventListener('error', (er) => {
       console.error(`[ERROR] [WS]`, er);
-      setSocket(null);
+      enqueueSnackbar('Unable to connect to server. Please check the password and try again.', {
+        variant: 'error'
+      });
     })
-  }, []);
-  
+  };
+
+  const setup = async (ev: React.FormEvent<HTMLFormElement>) => {
+    ev.preventDefault();
+    if (!socket)
+      return enqueueSnackbar('Invalid state: socket not found', { variant: 'error' });
+    const formData = new FormData(ev.currentTarget);
+    const password = formData.get('password');
+    const data = {
+      port: parseInt(formData.get('port')?.toString() ?? '') ?? 3000,
+      password: password ? password.toString() : undefined
+    } as GUIConfig;
+    await messageAndResponse(socket!, { name: 'setupServer', data });
+    enqueueSnackbar(`The following settings have been set: Port=${data.port}, Password=${data.password ?? 'noPasswordRequired'}`, {
+      variant: 'success',
+      persist: true
+    });
+    enqueueSnackbar('Please restart the server now.', {
+      variant: 'info',
+      persist: true
+    });
+  }
 
   const randomEventHandler = React.useMemo(() => new RandomEventHandler(), []);
 
@@ -103,8 +163,51 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
     };
   }, [ socket ]);
 
-  if (socket === undefined || socket === null)
-    return <Typography color='primary'>{socket === undefined ? 'Loading...' : 'WebSocket Error. Please try to reload and make sure the password ist correct.'}</Typography>;
+  if (usePassword === 'waiting')
+    return <></>;
+
+  if (socket === undefined) {
+    if (usePassword === 'no') {
+      connect(undefined)
+      return <></>;
+    }
+    return <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', justifyItems: 'center', alignItems: 'center' }}>
+      <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+        <LockOutlined />
+      </Avatar>
+      <Typography component="h1" variant="h5" color="text.primary">
+        Login
+      </Typography>
+      <Box component="form" onSubmit={connect} sx={{ mt: 1 }}>
+        <TextField name="password" margin='normal' type="password" fullWidth variant="filled" required label={'Password'} />
+        <Button type='submit' variant='contained' sx={{ mt: 3, mb: 2 }} fullWidth>Login</Button>
+        <Typography color="text.secondary" align='center' component="p" variant='body2'>
+          You need to login in order to use this tool.
+        </Typography>
+      </Box>
+    </Box>;
+  }
+
+  if (isSetuped === 'no') {
+    return <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', justifyItems: 'center', alignItems: 'center' }}>
+      <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+        <PowerSettingsNew />
+      </Avatar>
+      <Typography component="h1" variant="h5" color="text.primary">
+        Confirm
+      </Typography>
+      <Box component="form" onSubmit={setup} sx={{ mt: 1 }}>
+        <TextField name="port" margin='normal' type="number" fullWidth variant="filled" required label={'Port'} defaultValue={3000} />
+        <TextField name="password" margin='normal' type="password" fullWidth variant="filled" label={'Password'} />
+        <Button type='submit' variant='contained' sx={{ mt: 3, mb: 2 }} fullWidth>Confirm</Button>
+        <Typography color="text.secondary" align='center' component="p" variant='body2'>
+          Please enter data that will be set to use this tool.
+          <br />
+          Leave blank to use no password (NOT RECOMMENDED)!
+        </Typography>
+      </Box>
+    </Box>;
+  }
 
   const messageHandler: FrontEndMessanges = {
     auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,

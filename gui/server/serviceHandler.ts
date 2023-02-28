@@ -3,6 +3,7 @@ import { Server } from 'http';
 import { IncomingMessage } from 'http';
 import { MessageHandler } from '../../@types/messageHandler';
 import Funi from '../../funi';
+import { setSetuped, writeYamlCfgFile } from '../../modules/module.cfg-loader';
 import CrunchyHandler from './services/crunchyroll';
 import FunimationHandler from './services/funimation';
 import WebSocketHandler from './websocket';
@@ -18,6 +19,13 @@ export default class ServiceHandler {
   }
 
   private handleMessanges() {
+    this.ws.events.on('setupServer', ({ data }, respond) => {
+      writeYamlCfgFile('gui', data);
+      setSetuped(true);
+      respond(true);
+      process.exit(0);
+    });
+
     this.ws.events.on('setup', ({ data }) => {
       if (data === 'funi') {
         this.service = new FunimationHandler(this.ws);

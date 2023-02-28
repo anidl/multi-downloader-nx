@@ -4,6 +4,7 @@ import cors from 'cors';
 import ServiceHandler from './serviceHandler';
 import open from 'open';
 import path from 'path';
+import { PublicWebSocket } from './websocket';
 
 process.title = 'AniDL';
 
@@ -23,7 +24,7 @@ const server = app.listen(cfg.gui.port, () => {
   console.log(`[INFO] GUI server started on port ${cfg.gui.port}`);
 });
 
-
+new PublicWebSocket(server);
 new ServiceHandler(server);
 
 open(`http://localhost:${cfg.gui.port}`);

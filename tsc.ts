@@ -13,6 +13,7 @@ const isGUI = !(argv.length > 1 && argv[1] === 'false');
 if (!isTest)
   buildIgnore = [
     '*/\\.env',
+    './config/setup.json'
   ];
 
 if (!isGUI)

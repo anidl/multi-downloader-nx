@@ -15,6 +15,7 @@ const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
 const guiCfgFile   = path.join(workingDir, 'config', 'gui')
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
 const sessCfgFile  = path.join(workingDir, 'config', 'session');
+const setupFile    = path.join(workingDir, 'config', 'setup');
 const tokenFile    = {
   funi: path.join(workingDir, 'config', 'funi_token'),
   cr: path.join(workingDir, 'config', 'cr_token')
@@ -47,6 +48,22 @@ const loadYamlCfgFile = <T extends Record<string, any>>(file: string, isSess?: b
   return {} as T;
 };
 
+export type WriteObjects = {
+  gui: GUIConfig
+}
+
+const writeYamlCfgFile = <T extends keyof WriteObjects>(file: T, data: WriteObjects[T]) => {
+  const fn = path.join(workingDir, 'config', `${file}.yml`);
+  if (fs.existsSync(fn))
+    fs.removeSync(fn);
+  fs.writeFileSync(fn, yaml.stringify(data));
+}
+
+export type GUIConfig = {
+  port: number,
+  password?: string
+};
+
 export type ConfigObject = {
   dir: {
     content: string,
@@ -61,10 +78,7 @@ export type ConfigObject = {
   cli: {
     [key: string]: any
   },
-  gui: {
-    port: number,
-    password: string
-  }
+  gui: GUIConfig
 }
 
 const loadCfg = () : ConfigObject => {
@@ -80,10 +94,7 @@ const loadCfg = () : ConfigObject => {
     cli: loadYamlCfgFile<{
       [key: string]: any
     }>(cliCfgFile),
-    gui: loadYamlCfgFile<{
-      port: number,
-      password: string
-    }>(guiCfgFile)
+    gui: loadYamlCfgFile<GUIConfig>(guiCfgFile)
   };
   const defaultDirs = {
     fonts: '${wdir}/fonts/',
@@ -221,6 +232,28 @@ const saveFuniToken = (data: {
 
 const cfgDir = path.join(workingDir, 'config');
 
+const isSetuped = (): boolean => {
+  const fn = `${setupFile}.json`;
+  if (!fs.existsSync(fn))
+    return false;
+  return JSON.parse(fs.readFileSync(fn).toString()).setuped;
+}
+
+const setSetuped = (bool: boolean) => {
+  const fn = `${setupFile}.json`;
+  if (bool) {
+    fs.writeFileSync(fn, JSON.stringify({
+      setuped: true
+    }, null, 2))
+  } else {
+    if (fs.existsSync(fn)) {
+      fs.removeSync(fn);
+  }
+
+  }
+}
+
+
 export {
   loadBinCfg,
   loadCfg,
@@ -230,6 +263,9 @@ export {
   saveCRToken,
   loadCRToken,
   loadCRSession,
+  isSetuped,
+  setSetuped,
+  writeYamlCfgFile,
   sessCfgFile,
   cfgDir
 };
