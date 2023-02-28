@@ -1,8 +1,9 @@
-import { ExtendedProgress } from './messageHandler';
+import { ExtendedProgress, QueueItem } from './messageHandler';
 
 export type RandomEvents = {
   progress: ExtendedProgress,
-  finish: undefined
+  finish: undefined,
+  queueChange: QueueItem[]
 }
 
 export interface RandomEvent<T extends keyof RandomEvents> {

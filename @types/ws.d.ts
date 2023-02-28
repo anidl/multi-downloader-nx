@@ -23,9 +23,9 @@ export type MessageTypes = {
   'default': [string, unknown],
   'availableDubCodes': [undefined, string[]],
   'availableSubCodes': [undefined, string[]],
-  'resolveItems': [ResolveItemsData, ResponseBase<QueueItem[]>],
+  'resolveItems': [ResolveItemsData, boolean],
   'listEpisodes': [string, EpisodeListResponse],
-  'downloadItem': [unknown, undefined],
+  'downloadItem': [QueueItem, undefined],
   'isDownloading': [undefined, boolean],
   'writeToClipboard': [string, undefined],
   'openFolder': [FolderTypes, undefined],
@@ -36,5 +36,10 @@ export type MessageTypes = {
   'openURL': [string, undefined],
   'setuped': [undefined, boolean],
   'setupServer': [GUIConfig, boolean],
-  'requirePassword': [undefined, boolean]
+  'requirePassword': [undefined, boolean],
+  'getQueue': [undefined, QueueItem[]],
+  'removeFromQueue': [number, undefined],
+  'clearQueue': [undefined, undefined],
+  'setDownloadQueue': [boolean, undefined],
+  'getDownloadQueue': [undefined, boolean]
 }

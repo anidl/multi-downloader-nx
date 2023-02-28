@@ -22,7 +22,7 @@ const Layout: React.FC = () => {
       <AuthButton />
       <Box sx={{ display: 'flex', gap: 1, height: 36 }}>
         <Button variant="contained" startIcon={<Folder />} onClick={() => messageHandler?.openFolder('content')}>Open Output Directory</Button>
-        <Button variant="contained" startIcon={<ClearAll />} onClick={() => dispatch({ type: 'queue', payload: [], extraInfo: { force: true } })}>Clear Queue</Button>
+        <Button variant="contained" startIcon={<ClearAll />} onClick={() => messageHandler?.clearQueue() }>Clear Queue</Button>
       </Box>
       <AddToQueue />
       <StartQueueButton />

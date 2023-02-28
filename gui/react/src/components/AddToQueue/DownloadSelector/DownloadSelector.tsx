@@ -48,18 +48,10 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
   const addToQueue = async () => {
     setLoading(true);
     const res = await messageHandler?.resolveItems(store.downloadOptions);
-    if (!res || !res.isOk) {
-      console.error(res);
-      setLoading(false);
+    if (!res)
       return enqueueSnackbar('The request failed. Please check if the ID is correct.', {
         variant: 'error'
       });
-    } else {
-      dispatch({
-        type: 'queue',
-        payload: res.value
-      });
-    }
     setLoading(false);
     if (onFinish)
       onFinish();

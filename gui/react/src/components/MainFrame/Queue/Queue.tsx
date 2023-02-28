@@ -1,12 +1,19 @@
 import { Box, Button, Divider, LinearProgress, Skeleton, Typography } from "@mui/material";
 import React from "react";
 import useStore from "../../../hooks/useStore";
+import { messageChannelContext } from "../../../provider/MessageChannel";
+import { queueContext } from "../../../provider/QueueProvider";
 
 import useDownloadManager from "../DownloadManager/DownloadManager";
 
 const Queue: React.FC = () => {
   const data = useDownloadManager();
-  const [{ queue, currentDownload }, dispatch] = useStore();
+  const queue = React.useContext(queueContext);
+  const msg = React.useContext(messageChannelContext);
+
+  if (!msg)
+    return <>Never</>
+
   return data || queue.length > 0 ? <>
     {data && <>
       <Box sx={{ height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1, mb: 1, mt: 1 }}>
@@ -35,34 +42,6 @@ const Queue: React.FC = () => {
       </Box>
     </>
     }
-    {
-      !data && currentDownload && <>
-        <Box sx={{ height: 200, display: 'grid', gridTemplateColumns: '20% 1fr', gap: 1, mb: 1, mt: 1 }}>
-          <img src={currentDownload.image} height='200px' width='100%' alt="Thumbnail" />
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr max-content' }}>
-                <Typography variant='h5' color='text.primary'>
-                  {currentDownload.title}
-                </Typography>
-                <Typography variant='h5' color='text.primary'>
-                  Languages: {currentDownload.dubLang}
-                </Typography>
-              </Box>
-              <Typography variant='h6' color='text.primary'>
-                {currentDownload.parent.title}
-              </Typography>
-            </Box>
-            <LinearProgress variant='indeterminate' sx={{ height: '10px' }} />
-            <Box> 
-              <Typography variant="body1" color='text.primary'>
-                Waiting for download to start
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </>
-    }
     {queue.length && data && <Divider variant="fullWidth" />}
     {queue.map((queueItem, index, { length }) => {
       return <Box key={`queue_item_${index}`}>
@@ -87,15 +66,7 @@ const Queue: React.FC = () => {
               Quality: {queueItem.q}
             </Typography>
             <Button onClick={() => {
-              const override = [...queue];
-              override.splice(index, 1);
-              dispatch({
-                type: 'queue',
-                payload: override,
-                extraInfo: {
-                  force: true
-                }
-              });
+              msg.removeFromQueue(index);
             }} sx={{ position: 'relative', left: '50%', transform: 'translateX(-50%)', width: '60%' }} variant="outlined" color="warning">
               Remove from Queue
             </Button>

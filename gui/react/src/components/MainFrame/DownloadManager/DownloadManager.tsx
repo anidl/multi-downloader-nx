@@ -5,7 +5,6 @@ import useStore from "../../../hooks/useStore";
 import { messageChannelContext } from "../../../provider/MessageChannel";
 
 const useDownloadManager = () => {
-  const [ { currentDownload }, dispatch ] = useStore();
   const messageHandler = React.useContext(messageChannelContext);
 
   const [progressData, setProgressData] = React.useState<ExtendedProgress|undefined>();
@@ -19,10 +18,6 @@ const useDownloadManager = () => {
 
     const finishHandler = () => {
       setProgressData(undefined);
-      dispatch({
-        type: 'finish',
-        payload: undefined
-      })
     }
 
     messageHandler?.randomEvents.on('finish', finishHandler);
@@ -30,20 +25,8 @@ const useDownloadManager = () => {
       messageHandler?.randomEvents.removeListener('progress', handler);
       messageHandler?.randomEvents.removeListener('finish', finishHandler)
     };
-  }, [messageHandler, dispatch]);
-
-  React.useEffect(() => {
-    (async () => {
-      if (!currentDownload)
-        return;
-      if (await messageHandler?.isDownloading())
-        return;
-      console.log('start download');
-      messageHandler?.downloadItem(currentDownload);
-    })();
-  }, [currentDownload, messageHandler]);
+  }, [messageHandler]);
   
-
   return progressData;
 }
 

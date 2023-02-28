@@ -1,5 +1,5 @@
 import React from 'react';
-import type { MessageHandler } from '../../../../@types/messageHandler';
+import { MessageHandler, QueueItem } from '../../../../@types/messageHandler';
 import useStore from '../hooks/useStore';
 import type { MessageTypes, WSMessage, WSMessageWithID } from '../../../../@types/ws';
 import type { Handler, RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
@@ -16,7 +16,8 @@ export class RandomEventHandler {
     [eventName in keyof RandomEvents]: Handler<eventName>[]
   } = {
     progress: [],
-    finish: []
+    finish: [],
+    queueChange: []
   };
 
   public on<T extends keyof RandomEvents>(name: T, listener: Handler<T>) {
@@ -225,7 +226,12 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
     openFolder: async (data) =>  messageAndResponse(socket, { name: 'openFolder', data }),
     logout: async () => (await messageAndResponse(socket, { name: 'changeProvider', data: undefined })).data,
     openFile: async (data) => await messageAndResponse(socket, { name: 'openFile', data }),
-    openURL: async (data) => await messageAndResponse(socket, { name: 'openURL', data })
+    openURL: async (data) => await messageAndResponse(socket, { name: 'openURL', data }),
+    getQueue: async () => (await messageAndResponse(socket, { name: 'getQueue', data: undefined })).data,
+    removeFromQueue: async (data) => await messageAndResponse(socket, { name: 'removeFromQueue', data }),
+    clearQueue: async () => await messageAndResponse(socket, { name: 'clearQueue', data: undefined }),
+    setDownloadQueue: async (data) => await messageAndResponse(socket, { name: 'setDownloadQueue', data }),
+    getDownloadQueue: async () => (await messageAndResponse(socket, { name: 'getDownloadQueue', data: undefined })).data,
   }
 
   return <messageChannelContext.Provider value={messageHandler}>

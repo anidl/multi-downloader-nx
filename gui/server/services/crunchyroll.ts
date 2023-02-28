@@ -36,15 +36,16 @@ class CrunchyHandler extends Base implements MessageHandler {
     return subtitleLanguagesFilter;
   }
 
-  public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
+  public async resolveItems(data: ResolveItemsData): Promise<boolean> {
     await this.crunchy.refreshToken(true);
     console.log(`[DEBUG] Got resolve options: ${JSON.stringify(data)}`);
     const res = await this.crunchy.downloadFromSeriesID(data.id, data);
     if (!res.isOk)
-      return res;
-    return { isOk: true, value: res.value.map(a => {
+      return res.isOk;
+    this.addToQueue(res.value.map(a => {
       return {
         ...data,
+        
         ids: a.data.map(a => a.mediaId),
         title: a.episodeTitle,
         parent: {
@@ -55,7 +56,8 @@ class CrunchyHandler extends Base implements MessageHandler {
         image: a.image,
         episode: a.episodeNumber
       };
-    }) };
+    }));
+    return true;
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
@@ -104,6 +106,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     }
     this.sendMessage({ name: 'finish', data: undefined });
     this.setDownloading(false);
+    this.onFinish();
   }
 }
 

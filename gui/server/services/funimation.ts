@@ -51,12 +51,12 @@ class FunimationHandler extends Base implements MessageHandler {
     return subtitleLanguagesFilter;
   }
 
-  public async resolveItems(data: ResolveItemsData): Promise<ResponseBase<QueueItem[]>> {
+  public async resolveItems(data: ResolveItemsData): Promise<boolean> {
     console.log(`[DEBUG] Got resolve options: ${JSON.stringify(data)}`);
     const res = await this.funi.getShow(false, { ...data, id: parseInt(data.id) });
     if (!res.isOk)
-      return res;
-    return { isOk: true, value: res.value.map(a => {
+      return res.isOk;
+    this.addToQueue(res.value.map(a => {
       return {
         ...data,
         ids: [a.episodeID],
@@ -69,7 +69,8 @@ class FunimationHandler extends Base implements MessageHandler {
         e: a.episodeID,
         episode: a.epsiodeNumber,
       };
-    }) };
+    }));
+    return true;
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
@@ -95,7 +96,7 @@ class FunimationHandler extends Base implements MessageHandler {
     return this.funi.auth(data);
   }
 
-  public async downloadItem(data: DownloadData) {
+  public async downloadItem(data: QueueItem) {
     this.setDownloading(true);
     console.log(`[DEBUG] Got download options: ${JSON.stringify(data)}`);
     const res = await this.funi.getShow(false, { all: false, but: false, id: parseInt(data.id), e: data.e });
@@ -109,6 +110,7 @@ class FunimationHandler extends Base implements MessageHandler {
     }
     this.sendMessage({ name: 'finish', data: undefined });
     this.setDownloading(false);
+    this.onFinish();
   }
 }
 

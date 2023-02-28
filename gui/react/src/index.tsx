@@ -9,6 +9,7 @@ import { CloseOutlined } from "@mui/icons-material";
 import { SnackbarProvider, SnackbarKey } from 'notistack';
 import Store from './provider/Store';
 import ErrorHandler from './provider/ErrorHandler';
+import QueueProvider from './provider/QueueProvider';
 
 const notistackRef = React.createRef<SnackbarProvider>();
 const onClickDismiss = (key: SnackbarKey | undefined) => () => { 
@@ -32,7 +33,9 @@ root.render(
         <Style>
           <MessageChannel>
             <ServiceProvider>
-              <App />
+              <QueueProvider>
+                <App />
+              </QueueProvider>
             </ServiceProvider>
           </MessageChannel>
         </Style>

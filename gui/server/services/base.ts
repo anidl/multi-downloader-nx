@@ -1,4 +1,4 @@
-import { DownloadInfo, FolderTypes, ProgressData } from '../../../@types/messageHandler';
+import { DownloadInfo, FolderTypes, ProgressData, QueueItem } from '../../../@types/messageHandler';
 import { RandomEvent, RandomEvents } from '../../../@types/randomEvents';
 import WebSocketHandler from '../websocket';
 import copy from "copy-to-clipboard";
@@ -11,6 +11,9 @@ export default class Base {
   constructor(private ws: WebSocketHandler) {}
 
   private downloading = false;
+
+  private queue: QueueItem[] = [];
+  private workOnQueue = false;
 
   setDownloading(downloading: boolean) {
     this.downloading = downloading;
@@ -74,4 +77,48 @@ export default class Base {
     open(data);
   }
 
+  public async getQueue(): Promise<QueueItem[]> {
+    return this.queue;
+  }
+
+  public async removeFromQueue(index: number) {
+    this.queue.splice(index, 1);
+    this.queueChange();
+  }
+
+  public async clearQueue() {
+    this.queue = [];
+    this.queueChange();
+  }
+
+  public addToQueue(data: QueueItem[]) {
+    this.queue = this.queue.concat(...data);
+    this.queueChange();
+  }
+
+  public setDownloadQueue(data: boolean) {
+    this.workOnQueue = data;
+    this.queueChange();
+  }
+
+  public async getDownloadQueue(): Promise<boolean> {
+    return this.workOnQueue;
+  }
+
+  private async queueChange() {
+    this.sendMessage({ name: 'queueChange', data: this.queue });
+    if (this.workOnQueue && this.queue.length > 0 && !await this.isDownloading()) {
+      this.setDownloading(true);
+      this.downloadItem(this.queue[0]);
+      this.queue = this.queue.slice(1);
+      this.queueChange();
+    }
+  }
+
+  public async onFinish() {
+    this.queueChange();
+  }
+
+  //Overriten
+  public async downloadItem(data: QueueItem) {}
 }

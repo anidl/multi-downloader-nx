@@ -74,7 +74,7 @@ export default class ServiceHandler {
     });
     this.ws.events.on('resolveItems', async ({ data }, respond) => {
       if (this.service === undefined)
-        return respond({ isOk: false, reason: new Error('No service selected') });
+        return respond(false);
       respond(await this.service.resolveItems(data));
     });
     this.ws.events.on('listEpisodes', async ({ data }, respond) => {
@@ -101,6 +101,24 @@ export default class ServiceHandler {
     this.ws.events.on('openURL', async ({ data }, respond) => {
       this.service!.openURL(data);
       respond(undefined);
+    });
+    this.ws.events.on('getQueue', async ({ }, respond) => {
+      respond(await this.service?.getQueue() ?? []);
+    });
+    this.ws.events.on('removeFromQueue', async ({ data }, respond) => {
+      this.service?.removeFromQueue(data);
+      respond(undefined);
+    });
+    this.ws.events.on('clearQueue', async ({ }, respond) => {
+      this.service?.clearQueue();
+      respond(undefined);
+    });
+    this.ws.events.on('setDownloadQueue', async ({ data }, respond) => {
+      this.service?.setDownloadQueue(data);
+      respond(undefined);
+    });
+    this.ws.events.on('getDownloadQueue', async ({ }, respond) => {
+      respond(await this.service?.getDownloadQueue() ?? false);
     });
     this.ws.events.on('isDownloading', async ({}, respond) => respond(await this.service!.isDownloading()));
   }
