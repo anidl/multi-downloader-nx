@@ -9,10 +9,11 @@ This application is not endorsed by or affiliated with *Funimation* or *Crunchyr
 
 ## Prerequisites
 
-* NodeJS >= 12.4.0 (https://nodejs.org/)
+* NodeJS >= 14.6.0 (https://nodejs.org/)
 * NPM >= 6.9.0 (https://www.npmjs.org/)
+* PNPM >= 7.0.0 (https://pnpm.io/)
 * ffmpeg >= 4.0.0 (https://www.videohelp.com/software/ffmpeg)
-* MKVToolNix >= 20.0.0 (https://www.videohelp.com/software/MKVToolNix)
+* MKVToolNix >= 60.0.0 (https://www.videohelp.com/software/MKVToolNix)
 
 ### Paths Configuration
 
