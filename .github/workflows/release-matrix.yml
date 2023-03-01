@@ -14,20 +14,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6.0.2
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
           check-latest: true
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 6.0.2
-
       - name: Install Node modules
         run: |
           pnpm install
-
       - name: Get name and version from package.json
         run: |
           test -n $(node -p -e "require('./package.json').name") &&
@@ -36,7 +33,6 @@ jobs:
           echo PACKAGE_VERSION=$(node -p -e "require('./package.json').version") >> $GITHUB_ENV || exit 1
       - name: Make build
         run: pnpm run build-${{ matrix.build_type }}-${{ matrix.gui }}
-
       - name: Upload release
         uses: actions/upload-release-asset@v1
         with:
