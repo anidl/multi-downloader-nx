@@ -16,14 +16,6 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 
-export type sxItem = {
-  language: langsData.LanguageItem,
-  path: string,
-  file: string
-  title: string,
-  fonts: Font[]
-}
-
 // args
 
 // load req
@@ -40,6 +32,14 @@ import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
 import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
+
+export type sxItem = {
+  language: langsData.LanguageItem,
+  path: string,
+  file: string
+  title: string,
+  fonts: Font[]
+}
 
 export default class Crunchy implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;

@@ -68,7 +68,7 @@ class Req {
       options.followRedirect = params.followRedirect;
     }
     // if auth
-    const loc = new URL(durl);
+    //const loc = new URL(durl);
     // avoid cloudflare protection
     // debug
     options.hooks = {

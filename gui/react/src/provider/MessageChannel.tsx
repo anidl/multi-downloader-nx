@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageHandler, QueueItem } from '../../../../@types/messageHandler';
+import { MessageHandler } from '../../../../@types/messageHandler';
 import useStore from '../hooks/useStore';
 import type { MessageTypes, WSMessage, WSMessageWithID } from '../../../../@types/ws';
 import type { Handler, RandomEvent, RandomEvents } from '../../../../@types/randomEvents';

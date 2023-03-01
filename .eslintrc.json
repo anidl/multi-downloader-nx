@@ -22,6 +22,7 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "react-hooks/exhaustive-deps": 0,
         "@typescript-eslint/no-explicit-any": "off",
         "indent": [
             "error",

@@ -3,10 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // package json
-import packageJson from './package.json'; 
-
-// program name
-const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
+import packageJson from './package.json';
 
 // modules extra
 import * as shlp from 'sei-helper';
@@ -39,7 +36,10 @@ import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
 import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData, FuniEpisodeData, ResponseBase } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
-import { SubtitleRequest } from './@types/funiSubtitleRequest';
+import { SubtitleRequest } from './@types/funiSubtitleRequest'; 
+
+// program name
+const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 // check page
 
 // fn variables

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Chip, FormControl, InputLabel, MenuItem, OutlinedInput, Select, Theme, useTheme } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, OutlinedInput, Select, Theme, useTheme } from "@mui/material";
 
 export type MultiSelectProps = {
   values: string[],

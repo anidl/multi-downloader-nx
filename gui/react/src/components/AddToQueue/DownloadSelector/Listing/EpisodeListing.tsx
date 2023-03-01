@@ -93,7 +93,7 @@ const EpisodeListing: React.FC = () => {
               <Typography color='text.primary' sx={{ textAlign: 'center' }}>
                 {e}
               </Typography>
-              <img style={{ width: 'inherit', maxHeight: '200px', minWidth: '150px' }} src={item.img}></img>
+              <img style={{ width: 'inherit', maxHeight: '200px', minWidth: '150px' }} src={item.img} alt="thumbnail" />
               <Box sx={{ display: 'flex', flexDirection: 'column', pl: 1 }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr min-content' }}>
                   <Typography color='text.primary' variant="h5">

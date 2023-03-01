@@ -2,7 +2,6 @@ import { ChildProcess, exec } from 'child_process';
 import fs from 'fs-extra';
 import path from 'path';
 import { removeSync, copyFileSync } from 'fs-extra';
-import packageJSON from './package.json';
 
 const argv = process.argv.slice(2);
 let buildIgnore: string[] = [];

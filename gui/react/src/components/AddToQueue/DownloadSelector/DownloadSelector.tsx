@@ -1,11 +1,10 @@
 import React from "react";
-import { Backdrop, Box, Button, Checkbox, Chip, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, OutlinedInput, Select, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import useStore from "../../../hooks/useStore";
 import MultiSelect from "../../reusable/MultiSelect";
 import { messageChannelContext } from "../../../provider/MessageChannel";
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useSnackbar } from "notistack";
-import { Folder } from "@mui/icons-material";
 
 type DownloadSelectorProps = {
   onFinish?: () => unknown

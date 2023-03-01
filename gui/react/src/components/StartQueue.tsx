@@ -1,7 +1,6 @@
-import { ExitToApp, PauseCircleFilled, PlayCircleFilled } from "@mui/icons-material";
+import { PauseCircleFilled, PlayCircleFilled } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import React from "react";
-import useStore from "../hooks/useStore";
 import { messageChannelContext } from "../provider/MessageChannel";
 import Require from "./Require";
 

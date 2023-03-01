@@ -1,5 +1,5 @@
 import { GUIConfig } from '../modules/module.cfg-loader';
-import { AuthResponse, CheckTokenResponse, EpisodeListResponse, FolderTypes, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from './messageHandler';
+import { AuthResponse, CheckTokenResponse, EpisodeListResponse, FolderTypes, QueueItem, ResolveItemsData, SearchData, SearchResponse } from './messageHandler';
 
 export type WSMessage<T extends keyof MessageTypes, P extends 0|1 = 0> = {
   name: T,

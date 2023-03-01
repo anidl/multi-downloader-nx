@@ -1,7 +1,6 @@
 import React from "react";
 import { ExtendedProgress } from "../../../../../../@types/messageHandler";
 import { RandomEvent } from "../../../../../../@types/randomEvents";
-import useStore from "../../../hooks/useStore";
 import { messageChannelContext } from "../../../provider/MessageChannel";
 
 const useDownloadManager = () => {

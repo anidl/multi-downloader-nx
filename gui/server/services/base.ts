@@ -36,7 +36,7 @@ export default class Base {
           progress: data
         }
       });
-    }).bind(this);
+    });
   }
 
   sendMessage<T extends keyof RandomEvents>(data: RandomEvent<T>) {
@@ -120,5 +120,8 @@ export default class Base {
   }
 
   //Overriten
-  public async downloadItem(data: QueueItem) {}
+  // eslint-disable-next-line
+  public async downloadItem(_: QueueItem) {
+    throw new Error('downloadItem not overriden');
+  }
 }

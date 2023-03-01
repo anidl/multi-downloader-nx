@@ -1,4 +1,4 @@
-import { Backdrop, Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React from "react";
 
 export default class ErrorHandler extends React.Component<{

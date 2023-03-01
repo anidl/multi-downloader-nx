@@ -1,5 +1,4 @@
-import { StyledOptions } from "@emotion/styled";
-import { Box, Button, Card, Divider, List, Typography, SxProps } from "@mui/material";
+import { Box, Button, Divider, List, SxProps } from "@mui/material";
 import React from "react";
 
 export type Option = {

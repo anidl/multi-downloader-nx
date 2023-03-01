@@ -46,8 +46,8 @@ export default class ServiceHandler {
         return respond({ isOk: false, reason: new Error('No service selected') });
       respond(await this.service.auth(data));
     });
-    this.ws.events.on('type', async ({}, respond) => respond(this.service === undefined ? undefined : this.service instanceof Funi ? 'funi' : 'crunchy'));
-    this.ws.events.on('checkToken', async ({}, respond) => {
+    this.ws.events.on('type', async (_, respond) => respond(this.service === undefined ? undefined : this.service instanceof Funi ? 'funi' : 'crunchy'));
+    this.ws.events.on('checkToken', async (_, respond) => {
       if (this.service === undefined)
         return respond({ isOk: false, reason: new Error('No service selected') });
       respond(await this.service.checkToken());
@@ -62,12 +62,12 @@ export default class ServiceHandler {
         return respond({ isOk: false, reason: new Error('No service selected') });
       respond(await this.service.handleDefault(data));
     });
-    this.ws.events.on('availableDubCodes', async ({}, respond) => {
+    this.ws.events.on('availableDubCodes', async (_, respond) => {
       if (this.service === undefined)
         return respond([]);
       respond(await this.service.availableDubCodes());
     });
-    this.ws.events.on('availableSubCodes', async ({}, respond) => {
+    this.ws.events.on('availableSubCodes', async (_, respond) => {
       if (this.service === undefined)
         return respond([]);
       respond(await this.service.availableSubCodes());
@@ -83,33 +83,33 @@ export default class ServiceHandler {
       respond(await this.service.listEpisodes(data));
     });
     this.ws.events.on('downloadItem', async ({ data }, respond) => {
-      this.service!.downloadItem(data);
+      this.service?.downloadItem(data);
       respond(undefined);
     });
     this.ws.events.on('writeToClipboard', async ({ data }, respond) => {
-      this.service!.writeToClipboard(data);
+      this.service?.writeToClipboard(data);
       respond(undefined);
     });
     this.ws.events.on('openFolder', async ({ data }, respond) => {
-      this.service!.openFolder(data);
+      this.service?.openFolder(data);
       respond(undefined);
     });
     this.ws.events.on('openFile', async ({ data }, respond) => {
-      this.service!.openFile(data);
+      this.service?.openFile(data);
       respond(undefined);
     });
     this.ws.events.on('openURL', async ({ data }, respond) => {
-      this.service!.openURL(data);
+      this.service?.openURL(data);
       respond(undefined);
     });
-    this.ws.events.on('getQueue', async ({ }, respond) => {
+    this.ws.events.on('getQueue', async (_, respond) => {
       respond(await this.service?.getQueue() ?? []);
     });
     this.ws.events.on('removeFromQueue', async ({ data }, respond) => {
       this.service?.removeFromQueue(data);
       respond(undefined);
     });
-    this.ws.events.on('clearQueue', async ({ }, respond) => {
+    this.ws.events.on('clearQueue', async (_, respond) => {
       this.service?.clearQueue();
       respond(undefined);
     });
@@ -117,10 +117,10 @@ export default class ServiceHandler {
       this.service?.setDownloadQueue(data);
       respond(undefined);
     });
-    this.ws.events.on('getDownloadQueue', async ({ }, respond) => {
+    this.ws.events.on('getDownloadQueue', async (_, respond) => {
       respond(await this.service?.getDownloadQueue() ?? false);
     });
-    this.ws.events.on('isDownloading', async ({}, respond) => respond(await this.service!.isDownloading()));
+    this.ws.events.on('isDownloading', async (_, respond) => respond(await this.service?.isDownloading() ?? false));
   }
 
 }

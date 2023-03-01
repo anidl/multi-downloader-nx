@@ -45,7 +45,7 @@ import update from './modules/module.updater';
         if (key.endsWith('crunchy.js') || key.endsWith('funi.js'))
           delete require.cache[key];
       });
-      const service = new (argv.service === 'funi' ? (await import('./funi')).default : (await import('./crunchy')).default) as ServiceClass;
+      const service = new (argv.service === 'funi' ? (await import('./funi')).default : (await import('./crunchy')).default)() as ServiceClass;
       await service.cli();
     }
   } else {

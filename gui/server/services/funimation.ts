@@ -1,4 +1,4 @@
-import { AuthData, CheckTokenResponse, DownloadData, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, ResponseBase, SearchData, SearchResponse } from '../../../@types/messageHandler';
+import { AuthData, CheckTokenResponse, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, SearchData, SearchResponse } from '../../../@types/messageHandler';
 import Funimation from '../../../funi';
 import { ArgvType } from '../../../modules/module.app-args';
 import { buildDefault, getDefault } from '../../../modules/module.args';

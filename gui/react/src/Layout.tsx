@@ -6,14 +6,12 @@ import LogoutButton from "./components/LogoutButton";
 import AddToQueue from "./components/AddToQueue/AddToQueue";
 import { messageChannelContext } from './provider/MessageChannel';
 import { ClearAll, Folder } from "@mui/icons-material";
-import useStore from "./hooks/useStore";
 import StartQueueButton from "./components/StartQueue";
 import MenuBar from "./components/MenuBar/MenuBar";
 
 const Layout: React.FC = () => {
 
   const messageHandler = React.useContext(messageChannelContext);
-  const [, dispatch] = useStore();
 
   return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
     <MenuBar />

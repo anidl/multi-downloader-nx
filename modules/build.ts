@@ -4,7 +4,6 @@ import pkg from '../package.json';
 import modulesCleanup from 'removeNPMAbsolutePaths';
 import { exec } from 'pkg';
 import { execSync } from 'child_process';
-import path from 'path';
 
 const buildsDir = './_builds';
 const nodeVer = 'node16-';

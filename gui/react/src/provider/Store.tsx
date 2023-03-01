@@ -1,5 +1,5 @@
 import React from 'react';
-import { Episode, QueueItem } from '../../../../@types/messageHandler';
+import { Episode } from '../../../../@types/messageHandler';
 import { dubLanguageCodes } from '../../../../modules/module.langsData';
 
 export type DownloadOptions = {
