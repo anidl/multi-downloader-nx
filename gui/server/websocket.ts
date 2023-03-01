@@ -1,10 +1,10 @@
-import { IncomingMessage, Server } from "http";
+import { IncomingMessage, Server } from 'http';
 import ws, { WebSocket } from 'ws';
-import { RandomEvent, RandomEvents } from "../../@types/randomEvents";
-import { MessageTypes, UnknownWSMessage, WSMessage } from "../../@types/ws";
-import { EventEmitter } from "events";
-import { cfg } from ".";
-import { isSetuped } from "../../modules/module.cfg-loader";
+import { RandomEvent, RandomEvents } from '../../@types/randomEvents';
+import { MessageTypes, UnknownWSMessage, WSMessage } from '../../@types/ws';
+import { EventEmitter } from 'events';
+import { cfg } from '.';
+import { isSetuped } from '../../modules/module.cfg-loader';
 
 declare interface ExternalEvent {
   on<T extends keyof MessageTypes>(event: T, listener: (msg: WSMessage<T>, respond: (data: MessageTypes[T][1]) => void) => void): this;
@@ -37,9 +37,9 @@ export default class WebSocketHandler {
               name: json.name
             }), (er) => {
               if (er)
-                console.log(`[ERROR] [WS] ${er}`)
+                console.log(`[ERROR] [WS] ${er}`);
             });
-          })
+          });
         });
       });
     });
@@ -50,7 +50,7 @@ export default class WebSocketHandler {
       if (!this.authenticate(request)) {
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();
-        console.log(`[INFO] [WS] ${request.socket.remoteAddress} tried to connect but used a wrong password.`)
+        console.log(`[INFO] [WS] ${request.socket.remoteAddress} tried to connect but used a wrong password.`);
         return;
       }
       this.wsServer.handleUpgrade(request, socket, head, socket => {
@@ -67,7 +67,7 @@ export default class WebSocketHandler {
         if (er)
           console.log(`[ERROR] [WS] ${er}`);
       });
-    })
+    });
   }
 
   private authenticate(request: IncomingMessage): boolean {
@@ -87,14 +87,14 @@ export class PublicWebSocket {
       console.log(`[INFO] [WS] Connection to public ws from '${req.socket.remoteAddress}'`);
       socket.on('error', (er) => console.log(`[ERROR] [WS] ${er}`));
       socket.on('message', (msg) => {       
-        const data = JSON.parse(msg.toString()) as UnknownWSMessage
+        const data = JSON.parse(msg.toString()) as UnknownWSMessage;
         switch (data.name) {
-          case 'setuped':
-            this.send(socket, data.id, data.name, isSetuped());
-            break;
-          case 'requirePassword':
-            this.send(socket, data.id, data.name, cfg.gui.password !== undefined);
-            break;
+        case 'setuped':
+          this.send(socket, data.id, data.name, isSetuped());
+          break;
+        case 'requirePassword':
+          this.send(socket, data.id, data.name, cfg.gui.password !== undefined);
+          break;
         }
       });
     });
@@ -115,7 +115,7 @@ export class PublicWebSocket {
       name
     }), (er) => {
       if (er)
-        console.log(`[ERROR] [WS] ${er}`)
+        console.log(`[ERROR] [WS] ${er}`);
     });
   }
 }

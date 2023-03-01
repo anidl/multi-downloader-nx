@@ -12,7 +12,7 @@ export { workingDir };
 
 const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
-const guiCfgFile   = path.join(workingDir, 'config', 'gui')
+const guiCfgFile   = path.join(workingDir, 'config', 'gui');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
 const sessCfgFile  = path.join(workingDir, 'config', 'session');
 const setupFile    = path.join(workingDir, 'config', 'setup');
@@ -57,7 +57,7 @@ const writeYamlCfgFile = <T extends keyof WriteObjects>(file: T, data: WriteObje
   if (fs.existsSync(fn))
     fs.removeSync(fn);
   fs.writeFileSync(fn, yaml.stringify(data));
-}
+};
 
 export type GUIConfig = {
   port: number,
@@ -237,21 +237,20 @@ const isSetuped = (): boolean => {
   if (!fs.existsSync(fn))
     return false;
   return JSON.parse(fs.readFileSync(fn).toString()).setuped;
-}
+};
 
 const setSetuped = (bool: boolean) => {
   const fn = `${setupFile}.json`;
   if (bool) {
     fs.writeFileSync(fn, JSON.stringify({
       setuped: true
-    }, null, 2))
+    }, null, 2));
   } else {
     if (fs.existsSync(fn)) {
       fs.removeSync(fn);
+    }
   }
-
-  }
-}
+};
 
 
 export {

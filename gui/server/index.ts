@@ -18,7 +18,7 @@ export { app, cfg };
 
 app.use(express.json());
 app.use(cors());
-app.use(express.static(path.join(workingDir, 'gui', 'server', 'build'), { maxAge: 1000 * 60 * 20 }))
+app.use(express.static(path.join(workingDir, 'gui', 'server', 'build'), { maxAge: 1000 * 60 * 20 }));
 
 const server = app.listen(cfg.gui.port, () => {
   console.log(`[INFO] GUI server started on port ${cfg.gui.port}`);

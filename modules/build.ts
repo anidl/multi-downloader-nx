@@ -61,8 +61,8 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
   fs.copySync('./docs/', `${buildDir}/docs/`);
   fs.copySync('./LICENSE.md', `${buildDir}/docs/LICENSE.md`);
   if (gui) {
-    fs.copySync('./gui', `${buildDir}/gui`)
-    fs.copySync('./node_modules/open/xdg-open', `${buildDir}/xdg-open`)
+    fs.copySync('./gui', `${buildDir}/gui`);
+    fs.copySync('./node_modules/open/xdg-open', `${buildDir}/xdg-open`);
   }
   if(fs.existsSync(`${buildsDir}/${buildFull}.7z`)){
     fs.removeSync(`${buildsDir}/${buildFull}.7z`);

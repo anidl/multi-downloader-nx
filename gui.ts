@@ -1,1 +1,1 @@
-import './gui/server/index'
+import './gui/server/index';

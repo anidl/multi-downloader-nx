@@ -39,7 +39,7 @@ export default class ServiceHandler {
         return respond(false);
       this.service = undefined;
       respond(true);
-    })
+    });
 
     this.ws.events.on('auth', async ({ data }, respond) => {
       if (this.service === undefined)

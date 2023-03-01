@@ -1,7 +1,7 @@
 import { DownloadInfo, FolderTypes, ProgressData, QueueItem } from '../../../@types/messageHandler';
 import { RandomEvent, RandomEvents } from '../../../@types/randomEvents';
 import WebSocketHandler from '../websocket';
-import copy from "copy-to-clipboard";
+import copy from 'copy-to-clipboard';
 import open from 'open';
 import { cfg } from '..';
 import path from 'path';
@@ -65,11 +65,11 @@ export default class Base {
 
   async openFile(data: [FolderTypes, string]) {
     switch (data[0]) {
-      case 'config':
-        open(path.join(cfg.dir.config, data[1]));
-        break;
-      case 'content':
-        throw new Error('No subfolders');
+    case 'config':
+      open(path.join(cfg.dir.config, data[1]));
+      break;
+    case 'content':
+      throw new Error('No subfolders');
     }
   }
 
