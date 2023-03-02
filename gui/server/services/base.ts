@@ -109,6 +109,7 @@ export default class Base {
     this.sendMessage({ name: 'queueChange', data: this.queue });
     if (this.workOnQueue && this.queue.length > 0 && !await this.isDownloading()) {
       this.setDownloading(true);
+      this.sendMessage({ name: 'current', data: this.queue[0] });
       this.downloadItem(this.queue[0]);
       this.queue = this.queue.slice(1);
       this.queueChange();
@@ -116,6 +117,7 @@ export default class Base {
   }
 
   public async onFinish() {
+    this.sendMessage({ name: 'current', data: undefined });
     this.queueChange();
   }
 

@@ -58,7 +58,7 @@ const SearchBox: React.FC = () => {
                 }}>
                   <Box sx={{ display: 'flex' }}>
                     <Box sx={{ width: '20%', height: '100%', pr: 2 }}>
-                      <img ref={imageRef} src={a.image} style={{ width: '100%', height: '100%' }} alt="thumbnail"/>
+                      <img ref={imageRef} src={a.image} style={{ width: '100%', height: 'auto' }} alt="thumbnail"/>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', maxWidth: '70%' }}>
                       <Typography variant='h6' component='h6' color='text.primary' sx={{  }}>

@@ -17,7 +17,8 @@ export class RandomEventHandler {
   } = {
     progress: [],
     finish: [],
-    queueChange: []
+    queueChange: [],
+    current: []
   };
 
   public on<T extends keyof RandomEvents>(name: T, listener: Handler<T>) {
