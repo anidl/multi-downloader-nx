@@ -215,7 +215,8 @@ class hlsDownload {
       const dlOffset = offset + this.data.threads;
       // map download threads
       const krq = new Map(), prq = new Map();
-      const res = [], errcnt = 0;
+      const res = [];
+      let errcnt = 0;
       for (let px = offset; px < dlOffset && px < segments.length; px++){
         const curp = segments[px];
         const key = curp.key as Key;
