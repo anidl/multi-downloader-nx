@@ -2,6 +2,7 @@ import shlp from 'sei-helper';
 import got, { Headers, Method, Options, ReadError, Response } from 'got';
 import cookieFile from './module.cookieFile';
 import * as yamlCfg from './module.cfg-loader';
+import { console } from './log';
 //import curlReq from './module.curl-req';
 
 export type Params = {
@@ -75,8 +76,8 @@ class Req {
       beforeRequest: [
         (options) => {
           if(this.debug){
-            console.log('[DEBUG] GOT OPTIONS:');
-            console.log(options);
+            console.debug('[DEBUG] GOT OPTIONS:');
+            console.debug(options);
           }
         }
       ]
@@ -99,21 +100,21 @@ class Req {
         res: Response<unknown>
       };
       if(error.response && error.response.statusCode && error.response.statusMessage){
-        console.log(`[ERROR] ${error.name} ${error.response.statusCode}: ${error.response.statusMessage}`);
+        console.error(`${error.name} ${error.response.statusCode}: ${error.response.statusMessage}`);
       }
       else{
-        console.log(`[ERROR] ${error.name}: ${error.code || error.message}`);
+        console.error(`${error.name}: ${error.code || error.message}`);
       }
       if(error.response && !error.res){
         error.res = error.response;
         const docTitle = (error.res.body as string).match(/<title>(.*)<\/title>/);
         if(error.res.body && docTitle){
-          console.log('[ERROR]', docTitle[1]);
+          console.error(docTitle[1]);
         }
       }
       if(error.res && error.res.body && error.response.statusCode 
         && error.response.statusCode != 404 && error.response.statusCode != 403){
-        console.log('[ERROR] Body:', error.res.body);
+        console.error('Body:', error.res.body);
       }
       return {
         ok: false,
@@ -165,10 +166,10 @@ class Req {
     }
     if(cookieUpdated.length > 0){
       if(this.debug){
-        console.log('[SAVING FILE]',`${this.sessCfg}.yml`);
+        console.info('[SAVING FILE]',`${this.sessCfg}.yml`);
       }
       yamlCfg.saveCRSession(this.session);
-      console.log(`[INFO] Cookies were updated! (${cookieUpdated.join(', ')})\n`);
+      console.info(`Cookies were updated! (${cookieUpdated.join(', ')})\n`);
     }
   }
   checkCookieVal(chcookie: Record<string, string>){

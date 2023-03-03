@@ -1,13 +1,13 @@
-import React from "react";
-import AuthButton from "./components/AuthButton";
-import { Box, Button } from "@mui/material";
-import MainFrame from "./components/MainFrame/MainFrame";
-import LogoutButton from "./components/LogoutButton";
-import AddToQueue from "./components/AddToQueue/AddToQueue";
+import React from 'react';
+import AuthButton from './components/AuthButton';
+import { Box, Button } from '@mui/material';
+import MainFrame from './components/MainFrame/MainFrame';
+import LogoutButton from './components/LogoutButton';
+import AddToQueue from './components/AddToQueue/AddToQueue';
 import { messageChannelContext } from './provider/MessageChannel';
-import { ClearAll, Folder } from "@mui/icons-material";
-import StartQueueButton from "./components/StartQueue";
-import MenuBar from "./components/MenuBar/MenuBar";
+import { ClearAll, Folder } from '@mui/icons-material';
+import StartQueueButton from './components/StartQueue';
+import MenuBar from './components/MenuBar/MenuBar';
 
 const Layout: React.FC = () => {
 
@@ -27,6 +27,6 @@ const Layout: React.FC = () => {
     </Box>
     <MainFrame />
   </Box>;
-}
+};
 
 export default Layout;

@@ -1,9 +1,9 @@
-import { Box, Button, CircularProgress, Divider, LinearProgress, Skeleton, Typography } from "@mui/material";
-import React from "react";
-import { messageChannelContext } from "../../../provider/MessageChannel";
-import { queueContext } from "../../../provider/QueueProvider";
+import { Box, Button, CircularProgress, Divider, LinearProgress, Skeleton, Typography } from '@mui/material';
+import React from 'react';
+import { messageChannelContext } from '../../../provider/MessageChannel';
+import { queueContext } from '../../../provider/QueueProvider';
 
-import useDownloadManager from "../DownloadManager/DownloadManager";
+import useDownloadManager from '../DownloadManager/DownloadManager';
 
 const Queue: React.FC = () => {
   const { data, current } = useDownloadManager();
@@ -12,7 +12,7 @@ const Queue: React.FC = () => {
 
 
   if (!msg)
-    return <>Never</>
+    return <>Never</>;
 
   return data || queue.length > 0 ? <>
     {data && <>
@@ -114,8 +114,8 @@ const Queue: React.FC = () => {
         <Skeleton variant='text' height={'100%'} />
       </Box>
     </Box>
-  </Box>
-}
+  </Box>;
+};
 
 const formatTime = (time: number) => {
   time = Math.floor(time / 1000);
@@ -123,6 +123,6 @@ const formatTime = (time: number) => {
   time = time % 60;
 
   return `${minutes.toFixed(0).length < 2 ? `0${minutes}` : minutes}m${time.toFixed(0).length < 2 ? `0${time}` : time}s`;
-}
+};
 
 export default Queue;

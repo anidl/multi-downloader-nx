@@ -4,8 +4,8 @@ import App from './App';
 import ServiceProvider from './provider/ServiceProvider';
 import Style from './Style';
 import MessageChannel from './provider/MessageChannel';
-import { IconButton } from "@mui/material";
-import { CloseOutlined } from "@mui/icons-material";
+import { IconButton } from '@mui/material';
+import { CloseOutlined } from '@mui/icons-material';
 import { SnackbarProvider, SnackbarKey } from 'notistack';
 import Store from './provider/Store';
 import ErrorHandler from './provider/ErrorHandler';
@@ -18,7 +18,7 @@ const onClickDismiss = (key: SnackbarKey | undefined) => () => {
 };
 
 const container = document.getElementById('root');
-const root = createRoot(container!);
+const root = createRoot(container as HTMLElement);
 root.render(
   <ErrorHandler>
     <Store>
@@ -29,7 +29,7 @@ root.render(
             <CloseOutlined />
           </IconButton>
         )}
-        >
+      >
         <Style>
           <MessageChannel>
             <ServiceProvider>

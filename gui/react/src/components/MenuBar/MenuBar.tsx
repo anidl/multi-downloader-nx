@@ -1,6 +1,6 @@
-import { Box, Button, Menu, MenuItem } from "@mui/material";
-import React from "react"
-import { messageChannelContext } from "../../provider/MessageChannel";
+import { Box, Button, Menu, MenuItem } from '@mui/material';
+import React from 'react';
+import { messageChannelContext } from '../../provider/MessageChannel';
 
 const MenuBar: React.FC = () => {
   const [ openMenu, setMenuOpen ] = React.useState<'settings'|'help'|undefined>(); 
@@ -18,7 +18,7 @@ const MenuBar: React.FC = () => {
   };
 
   if (!msg)
-    return <></>
+    return <></>;
 
   return <Box sx={{ width: '100%', display: 'flex' }}>
     <Button onClick={(e) => handleClick(e, 'settings')}>
@@ -80,6 +80,6 @@ const MenuBar: React.FC = () => {
       </MenuItem>
     </Menu>
   </Box>;
-}
+};
 
 export default MenuBar;

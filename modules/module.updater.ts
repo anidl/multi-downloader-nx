@@ -9,6 +9,7 @@ import tsConfig from '../tsconfig.json';
 import fsextra from 'fs-extra';
 import seiHelper from 'sei-helper';
 import { workingDir } from './module.cfg-loader';
+import { console } from './log';
 const updateFilePlace = path.join(workingDir, 'config', 'updates.json');
 
 const updateIgnore = [
@@ -53,7 +54,7 @@ export default (async (force = false) => {
       return;
     }
   }
-  console.log('Checking for updates...');
+  console.info('Checking for updates...');
   const tagRequest = await got('https://api.github.com/repos/anidl/multi-downloader-nx/tags');
   const tags = JSON.parse(tagRequest.body) as GithubTag[];
 
@@ -61,10 +62,10 @@ export default (async (force = false) => {
     const newer = tags.filter(a => {
       return isNewer(packageJson.version, a.name);
     });
-    console.log(`Found ${tags.length} release tags and ${newer.length} that are new.`);
+    console.info(`Found ${tags.length} release tags and ${newer.length} that are new.`);
   
     if (newer.length < 1) {
-      console.log('[INFO] No new tags found');
+      console.info('No new tags found');
       return done();
     }
     const newest = newer.sort((a, b) => a.name < b.name ? 1 : a.name > b.name ? -1 : 0)[0];
@@ -72,7 +73,7 @@ export default (async (force = false) => {
 
     const compareJSON = JSON.parse(compareRequest.body) as TagCompare;
 
-    console.log(`You are behind by ${compareJSON.ahead_by} releases!`);
+    console.info(`You are behind by ${compareJSON.ahead_by} releases!`);
     const changedFiles = compareJSON.files.map(a => ({
       ...a,
       filename: path.join(...a.filename.split('/'))
@@ -80,10 +81,10 @@ export default (async (force = false) => {
       return !updateIgnore.some(_filter => matchString(_filter, a.filename));
     });
     if (changedFiles.length < 1) {
-      console.log('[INFO] No file changes found... updating package.json. If you think this is an error please get the newst version yourself.');
+      console.info('No file changes found... updating package.json. If you think this is an error please get the newst version yourself.');
       return done(newest.name);
     }
-    console.log(`Found file changes: \n${changedFiles.map(a => `  [${
+    console.info(`Found file changes: \n${changedFiles.map(a => `  [${
       a.status === 'modified' ? '*' : a.status === 'added' ? '+' : '-'
     }] ${a.filename}`).join('\n')}`);
 
@@ -107,7 +108,7 @@ export default (async (force = false) => {
           }).outputText,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
         };
-        console.log('✓ Transpiled %s', ret.path);
+        console.info('✓ Transpiled %s', ret.path);
         return ret;
       } else {
         const ret = {
@@ -115,7 +116,7 @@ export default (async (force = false) => {
           content: (await got(a.raw_url)).body,
           type: a.status === 'modified' ? ApplyType.UPDATE : a.status === 'added' ? ApplyType.ADD : ApplyType.DELETE
         };
-        console.log('✓ Got %s', ret.path);
+        console.info('✓ Got %s', ret.path);
         return ret;
       }
     }));
@@ -124,13 +125,13 @@ export default (async (force = false) => {
       try {
         fsextra.ensureDirSync(path.dirname(a.path));
         fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
-        console.log('✓ Written %s', a.path);
+        console.info('✓ Written %s', a.path);
       } catch (er) {
-        console.log('✗ Error while writing %s', a.path);
+        console.info('✗ Error while writing %s', a.path);
       }
     });
 
-    console.log('[INFO] Done');
+    console.info('Done');
     return done();
   } 
 });
@@ -147,7 +148,7 @@ function done(newVersion?: string) {
       version: newVersion
     }, null, 4));
   }
-  console.log('[INFO] Searching for update finished. Next time running on the ' + next.toLocaleDateString() + ' at ' + next.toLocaleTimeString() + '.');
+  console.info('[INFO] Searching for update finished. Next time running on the ' + next.toLocaleDateString() + ' at ' + next.toLocaleTimeString() + '.');
 }
 
 function isNewer(curr: string, compare: string) : boolean {

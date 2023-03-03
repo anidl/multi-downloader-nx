@@ -3,6 +3,7 @@ import child_process from 'child_process';
 import fs from 'fs-extra';
 import { Headers } from 'got';
 import path from 'path';
+import { console } from './log';
 
 export type CurlOptions = {
   headers?: Headers,
@@ -73,7 +74,7 @@ const curlReq = async (curlBin: string, url: string, options: CurlOptions, cache
     
   try{
     if(options.curlDebug){
-      console.log(curlComm, '\n');
+      console.info(curlComm, '\n');
     }
     child_process.execSync(curlComm, { stdio: 'inherit', windowsHide: true });
   }

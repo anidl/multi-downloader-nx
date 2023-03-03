@@ -15,7 +15,7 @@ const ServiceProvider: FCWithChildren = ({ children }) => {
       type: 'service',
       payload: s
     });
-  }
+  };
 
   return service === undefined ? 
     <Box>

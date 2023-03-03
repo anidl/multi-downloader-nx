@@ -1,9 +1,9 @@
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
-import { Check, Close } from '@mui/icons-material'
-import React from "react";
-import { messageChannelContext } from "../provider/MessageChannel";
-import Require from "./Require";
-import { useSnackbar } from "notistack";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import { Check, Close } from '@mui/icons-material';
+import React from 'react';
+import { messageChannelContext } from '../provider/MessageChannel';
+import Require from './Require';
+import { useSnackbar } from 'notistack';
 
 const AuthButton: React.FC = () => {
   const snackbar = useSnackbar();
@@ -24,9 +24,9 @@ const AuthButton: React.FC = () => {
 
   const checkAuth = async () => {
     setAuthed((await messageChannel?.checkToken())?.isOk ?? false);
-  }
+  };
 
-  React.useEffect(() => { checkAuth() }, []);
+  React.useEffect(() => { checkAuth(); }, []);
 
   const handleSubmit = async () => {
     if (!messageChannel)
@@ -52,7 +52,7 @@ const AuthButton: React.FC = () => {
     }
     await checkAuth();
     setLoading(false);
-  }
+  };
 
   return <Require value={messageChannel}>
     <Dialog open={open}>
@@ -106,7 +106,7 @@ const AuthButton: React.FC = () => {
       </DialogActions>
     </Dialog>
     <Button startIcon={authed ? <Check />: <Close />} variant="contained" onClick={() => setOpen(true)}>Authenticate</Button>
-  </Require>
-}
+  </Require>;
+};
 
 export default AuthButton;

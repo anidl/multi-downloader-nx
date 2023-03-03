@@ -1,5 +1,5 @@
-import React from "react";
-import { Container, Box, ThemeProvider, createTheme, Theme } from "@mui/material";
+import React from 'react';
+import { Container, Box, ThemeProvider, createTheme, Theme } from '@mui/material';
 
 const makeTheme = (mode: 'dark'|'light') : Partial<Theme> => {
   return createTheme({
@@ -16,6 +16,6 @@ const Style: FCWithChildren = ({children}) => {
       {children}
     </Container>
   </ThemeProvider>;
-}
+};
 
 export default Style;

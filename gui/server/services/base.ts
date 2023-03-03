@@ -5,6 +5,7 @@ import copy from 'copy-to-clipboard';
 import open from 'open';
 import { cfg } from '..';
 import path from 'path';
+import { console } from '../../../modules/log';
 
 export default class Base {
 
@@ -24,7 +25,7 @@ export default class Base {
   }
 
   alertError(error: Error) {
-    console.log(`[ERROR] ${error}`);
+    console.error(`${error}`);
   }
 
   makeProgressHandler(videoInfo: DownloadInfo) {

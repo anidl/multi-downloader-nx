@@ -4,6 +4,7 @@ import pkg from '../package.json';
 import modulesCleanup from 'removeNPMAbsolutePaths';
 import { exec } from 'pkg';
 import { execSync } from 'child_process';
+import { console } from './log';
 
 const buildsDir = './_builds';
 const nodeVer = 'node16-';
@@ -40,12 +41,12 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
     '--target', nodeVer + getTarget(buildType),
     '--output', `${buildDir}/${pkg.short_name}`,
   ];
-  console.log(`[Build] Build configuration: ${buildFull}`);
+  console.info(`[Build] Build configuration: ${buildFull}`);
   try {
     await exec(buildConfig);
   }
   catch(e){
-    console.log(e);
+    console.info(e);
     process.exit(1);
   }
   fs.mkdirSync(`${buildDir}/config`);

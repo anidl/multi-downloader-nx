@@ -2,6 +2,7 @@ import path from 'path';
 import yaml from 'yaml';
 import fs from 'fs-extra';
 import { lookpath } from 'lookpath';
+import { console } from './log';
 
 // new-cfg
 const workingDir = (process as NodeJS.Process & {
@@ -41,7 +42,7 @@ const loadYamlCfgFile = <T extends Record<string, any>>(file: string, isSess?: b
       return yaml.parse(fs.readFileSync(file, 'utf8'));
     }
     catch(e){
-      console.log('[ERROR]', e);
+      console.error('[ERROR]', e);
       return {} as T;
     }
   }
@@ -120,7 +121,7 @@ const loadCfg = () : ConfigObject => {
       fs.ensureDirSync(defaultCfg.dir.content);
     }
     catch(e){
-      console.log('[ERROR] Content directory not accessible!');
+      console.error('Content directory not accessible!');
       return defaultCfg;
     }
   }
@@ -180,7 +181,7 @@ const saveCRSession = (data: Record<string, unknown>) => {
     fs.writeFileSync(`${sessCfgFile}.yml`, yaml.stringify(data));
   }
   catch(e){
-    console.log('[ERROR] Can\'t save session file to disk!');
+    console.error('Can\'t save session file to disk!');
   }
 };
 
@@ -199,7 +200,7 @@ const saveCRToken = (data: Record<string, unknown>) => {
     fs.writeFileSync(`${tokenFile.cr}.yml`, yaml.stringify(data));
   }
   catch(e){
-    console.log('[ERROR] Can\'t save token file to disk!');
+    console.error('Can\'t save token file to disk!');
   }
 };
 
@@ -212,7 +213,7 @@ const loadFuniToken = () => {
     token = loadedToken.token;
   // info if token not set
   if(!token){
-    console.log('[INFO] Token not set!\n');
+    console.info('[INFO] Token not set!\n');
   }
   return token;
 };
@@ -226,7 +227,7 @@ const saveFuniToken = (data: {
     fs.writeFileSync(`${tokenFile.funi}.yml`, yaml.stringify(data));
   }
   catch(e){
-    console.log('[ERROR] Can\'t save token file to disk!');
+    console.error('Can\'t save token file to disk!');
   }
 };
 

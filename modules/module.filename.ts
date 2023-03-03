@@ -1,7 +1,7 @@
 import * as shlp from 'sei-helper';
 import path from 'path';
 import { AvailableFilenameVars } from './module.args';
-
+import { console } from './log';
 
 export type Variable<T extends string = AvailableFilenameVars> = ({
   type: 'number',
@@ -25,7 +25,7 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
     const varName = type.slice(2, -1);
     const use = overridenVars.find(a => a.name === varName);
     if (use === undefined) {
-      console.log(`[ERROR] Found variable '${type}' in fileName but no values was internally found!`);
+      console.info(`[ERROR] Found variable '${type}' in fileName but no values was internally found!`);
       continue;
     }
     

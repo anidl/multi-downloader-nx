@@ -1,3 +1,3 @@
-type FCWithChildren<T = {}> = React.FC<{
+type FCWithChildren<T = object> = React.FC<{
   children?: React.ReactNode[]|React.ReactNode
 } & T>

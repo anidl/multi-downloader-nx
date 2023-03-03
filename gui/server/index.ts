@@ -5,6 +5,7 @@ import ServiceHandler from './serviceHandler';
 import open from 'open';
 import path from 'path';
 import { PublicWebSocket } from './websocket';
+import { console } from '../../modules/log';
 
 process.title = 'AniDL';
 
@@ -21,7 +22,7 @@ app.use(cors());
 app.use(express.static(path.join(workingDir, 'gui', 'server', 'build'), { maxAge: 1000 * 60 * 20 }));
 
 const server = app.listen(cfg.gui.port, () => {
-  console.log(`[INFO] GUI server started on port ${cfg.gui.port}`);
+  console.info(`GUI server started on port ${cfg.gui.port}`);
 });
 
 new PublicWebSocket(server);

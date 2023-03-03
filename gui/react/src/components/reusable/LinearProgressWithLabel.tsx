@@ -19,6 +19,6 @@ const LinearProgressWithLabel: React.FC<LinearProgressWithLabelProps> = (props) 
       </Box>
     </Box>
   );
-}
+};
 
 export default LinearProgressWithLabel;

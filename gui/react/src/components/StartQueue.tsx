@@ -1,8 +1,8 @@
-import { PauseCircleFilled, PlayCircleFilled } from "@mui/icons-material";
-import { Button } from "@mui/material";
-import React from "react";
-import { messageChannelContext } from "../provider/MessageChannel";
-import Require from "./Require";
+import { PauseCircleFilled, PlayCircleFilled } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import React from 'react';
+import { messageChannelContext } from '../provider/MessageChannel';
+import Require from './Require';
 
 const StartQueueButton: React.FC = () => {
   const messageChannel = React.useContext(messageChannelContext);
@@ -19,10 +19,10 @@ const StartQueueButton: React.FC = () => {
 
   const change = async () => {
     if (await messageChannel?.isDownloading())
-      alert("The current download will be finished before the queue stops")
+      alert('The current download will be finished before the queue stops');
     msg?.setDownloadQueue(!start);
     setStart(!start);
-  }
+  };
 
   return <Require value={messageChannel}>
     <Button
@@ -34,8 +34,8 @@ const StartQueueButton: React.FC = () => {
         start ? 'Stop Queue' : 'Start Queue'
       }
     </Button>
-  </Require>
+  </Require>;
 
-}
+};
 
 export default StartQueueButton;

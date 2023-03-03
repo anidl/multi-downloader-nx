@@ -5,6 +5,7 @@ import { buildDefault, getDefault } from '../../../modules/module.args';
 import { languages, subtitleLanguagesFilter } from '../../../modules/module.langsData';
 import WebSocketHandler from '../websocket';
 import Base from './base';
+import { console } from '../../../modules/log';
 
 class CrunchyHandler extends Base implements MessageHandler {
   private crunchy: Crunchy;
@@ -38,7 +39,7 @@ class CrunchyHandler extends Base implements MessageHandler {
 
   public async resolveItems(data: ResolveItemsData): Promise<boolean> {
     await this.crunchy.refreshToken(true);
-    console.log(`[DEBUG] Got resolve options: ${JSON.stringify(data)}`);
+    console.debug(`Got resolve options: ${JSON.stringify(data)}`);
     const res = await this.crunchy.downloadFromSeriesID(data.id, data);
     if (!res.isOk)
       return res.isOk;
@@ -62,7 +63,7 @@ class CrunchyHandler extends Base implements MessageHandler {
 
   public async search(data: SearchData): Promise<SearchResponse> {
     await this.crunchy.refreshToken(true);
-    console.log(`[DEBUG] Got search options: ${JSON.stringify(data)}`);
+    console.debug(`Got search options: ${JSON.stringify(data)}`);
     const crunchySearch = await this.crunchy.doSearch(data);
     if (!crunchySearch.isOk) {
       this.crunchy.refreshToken();
@@ -85,7 +86,7 @@ class CrunchyHandler extends Base implements MessageHandler {
 
   public async downloadItem(data: DownloadData) {
     await this.crunchy.refreshToken(true);
-    console.log(`[DEBUG] Got download options: ${JSON.stringify(data)}`);
+    console.debug(`Got download options: ${JSON.stringify(data)}`);
     this.setDownloading(true);
     const _default = buildDefault() as ArgvType;
     const res = await this.crunchy.downloadFromSeriesID(data.id, {

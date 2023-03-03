@@ -4,9 +4,9 @@ import useStore from '../hooks/useStore';
 import type { MessageTypes, WSMessage, WSMessageWithID } from '../../../../@types/ws';
 import type { Handler, RandomEvent, RandomEvents } from '../../../../@types/randomEvents';
 import { Avatar, Box, Button, TextField, Typography } from '@mui/material';
-import { v4 } from "uuid";
-import { useSnackbar } from "notistack";
-import { LockOutlined, PowerSettingsNew } from '@mui/icons-material'
+import { v4 } from 'uuid';
+import { useSnackbar } from 'notistack';
+import { LockOutlined, PowerSettingsNew } from '@mui/icons-material';
 import { GUIConfig } from '../../../../modules/module.cfg-loader';
 
 export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler, logout: () => Promise<boolean> });
@@ -49,7 +49,7 @@ async function messageAndResponse<T extends keyof MessageTypes>(socket: WebSocke
         socket.removeEventListener('message', handler);
         resolve(parsed);
       }
-    }
+    };
     socket.addEventListener('message', handler); 
   });
   const toSend = msg as WSMessageWithID<T>;
@@ -109,11 +109,11 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       setSocket(wws);
     });
     wws.addEventListener('error', (er) => {
-      console.error(`[ERROR] [WS]`, er);
+      console.error('[ERROR] [WS]', er);
       enqueueSnackbar('Unable to connect to server. Please check the password and try again.', {
         variant: 'error'
       });
-    })
+    });
   };
 
   const setup = async (ev: React.FormEvent<HTMLFormElement>) => {
@@ -126,7 +126,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       port: parseInt(formData.get('port')?.toString() ?? '') ?? 3000,
       password: password ? password.toString() : undefined
     } as GUIConfig;
-    await messageAndResponse(socket!, { name: 'setupServer', data });
+    await messageAndResponse(socket, { name: 'setupServer', data });
     enqueueSnackbar(`The following settings have been set: Port=${data.port}, Password=${data.password ?? 'noPasswordRequired'}`, {
       variant: 'success',
       persist: true
@@ -135,7 +135,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       variant: 'info',
       persist: true
     });
-  }
+  };
 
   const randomEventHandler = React.useMemo(() => new RandomEventHandler(), []);
 
@@ -149,7 +149,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       if (store.service !== currentService.data) 
         messageAndResponse(socket, { name: 'setup', data: store.service });
     })();
-  }, [store.service, dispatch, socket])
+  }, [store.service, dispatch, socket]);
 
   React.useEffect(() => {
     if (!socket)
@@ -158,7 +158,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
     const listener = (initalData: MessageEvent<string>) => {
       const data = JSON.parse(initalData.data) as RandomEvent<'finish'>;
       randomEventHandler.emit(data.name, data);
-    }
+    };
     socket.addEventListener('message', listener);
     return () => {
       socket.removeEventListener('message', listener);
@@ -170,7 +170,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 
   if (socket === undefined) {
     if (usePassword === 'no') {
-      connect(undefined)
+      connect(undefined);
       return <></>;
     }
     return <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', justifyItems: 'center', alignItems: 'center' }}>
@@ -233,7 +233,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
     clearQueue: async () => await messageAndResponse(socket, { name: 'clearQueue', data: undefined }),
     setDownloadQueue: async (data) => await messageAndResponse(socket, { name: 'setDownloadQueue', data }),
     getDownloadQueue: async () => (await messageAndResponse(socket, { name: 'getDownloadQueue', data: undefined })).data,
-  }
+  };
 
   return <messageChannelContext.Provider value={messageHandler}>
     {children}

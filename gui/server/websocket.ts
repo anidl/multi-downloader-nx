@@ -5,6 +5,7 @@ import { MessageTypes, UnknownWSMessage, WSMessage } from '../../@types/ws';
 import { EventEmitter } from 'events';
 import { cfg } from '.';
 import { isSetuped } from '../../modules/module.cfg-loader';
+import { console } from '../../modules/log';
 
 declare interface ExternalEvent {
   on<T extends keyof MessageTypes>(event: T, listener: (msg: WSMessage<T>, respond: (data: MessageTypes[T][1]) => void) => void): this;
@@ -23,8 +24,8 @@ export default class WebSocketHandler {
     this.wsServer = new ws.WebSocketServer({ noServer: true, path: '/ws' });
 
     this.wsServer.on('connection', (socket, req) => {
-      console.log(`[INFO] [WS] Connection from '${req.socket.remoteAddress}'`);
-      socket.on('error', (er) => console.log(`[ERROR] [WS] ${er}`));
+      console.info(`[WS] Connection from '${req.socket.remoteAddress}'`);
+      socket.on('error', (er) => console.error(`[WS] ${er}`));
       socket.on('message', (data) => {       
         const json = JSON.parse(data.toString()) as UnknownWSMessage;
         this.events.emit(json.name, json as any, (data) => {
@@ -37,7 +38,7 @@ export default class WebSocketHandler {
               name: json.name
             }), (er) => {
               if (er)
-                console.log(`[ERROR] [WS] ${er}`);
+                console.error(`[WS] ${er}`);
             });
           });
         });
@@ -50,7 +51,7 @@ export default class WebSocketHandler {
       if (!this.authenticate(request)) {
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();
-        console.log(`[INFO] [WS] ${request.socket.remoteAddress} tried to connect but used a wrong password.`);
+        console.info(`[WS] ${request.socket.remoteAddress} tried to connect but used a wrong password.`);
         return;
       }
       this.wsServer.handleUpgrade(request, socket, head, socket => {
@@ -65,7 +66,7 @@ export default class WebSocketHandler {
         return;
       client.send(JSON.stringify(data), (er) => {
         if (er)
-          console.log(`[ERROR] [WS] ${er}`);
+          console.error(`[WS] ${er}`);
       });
     });
   }
@@ -84,8 +85,8 @@ export class PublicWebSocket {
     this.wsServer = new ws.WebSocketServer({ noServer: true, path: '/public' });
 
     this.wsServer.on('connection', (socket, req) => {
-      console.log(`[INFO] [WS] Connection to public ws from '${req.socket.remoteAddress}'`);
-      socket.on('error', (er) => console.log(`[ERROR] [WS] ${er}`));
+      console.info(`[WS] Connection to public ws from '${req.socket.remoteAddress}'`);
+      socket.on('error', (er) => console.error(`[WS] ${er}`));
       socket.on('message', (msg) => {       
         const data = JSON.parse(msg.toString()) as UnknownWSMessage;
         switch (data.name) {
@@ -115,7 +116,7 @@ export class PublicWebSocket {
       name
     }), (er) => {
       if (er)
-        console.log(`[ERROR] [WS] ${er}`);
+        console.error(`[WS] ${er}`);
     });
   }
 }

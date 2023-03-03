@@ -20,11 +20,11 @@ const QueueProvider: FCWithChildren = ({ children }) => {
     }
     const listener = (ev: RandomEvent<'queueChange'>) => {
       setQueue(ev.data);
-    }
+    };
     msg?.randomEvents.on('queueChange', listener);
     return () => {
       msg?.randomEvents.removeListener('queueChange', listener);
-    }
+    };
   }, [ msg ]);
   
   return <queueContext.Provider value={queue}>

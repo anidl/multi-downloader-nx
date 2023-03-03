@@ -30,8 +30,8 @@ export type StoreAction<T extends (keyof StoreState)> = {
 
 const Reducer = <T extends keyof StoreState,>(state: StoreState, action: StoreAction<T>): StoreState => {
   switch(action.type) {
-    default:
-      return { ...state, [action.type]: action.payload }
+  default:
+    return { ...state, [action.type]: action.payload };
   }
 };
 

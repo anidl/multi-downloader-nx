@@ -1,3 +1,5 @@
+import { console } from './log';
+
 const parseSelect = (selectString: string, but = false) : {
     isSelected: (val: string|string[]) => boolean,
     values: string[]
@@ -14,7 +16,7 @@ const parseSelect = (selectString: string, but = false) : {
     if (part.includes('-')) {
       const splits = part.split('-');
       if (splits.length !== 2) {
-        console.log(`[WARN] Unable to parse input "${part}"`);
+        console.warn(`[WARN] Unable to parse input "${part}"`);
         return;
       }
 
@@ -22,14 +24,14 @@ const parseSelect = (selectString: string, but = false) : {
       const match = firstPart.match(/[A-Za-z]+/);
       if (match && match.length > 0) {
         if (match.index && match.index !== 0) {
-          console.log(`[WARN] Unable to parse input "${part}"`);
+          console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
         }
         const letters = firstPart.substring(0, match[0].length);
         const number = parseInt(firstPart.substring(match[0].length));
         const b = parseInt(splits[1]);
         if (isNaN(number) || isNaN(b)) {
-          console.log(`[WARN] Unable to parse input "${part}"`);
+          console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
         }
         for (let i = number; i <= b; i++) {
@@ -40,7 +42,7 @@ const parseSelect = (selectString: string, but = false) : {
         const a = parseInt(firstPart);
         const b = parseInt(splits[1]);
         if (isNaN(a) || isNaN(b)) {
-          console.log(`[WARN] Unable to parse input "${part}"`);
+          console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
         }
         for (let i = a; i <= b; i++) {
@@ -56,13 +58,13 @@ const parseSelect = (selectString: string, but = false) : {
       const match = part.match(/[A-Za-z]+/);
       if (match && match.length > 0) {
         if (match.index && match.index !== 0) {
-          console.log(`[WARN] Unable to parse input "${part}"`);
+          console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
         }
         const letters = part.substring(0, match[0].length);
         const number = parseInt(part.substring(match[0].length));
         if (isNaN(number)) {
-          console.log(`[WARN] Unable to parse input "${part}"`);
+          console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
         }
         select.push(`${letters}${number}`);
