@@ -78,6 +78,10 @@ export { ignore };
   
     const react = exec('pnpm run build', {
       cwd: path.join(__dirname, 'gui', 'react'),
+      env: {
+        ...process.env,
+        CI: 'false'
+      }
     });
   
     await waitForProcess(react);
