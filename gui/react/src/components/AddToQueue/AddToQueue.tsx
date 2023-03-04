@@ -1,9 +1,9 @@
-import { Add } from "@mui/icons-material";
-import { Box, Button, Dialog, Divider } from "@mui/material";
-import React from "react";
-import DownloadSelector from "./DownloadSelector/DownloadSelector";
-import EpisodeListing from "./DownloadSelector/Listing/EpisodeListing";
-import SearchBox from "./SearchBox/SearchBox";
+import { Add } from '@mui/icons-material';
+import { Box, Button, Dialog, Divider } from '@mui/material';
+import React from 'react';
+import DownloadSelector from './DownloadSelector/DownloadSelector';
+import EpisodeListing from './DownloadSelector/Listing/EpisodeListing';
+import SearchBox from './SearchBox/SearchBox';
 
 const AddToQueue: React.FC = () => {
   const [isOpen, setOpen] = React.useState(false);
@@ -21,7 +21,7 @@ const AddToQueue: React.FC = () => {
       <Add />
       Add to Queue
     </Button>
-  </Box>
-}
+  </Box>;
+};
 
 export default AddToQueue;

@@ -5,9 +5,10 @@ import fs from 'fs-extra';
 // package program
 import packageJson from './package.json';
 // plugins
+import { console } from './modules/log';
 import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
-import streamdl from 'hls-download';
+import streamdl from './modules/hls-download';
 
 // custom modules
 import * as fontsData from './modules/module.fontsData';
@@ -15,14 +16,6 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-
-export type sxItem = {
-  language: langsData.LanguageItem,
-  path: string,
-  file: string
-  title: string,
-  fonts: Font[]
-}
 
 // args
 
@@ -40,6 +33,14 @@ import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
 import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
+
+export type sxItem = {
+  language: langsData.LanguageItem,
+  path: string,
+  file: string
+  title: string,
+  fonts: Font[]
+}
 
 export default class Crunchy implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;
@@ -60,7 +61,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async cli() {
-    console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
+    console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
   
     // load binaries
@@ -103,7 +104,7 @@ export default class Crunchy implements ServiceClass {
       if (selected.isOk) {
         for (const select of selected.value) {
           if (!(await this.downloadEpisode(select, {...argv, skipsubs: false }))) {
-            console.log(`[ERROR] Unable to download selected episode ${select.episodeNumber}`);
+            console.error(`Unable to download selected episode ${select.episodeNumber}`);
             return false;
           }
         }
@@ -117,14 +118,14 @@ export default class Crunchy implements ServiceClass {
     else if(argv.s && argv.s.match(/^[0-9A-Z]{9}$/)){
       await this.refreshToken();
       if (argv.dubLang.length > 1) {
-        console.log('[INFO] One show can only be downloaded with one dub. Use --srz instead.');
+        console.info('One show can only be downloaded with one dub. Use --srz instead.');
       }
       argv.dubLang = [argv.dubLang[0]];
       const selected = await this.getSeasonById(argv.s, argv.numbers, argv.e, argv.but, argv.all);
       if (selected.isOk) {
         for (const select of selected.value) {
           if (!(await this.downloadEpisode(select, {...argv, skipsubs: false }))) {
-            console.log(`[ERROR] Unable to download selected episode ${select.episodeNumber}`);
+            console.error(`Unable to download selected episode ${select.episodeNumber}`);
             return false;
           }
         }
@@ -136,24 +137,24 @@ export default class Crunchy implements ServiceClass {
       const selected = await this.getObjectById(argv.e, false);
       for (const select of selected as Partial<CrunchyEpMeta>[]) {
         if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false }))) {
-          console.log(`[ERROR] Unable to download selected episode ${select.episodeNumber}`);
+          console.error(`Unable to download selected episode ${select.episodeNumber}`);
           return false;
         }
       }
       return true;
     }
     else{
-      console.log('[INFO] No option selected or invalid value entered. Try --help.');
+      console.info('No option selected or invalid value entered. Try --help.');
     }
   }
 
   public async getFonts() {
-    console.log('[INFO] Downloading fonts...');
+    console.info('Downloading fonts...');
     const fonts = Object.values(fontsData.fontFamilies).reduce((pre, curr) => pre.concat(curr));
     for(const f of fonts) {
       const fontLoc  = path.join(this.cfg.dir.fonts, f);
       if(fs.existsSync(fontLoc) && fs.statSync(fontLoc).size != 0){
-        console.log(`[INFO] ${f} already downloaded!`);
+        console.info(`${f} already downloaded!`);
       }
       else{
         const fontFolder = path.dirname(fontLoc);
@@ -164,20 +165,20 @@ export default class Crunchy implements ServiceClass {
           fs.ensureDirSync(fontFolder);
         }
         catch(e){
-          console.log();
+          console.info('');
         }
         const fontUrl = fontsData.root + f;
         const getFont = await this.req.getData<Buffer>(fontUrl, { binary: true });
         if(getFont.ok && getFont.res){
           fs.writeFileSync(fontLoc, getFont.res.body);
-          console.log(`[INFO] Downloaded: ${f}`);
+          console.info(`Downloaded: ${f}`);
         }
         else{
-          console.log(`[WARN] Failed to download: ${f}`);
+          console.warn(`Failed to download: ${f}`);
         }
       }
     }
-    console.log('[INFO] All required fonts downloaded!');
+    console.info('All required fonts downloaded!');
   }
 
   public async doAuth(data: AuthData): Promise<AuthResponse> {
@@ -194,14 +195,14 @@ export default class Crunchy implements ServiceClass {
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
     if(!authReq.ok || !authReq.res){
-      console.log('[ERROR] Authentication failed!');
+      console.error('Authentication failed!');
       return { isOk: false, reason: new Error('Authentication failed') };
     }
     this.token = JSON.parse(authReq.res.body);
     this.token.expires = new Date(Date.now() + this.token.expires_in);
     yamlCfg.saveCRToken(this.token);
     await this.getProfile();
-    console.log('[INFO] Your Country: %s', this.token.country);
+    console.info('Your Country: %s', this.token.country);
     return { isOk: true, value: undefined };
   }
 
@@ -217,7 +218,7 @@ export default class Crunchy implements ServiceClass {
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
     if(!authReq.ok || !authReq.res){
-      console.log('[ERROR] Authentication failed!');
+      console.error('Authentication failed!');
       return;
     }
     this.token = JSON.parse(authReq.res.body);
@@ -227,7 +228,7 @@ export default class Crunchy implements ServiceClass {
 
   public async getProfile() : Promise<boolean> {
     if(!this.token.access_token){
-      console.log('[ERROR] No access token!');
+      console.error('No access token!');
       return false;
     }
     const profileReqOptions = {
@@ -238,11 +239,11 @@ export default class Crunchy implements ServiceClass {
     };
     const profileReq = await this.req.getData(api.beta_profile, profileReqOptions);
     if(!profileReq.ok || !profileReq.res){
-      console.log('[ERROR] Get profile failed!');
+      console.error('Get profile failed!');
       return false;
     }
     const profile = JSON.parse(profileReq.res.body);
-    console.log('[INFO] USER: %s (%s)', profile.username, profile.email);
+    console.info('USER: %s (%s)', profile.username, profile.email);
     return true;
   }
 
@@ -256,7 +257,7 @@ export default class Crunchy implements ServiceClass {
       if (!(Date.now() > new Date(this.token.expires).getTime()) && ifNeeded) {
         return;
       } else {
-        //console.log('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
+        //console.info('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
       }
       const authData = new URLSearchParams({
         'refresh_token': this.token.refresh_token,
@@ -270,7 +271,7 @@ export default class Crunchy implements ServiceClass {
       };
       const authReq = await this.req.getData(api.beta_auth, authReqOpts);
       if(!authReq.ok || !authReq.res){
-        console.log('[ERROR] Authentication failed!');
+        console.error('Authentication failed!');
         return;
       }
       this.token = JSON.parse(authReq.res.body);
@@ -281,14 +282,14 @@ export default class Crunchy implements ServiceClass {
       if (!silent)
         await this.getProfile();
     } else {
-      console.log('[INFO] USER: Anonymous');
+      console.info('USER: Anonymous');
     }
     await this.getCMStoken();
   }
 
   public async getCMStoken(){
     if(!this.token.access_token){
-      console.log('[ERROR] No access token!');
+      console.error('No access token!');
       return;
     }
     const cmsTokenReqOpts = {
@@ -299,17 +300,17 @@ export default class Crunchy implements ServiceClass {
     };
     const cmsTokenReq = await this.req.getData(api.beta_cmsToken, cmsTokenReqOpts);
     if(!cmsTokenReq.ok || !cmsTokenReq.res){
-      console.log('[ERROR] Authentication CMS token failed!');
+      console.error('Authentication CMS token failed!');
       return;
     }
     this.cmsToken = JSON.parse(cmsTokenReq.res.body);
-    console.log('[INFO] Your Country: %s\n', this.cmsToken.cms?.bucket.split('/')[1]);
+    console.info('Your Country: %s\n', this.cmsToken.cms?.bucket.split('/')[1]);
   }
 
   public async getCmsData(){
     // check token
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
     // opts
@@ -325,15 +326,15 @@ export default class Crunchy implements ServiceClass {
     ].join('');
     const indexReq = await this.req.getData(indexReqOpts);
     if(!indexReq.ok || ! indexReq.res){
-      console.log('[ERROR] Get CMS index FAILED!');
+      console.error('Get CMS index FAILED!');
       return;
     }
-    console.log(JSON.parse(indexReq.res.body));
+    console.info(JSON.parse(indexReq.res.body));
   }
 
   public async doSearch(data: SearchData): Promise<SearchResponse>{
     if(!this.token.access_token){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return { isOk: false, reason: new Error('Not authenticated') };
     }
     const searchReqOpts = {
@@ -352,12 +353,12 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const searchReq = await this.req.getData(`${api.search}?${searchParams}`, searchReqOpts);
     if(!searchReq.ok || ! searchReq.res){
-      console.log('[ERROR] Search FAILED!');
+      console.error('Search FAILED!');
       return { isOk: false, reason: new Error('Search failed. No more information provided') };
     }
     const searchResults = JSON.parse(searchReq.res.body) as CrunchySearch;
     if(searchResults.total < 1){
-      console.log('[INFO] Nothing Found!');
+      console.info('Nothing Found!');
       return { isOk: true, value: [] };
     }
 
@@ -368,23 +369,23 @@ export default class Crunchy implements ServiceClass {
       'episode':       'Found episodes'
     };
     for(const search_item of searchResults.data){
-      console.log('[INFO] %s:', searchTypesInfo[search_item.type as keyof typeof searchTypesInfo]);
+      console.info('%s:', searchTypesInfo[search_item.type as keyof typeof searchTypesInfo]);
       // calculate pages
       const pageCur = searchStart > 0 ? Math.ceil(searchStart/5) + 1 : 1;
       const pageMax = Math.ceil(search_item.count/5);
       // pages per category
       if(search_item.count < 1){
-        console.log('  [INFO] Nothing Found...');
+        console.info('  Nothing Found...');
       }
       if(search_item.count > 0){
         if(pageCur > pageMax){
-          console.log('  [INFO] Last page is %s...', pageMax);
+          console.info('  Last page is %s...', pageMax);
           continue;
         }
         for(const item of search_item.items){
           await this.logObject(item);
         }
-        console.log(`  [INFO] Total results: ${search_item.count} (Page: ${pageCur}/${pageMax})`);
+        console.info(`  Total results: ${search_item.count} (Page: ${pageCur}/${pageMax})`);
       }
     }
     const toSend = searchResults.data.filter(a => a.type === 'series' || a.type === 'movie_listing');
@@ -404,7 +405,7 @@ export default class Crunchy implements ServiceClass {
 
   public async logObject(item: ParseItem, pad?: number, getSeries?: boolean, getMovieListing?: boolean){
     if(this.debug){
-      console.log(item);
+      console.info(item);
     }
     pad = pad ?? 2;
     getSeries = getSeries === undefined ? true : getSeries;
@@ -455,13 +456,13 @@ export default class Crunchy implements ServiceClass {
       // check title
     item.title = item.title != '' ? item.title : 'NO_TITLE';
     // static data
-    const oMetadata = [],
-      oBooleans = [],
+    const oMetadata: string[] = [],
+      oBooleans: string[] = [],
       tMetadata = item.type + '_metadata',
       iMetadata = (Object.prototype.hasOwnProperty.call(item, tMetadata) ? item[tMetadata as keyof ParseItem] : item) as Record<string, any>,
       iTitle = [ item.title ];
     
-    const audio_languages = [];
+    const audio_languages: string[] = [];
 
     // set object booleans
     if(iMetadata.duration_ms){
@@ -523,7 +524,7 @@ export default class Crunchy implements ServiceClass {
     const showObjectMetadata = oMetadata.length > 0 && !iMetadata.hide_metadata ? true : false;
     const showObjectBooleans = oBooleans.length > 0 && !iMetadata.hide_metadata ? true : false;
     // make obj ids
-    const objects_ids = [];
+    const objects_ids: string[] = [];
     objects_ids.push(oTypes[item.type as keyof typeof oTypes] + ':' + item.id);
     if(item.seq_id){
       objects_ids.unshift(item.seq_id);
@@ -542,7 +543,7 @@ export default class Crunchy implements ServiceClass {
     }
 
     // show entry
-    console.log(
+    console.info(
       '%s%s[%s] %s%s%s',
       ''.padStart(item.isSelected ? pad-1 : pad, ' '),
       item.isSelected ? '✓' : '',
@@ -553,27 +554,27 @@ export default class Crunchy implements ServiceClass {
           
     );
     if(item.last_public){
-      console.log(''.padStart(pad+1, ' '), '- Last updated:', item.last_public);
+      console.info(''.padStart(pad+1, ' '), '- Last updated:', item.last_public);
     }
     if(item.subtitle_locales){
       iMetadata.subtitle_locales = item.subtitle_locales;
     }
     if (item.versions && audio_languages.length > 0) {
-      console.log(
+      console.info(
         '%s- Versions: %s',
         ''.padStart(pad + 2, ' '),
         langsData.parseSubtitlesArray(audio_languages)
       );
     }
     if(iMetadata.subtitle_locales && iMetadata.subtitle_locales.length > 0){
-      console.log(
+      console.info(
         '%s- Subtitles: %s',
         ''.padStart(pad + 2, ' '),
         langsData.parseSubtitlesArray(iMetadata.subtitle_locales)
       );
     }
     if(item.availability_notes){
-      console.log(
+      console.info(
         '%s- Availability notes: %s',
         ''.padStart(pad + 2, ' '),
         item.availability_notes.replace(/\[[^\]]*\]?/gm, '')
@@ -581,11 +582,11 @@ export default class Crunchy implements ServiceClass {
     }
     if(item.type == 'series' && getSeries){
       await this.logSeriesById(item.id, pad, true);
-      console.log();
+      console.info('');
     }
     if(item.type == 'movie_listing' && getMovieListing){
       await this.logMovieListingById(item.id, pad+2);
-      console.log();
+      console.info('');
     }
   }
 
@@ -595,7 +596,7 @@ export default class Crunchy implements ServiceClass {
     hideSeriesTitle = hideSeriesTitle !== undefined ? hideSeriesTitle : false;
     // check token
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
     // opts
@@ -609,7 +610,7 @@ export default class Crunchy implements ServiceClass {
     if(!hideSeriesTitle){
       const seriesReq = await this.req.getData(`${api.cms}/series/${id}?preferred_audio_language=ja-JP`, AuthHeaders);
       if(!seriesReq.ok || !seriesReq.res){
-        console.log('[ERROR] Series Request FAILED!');
+        console.error('Series Request FAILED!');
         return;
       }
       const seriesData = JSON.parse(seriesReq.res.body);
@@ -618,13 +619,13 @@ export default class Crunchy implements ServiceClass {
     // seasons list
     const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
-      console.log('[ERROR] Series Request FAILED!');
+      console.error('Series Request FAILED!');
       return;
     }
     // parse data
     const seasonsList = JSON.parse(seriesSeasonListReq.res.body) as SeriesSearch;
     if(seasonsList.total < 1){
-      console.log('[INFO] Series is empty!');
+      console.info('Series is empty!');
       return;
     }
     for(const item of seasonsList.data){
@@ -635,7 +636,7 @@ export default class Crunchy implements ServiceClass {
   public async logMovieListingById(id: string, pad?: number){
     pad = pad || 2;
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
     const movieListingReqOpts = [
@@ -651,12 +652,12 @@ export default class Crunchy implements ServiceClass {
     ].join('');
     const movieListingReq = await this.req.getData(movieListingReqOpts);
     if(!movieListingReq.ok || !movieListingReq.res){
-      console.log('[ERROR]  Movie Listing Request FAILED!');
+      console.error('Movie Listing Request FAILED!');
       return;
     }
     const movieListing = JSON.parse(movieListingReq.res.body);
     if(movieListing.total < 1){
-      console.log('[INFO] Movie Listing is empty!');
+      console.info('Movie Listing is empty!');
       return;
     }
     for(const item of movieListing.items){
@@ -666,7 +667,7 @@ export default class Crunchy implements ServiceClass {
   
   public async getNewlyAdded(page?: number){
     if(!this.token.access_token){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
     const newlyAddedReqOpts = {
@@ -682,11 +683,11 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const newlyAddedReq = await this.req.getData(`${api.beta_browse}?${newlyAddedParams}`, newlyAddedReqOpts);
     if(!newlyAddedReq.ok || !newlyAddedReq.res){
-      console.log('[ERROR] Get newly added FAILED!');
+      console.error('Get newly added FAILED!');
       return;
     }
     const newlyAddedResults = JSON.parse(newlyAddedReq.res.body);
-    console.log('[INFO] Newly added:');
+    console.info('Newly added:');
     for(const i of newlyAddedResults.items){
       await this.logObject(i, 2);
     }
@@ -694,12 +695,12 @@ export default class Crunchy implements ServiceClass {
     const itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.api_beta).searchParams.get('start') as string);
     const pageCur = itemPad > 0 ? Math.ceil(itemPad/25) + 1 : 1;
     const pageMax = Math.ceil(newlyAddedResults.total/25);
-    console.log(`  [INFO] Total results: ${newlyAddedResults.total} (Page: ${pageCur}/${pageMax})`);
+    console.info(`  Total results: ${newlyAddedResults.total} (Page: ${pageCur}/${pageMax})`);
   }
 
   public async getSeasonById(id: string, numbers: number, e: string|undefined, but: boolean, all: boolean) : Promise<ResponseBase<CrunchyEpMeta[]>> {
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return { isOk: false, reason: new Error('Authentication required') };
     }
 
@@ -714,7 +715,7 @@ export default class Crunchy implements ServiceClass {
     //get show info
     const showInfoReq = await this.req.getData(`${api.cms}/seasons/${id}?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!showInfoReq.ok || !showInfoReq.res){
-      console.log('[ERROR] Show Request FAILED!');
+      console.error('Show Request FAILED!');
       return { isOk: false, reason: new Error('Show request failed. No more information provided.') };
     }
     const showInfo = JSON.parse(showInfoReq.res.body);
@@ -723,7 +724,7 @@ export default class Crunchy implements ServiceClass {
     //get episode info
     const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!reqEpsList.ok || !reqEpsList.res){
-      console.log('[ERROR] Episode List Request FAILED!');
+      console.error('Episode List Request FAILED!');
       return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
     }
     const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyEpisodeList;
@@ -735,7 +736,7 @@ export default class Crunchy implements ServiceClass {
     const epNumLen = numbers;
       
     if(episodeList.total < 1){
-      console.log('  [INFO] Season is empty!');
+      console.info('  Season is empty!');
       return { isOk: true, value: [] };
     }
       
@@ -808,10 +809,10 @@ export default class Crunchy implements ServiceClass {
       
     // display
     if(selectedMedia.length < 1){
-      console.log('\n[INFO] Episodes not selected!\n');
+      console.info('\nEpisodes not selected!\n');
     }
       
-    console.log();
+    console.info('');
     return { isOk: true, value: selectedMedia };
   }
 
@@ -831,19 +832,19 @@ export default class Crunchy implements ServiceClass {
 
   public async getObjectById(e?: string, earlyReturn?: boolean): Promise<ObjectInfo|Partial<CrunchyEpMeta>[]|undefined> {
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
       
     const doEpsFilter = parseSelect(e as string);
       
     if(doEpsFilter.values.length < 1){
-      console.log('\n[INFO] Objects not selected!\n');
+      console.info('\nObjects not selected!\n');
       return;
     }
       
     // node index.js --service crunchy -e G6497Z43Y,GRZXCMN1W,G62PEZ2E6,G25FVGDEK,GZ7UVPVX5
-    console.log('[INFO] Requested object ID: %s', doEpsFilter.values.join(', '));
+    console.info('Requested object ID: %s', doEpsFilter.values.join(', '));
     
     const AuthHeaders = {
       headers: {
@@ -855,10 +856,10 @@ export default class Crunchy implements ServiceClass {
     // reqs
     const objectReq = await this.req.getData(`${api.cms}/objects/${doEpsFilter.values.join(',')}?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!objectReq.ok || !objectReq.res){
-      console.log('[ERROR] Objects Request FAILED!');
+      console.error('Objects Request FAILED!');
       if(objectReq.error && objectReq.error.res && objectReq.error.res.body){
         const objectInfo = JSON.parse(objectReq.error.res.body as string);
-        console.log('[INFO] Body:', JSON.stringify(objectInfo, null, '\t'));
+        console.info('Body:', JSON.stringify(objectInfo, null, '\t'));
         objectInfo.error = true;
         return objectInfo;
       }
@@ -870,7 +871,7 @@ export default class Crunchy implements ServiceClass {
       return objectInfo;
     }
       
-    const selectedMedia = [];
+    const selectedMedia: Partial<CrunchyEpMeta>[] = [];
       
     for(const item of objectInfo.data){
       if(item.type != 'episode' && item.type != 'movie'){
@@ -913,7 +914,7 @@ export default class Crunchy implements ServiceClass {
       }
       await this.logObject(item, 2);
     }
-    console.log();
+    console.info('');
     return selectedMedia;      
   }
 
@@ -923,7 +924,7 @@ export default class Crunchy implements ServiceClass {
     error: boolean
   } | undefined> {
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
 
@@ -937,7 +938,7 @@ export default class Crunchy implements ServiceClass {
     const files: DownloadedMedia[] = [];
   
     if(medias.data.every(a => !a.playback)){
-      console.log('[WARN] Video not available!');
+      console.warn('Video not available!');
       return undefined;
     }
 
@@ -946,7 +947,7 @@ export default class Crunchy implements ServiceClass {
     
 
     for (const mMeta of medias.data) {
-      console.log(`[INFO] Requesting: [${mMeta.mediaId}] ${mediaName}`);
+      console.info(`Requesting: [${mMeta.mediaId}] ${mediaName}`);
       
       //Make sure token is up to date
       await this.refreshToken(true, true);
@@ -962,7 +963,7 @@ export default class Crunchy implements ServiceClass {
       if (mMeta.versions && mMeta.lang) {
         mediaId = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale)?.media_guid as string;
         if (!mediaId) {
-          console.log('[ERROR] Selected language not found.');
+          console.error('Selected language not found.');
           return undefined;
         }
       }
@@ -973,10 +974,10 @@ export default class Crunchy implements ServiceClass {
 
       let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
       if(!playbackReq.ok || !playbackReq.res){
-        console.log('[ERROR] Request Stream URLs FAILED! Attempting fallback');
+        console.error('Request Stream URLs FAILED! Attempting fallback');
         playbackReq = await this.req.getData(`${domain.api_beta}${mMeta.playback}`, AuthHeaders);
         if(!playbackReq.ok || !playbackReq.res){
-          console.log('[ERROR] Fallback Request Stream URLs FAILED!');
+          console.error('Fallback Request Stream URLs FAILED!');
           return undefined;
         }
       }
@@ -998,7 +999,7 @@ export default class Crunchy implements ServiceClass {
         } as Variable;
       }));
     
-      let streams = [];
+      let streams: any[] = [];
       let hsLangs: string[] = [];
       const pbStreams = pbData.data[0];
 
@@ -1021,7 +1022,7 @@ export default class Crunchy implements ServiceClass {
       }
         
       if(streams.length < 1){
-        console.log('[WARN] No full streams found!');
+        console.warn('No full streams found!');
         return undefined;
       }
       
@@ -1044,7 +1045,7 @@ export default class Crunchy implements ServiceClass {
         
       if(options.hslang != 'none'){
         if(hsLangs.indexOf(options.hslang) > -1){
-          console.log('[INFO] Selecting stream with %s hardsubs', langsData.locale2language(options.hslang).language);
+          console.info('Selecting stream with %s hardsubs', langsData.locale2language(options.hslang).language);
           streams = streams.filter((s) => {
             if(s.hardsub_lang == '-'){
               return false;
@@ -1053,9 +1054,9 @@ export default class Crunchy implements ServiceClass {
           });
         }
         else{
-          console.log('[WARN] Selected stream with %s hardsubs not available', langsData.locale2language(options.hslang).language);
+          console.warn('Selected stream with %s hardsubs not available', langsData.locale2language(options.hslang).language);
           if(hsLangs.length > 0){
-            console.log('[WARN] Try other hardsubs stream:', hsLangs.join(', '));
+            console.warn('Try other hardsubs stream:', hsLangs.join(', '));
           }
           dlFailed = true;
         }
@@ -1068,13 +1069,13 @@ export default class Crunchy implements ServiceClass {
           return true;
         });
         if(streams.length < 1){
-          console.log('[WARN] Raw streams not available!');
+          console.warn('Raw streams not available!');
           if(hsLangs.length > 0){
-            console.log('[WARN] Try hardsubs stream:', hsLangs.join(', '));
+            console.warn('Try hardsubs stream:', hsLangs.join(', '));
           }
           dlFailed = true;
         }
-        console.log('[INFO] Selecting raw stream');
+        console.info('Selecting raw stream');
       }
         
       let curStream:
@@ -1086,19 +1087,19 @@ export default class Crunchy implements ServiceClass {
             
         streams.forEach((s, i) => {
           const isSelected = options.kstream == i + 1 ? '✓' : ' ';
-          console.log('[INFO] Full stream found! (%s%s: %s )', isSelected, i + 1, s.type); 
+          console.info('Full stream found! (%s%s: %s )', isSelected, i + 1, s.type); 
         });
             
-        console.log('[INFO] Downloading video...');
+        console.info('Downloading video...');
         curStream = streams[options.kstream-1];
             
-        console.log('[INFO] Playlists URL: %s (%s)', curStream.url, curStream.type);
+        console.info('Playlists URL: %s (%s)', curStream.url, curStream.type);
       }
         
       if(!options.novids && !dlFailed && curStream !== undefined){
         const streamPlaylistsReq = await this.req.getData(curStream.url);
         if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
-          console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLISTS!');
+          console.error('CAN\'T FETCH VIDEO PLAYLISTS!');
           dlFailed = true;
         }
         else{
@@ -1139,7 +1140,7 @@ export default class Crunchy implements ServiceClass {
                         && plStreams[plServer][plResolutionText] != pl.uri
                         && typeof plStreams[plServer][plResolutionText] != 'undefined'
             ){
-              console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
+              console.error(`Non duplicate url for ${plServer} detected, please report to developer!`);
             }
             else{
               plStreams[plServer][plResolutionText] = pl.uri;
@@ -1170,7 +1171,7 @@ export default class Crunchy implements ServiceClass {
           });
           let quality = options.q === 0 ? plQuality.length : options.q;
           if(quality > plQuality.length) {
-            console.log(`[WARN] The requested quality of ${options.q} is greater than the maximun ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
+            console.warn(`The requested quality of ${options.q} is greater than the maximun ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
             quality = plQuality.length;
           }
           // When best selected video quality is already downloaded
@@ -1181,8 +1182,8 @@ export default class Crunchy implements ServiceClass {
             }
           }
           const selPlUrl = plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
-          console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
-          console.log(`[INFO] Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
+          console.info(`Servers available:\n\t${plServerList.join('\n\t')}`);
+          console.info(`Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
     
           if(selPlUrl != ''){
             variables.push({
@@ -1196,18 +1197,18 @@ export default class Crunchy implements ServiceClass {
             });
             const lang = langsData.languages.find(a => a.code === curStream?.audio_lang);
             if (!lang) {
-              console.log(`[ERROR] Unable to find language for code ${curStream.audio_lang}`);
+              console.error(`Unable to find language for code ${curStream.audio_lang}`);
               return;
             }
-            console.log(`[INFO] Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
-            console.log('[INFO] Stream URL:', selPlUrl);
+            console.info(`Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
+            console.info('Stream URL:', selPlUrl);
             // TODO check filename
             fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
             const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
-            console.log(`[INFO] Output filename: ${outFile}`);
+            console.info(`Output filename: ${outFile}`);
             const chunkPage = await this.req.getData(selPlUrl);
             if(!chunkPage.ok || !chunkPage.res){
-              console.log('[ERROR] CAN\'T FETCH VIDEO PLAYLIST!');
+              console.error('CAN\'T FETCH VIDEO PLAYLIST!');
               dlFailed = true;
             }
             else{
@@ -1215,7 +1216,7 @@ export default class Crunchy implements ServiceClass {
               const totalParts = chunkPlaylist.segments.length;
               const mathParts  = Math.ceil(totalParts / options.partsize);
               const mathMsg    = `(${mathParts}*${options.partsize})`;
-              console.log('[INFO] Total parts in stream:', totalParts, mathMsg);
+              console.info('Total parts in stream:', totalParts, mathMsg);
               const tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
               const split = outFile.split(path.sep).slice(0, -1);
               split.forEach((val, ind, arr) => {
@@ -1242,7 +1243,7 @@ export default class Crunchy implements ServiceClass {
                 }) : undefined
               }).download();
               if(!dlStreamByPl.ok){
-                console.log(`[ERROR] DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
+                console.error(`DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
                 dlFailed = true;
               }
               files.push({
@@ -1254,14 +1255,14 @@ export default class Crunchy implements ServiceClass {
             }
           }
           else{
-            console.log('[ERROR] Quality not selected!\n');
+            console.error('Quality not selected!\n');
             dlFailed = true;
           }
         }
       }
       else if(options.novids){
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
-        console.log('[INFO] Downloading skipped!');
+        console.info('Downloading skipped!');
       }
       
         
@@ -1270,7 +1271,7 @@ export default class Crunchy implements ServiceClass {
       }
         
       if(options.hslang != 'none'){
-        console.log('[WARN] Subtitles downloading disabled for hardsubs streams.');
+        console.warn('Subtitles downloading disabled for hardsubs streams.');
         options.skipsubs = true;
       }
   
@@ -1307,7 +1308,7 @@ export default class Crunchy implements ServiceClass {
                 sxData.title = `${langItem.language} / ${sxData.title}`;
                 sxData.fonts = fontsData.assFonts(sBody) as Font[];
                 fs.writeFileSync(sxData.path, sBody);
-                console.log(`[INFO] Subtitle downloaded: ${sxData.file}`);
+                console.info(`Subtitle downloaded: ${sxData.file}`);
                 files.push({
                   type: 'Subtitle',
                   ...sxData as sxItem,
@@ -1315,17 +1316,17 @@ export default class Crunchy implements ServiceClass {
                 });
               }
               else{
-                console.log(`[WARN] Failed to download subtitle: ${sxData.file}`);
+                console.warn(`Failed to download subtitle: ${sxData.file}`);
               }
             }
           }
         }
         else{
-          console.log('[WARN] Can\'t find urls for subtitles!');
+          console.warn('Can\'t find urls for subtitles!');
         }
       }
       else{
-        console.log('[INFO] Subtitles downloading skipped!');
+        console.info('Subtitles downloading skipped!');
       }
     }
     return {
@@ -1338,7 +1339,7 @@ export default class Crunchy implements ServiceClass {
   public async muxStreams(data: DownloadedMedia[], options: CrunchyMuxOptions) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
-      return console.log('[INFO] Skip muxing since no vids are downloaded');
+      return console.info('Skip muxing since no vids are downloaded');
     const merger = new Merger({
       onlyVid: [],
       skipSubMux: options.skipSubMux,
@@ -1385,7 +1386,7 @@ export default class Crunchy implements ServiceClass {
       await merger.merge('ffmpeg', bin.FFmpeg);
       isMuxed = true;
     } else{
-      console.log('\n[INFO] Done!\n');
+      console.info('\nDone!\n');
       return;
     }
     if (isMuxed && !options.nocleanup)
@@ -1465,7 +1466,7 @@ export default class Crunchy implements ServiceClass {
   
     for (const key of Object.keys(episodes)) {
       const item = episodes[key];
-      console.log(`[${key}] ${
+      console.info(`[${key}] ${
         item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
       } - Season ${item.items[0].season_number} - ${item.items[0].title} [${
         item.items.map((a, index) => {
@@ -1477,7 +1478,7 @@ export default class Crunchy implements ServiceClass {
     //TODO: Sort episodes to have specials at the end
 
     if (!serieshasversions) {
-      console.log('[WARN] Couldn\'t find versions on some episodes, fell back to old method.');
+      console.warn('Couldn\'t find versions on some episodes, fell back to old method.');
     }
 
     return { data: episodes, list: Object.entries(episodes).map(([key, value]) => {
@@ -1500,13 +1501,13 @@ export default class Crunchy implements ServiceClass {
 
   public async downloadFromSeriesID(id: string, data: CurnchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
     const { data: episodes } = await this.listSeriesID(id);
-    console.log();
-    console.log('-'.repeat(30));
-    console.log();
+    console.info('');
+    console.info('-'.repeat(30));
+    console.info('');
     const selected = this.itemSelectMultiDub(episodes, data.dubLang, data.but, data.all, data.e);
     for (const key of Object.keys(selected)) {
       const item = selected[key];
-      console.log(`[S${item.season}E${item.episodeNumber}] - ${item.episodeTitle} [${
+      console.info(`[S${item.season}E${item.episodeNumber}] - ${item.episodeTitle} [${
         item.data.map(a => {
           return `✓ ${a.lang?.name || 'Unknown Language'}`;
         }).join(', ')
@@ -1611,7 +1612,7 @@ export default class Crunchy implements ServiceClass {
   
   public async parseSeriesById(id: string) {
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
 
@@ -1625,13 +1626,13 @@ export default class Crunchy implements ServiceClass {
     // seasons list
     const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
-      console.log('[ERROR] Series Request FAILED!');
+      console.error('Series Request FAILED!');
       return;
     }
     // parse data
     const seasonsList = JSON.parse(seriesSeasonListReq.res.body) as SeriesSearch;
     if(seasonsList.total < 1){
-      console.log('[INFO] Series is empty!');
+      console.info('Series is empty!');
       return;
     }
     return seasonsList;
@@ -1639,7 +1640,7 @@ export default class Crunchy implements ServiceClass {
   
   public async getSeasonDataById(item: SeriesSearchItem, log = false){
     if(!this.cmsToken.cms){
-      console.log('[ERROR] Authentication required!');
+      console.error('Authentication required!');
       return;
     }
 
@@ -1653,7 +1654,7 @@ export default class Crunchy implements ServiceClass {
     //get show info
     const showInfoReq = await this.req.getData(`${api.cms}/seasons/${item.id}?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!showInfoReq.ok || !showInfoReq.res){
-      console.log('[ERROR] Show Request FAILED!');
+      console.error('Show Request FAILED!');
       return;
     }
     const showInfo = JSON.parse(showInfoReq.res.body);
@@ -1662,13 +1663,13 @@ export default class Crunchy implements ServiceClass {
     //get episode info
     const reqEpsList = await this.req.getData(`${api.cms}/seasons/${item.id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!reqEpsList.ok || !reqEpsList.res){
-      console.log('[ERROR] Episode List Request FAILED!');
+      console.error('Episode List Request FAILED!');
       return;
     }
     const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyEpisodeList;
       
     if(episodeList.total < 1){
-      console.log('  [INFO] Season is empty!');
+      console.info('  Season is empty!');
       return;
     }
     return episodeList;

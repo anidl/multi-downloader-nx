@@ -1,11 +1,11 @@
-import React from "react";
-import { Box, ClickAwayListener, Divider, List, ListItem, Paper, TextField, Typography } from "@mui/material";
-import { SearchResponse } from "../../../../../../@types/messageHandler";
-import useStore from "../../../hooks/useStore";
-import { messageChannelContext } from "../../../provider/MessageChannel";
+import React from 'react';
+import { Box, ClickAwayListener, Divider, List, ListItem, Paper, TextField, Typography } from '@mui/material';
+import { SearchResponse } from '../../../../../../@types/messageHandler';
+import useStore from '../../../hooks/useStore';
+import { messageChannelContext } from '../../../provider/MessageChannel';
 import './SearchBox.css';
-import ContextMenu from "../../reusable/ContextMenu";
-import { useSnackbar } from "notistack";
+import ContextMenu from '../../reusable/ContextMenu';
+import { useSnackbar } from 'notistack';
 
 const SearchBox: React.FC = () => {
   const messageHandler = React.useContext(messageChannelContext);
@@ -52,13 +52,13 @@ const SearchBox: React.FC = () => {
             searchResult.value.map((a, ind, arr) => {
               const imageRef = React.createRef<HTMLImageElement>();
               return <Box key={a.id}>
-                <ListItem className='listitem-hover' onClick={(e) => {
+                <ListItem className='listitem-hover' onClick={() => {
                   selectItem(a.id);
                   setFocus(false);
                 }}>
                   <Box sx={{ display: 'flex' }}>
                     <Box sx={{ width: '20%', height: '100%', pr: 2 }}>
-                      <img ref={imageRef} src={a.image} style={{ width: '100%', height: '100%' }}/>
+                      <img ref={imageRef} src={a.image} style={{ width: '100%', height: 'auto' }} alt="thumbnail"/>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', maxWidth: '70%' }}>
                       <Typography variant='h6' component='h6' color='text.primary' sx={{  }}>
@@ -83,13 +83,13 @@ const SearchBox: React.FC = () => {
                   });
                 }} ]} popupItem={imageRef} />
                 {(ind < arr.length - 1) && <Divider />}
-              </Box>
+              </Box>;
             })
-          : <></>}
+            : <></>}
         </List>
       </Paper>}
     </Box>
-  </ClickAwayListener>
-}
+  </ClickAwayListener>;
+};
 
 export default SearchBox;

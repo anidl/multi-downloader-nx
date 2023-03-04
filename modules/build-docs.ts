@@ -45,7 +45,7 @@ Object.entries(groups).forEach(([key, value]) => {
       typeof argument.default === 'object'
         ? Array.isArray(argument.default) 
           ? JSON.stringify(argument.default)
-          : argument.default.default
+          : (argument.default as any).default
         : argument.default
     }\`|` : ''}`
     + ` ${typeof argument.default === 'object' && !Array.isArray(argument.default)

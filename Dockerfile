@@ -15,13 +15,13 @@ RUN echo 'ffmpeg: "./bin/ffmpeg/ffmpeg"\nmkvmerge: "./bin/mkvtoolnix/mkvmerge"' 
 
 RUN npm install -g pnpm
 RUN pnpm i
-RUN pnpm run build-ubuntu-cli
+RUN pnpm run build-ubuntu-gui
 
 # Move build to new Clean Image
 
 FROM node
 WORKDIR "/app"
-COPY --from=builder /app/lib/_builds/multi-downloader-nx-ubuntu64-cli ./
+COPY --from=builder /app/lib/_builds/multi-downloader-nx-ubuntu64-gui ./
 
 # Install mkvmerge and ffmpeg
 
@@ -29,10 +29,11 @@ RUN mkdir -p /app/bin/mkvtoolnix
 RUN mkdir -p /app/bin/ffmpeg
 
 RUN apt-get update
+RUN apt-get install xdg-utils -y
 RUN apt-get install mkvtoolnix -y
-RUN apt-get install ffmpeg -y
+#RUN apt-get install ffmpeg -y
 
 RUN mv /usr/bin/mkvmerge /app/bin/mkvtoolnix/mkvmerge
-RUN mv /usr/bin/ffmpeg /app/bin/ffmpeg/ffmpeg
+#RUN mv /usr/bin/ffmpeg /app/bin/ffmpeg/ffmpeg
 
-CMD [ "/bin/bash" ]
+CMD [ "/app/aniDL" ]

@@ -3,15 +3,13 @@ import fs from 'fs';
 import path from 'path';
 
 // package json
-import packageJson from './package.json'; 
-
-// program name
-const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
+import packageJson from './package.json';
 
 // modules extra
+import { console } from './modules/log';
 import * as shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
-import hlsDownload, { HLSCallback } from 'hls-download';
+import hlsDownload, { HLSCallback } from './modules/hls-download';
 
 // extra
 import * as appYargs from './modules/module.app-args';
@@ -19,7 +17,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import vttConvert from './modules/module.vttconvert';
 
 // types
-import { Item } from './@types/items';
+import type { Item } from './@types/items.js';
 
 // params
 
@@ -39,7 +37,10 @@ import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
 import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData, FuniEpisodeData, ResponseBase } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
-import { SubtitleRequest } from './@types/funiSubtitleRequest';
+import { SubtitleRequest } from './@types/funiSubtitleRequest'; 
+
+// program name
+const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
 // check page
 
 // fn variables
@@ -73,7 +74,7 @@ export default class Funi implements ServiceClass {
     const argv = appYargs.appArgv(this.cfg.cli);
     if (argv.debug)
       this.debug = true;
-    console.log(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
+    console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     if (argv.allDubs) {
       argv.dubLang = langsData.dubLanguageCodes;
     }
@@ -98,7 +99,7 @@ export default class Funi implements ServiceClass {
     else if(argv.s && !isNaN(parseInt(argv.s)) && parseInt(argv.s) > 0){
       const data = await this.getShow(true, { id: parseInt(argv.s), but: argv.but, all: argv.all, e: argv.e });
       if (!data.isOk) {
-        console.log(`[ERROR] ${data.reason.message}`);
+        console.error(`${data.reason.message}`);
         return false;
       }
       let ok = true;
@@ -112,7 +113,7 @@ export default class Funi implements ServiceClass {
       return ok;
     }
     else{
-      console.log('[INFO] No option selected or invalid value entered. Try --help.');
+      console.info('No option selected or invalid value entered. Try --help.');
     }
   }
   public async auth(data: AuthData): Promise<AuthResponse> {
@@ -129,14 +130,14 @@ export default class Funi implements ServiceClass {
     if(authData.ok && authData.res){
       const resJSON = JSON.parse(authData.res.body);
       if(resJSON.token){
-        console.log('[INFO] Authentication success, your token: %s%s\n', resJSON.token.slice(0,8),'*'.repeat(32));
+        console.info('Authentication success, your token: %s%s\n', resJSON.token.slice(0,8),'*'.repeat(32));
         yamlCfg.saveFuniToken({'token': resJSON.token});
         this.token = resJSON.token;
         return { isOk: true, value: undefined };
       } else {
-        console.log('[ERROR]%s\n', ' No token found');
+        console.info('[ERROR]%s\n', ' No token found');
         if (this.debug) {
-          console.log(resJSON);
+          console.info(resJSON);
         }
         return { isOk: false, reason: new Error(resJSON) };
       }
@@ -159,18 +160,18 @@ export default class Funi implements ServiceClass {
     }
     const searchDataJSON = JSON.parse(searchData.res.body);
     if(searchDataJSON.detail){
-      console.log(`[ERROR] ${searchDataJSON.detail}`);
+      console.error(`${searchDataJSON.detail}`);
       return { isOk: false, reason: new Error(searchDataJSON.defail) };
     }
     if(searchDataJSON.items && searchDataJSON.items.hits && log){
       const shows = searchDataJSON.items.hits;
-      console.log('[INFO] Search Results:');
+      console.info('Search Results:');
       for(const ssn in shows){
-        console.log(`[#${shows[ssn].id}] ${shows[ssn].title}` + (shows[ssn].tx_date?` (${shows[ssn].tx_date})`:''));
+        console.info(`[#${shows[ssn].id}] ${shows[ssn].title}` + (shows[ssn].tx_date?` (${shows[ssn].tx_date})`:''));
       }
     }
     if (log)
-      console.log('[INFO] Total shows found: %s\n',searchDataJSON.count);
+      console.info('Total shows found: %s\n',searchDataJSON.count);
     return { isOk: true, value: searchDataJSON };
   }
 
@@ -186,15 +187,15 @@ export default class Funi implements ServiceClass {
     if(!showData.ok || !showData.res){ return { isOk: false, reason: new Error('ShowData is not ok') }; }
     const showDataJSON = JSON.parse(showData.res.body);
     if(showDataJSON.status){
-      console.log('[ERROR] Error #%d: %s\n', showDataJSON.status, showDataJSON.data.errors[0].detail);
+      console.error('Error #%d: %s\n', showDataJSON.status, showDataJSON.data.errors[0].detail);
       return { isOk: false, reason: new Error(showDataJSON.data.errors[0].detail) };
     }
     else if(!showDataJSON.items || showDataJSON.items.length<1){
-      console.log('[ERROR] Show not found\n');
+      console.error('Show not found\n');
       return { isOk: false, reason: new Error('Show not found') };
     }
     const showDataItem = showDataJSON.items[0];
-    console.log('[#%s] %s (%s)',showDataItem.id,showDataItem.title,showDataItem.releaseYear);
+    console.info('[#%s] %s (%s)',showDataItem.id,showDataItem.title,showDataItem.releaseYear);
     // show episodes
     const qs: {
           limit: number,
@@ -219,7 +220,7 @@ export default class Funi implements ServiceClass {
     const parseEpStr = (epStr: string) => {
       const match = epStr.match(epNumRegex);
       if (!match) {
-        console.error('[ERROR] No match found');
+        console.error('No match found');
         return ['', ''];
       }
       if(match.length > 2){
@@ -241,7 +242,7 @@ export default class Funi implements ServiceClass {
       }
       else{
         Funi.typeIdLen = 3 > Funi.typeIdLen? 3 : Funi.typeIdLen;
-        console.log('[ERROR] FAILED TO PARSE: ', e.id);
+        console.error('FAILED TO PARSE: ', e.id);
         e.id_split = [ 'ZZZ', 9999 ];
       }
       return e;
@@ -266,7 +267,7 @@ export default class Funi implements ServiceClass {
       return showList;
     const eps = showList.value;
     const epSelList = parseSelect(data.e as string, data.but);
-    const fnSlug: FuniEpisodeData[] = [], epSelEpsTxt = []; let is_selected = false;
+    const fnSlug: FuniEpisodeData[] = [], epSelEpsTxt: string[] = []; let is_selected = false;
 
       
     for(const e in eps){
@@ -308,16 +309,16 @@ export default class Funi implements ServiceClass {
       conOut += `(${rtm_str}) [${qua_str+aud_str}]`;
       conOut += is_selected ? ' (selected)' : '';
       conOut += eps.length-1 == parseInt(e) ? '\n' : '';
-      console.log(conOut);
+      console.info(conOut);
     }
     if(fnSlug.length < 1){
       if (log)
-        console.log('[INFO] Episodes not selected!\n');
+        console.info('Episodes not selected!\n');
       return { isOk: true, value: [] } ;
     }
     else{
       if (log)
-        console.log('[INFO] Selected Episodes: %s\n',epSelEpsTxt.join(', '));
+        console.info('Selected Episodes: %s\n',epSelEpsTxt.join(', '));
       return { isOk: true, value: fnSlug };
     }
   }
@@ -331,7 +332,7 @@ export default class Funi implements ServiceClass {
       debug: this.debug,
     });
     if(!episodeData.ok || !episodeData.res){return { isOk: false, reason: new Error('Unable to get episodeData') }; }
-    const ep = JSON.parse(episodeData.res.body).items[0] as EpisodeData, streamIds = [];
+    const ep = JSON.parse(episodeData.res.body).items[0] as EpisodeData, streamIds: { id: number, lang: langsData.LanguageItem }[] = [];
     // build fn
     season = parseInt(ep.parent.seasonNumber);
     if(ep.mediaCategory != 'Episode'){
@@ -347,15 +348,15 @@ export default class Funi implements ServiceClass {
       
     // end
     if (log) {
-      console.log(
-        '[INFO] %s - S%sE%s - %s',
+      console.info(
+        '%s - S%sE%s - %s',
         ep.parent.title,
         (ep.parent.seasonNumber ? ep.parent.seasonNumber : '?'),
         (ep.number ? ep.number : '?'),
         ep.title
       );
       
-      console.log('[INFO] Available streams (Non-Encrypted):');
+      console.info('Available streams (Non-Encrypted):');
     }
     // map medias
     const media = await Promise.all(ep.media.map(async (m) =>{
@@ -406,7 +407,7 @@ export default class Funi implements ServiceClass {
             if (!subsToDisplay.includes(a.lang))
               subsToDisplay.push(a.lang);
           });
-          console.log(`[#${m.id}] ${dub_type} [${m.version}]${(selected?' (selected)':'')}${
+          console.info(`[#${m.id}] ${dub_type} [${m.version}]${(selected?' (selected)':'')}${
             localSubs && localSubs.length > 0 && selected ? ` (using ${subsToDisplay.map(a => `'${a.name}'`).join(', ')} for subtitles)` : ''
           }`);
         }
@@ -424,7 +425,7 @@ export default class Funi implements ServiceClass {
     });
     if(streamIds.length < 1){
       if (log)
-        console.log('[ERROR] Track not selected\n');
+        console.error('Track not selected\n');
       return { isOk: false, reason: new Error('Track not selected') };
     }
     else{
@@ -442,7 +443,7 @@ export default class Funi implements ServiceClass {
         const streamDataRes = JSON.parse(streamData.res.body) as StreamData;
         if(streamDataRes.errors){
           if (log)
-            console.log('[ERROR] Error #%s: %s\n',streamDataRes.errors[0].code,streamDataRes.errors[0].detail);
+            console.info('Error #%s: %s\n',streamDataRes.errors[0].code,streamDataRes.errors[0].detail);
           return { isOk: false, reason: new Error(streamDataRes.errors[0].detail) };
         }
         else{
@@ -459,7 +460,7 @@ export default class Funi implements ServiceClass {
       }
       if(tsDlPath.length < 1){
         if (log)
-          console.log('[ERROR] Unknown error\n');
+          console.error('Unknown error\n');
         return { isOk: false, reason: new Error('Unknown error') };
       }
       else{
@@ -508,7 +509,7 @@ export default class Funi implements ServiceClass {
         plStreams: Record<string|number, {
         [key: string]: string   
       }> = {},
-        plLayersStr  = [],
+        plLayersStr: string[]  = [],
         plLayersRes: Record<string|number, {
         width: number,
         height: number
@@ -525,7 +526,7 @@ export default class Funi implements ServiceClass {
       if(plQualityLinkList.playlists[0].uri.match(vplReg)){
         const audioKey = Object.keys(plQualityLinkList.mediaGroups.AUDIO).pop();
         if (!audioKey)
-          return console.log('[ERROR] No audio key found');
+          return console.error('No audio key found');
         if(plQualityLinkList.mediaGroups.AUDIO[audioKey]){
           const audioDataParts = plQualityLinkList.mediaGroups.AUDIO[audioKey],
             audioEl = Object.keys(audioDataParts);
@@ -535,7 +536,7 @@ export default class Funi implements ServiceClass {
             language = langsData.languages.find(a => a.funi_name_lagacy === audioEl[0] || ((a.funi_name ?? a.name) === audioEl[0]));
             if (!language) {
               if (log)
-                console.log(`[ERROR] Unable to find language for locale ${audioData.language} or name ${audioEl[0]}`);
+                console.error(`Unable to find language for locale ${audioData.language} or name ${audioEl[0]}`);
               return;
             }
           }
@@ -547,7 +548,7 @@ export default class Funi implements ServiceClass {
         plQualityLinkList.playlists.sort((a, b) => {
           const aMatch = a.uri.match(vplReg), bMatch = b.uri.match(vplReg);
           if (!aMatch || !bMatch) {
-            console.log('[ERROR] Unable to match');
+            console.info('Unable to match');
             return 0;
           }
           const av = parseInt(aMatch[3]);
@@ -584,7 +585,7 @@ export default class Funi implements ServiceClass {
             plStreams[plServer] = {};
           }
           if(plStreams[plServer][plLayerId] && plStreams[plServer][plLayerId] != plUrlDl){
-            console.log(`[WARN] Non duplicate url for ${plServer} detected, please report to developer!`);
+            console.warn(`Non duplicate url for ${plServer} detected, please report to developer!`);
           }
           else{
             plStreams[plServer][plLayerId] = plUrlDl;
@@ -604,7 +605,7 @@ export default class Funi implements ServiceClass {
           }
         }
         else {
-          console.log(s.uri);
+          console.info(s.uri);
         }
       }
   
@@ -622,8 +623,8 @@ export default class Funi implements ServiceClass {
           
       plLayersStr.sort();
       if (log) {
-        console.log(`[INFO] Servers available:\n\t${plServerList.join('\n\t')}`);
-        console.log(`[INFO] Available qualities:\n\t${plLayersStr.join('\n\t')}`);
+        console.info(`Servers available:\n\t${plServerList.join('\n\t')}`);
+        console.info(`Available qualities:\n\t${plLayersStr.join('\n\t')}`);
       }
   
       const selectedQuality = data.q === 0 || data.q > Object.keys(plLayersRes).length
@@ -633,8 +634,8 @@ export default class Funi implements ServiceClass {
   
       if(videoUrl != ''){
         if (log) {
-          console.log(`[INFO] Selected layer: ${selectedQuality} (${plLayersRes[selectedQuality].width}x${plLayersRes[selectedQuality].height}) @ ${plSelectedServer}`);
-          console.log('[INFO] Stream URL:',videoUrl);
+          console.info(`Selected layer: ${selectedQuality} (${plLayersRes[selectedQuality].width}x${plLayersRes[selectedQuality].height}) @ ${plSelectedServer}`);
+          console.info('Stream URL:',videoUrl);
         }
       
         fnOutput = parseFileName(data.fileName, ([
@@ -656,16 +657,16 @@ export default class Funi implements ServiceClass {
         if (fnOutput.length < 1)
           throw new Error(`Invalid path generated for input ${data.fileName}`);
         if (log)
-          console.log(`[INFO] Output filename: ${fnOutput.join(path.sep)}.ts`);
+          console.info(`Output filename: ${fnOutput.join(path.sep)}.ts`);
       }
       else if(data.x > plServerList.length){
         if (log)
-          console.log('[ERROR] Server not selected!\n');
+          console.error('Server not selected!\n');
         return;
       }
       else{
         if (log)
-          console.log('[ERROR] Layer not selected!\n');
+          console.error('Layer not selected!\n');
         return;
       }
           
@@ -715,7 +716,7 @@ export default class Funi implements ServiceClass {
       }
       else{
         if (log)
-          console.log('[INFO] Skip video downloading...\n');
+          console.info('Skip video downloading...\n');
       }
       audio: if (plAud && !data.noaudio) {
         // download audio
@@ -756,7 +757,7 @@ export default class Funi implements ServiceClass {
     // download subtitles
     if(stDlPath.length > 0){
       if (log)
-        console.log('[INFO] Downloading subtitles...');
+        console.info('Downloading subtitles...');
       for (const subObject of stDlPath) {
         const subsSrc = await getData({
           url: subObject.url,
@@ -769,24 +770,24 @@ export default class Funi implements ServiceClass {
         }
         else{
           if (log)
-            console.log('[ERROR] Failed to download subtitles!');
+            console.error('Failed to download subtitles!');
           addSubs = false;
           break;
         }
       }
       if (addSubs && log)
-        console.log('[INFO] Subtitles downloaded!');
+        console.info('Subtitles downloaded!');
     }
     
     if((puraudio.length < 1 && audioAndVideo.length < 1) || (purvideo.length < 1 && audioAndVideo.length < 1)){
       if (log)
-        console.log('\n[INFO] Unable to locate a video AND audio file\n');
+        console.info('\nUnable to locate a video AND audio file\n');
       return;
     }
       
     if(data.skipmux){
       if (log)
-        console.log('[INFO] Skipping muxing...');
+        console.info('Skipping muxing...');
       return;
     }
       
@@ -796,7 +797,7 @@ export default class Funi implements ServiceClass {
       
     if ( data.novids ){
       if (log)
-        console.log('[INFO] Video not downloaded. Skip muxing video.');
+        console.info('Video not downloaded. Skip muxing video.');
     }
   
     const ffext = !data.mp4 ? 'mkv' : 'mp4';
@@ -835,7 +836,7 @@ export default class Funi implements ServiceClass {
     }
     else{
       if (log)
-        console.log('\n[INFO] Done!\n');
+        console.info('\nDone!\n');
       return true;
     }
     if (data.nocleanup) {
@@ -844,7 +845,7 @@ export default class Funi implements ServiceClass {
       
     mergeInstance.cleanUp();
     if (log)
-      console.log('\n[INFO] Done!\n');
+      console.info('\nDone!\n');
     return true;
   }
   
@@ -878,7 +879,7 @@ export default class Funi implements ServiceClass {
       querystring: { deviceType: 'web' }
     });
     if (!subs.ok || !subs.res || !subs.res.body) {
-      console.log('[ERROR] Subtitle Request failed.');
+      console.error('Subtitle Request failed.');
       return [];
     }
     const parsed: SubtitleRequest = JSON.parse(subs.res.body);

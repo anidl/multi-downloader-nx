@@ -2,7 +2,6 @@ import { ChildProcess, exec } from 'child_process';
 import fs from 'fs-extra';
 import path from 'path';
 import { removeSync, copyFileSync } from 'fs-extra';
-import packageJSON from './package.json';
 
 const argv = process.argv.slice(2);
 let buildIgnore: string[] = [];
@@ -13,12 +12,14 @@ const isGUI = !(argv.length > 1 && argv[1] === 'false');
 if (!isTest)
   buildIgnore = [
     '*/\\.env',
+    './config/setup.json'
   ];
 
 if (!isGUI)
   buildIgnore = buildIgnore.concat([
     './gui*',
-    './build*'
+    './build*',
+    'gui.ts'
   ]);
 
 
@@ -77,6 +78,10 @@ export { ignore };
   
     const react = exec('pnpm run build', {
       cwd: path.join(__dirname, 'gui', 'react'),
+      env: {
+        ...process.env,
+        CI: 'false'
+      }
     });
   
     await waitForProcess(react);
@@ -84,7 +89,7 @@ export { ignore };
 
   process.stdout.write('✓\nCopying files... ');
   if (!isTest && isGUI) {
-    copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'electron', 'build'));
+    copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'server', 'build'));
   }
 
   const files = readDir(__dirname);
@@ -99,9 +104,6 @@ export { ignore };
   });
 
   process.stdout.write('✓\nInstalling dependencies... ');
-  if (!isTest && !isGUI) {
-    alterJSON();
-  }
   if (!isTest) {
     const dependencies = exec(`pnpm install ${isGUI ? '' : '-P'}`, {
       cwd: path.join(__dirname, 'lib')
@@ -111,11 +113,6 @@ export { ignore };
 
   process.stdout.write('✓\n');
 })();
-
-function alterJSON() {
-  packageJSON.main = 'index.js';
-  fs.writeFileSync(path.join('lib', 'package.json'), JSON.stringify(packageJSON, null, 4));
-}
 
 function readDir (dir: string): {
   path: string,

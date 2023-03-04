@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Backdrop, CircularProgress } from "@mui/material";
+import React from 'react';
+import { Box, Backdrop, CircularProgress } from '@mui/material';
 
 export type RequireType<T> = {
   value?: T
@@ -8,7 +8,7 @@ export type RequireType<T> = {
 const Require = <T, >(props: React.PropsWithChildren<RequireType<T>>) => {
   return props.value === undefined ? <Backdrop open>
     <CircularProgress />
-  </Backdrop> : <Box>{props.children}</Box>
-}
+  </Backdrop> : <Box>{props.children}</Box>;
+};
 
 export default Require;

@@ -9,7 +9,8 @@ const groups = {
   'fileName': 'Filename Template:',
   'debug': 'Debug:',
   'util': 'Utilities:',
-  'help': 'Help:'
+  'help': 'Help:',
+  'gui': 'GUI:'
 };
 
 export type AvailableFilenameVars =  'title' | 'episode' | 'showTitle' | 'season' | 'width' | 'height' | 'service'
@@ -715,10 +716,10 @@ const getDefault = <T extends boolean|string|number|unknown[]>(name: string, cfg
   if (typeof option.default === 'object') {
     if (Array.isArray(option.default))
       return option.default as T;
-    if (Object.prototype.hasOwnProperty.call(cfg, option.default.name ?? option.name)) {
-      return cfg[option.default.name ?? option.name];
+    if (Object.prototype.hasOwnProperty.call(cfg, (option.default as any).name ?? option.name)) {
+      return cfg[(option.default as any).name ?? option.name];
     } else {
-      return option.default.default as T;
+      return (option.default as any).default as T;
     }
   } else {
     return option.default as T;
@@ -733,7 +734,7 @@ const buildDefault = () => {
       if (Array.isArray(item.default)) {
         data[item.name] = item.default;
       } else {
-        data[item.default.name ?? item.name] = item.default.default;
+        data[(item.default as any).name ?? item.name] = (item.default as any).default;
       }
     } else {
       data[item.name] = item.default;

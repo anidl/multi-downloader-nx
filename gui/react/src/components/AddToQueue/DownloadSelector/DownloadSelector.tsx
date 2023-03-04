@@ -1,11 +1,10 @@
-import React from "react";
-import { Backdrop, Box, Button, Checkbox, Chip, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, OutlinedInput, Select, TextField } from "@mui/material";
-import useStore from "../../../hooks/useStore";
-import MultiSelect from "../../reusable/MultiSelect";
-import { messageChannelContext } from "../../../provider/MessageChannel";
+import React from 'react';
+import { Box, Button, TextField } from '@mui/material';
+import useStore from '../../../hooks/useStore';
+import MultiSelect from '../../reusable/MultiSelect';
+import { messageChannelContext } from '../../../provider/MessageChannel';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { useSnackbar } from "notistack";
-import { Folder } from "@mui/icons-material";
+import { useSnackbar } from 'notistack';
 
 type DownloadSelectorProps = {
   onFinish?: () => unknown
@@ -48,22 +47,14 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
   const addToQueue = async () => {
     setLoading(true);
     const res = await messageHandler?.resolveItems(store.downloadOptions);
-    if (!res || !res.isOk) {
-      console.error(res);
-      setLoading(false);
+    if (!res)
       return enqueueSnackbar('The request failed. Please check if the ID is correct.', {
         variant: 'error'
       });
-    } else {
-      dispatch({
-        type: 'queue',
-        payload: res.value
-      });
-    }
     setLoading(false);
     if (onFinish)
       onFinish();
-  }
+  };
 
   const listEpisodes = async () => {
     if (!store.downloadOptions.id) {
@@ -85,7 +76,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
       });
     }
     setLoading(false);
-  }
+  };
 
   return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
     <Box sx={{ m: 2, gap: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -93,7 +84,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
         dispatch({
           type: 'downloadOptions',
           payload: { ...store.downloadOptions, id: e.target.value }
-        })
+        });
       }} label='Item ID' />
       <TextField type='number' value={store.downloadOptions.q} required onChange={e => {
         const parsed = parseInt(e.target.value);
@@ -102,13 +93,13 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
         dispatch({
           type: 'downloadOptions',
           payload: { ...store.downloadOptions, q: parsed }
-        })
+        });
       }} label='Quality Level (0 for max)' />
       <TextField disabled={store.downloadOptions.all} value={store.downloadOptions.e} required onChange={e => {
         dispatch({
           type: 'downloadOptions',
           payload: { ...store.downloadOptions, e: e.target.value }
-        })
+        });
       }} label='Episode Select' />
       <MultiSelect
         title='Dub Languages'
@@ -137,7 +128,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
         dispatch({
           type: 'downloadOptions',
           payload: { ...store.downloadOptions, fileName: e.target.value }
-        })
+        });
       }} sx={{ width: '50%' }} label='Filename' />
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, all: !store.downloadOptions.all } })} variant={store.downloadOptions.all ? 'contained' : 'outlined'}>Download all</Button>
       <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, but: !store.downloadOptions.but } })} variant={store.downloadOptions.but ? 'contained' : 'outlined'}>Download all but</Button>
@@ -149,7 +140,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
       <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>List episodes</LoadingButton>
       <LoadingButton loading={loading} onClick={addToQueue} variant='contained'>Add to Queue</LoadingButton>
     </Box>
-  </Box> 
+  </Box>; 
 };
 
 export default DownloadSelector;

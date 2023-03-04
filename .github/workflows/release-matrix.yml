@@ -14,20 +14,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6.0.2
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
           check-latest: true
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 6.0.2
-
       - name: Install Node modules
         run: |
           pnpm install
-
       - name: Get name and version from package.json
         run: |
           test -n $(node -p -e "require('./package.json').name") &&
@@ -36,7 +33,6 @@ jobs:
           echo PACKAGE_VERSION=$(node -p -e "require('./package.json').version") >> $GITHUB_ENV || exit 1
       - name: Make build
         run: pnpm run build-${{ matrix.build_type }}-${{ matrix.gui }}
-
       - name: Upload release
         uses: actions/upload-release-asset@v1
         with:
@@ -46,3 +42,25 @@ jobs:
           asset_content_type: application/x-7z-compressed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Login to DockerHub
+      if: ${{ github.ref == 'refs/heads/master' }}
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v2.9.0
+      with:
+        github-token: ${{ github.token }}
+        push: ${{ github.ref == 'refs/heads/master' }}
+        tags: |
+          "izuco/multi-downloader-nx:${{ github.event.release.tag_name }}"
+    - name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}

@@ -10,7 +10,7 @@ export type NullRecord = Record | null;
 function loadVtt(vttStr: string) {
   const rx = /^([\d:.]*) --> ([\d:.]*)\s?(.*?)\s*$/;
   const lines = vttStr.replace(/\r?\n/g, '\n').split('\n');
-  const data = []; let lineBuf = [], record: NullRecord = null;
+  const data: Record[] = []; let lineBuf: string[] = [], record: NullRecord = null;
   // check  lines
   for (const l of lines) {
     const m = l.match(rx);
@@ -142,7 +142,7 @@ function convertTime(time: string, srtFormat = false) {
 
 function toSubsTime(str: string, srtFormat: boolean) : string {
     
-  const n = [], x: (string|number)[] = str.split(/[:.]/).map(x => Number(x)); let sx;
+  const n: string[] = [], x: (string|number)[] = str.split(/[:.]/).map(x => Number(x)); let sx;
     
   const msLen = srtFormat ? 3 : 2;
   const hLen = srtFormat ? 2 : 1;

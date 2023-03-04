@@ -53,7 +53,7 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
       ...a,
       group: groups[a.group],
       default: typeof a.default === 'object' && !Array.isArray(a.default) ? 
-        parseDefault(a.default.name || a.name, a.default.default) : a.default
+        parseDefault((a.default as any).name || a.name, (a.default as any).default) : a.default
     };
   });
   for (const item of data)

@@ -1,6 +1,5 @@
-import { StyledOptions } from "@emotion/styled";
-import { Box, Button, Card, Divider, List, Typography, SxProps } from "@mui/material";
-import React from "react";
+import { Box, Button, Divider, List, SxProps } from '@mui/material';
+import React from 'react';
 
 export type Option = {
   text: string,
@@ -35,32 +34,32 @@ function ContextMenu<T extends HTMLElement, >(props: ContextMenuProps<T>) {
       ev.preventDefault();
       setAnchor({ x: ev.x + 10, y: ev.y + 10 });
       setShow(true);
-    }
+    };
     ref.current.addEventListener('contextmenu', listener);
 
     return () => { 
       if (ref.current)
-        ref.current.removeEventListener('contextmenu', listener)
+        ref.current.removeEventListener('contextmenu', listener);
     };
-  }, [ props.popupItem ])
+  }, [ props.popupItem ]);
 
   return show ? <Box sx={{ zIndex: 9999, p: 1, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(5px)', position: 'fixed', left: anchor.x, top: anchor.y }}>
     <List sx={{ p: 0, m: 0 }}>
       {props.options.map((item, i) => {
         return item === 'divider' ? <Divider key={`ContextMenu_Divider_${i}_${item}`}/> : 
-        <Button color='inherit' key={`ContextMenu_Value_${i}_${item}`} onClick={() => {
-          item.onClick();
-          setShow(false);
-        }} sx={buttonSx}>
-          {item.text}
-        </Button>
+          <Button color='inherit' key={`ContextMenu_Value_${i}_${item}`} onClick={() => {
+            item.onClick();
+            setShow(false);
+          }} sx={buttonSx}>
+            {item.text}
+          </Button>;
       })}
       <Divider />
       <Button fullWidth color='inherit' onClick={() => setShow(false)} sx={buttonSx} >
         Close
       </Button>
     </List>
-  </Box> : <></>
+  </Box> : <></>;
 }
 
 export default ContextMenu;

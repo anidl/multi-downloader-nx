@@ -2,6 +2,7 @@ import path from 'path';
 import yaml from 'yaml';
 import fs from 'fs-extra';
 import { lookpath } from 'lookpath';
+import { console } from './log';
 
 // new-cfg
 const workingDir = (process as NodeJS.Process & {
@@ -12,8 +13,10 @@ export { workingDir };
 
 const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
+const guiCfgFile   = path.join(workingDir, 'config', 'gui');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
 const sessCfgFile  = path.join(workingDir, 'config', 'session');
+const setupFile    = path.join(workingDir, 'config', 'setup');
 const tokenFile    = {
   funi: path.join(workingDir, 'config', 'funi_token'),
   cr: path.join(workingDir, 'config', 'cr_token')
@@ -23,7 +26,7 @@ export const ensureConfig = () => {
   if (!fs.existsSync(path.join(workingDir, 'config')))
     fs.mkdirSync(path.join(workingDir, 'config'));
   if (process.env.contentDirectory)
-    [binCfgFile, dirCfgFile, cliCfgFile].forEach(a => {
+    [binCfgFile, dirCfgFile, cliCfgFile, guiCfgFile].forEach(a => {
       if (!fs.existsSync(`${a}.yml`)) 
         fs.copyFileSync(path.join(__dirname, '..', 'config', `${path.basename(a)}.yml`), `${a}.yml`);
     });
@@ -39,11 +42,27 @@ const loadYamlCfgFile = <T extends Record<string, any>>(file: string, isSess?: b
       return yaml.parse(fs.readFileSync(file, 'utf8'));
     }
     catch(e){
-      console.log('[ERROR]', e);
+      console.error('[ERROR]', e);
       return {} as T;
     }
   }
   return {} as T;
+};
+
+export type WriteObjects = {
+  gui: GUIConfig
+}
+
+const writeYamlCfgFile = <T extends keyof WriteObjects>(file: T, data: WriteObjects[T]) => {
+  const fn = path.join(workingDir, 'config', `${file}.yml`);
+  if (fs.existsSync(fn))
+    fs.removeSync(fn);
+  fs.writeFileSync(fn, yaml.stringify(data));
+};
+
+export type GUIConfig = {
+  port: number,
+  password?: string
 };
 
 export type ConfigObject = {
@@ -59,7 +78,8 @@ export type ConfigObject = {
   },
   cli: {
     [key: string]: any
-  }
+  },
+  gui: GUIConfig
 }
 
 const loadCfg = () : ConfigObject => {
@@ -75,6 +95,7 @@ const loadCfg = () : ConfigObject => {
     cli: loadYamlCfgFile<{
       [key: string]: any
     }>(cliCfgFile),
+    gui: loadYamlCfgFile<GUIConfig>(guiCfgFile)
   };
   const defaultDirs = {
     fonts: '${wdir}/fonts/',
@@ -100,7 +121,7 @@ const loadCfg = () : ConfigObject => {
       fs.ensureDirSync(defaultCfg.dir.content);
     }
     catch(e){
-      console.log('[ERROR] Content directory not accessible!');
+      console.error('Content directory not accessible!');
       return defaultCfg;
     }
   }
@@ -160,7 +181,7 @@ const saveCRSession = (data: Record<string, unknown>) => {
     fs.writeFileSync(`${sessCfgFile}.yml`, yaml.stringify(data));
   }
   catch(e){
-    console.log('[ERROR] Can\'t save session file to disk!');
+    console.error('Can\'t save session file to disk!');
   }
 };
 
@@ -179,7 +200,7 @@ const saveCRToken = (data: Record<string, unknown>) => {
     fs.writeFileSync(`${tokenFile.cr}.yml`, yaml.stringify(data));
   }
   catch(e){
-    console.log('[ERROR] Can\'t save token file to disk!');
+    console.error('Can\'t save token file to disk!');
   }
 };
 
@@ -192,7 +213,7 @@ const loadFuniToken = () => {
     token = loadedToken.token;
   // info if token not set
   if(!token){
-    console.log('[INFO] Token not set!\n');
+    console.info('[INFO] Token not set!\n');
   }
   return token;
 };
@@ -206,11 +227,32 @@ const saveFuniToken = (data: {
     fs.writeFileSync(`${tokenFile.funi}.yml`, yaml.stringify(data));
   }
   catch(e){
-    console.log('[ERROR] Can\'t save token file to disk!');
+    console.error('Can\'t save token file to disk!');
   }
 };
 
 const cfgDir = path.join(workingDir, 'config');
+
+const isSetuped = (): boolean => {
+  const fn = `${setupFile}.json`;
+  if (!fs.existsSync(fn))
+    return false;
+  return JSON.parse(fs.readFileSync(fn).toString()).setuped;
+};
+
+const setSetuped = (bool: boolean) => {
+  const fn = `${setupFile}.json`;
+  if (bool) {
+    fs.writeFileSync(fn, JSON.stringify({
+      setuped: true
+    }, null, 2));
+  } else {
+    if (fs.existsSync(fn)) {
+      fs.removeSync(fn);
+    }
+  }
+};
+
 
 export {
   loadBinCfg,
@@ -221,6 +263,9 @@ export {
   saveCRToken,
   loadCRToken,
   loadCRSession,
+  isSetuped,
+  setSetuped,
+  writeYamlCfgFile,
   sessCfgFile,
   cfgDir
 };

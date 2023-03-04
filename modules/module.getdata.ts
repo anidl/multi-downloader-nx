@@ -1,4 +1,5 @@
 import got, { OptionsOfUnknownResponseBody, ReadError, Response, ResponseType } from 'got';
+import { console } from './log';
 
 // Used for future updates
 // const argv = require('../funi').argv;
@@ -83,8 +84,8 @@ const getData = async <T = string>(options: Options) => {
     beforeRequest: [
       (gotOpts) => {
         if(options.debug){
-          console.log('[DEBUG] GOT OPTIONS:');
-          console.log(gotOpts);
+          console.debug('GOT OPTIONS:');
+          console.debug(gotOpts);
         }
       }
     ]
@@ -109,17 +110,17 @@ const getData = async <T = string>(options: Options) => {
           res: Response<unknown>
         };
     if(options.debug){
-      console.log(error);
+      console.debug(error);
     }
     if(error.response && error.response.statusCode && error.response.statusMessage){
-      console.log(`[ERROR] ${error.name} ${error.response.statusCode}: ${error.response.statusMessage}`);
+      console.error(`${error.name} ${error.response.statusCode}: ${error.response.statusMessage}`);
     }
     else if(error.name && error.name == 'HTMLError' && error.res && error.res.body){
-      console.log(`[ERROR] ${error.name}:`);
-      console.log(error.res.body);
+      console.error(`${error.name}:`);
+      console.error(error.res.body);
     }
     else{
-      console.log(`[ERROR] ${error.name}: ${error.code||error.message}`);
+      console.error(`${error.name}: ${error.code||error.message}`);
     }
     return {
       ok: false,

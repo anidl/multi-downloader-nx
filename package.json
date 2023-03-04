@@ -1,7 +1,7 @@
 {
   "name": "multi-downloader-nx",
   "short_name": "aniDL",
-  "version": "3.3.7",
+  "version": "3.4.0",
   "description": "Download videos from Funimation or Crunchyroll via cli",
   "keywords": [
     "download",
@@ -35,56 +35,52 @@
     "url": "https://github.com/anidl/multi-downloader-nx/issues"
   },
   "license": "MIT",
-  "main": "gui/electron/src/index.js",
   "dependencies": {
-    "@babel/core": "^7.20.12",
+    "@babel/core": "^7.21.0",
     "@babel/plugin-syntax-flow": "^7.18.6",
-    "@babel/plugin-transform-react-jsx": "^7.20.13",
-    "cheerio": "^1.0.0-rc.12",
+    "@babel/plugin-transform-react-jsx": "^7.21.0",
+    "cheerio": "1.0.0-rc.12",
+    "copy-to-clipboard": "^3.3.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "electron-squirrel-startup": "^1.0.0",
     "eslint-plugin-import": "^2.27.5",
     "express": "^4.18.2",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.0",
     "got": "^11.8.6",
-    "hls-download": "^2.6.10",
     "iso-639": "^0.2.2",
+    "log4js": "^6.8.0",
     "lookpath": "^1.2.2",
     "m3u8-parsed": "^1.3.0",
+    "open": "^8.4.2",
     "sei-helper": "^3.3.0",
-    "typescript-eslint": "^0.0.1-alpha.0",
-    "webpack": "^5.75.0",
+    "typescript-eslint": "0.0.1-alpha.0",
+    "ws": "^8.12.1",
     "yaml": "^2.2.1",
-    "yargs": "^17.7.0"
+    "yargs": "^17.7.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/fs-extra": "^11.0.1",
-    "@types/node": "^18.14.0",
+    "@types/node": "^18.14.6",
+    "@types/ws": "^8.5.4",
     "@types/yargs": "^17.0.22",
-    "@typescript-eslint/eslint-plugin": "^5.52.0",
-    "@typescript-eslint/parser": "^5.52.0",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
-    "css-loader": "^6.7.3",
-    "electron": "23.1.0",
-    "electron-builder": "^23.6.0",
-    "eslint": "^8.34.0",
+    "eslint": "^8.35.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-react": "^7.32.2",
-    "fork-ts-checker-webpack-plugin": "^7.3.0",
-    "node-loader": "^2.0.0",
+    "eslint-plugin-react": "7.32.2",
     "pkg": "^5.8.0",
     "removeNPMAbsolutePaths": "^3.0.1",
-    "style-loader": "^3.3.1",
-    "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "5.1.0-dev.20230227"
   },
   "scripts": {
     "prestart": "pnpm run tsc test",
-    "start": "pnpm prestart && cd lib && npx electron .",
+    "start": "pnpm prestart && cd lib && node gui.js",
     "docs": "ts-node modules/build-docs.ts",
     "tsc": "ts-node tsc.ts",
     "prebuild-cli": "pnpm run tsc false false",
@@ -101,33 +97,5 @@
     "eslint-fix": "eslint *.js modules --fix",
     "pretest": "pnpm run tsc",
     "test": "pnpm run pretest && cd lib && node modules/build windows64 && node modules/build ubuntu64 && node modules/build macos64"
-  },
-  "build": {
-    "appId": "github.com/anidl",
-    "mac": {
-      "category": "public.app-category.developer-tools",
-      "darkModeSupport": true
-    },
-    "dmg": {
-      "iconSize": 160,
-      "contents": [
-        {
-          "x": 180,
-          "y": 170
-        },
-        {
-          "x": 480,
-          "y": 170,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
-    "linux": {
-      "target": [
-        "deb"
-      ],
-      "category": "Development"
-    }
   }
 }

@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Chip, FormControl, InputLabel, MenuItem, OutlinedInput, Select, Theme, useTheme } from "@mui/material";
+import React from 'react';
+import { FormControl, InputLabel, MenuItem, OutlinedInput, Select, Theme, useTheme } from '@mui/material';
 
 export type MultiSelectProps = {
   values: string[],
@@ -41,7 +41,7 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
         multiple
         value={(props.selected ?? [])}
         onChange={e => {
-          const val = typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value;
+          const val = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
           if (props.allOption && val.includes('all')) {
             if (props.values.length === val.length - 1)
               props.onChange([]);
@@ -68,7 +68,7 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
         ))}
       </Select>
     </FormControl>
-  </div>
-}
+  </div>;
+};
 
 export default MultiSelect;

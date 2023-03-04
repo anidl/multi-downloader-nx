@@ -5,6 +5,7 @@ import fs from 'fs';
 import { LanguageItem } from './module.langsData';
 import { AvailableMuxer } from './module.args';
 import { exec } from './sei-helper-fixes';
+import { console } from './log';
 
 export type MergerInput = {
   path: string,
@@ -56,8 +57,8 @@ class Merger {
   }
 
   public FFmpeg() : string {
-    const args = [];
-    const metaData = [];
+    const args: string[] = [];
+    const metaData: string[] = [];
 
     let index = 0;
     let audioIndex = 0;
@@ -137,7 +138,7 @@ class Merger {
   };
 
   public MkvMerge = () => {
-    const args = [];
+    const args: string[] = [];
 
     let hasVideo = false;
 
@@ -224,7 +225,6 @@ class Merger {
     }
     if (this.options.fonts && this.options.fonts.length > 0) {
       for (const f of this.options.fonts) {
-        console.log(f.path);
         args.push('--attachment-name', f.name);
         args.push('--attachment-mime-type', f.mime);
         args.push('--attach-file', `"${f.path}"`);
@@ -261,9 +261,9 @@ class Merger {
         FFmpeg: bin.ffmpeg
       };
     } else if (useMP4format) {
-      console.log('[WARN] FFmpeg not found, skip muxing...');
+      console.warn('FFmpeg not found, skip muxing...');
     } else if (!bin.mkvmerge) {
-      console.log('[WARN] MKVMerge not found, skip muxing...');
+      console.warn('MKVMerge not found, skip muxing...');
     }
     return {};
   }
@@ -272,18 +272,18 @@ class Merger {
     language: LanguageItem,
     fonts: Font[]
   }[]) : ParsedFont[] {
-    let fontsNameList: Font[] = []; const fontsList = [], subsList = []; let isNstr = true;
+    let fontsNameList: Font[] = []; const fontsList: { name: string, path: string, mime: string }[] = [], subsList: string[] = []; let isNstr = true;
     for(const s of subs){
       fontsNameList.push(...s.fonts);
       subsList.push(s.language.locale);
     }
     fontsNameList = [...new Set(fontsNameList)];
     if(subsList.length > 0){
-      console.log('\n[INFO] Subtitles: %s (Total: %s)', subsList.join(', '), subsList.length);
+      console.info('\nSubtitles: %s (Total: %s)', subsList.join(', '), subsList.length);
       isNstr = false;
     }
     if(fontsNameList.length > 0){
-      console.log((isNstr ? '\n' : '') + '[INFO] Required fonts: %s (Total: %s)', fontsNameList.join(', '), fontsNameList.length);
+      console.info((isNstr ? '\n' : '') + 'Required fonts: %s (Total: %s)', fontsNameList.join(', '), fontsNameList.length);
     }
     for(const f of fontsNameList){
       const fontFiles = fontFamilies[f];
@@ -315,18 +315,18 @@ class Merger {
       break;
     }
     if (command === undefined) {
-      console.log('[WARN] Unable to merge files.');
+      console.warn('Unable to merge files.');
       return;
     }
-    console.log(`[INFO][${type}] Started merging`);
+    console.info(`[${type}] Started merging`);
     const res = exec(type, `"${bin}"`, command);
     if (!res.isOk && type === 'mkvmerge' && res.err.code === 1) {
-      console.log(`[INFO][${type}] Mkvmerge finished with at least one warning`);
+      console.info(`[${type}] Mkvmerge finished with at least one warning`);
     } else if (!res.isOk) {
-      console.log(res.err);
-      console.log(`[ERROR][${type}] Merging failed with exit code ${res.err.code}`);
+      console.error(res.err);
+      console.error(`[${type}] Merging failed with exit code ${res.err.code}`);
     } else {
-      console.log(`[INFO][${type} Done]`);
+      console.info(`[${type} Done]`);
     }
   }
 

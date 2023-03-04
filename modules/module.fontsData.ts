@@ -28,7 +28,7 @@ const fontFamilies = {
 // collect styles from ass string
 function assFonts(ass: string){
   const strings = ass.replace(/\r/g,'').split('\n');
-  const styles = [];
+  const styles: string[] = [];
   for(const s of strings){
     if(s.match(/^Style: /)){
       const addStyle = s.split(',');

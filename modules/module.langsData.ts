@@ -44,7 +44,7 @@ const languages: LanguageItem[] = [
 
 // construct dub language codes
 const dubLanguageCodes = (() => {
-  const dubLanguageCodesArray = [];
+  const dubLanguageCodesArray: string[] = [];
   for(const language of languages){
     dubLanguageCodesArray.push(language.code);
   }

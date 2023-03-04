@@ -10,12 +10,19 @@ export interface MessageHandler {
   availableDubCodes: () => Promise<string[]>,
   availableSubCodes: () => Promise<string[]>,
   handleDefault: (name: string) => Promise<any>,
-  resolveItems: (data: ResolveItemsData) => Promise<ResponseBase<QueueItem[]>>,
+  resolveItems: (data: ResolveItemsData) => Promise<boolean>,
   listEpisodes: (id: string) => Promise<EpisodeListResponse>,
-  downloadItem: (data) => void,
-  isDownloading: () => boolean,
+  downloadItem: (data: QueueItem) => void,
+  isDownloading: () => Promise<boolean>,
   writeToClipboard: (text: string) => void,
   openFolder: (path: FolderTypes) => void,
+  openFile: (data: [FolderTypes, string]) => void,
+  openURL: (data: string) => void;
+  getQueue: () => Promise<QueueItem[]>,
+  removeFromQueue: (index: number) => void,
+  clearQueue: () => void,
+  setDownloadQueue: (data: boolean) => void,
+  getDownloadQueue: () => Promise<boolean>
 }
 
 export type FolderTypes = 'content' | 'config';
@@ -23,7 +30,6 @@ export type FolderTypes = 'content' | 'config';
 export type QueueItem = {
   title: string,
   episode: string,
-  ids: string[],
   fileName: string,
   dlsubs: string[],
   parent: {
@@ -34,13 +40,15 @@ export type QueueItem = {
   dlVideoOnce: boolean,
   dubLang: string[],
   image: string
-}
+} & ResolveItemsData
 
 export type ResolveItemsData = {
   id: string,
   dubLang: string[],
   all: boolean,
   but: boolean,
+  novids: boolean,
+  noaudio: boolean
   dlVideoOnce: boolean,
   e: string,
   fileName: string,
