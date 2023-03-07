@@ -76,7 +76,7 @@
     "pkg": "^5.8.0",
     "removeNPMAbsolutePaths": "^3.0.1",
     "ts-node": "^10.9.1",
-    "typescript": "5.1.0-dev.20230227"
+    "typescript": "5.1.0-dev.20230306"
   },
   "scripts": {
     "prestart": "pnpm run tsc test",
