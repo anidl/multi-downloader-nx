@@ -1,11 +1,11 @@
 import { AuthData, CheckTokenResponse, EpisodeListResponse, MessageHandler, QueueItem, ResolveItemsData, SearchData, SearchResponse } from '../../../@types/messageHandler';
 import Funimation from '../../../funi';
-import { ArgvType } from '../../../modules/module.app-args';
-import { buildDefault, getDefault } from '../../../modules/module.args';
+import { getDefault } from '../../../modules/module.args';
 import { languages, subtitleLanguagesFilter } from '../../../modules/module.langsData';
 import WebSocketHandler from '../websocket';
 import Base from './base';
 import { console } from '../../../modules/log';
+import * as yargs from '../../../modules/module.app-args';
 
 class FunimationHandler extends Base implements MessageHandler {
   private funi: Funimation;
@@ -101,7 +101,7 @@ class FunimationHandler extends Base implements MessageHandler {
     this.setDownloading(true);
     console.debug(`Got download options: ${JSON.stringify(data)}`);
     const res = await this.funi.getShow(false, { all: false, but: false, id: parseInt(data.id), e: data.e });
-    const _default = buildDefault() as ArgvType;
+    const _default = yargs.appArgv(this.funi.cfg.cli, true);
     if (!res.isOk)
       return this.alertError(res.reason);
 

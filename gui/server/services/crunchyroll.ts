@@ -1,11 +1,11 @@
 import { AuthData, CheckTokenResponse, DownloadData, EpisodeListResponse, MessageHandler, ResolveItemsData, SearchData, SearchResponse } from '../../../@types/messageHandler';
 import Crunchy from '../../../crunchy';
-import { ArgvType } from '../../../modules/module.app-args';
-import { buildDefault, getDefault } from '../../../modules/module.args';
+import { getDefault } from '../../../modules/module.args';
 import { languages, subtitleLanguagesFilter } from '../../../modules/module.langsData';
 import WebSocketHandler from '../websocket';
 import Base from './base';
 import { console } from '../../../modules/log';
+import * as yargs from '../../../modules/module.app-args';
 
 class CrunchyHandler extends Base implements MessageHandler {
   private crunchy: Crunchy;
@@ -88,7 +88,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     await this.crunchy.refreshToken(true);
     console.debug(`Got download options: ${JSON.stringify(data)}`);
     this.setDownloading(true);
-    const _default = buildDefault() as ArgvType;
+    const _default = yargs.appArgv(this.crunchy.cfg.cli, true);
     const res = await this.crunchy.downloadFromSeriesID(data.id, {
       dubLang: data.dubLang,
       e: data.e

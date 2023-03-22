@@ -8,19 +8,19 @@ export type ArgvType = typeof argvC;
 
 const appArgv = (cfg: {
   [key: string]: unknown
-}) => {
+}, isGUI = false) => {
   if (argvC)
     return argvC;
   yargs(process.argv.slice(2));
-  const argv = getArgv(cfg)
+  const argv = getArgv(cfg, isGUI)
     .parseSync();
   argvC = argv;
   return argv;
 };
 
 
-const overrideArguments = (cfg: { [key:string]: unknown }, override: Partial<typeof argvC>) => {
-  const argv = getArgv(cfg).middleware((ar) => {
+const overrideArguments = (cfg: { [key:string]: unknown }, override: Partial<typeof argvC>, isGUI = false) => {
+  const argv = getArgv(cfg, isGUI).middleware((ar) => {
     for (const key of Object.keys(override)) {
       ar[key] = override[key];
     }
@@ -33,7 +33,7 @@ export {
   overrideArguments
 };
     
-const getArgv = (cfg: { [key:string]: unknown }) => {
+const getArgv = (cfg: { [key:string]: unknown }, isGUI: boolean) => {
   const parseDefault = <T = unknown>(key: string, _default: T) : T=> {
     if (Object.prototype.hasOwnProperty.call(cfg, key)) {
       return cfg[key] as T;
@@ -51,6 +51,7 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
   const data = args.map(a => {
     return {
       ...a,
+      demandOption: !isGUI && a.demandOption,
       group: groups[a.group],
       default: typeof a.default === 'object' && !Array.isArray(a.default) ? 
         parseDefault((a.default as any).name || a.name, (a.default as any).default) : a.default
@@ -66,7 +67,7 @@ const getArgv = (cfg: { [key:string]: unknown }) => {
           return value;
         }
       },
-      choices: item.choices as unknown as Choices
+      choices: item.name === 'service' && isGUI ? undefined : item.choices as unknown as Choices
     });
   return argv as unknown as yargs.Argv<typeof argvC>;
 };
