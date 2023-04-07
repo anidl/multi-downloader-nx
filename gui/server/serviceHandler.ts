@@ -86,10 +86,6 @@ export default class ServiceHandler {
       this.service?.downloadItem(data);
       respond(undefined);
     });
-    this.ws.events.on('writeToClipboard', async ({ data }, respond) => {
-      this.service?.writeToClipboard(data);
-      respond(undefined);
-    });
     this.ws.events.on('openFolder', async ({ data }, respond) => {
       this.service?.openFolder(data);
       respond(undefined);

@@ -1,7 +1,6 @@
 import { DownloadInfo, FolderTypes, ProgressData, QueueItem } from '../../../@types/messageHandler';
 import { RandomEvent, RandomEvents } from '../../../@types/randomEvents';
 import WebSocketHandler from '../websocket';
-import copy from 'copy-to-clipboard';
 import open from 'open';
 import { cfg } from '..';
 import path from 'path';
@@ -47,11 +46,6 @@ export default class Base {
   async isDownloading() {
     return this.downloading;
   }
-
-  async writeToClipboard(text: string) {
-    copy(text);
-    return true;
-  } 
 
   async openFolder(folderType: FolderTypes) {
     switch (folderType) {

@@ -76,12 +76,18 @@ const SearchBox: React.FC = () => {
                     </Box>
                   </Box>
                 </ListItem>
-                <ContextMenu options={[ { text: 'Copy image URL', onClick: () => {
-                  messageHandler?.writeToClipboard(a.image);
+                <ContextMenu options={[ { text: 'Copy image URL', onClick: async () => {
+                  await navigator.clipboard.writeText(a.image);
                   enqueueSnackbar('Copied URL to clipboard', {
                     variant: 'info'
                   });
-                }} ]} popupItem={imageRef} />
+                }},
+                {
+                  text: 'Open image in new tab',
+                  onClick: () => {
+                    window.open(a.image);
+                  } 
+                } ]} popupItem={imageRef} />
                 {(ind < arr.length - 1) && <Divider />}
               </Box>;
             })

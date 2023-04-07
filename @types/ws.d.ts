@@ -27,7 +27,6 @@ export type MessageTypes = {
   'listEpisodes': [string, EpisodeListResponse],
   'downloadItem': [QueueItem, undefined],
   'isDownloading': [undefined, boolean],
-  'writeToClipboard': [string, undefined],
   'openFolder': [FolderTypes, undefined],
   'changeProvider': [undefined, boolean],
   'type': [undefined, 'funi'|'crunchy'|undefined],

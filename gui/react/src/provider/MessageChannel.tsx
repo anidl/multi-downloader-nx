@@ -223,7 +223,6 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
     randomEvents: randomEventHandler,
     downloadItem: (data) => messageAndResponse(socket, { name: 'downloadItem', data }),
     isDownloading: async () => (await messageAndResponse(socket, { name: 'isDownloading', data: undefined })).data,
-    writeToClipboard: async (data) =>  messageAndResponse(socket, { name: 'writeToClipboard', data }),
     openFolder: async (data) =>  messageAndResponse(socket, { name: 'openFolder', data }),
     logout: async () => (await messageAndResponse(socket, { name: 'changeProvider', data: undefined })).data,
     openFile: async (data) => await messageAndResponse(socket, { name: 'openFile', data }),

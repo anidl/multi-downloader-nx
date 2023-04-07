@@ -14,7 +14,6 @@ export interface MessageHandler {
   listEpisodes: (id: string) => Promise<EpisodeListResponse>,
   downloadItem: (data: QueueItem) => void,
   isDownloading: () => Promise<boolean>,
-  writeToClipboard: (text: string) => void,
   openFolder: (path: FolderTypes) => void,
   openFile: (data: [FolderTypes, string]) => void,
   openURL: (data: string) => void;
