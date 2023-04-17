@@ -425,6 +425,10 @@ export default class Crunchy implements ServiceClass {
         iType = 'season';
       } else if (item.season_count) {
         iType = 'series';
+      } else if (item.media_type == "movie") {
+        iType = 'movie';
+      } else if (item.movie_release_year) {
+        iType = 'movie_listing';
       } else {
         if (item.identifier !== '') {
           const iTypeCheck = item.identifier?.split('|');
@@ -639,18 +643,17 @@ export default class Crunchy implements ServiceClass {
       console.error('Authentication required!');
       return;
     }
-    const movieListingReqOpts = [
-      api.beta_cms,
-      this.cmsToken.cms.bucket,
-      '/movies?',
-      new URLSearchParams({
-        'movie_listing_id': id,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
-      }),
-    ].join('');
-    const movieListingReq = await this.req.getData(movieListingReqOpts);
+
+    // opts
+    const AuthHeaders = {
+      headers: {
+        Authorization: `Bearer ${this.token.access_token}`,
+      },
+      useProxy: true
+    };
+
+    //Movie Listing
+    const movieListingReq = await this.req.getData(`${api.cms}/movie_listings/${id}?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!movieListingReq.ok || !movieListingReq.res){
       console.error('Movie Listing Request FAILED!');
       return;
@@ -660,8 +663,19 @@ export default class Crunchy implements ServiceClass {
       console.info('Movie Listing is empty!');
       return;
     }
-    for(const item of movieListing.items){
-      this.logObject(item, pad);
+    for(const item of movieListing.data){
+      this.logObject(item, pad, false, false);
+    }
+
+    //Movies
+    const moviesListReq = await this.req.getData(`${api.cms}/movie_listings/${id}/movies?preferred_audio_language=ja-JP`, AuthHeaders);
+    if(!moviesListReq.ok || !moviesListReq.res){
+      console.error('Movies List Request FAILED!');
+      return;
+    }
+    const moviesList = JSON.parse(moviesListReq.res.body);
+    for(const item of moviesList.data){
+      this.logObject(item, pad+2);
     }
   }
   

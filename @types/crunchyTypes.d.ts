@@ -99,6 +99,8 @@ export type ParseItem = {
   availability_notes?: string,
   identifier?: string,
   versions?: Version[] | null,
+  media_type?: string | null,
+  movie_release_year?: number | null,
 }
 
 export interface SeriesSearch {
