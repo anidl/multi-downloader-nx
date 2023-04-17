@@ -21,6 +21,7 @@ export interface CrunchyObject {
   type:                    string;
   promo_title:             string;
   movie_listing_metadata?: MovieListingMetadata;
+  movie_metadata?:         MovieMetadata;
   playback?:               string;
   episode_metadata?:       EpisodeMetadata;
   streams_link?:           string;
@@ -120,6 +121,23 @@ export interface MovieListingMetadata {
   premium_date:             null;
   subtitle_locales:         Locale[];
   tenant_categories:        string[];
+}
+
+export interface MovieMetadata {
+  availability_notes:        string;
+  available_offline:         boolean;
+  closed_captions_available: boolean;
+  duration_ms:               number;
+  extended_maturity_rating:  Record<unknown>;
+  is_dubbed:                 boolean;
+  is_mature:                 boolean;
+  is_premium_only:           boolean;
+  is_subbed:                 boolean;
+  mature_blocked:            boolean;
+  maturity_ratings:          string[];
+  movie_listing_id:          string;
+  movie_listing_slug_title:  string; 
+  movie_listing_title:       string;
 }
 
 export interface SeasonMetadata {

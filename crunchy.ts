@@ -917,6 +917,17 @@ export default class Crunchy implements ServiceClass {
         epMeta.seasonTitle = item.title;
         epMeta.episodeNumber = 'Movie';
         epMeta.episodeTitle = item.title;
+      } else if (item.movie_metadata) {
+        item.f_num = 'F:' + item.id;
+        epMeta.data = [
+          {
+            mediaId: 'M:'+ item.id
+          }
+        ];
+        epMeta.season = 0;
+        epMeta.seasonTitle = item.title;
+        epMeta.episodeNumber = 'Movie';
+        epMeta.episodeTitle = item.title;
       }
       if (item.streams_link) {
         epMeta.data[0].playback = item.streams_link;
