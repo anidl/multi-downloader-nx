@@ -425,7 +425,7 @@ export default class Crunchy implements ServiceClass {
         iType = 'season';
       } else if (item.season_count) {
         iType = 'series';
-      } else if (item.media_type == "movie") {
+      } else if (item.media_type == 'movie') {
         iType = 'movie';
       } else if (item.movie_release_year) {
         iType = 'movie_listing';
