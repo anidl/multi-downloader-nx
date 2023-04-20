@@ -58,6 +58,7 @@ export type CrunchyEpMeta = {
     playback?: string,
     versions?: EpisodeVersion[] | null
   }[],
+  seriesTitle: string,
   seasonTitle: string,
   episodeNumber: string,
   episodeTitle: string,

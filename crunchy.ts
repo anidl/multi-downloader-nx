@@ -766,6 +766,7 @@ export default class Crunchy implements ServiceClass {
       }
       if(item.season_title == '' && item.series_title == ''){
         item.season_title = 'NO_TITLE';
+        item.series_title = 'NO_TITLE';
       }
       const epNum = item.episode;
       let isSpecial = false;
@@ -792,6 +793,7 @@ export default class Crunchy implements ServiceClass {
             lang: langsData.languages.find(a => a.code == yargs.appArgv(this.cfg.cli).dubLang[0])
           }
         ],
+        seriesTitle:   item.series_title,
         seasonTitle:   item.season_title,
         episodeNumber: item.episode,
         episodeTitle:  item.title,
@@ -902,7 +904,8 @@ export default class Crunchy implements ServiceClass {
             mediaId: 'E:'+ item.id,
             versions: item.episode_metadata.versions
           }
-        ];
+        ];        
+        epMeta.seriesTitle = item.episode_metadata.series_title;
         epMeta.seasonTitle = item.episode_metadata.season_title;
         epMeta.episodeNumber = item.episode_metadata.episode;
         epMeta.episodeTitle = item.title;
@@ -914,6 +917,7 @@ export default class Crunchy implements ServiceClass {
             mediaId: 'M:'+ item.id
           }
         ];
+        epMeta.seriesTitle = item.title;
         epMeta.seasonTitle = item.title;
         epMeta.episodeNumber = 'Movie';
         epMeta.episodeTitle = item.title;
@@ -925,6 +929,7 @@ export default class Crunchy implements ServiceClass {
           }
         ];
         epMeta.season = 0;
+        epMeta.seriesTitle = item.title;
         epMeta.seasonTitle = item.title;
         epMeta.episodeNumber = 'Movie';
         epMeta.episodeTitle = item.title;
@@ -1013,6 +1018,7 @@ export default class Crunchy implements ServiceClass {
         ['title', medias.episodeTitle, true],
         ['episode', isNaN(parseInt(medias.episodeNumber)) ? medias.episodeNumber : parseInt(medias.episodeNumber), false],
         ['service', 'CR', false],
+        ['seriesTitle', medias.seriesTitle, true],
         ['showTitle', medias.seasonTitle, true],
         ['season', medias.season, false]
       ] as [AvailableFilenameVars, string|number, boolean][]).map((a): Variable => {
@@ -1514,6 +1520,7 @@ export default class Crunchy implements ServiceClass {
         lang: value.langs.map(a => a.code),
         name: value.items[0].title,
         season: value.items[0].season_number.toString(),
+        seriesTitle: value.items[0].series_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
         seasonTitle: value.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
         episode: value.items[0].episode_number?.toString() ?? value.items[0].episode ?? '?',
         id: value.items[0].season_id,
@@ -1562,6 +1569,7 @@ export default class Crunchy implements ServiceClass {
         }
         if(item.season_title == '' && item.series_title == ''){
           item.season_title = 'NO_TITLE';
+          item.series_title = 'NO_TITLE';
         }
         const epNum = key.startsWith('E') ? key.slice(1) : key;
         // set data
@@ -1572,7 +1580,8 @@ export default class Crunchy implements ServiceClass {
               mediaId: item.id,
               versions: item.versions
             }
-          ],
+          ],          
+          seriesTitle: itemE.items.find(a => !a.series_title.match(/\(\w+ Dub\)/))?.series_title ?? itemE.items[0].series_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
           seasonTitle: itemE.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? itemE.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
           episodeNumber: item.episode,
           episodeTitle: item.title,
