@@ -1,7 +1,7 @@
 {
   "name": "multi-downloader-nx",
   "short_name": "aniDL",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "Download videos from Funimation or Crunchyroll via cli",
   "keywords": [
     "download",
