@@ -837,7 +837,11 @@ export default class Crunchy implements ServiceClass {
     if (res === undefined || res.error) {
       return false;
     } else {
-      await this.muxStreams(res.data, { ...options, output: res.fileName });
+      if (!options.skipmux) {
+        await this.muxStreams(res.data, { ...options, output: res.fileName });
+      } else {
+        console.info('Skipping mux');
+      }
       downloaded({
         service: 'crunchy',
         type: 's'
