@@ -6,6 +6,7 @@ import Funi from '../../funi';
 import { setSetuped, writeYamlCfgFile } from '../../modules/module.cfg-loader';
 import CrunchyHandler from './services/crunchyroll';
 import FunimationHandler from './services/funimation';
+import HidiveHandler from './services/hidive';
 import WebSocketHandler from './websocket';
 
 export default class ServiceHandler {
@@ -31,6 +32,8 @@ export default class ServiceHandler {
         this.service = new FunimationHandler(this.ws);
       } else if (data === 'crunchy') {
         this.service = new CrunchyHandler(this.ws);
+      } else if (data === 'hidive') {
+        this.service = new HidiveHandler(this.ws);
       }
     });
     

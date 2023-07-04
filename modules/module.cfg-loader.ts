@@ -15,11 +15,17 @@ const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
 const guiCfgFile   = path.join(workingDir, 'config', 'gui');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
-const sessCfgFile  = path.join(workingDir, 'config', 'session');
+const hdProfileCfgFile   = path.join(workingDir, 'config', 'hd_profile');
+const sessCfgFile    = {
+  funi: path.join(workingDir, 'config', 'funi_sess'),
+  cr: path.join(workingDir, 'config', 'cr_sess'),
+  hd: path.join(workingDir, 'config', 'hd_sess')
+};
 const setupFile    = path.join(workingDir, 'config', 'setup');
 const tokenFile    = {
   funi: path.join(workingDir, 'config', 'funi_token'),
-  cr: path.join(workingDir, 'config', 'cr_token')
+  cr: path.join(workingDir, 'config', 'cr_token'),
+  hd: path.join(workingDir, 'config', 'hd_token')
 };
 
 export const ensureConfig = () => {
@@ -162,7 +168,7 @@ const loadBinCfg = async () => {
 };
 
 const loadCRSession = () => {
-  let session = loadYamlCfgFile(sessCfgFile, true);
+  let session = loadYamlCfgFile(sessCfgFile.cr, true);
   if(typeof session !== 'object' || session === null || Array.isArray(session)){
     session = {};
   }
@@ -175,10 +181,10 @@ const loadCRSession = () => {
 };
 
 const saveCRSession = (data: Record<string, unknown>) => {
-  const cfgFolder = path.dirname(sessCfgFile);
+  const cfgFolder = path.dirname(sessCfgFile.cr);
   try{
     fs.ensureDirSync(cfgFolder);
-    fs.writeFileSync(`${sessCfgFile}.yml`, yaml.stringify(data));
+    fs.writeFileSync(`${sessCfgFile.cr}.yml`, yaml.stringify(data));
   }
   catch(e){
     console.error('Can\'t save session file to disk!');
@@ -202,6 +208,83 @@ const saveCRToken = (data: Record<string, unknown>) => {
   catch(e){
     console.error('Can\'t save token file to disk!');
   }
+};
+
+
+const loadHDSession = () => {
+  let session = loadYamlCfgFile(sessCfgFile.hd, true);
+  if(typeof session !== 'object' || session === null || Array.isArray(session)){
+    session = {};
+  }
+  for(const cv of Object.keys(session)){
+    if(typeof session[cv] !== 'object' || session[cv] === null || Array.isArray(session[cv])){
+      session[cv] = {};
+    }
+  }
+  return session;
+};
+
+const saveHDSession = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(sessCfgFile.hd);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${sessCfgFile.hd}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.error('Can\'t save session file to disk!');
+  }
+};
+
+
+const loadHDToken = () => {
+  let token = loadYamlCfgFile(tokenFile.cr, true);
+  if(typeof token !== 'object' || token === null || Array.isArray(token)){
+    token = {};
+  }
+  return token;
+};
+
+const saveHDToken = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(tokenFile.hd);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${tokenFile.hd}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.error('Can\'t save token file to disk!');
+  }
+};
+
+const saveHDProfile = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(hdProfileCfgFile);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${hdProfileCfgFile}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.error('Can\'t save profile file to disk!');
+  }
+};
+
+const loadHDProfile = () => {
+  let profile = loadYamlCfgFile(hdProfileCfgFile, true);
+  if(typeof profile !== 'object' || profile === null || Array.isArray(profile) || Object.keys(profile).length === 0){
+    profile = {
+      // base
+      ipAddress : '',
+      xNonce    : '',
+      xSignature: '',
+      // personal
+      visitId : '',
+      // profile data
+      profile: {
+        userId   : 0,
+        profileId: 0,
+        deviceId : '',
+      },
+    };
+  }
+  return profile;
 };
 
 const loadFuniToken = () => {
@@ -260,12 +343,19 @@ export {
   loadFuniToken,
   saveFuniToken,
   saveCRSession,
+  loadCRSession,
   saveCRToken,
   loadCRToken,
-  loadCRSession,
+  saveHDSession,
+  loadHDSession,
+  saveHDToken,
+  loadHDToken,
+  saveHDProfile,
+  loadHDProfile,
   isSetuped,
   setSetuped,
   writeYamlCfgFile,
   sessCfgFile,
+  hdProfileCfgFile,
   cfgDir
 };

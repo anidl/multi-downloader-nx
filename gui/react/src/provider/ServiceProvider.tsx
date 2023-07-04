@@ -3,7 +3,7 @@ import {Divider, Box, Button, Typography} from '@mui/material';
 import useStore from '../hooks/useStore';
 import { StoreState } from './Store';
 
-type Services = 'funi'|'crunchy';
+type Services = 'funi'|'crunchy'|'hidive';
 
 export const serviceContext = React.createContext<Services|undefined>(undefined);
 
@@ -24,6 +24,8 @@ const ServiceProvider: FCWithChildren = ({ children }) => {
         <Button size='large' variant="contained" onClick={() => setService('funi')} >Funimation</Button>
         <Divider orientation='vertical' flexItem />
         <Button size='large' variant="contained" onClick={() => setService('crunchy')}>Crunchyroll</Button>
+        <Divider orientation='vertical' flexItem />
+        <Button size='large' variant="contained" onClick={() => setService('hidive')}>Hidive</Button>
       </Box>
     </Box>
     : <serviceContext.Provider value={service}>

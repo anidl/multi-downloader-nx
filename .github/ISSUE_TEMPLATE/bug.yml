@@ -49,7 +49,8 @@ body:
       options:
         - Funimation
         - Crunchyroll
-        - Both
+        - Hidive
+        - All
         - Irrelevant
     validations:
       required: true

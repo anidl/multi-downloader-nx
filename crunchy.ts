@@ -53,7 +53,7 @@ export default class Crunchy implements ServiceClass {
   constructor(private debug = false) {
     this.cfg = yamlCfg.loadCfg();
     this.token = yamlCfg.loadCRToken();
-    this.req = new reqModule.Req(domain, false, false);
+    this.req = new reqModule.Req(domain, false, false, 'cr');
   }
 
   public checkToken(): boolean {

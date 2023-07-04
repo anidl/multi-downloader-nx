@@ -19,7 +19,7 @@ export type DownloadOptions = {
 export type StoreState = {
   episodeListing: Episode[];
   downloadOptions: DownloadOptions,
-  service: 'crunchy'|'funi'|undefined,
+  service: 'crunchy'|'funi'|'hidive'|undefined,
 }
 
 export type StoreAction<T extends (keyof StoreState)> = {

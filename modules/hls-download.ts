@@ -417,6 +417,11 @@ const extFn = {
           if(!options.headers['user-agent']){
             options.headers['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0';
           }
+          //TODO: implement fix for hidive properly
+          if ((options.url.hostname as string).match('hidive')) {
+            options.headers['referrer'] = 'https://www.hidive.com/';
+            options.headers['origin'] = 'https://www.hidive.com';
+          }
           // console.log(' - Req:', options.url.pathname);
         }
       ],

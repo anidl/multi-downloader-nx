@@ -3,15 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { args, groups } from './module.args';
 
-const transformService = (str: 'funi'|'crunchy'|'both') => {
-  switch (str) {
-  case 'both':
-    return 'Both';
-  case 'crunchy':
-    return 'Crunchyroll';
-  case 'funi':
-    return 'Funimation';
-  }
+const transformService = (str: Array<'funi'|'crunchy'|'hidive'|'all'>) => {
+  return str.join(', ');
 };
 
 let docs = `# ${packageJSON.name} (${packageJSON.version}v)

@@ -1,11 +1,12 @@
 # Anime Downloader NX by AniDL
+
 [![Discord Shield](https://discord.com/api/guilds/884479461997805568/widget.png?style=banner2)](https://discord.gg/qEpbWen5vq)
 
-This downloader can download anime from different sites. Currently supported are *Funimation* and *Crunchyroll*.
+This downloader can download anime from different sites. Currently supported are *Funimation*, *Crunchyroll*, and *Hidive*.
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Funimation* or *Crunchyroll*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
+This application is not endorsed by or affiliated with *Funimation*, *Crunchyroll*, or *Hidive*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
 
 ## Prerequisites
 
@@ -27,6 +28,7 @@ To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 ### Node Modules
 
 After installing NodeJS with NPM go to directory with `package.json` file and type: `npm i`. Afterwards run `npm run tsc`. You can now find a lib folder containing the js code execute.
+
 * [check dependencies](https://david-dm.org/anidl/funimation-downloader-nx)
 
 ## CLI Options

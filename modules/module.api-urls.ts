@@ -6,6 +6,8 @@ const domain = {
   api:      'https://api.crunchyroll.com',
   www_beta: 'https://beta.crunchyroll.com',
   api_beta: 'https://beta-api.crunchyroll.com',
+  hd_www:   'https://www.hidive.com',
+  hd_api:   'https://api.hidive.com'
 };
 
 export type APIType = {
@@ -32,7 +34,13 @@ export type APIType = {
   beta_browse: string
   beta_cms: string,
   beta_authHeader: Headers,
-  beta_authHeaderMob: Headers
+  beta_authHeaderMob: Headers,
+  hd_apikey: string,
+  hd_devName: string,
+  hd_appId: string,
+  hd_clientWeb: string,
+  hd_clientExo: string,
+  hd_api: string,
 }
 
 // api urls
@@ -61,7 +69,14 @@ const api: APIType = {
   beta_browse:       `${domain.api_beta}/content/v1/browse`,
   beta_cms:          `${domain.api_beta}/cms/v2`,
   beta_authHeader: {},
-  beta_authHeaderMob: {}
+  beta_authHeaderMob: {},
+  //hidive API
+  hd_apikey:        '508efd7b42d546e19cc24f4d0b414e57e351ca73',
+  hd_devName:       'Android',
+  hd_appId:         '24i-Android',
+  hd_clientWeb:     'okhttp/3.4.1',
+  hd_clientExo:     'smartexoplayer/1.6.0.R (Linux;Android 6.0) ExoPlayerLib/2.6.0',
+  hd_api:           `${domain.hd_api}/api/v1`,
 };
 
 // set header

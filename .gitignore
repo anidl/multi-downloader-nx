@@ -21,6 +21,9 @@ test.*
 updates.json
 funi_token.yml
 cr_token.yml
+hd_profile.yml
+hd_sess.yml
+hd_token.yml
 archive.json
 fonts
 .webpack/
@@ -28,3 +31,5 @@ out/
 dist/
 gui/react/build/
 docker-compose.yml
+crunchyendpoints
+.vscode
