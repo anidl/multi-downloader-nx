@@ -14,12 +14,30 @@ let fontSize = 0;
 let tmMrg = 0;
 let rFont = '';
 
-function loadCSS(cssStr: string) {
+type Css = Record<string, {
+  params: string;
+  list: string[];
+}>
+
+type Vtt = {
+  caption: string;
+  time: {
+      start: string;
+      end: string;
+      ext: unknown;
+  };
+  text?: string | undefined;
+};
+
+function loadCSS(cssStr: string): Css {
   const css = cssStr.replace(cssPrefixRx, '').replace(/[\r\n]+/g, '\n').split('\n');
   const defaultSFont = rFont == '' ? defaultStyleFont : rFont;
   let defaultStyle = `${defaultSFont},40,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,1,0,2,20,20,20,1`; //base for nonDialog
-  const styles = { [defaultStyleName]: { params: defaultStyle, list: [] } };
-  const classList = { [defaultStyleName]: 1 };
+  const styles: Record<string, {
+    params: string,
+    list: string[]
+  }> = { [defaultStyleName]: { params: defaultStyle, list: [] } };
+  const classList: Record<string, number> = { [defaultStyleName]: 1 };
   for (const i in css) {
     let clx, clz, clzx, rgx;
     const l = css[i];
@@ -74,7 +92,7 @@ function parseStyle(stylegroup: string, line: string, style: any) {
           style[0] = defaultStyleFont; //non-dialog to Arial
         }
       } else { //otherwise keep default style
-        style[0] = st[1].match(/[\s"]*([^",]*)/)[1];
+        style[0] = st[1].match(/[\s"]*([^",]*)/)![1];
       }
       break;
     case 'font-size':
@@ -120,20 +138,21 @@ function parseStyle(stylegroup: string, line: string, style: any) {
       if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song')) { //don't touch shadow if dialog
         break;
       }
-      st[1] = st[1].split(',').map(r => r.trim());
-      st[1] = st[1].map(r => { return (r.split(' ').length > 3 ? r.replace(/(\d+)px black$/, '') : r.replace(/black$/, '')).trim(); });
-      st[1] = st[1].map(r => r.replace(/-/g, '').replace(/px/g, '').replace(/(^| )0( |$)/g, ' ').trim()).join(' ');
-      st[1] = st[1].split(' ');
-      if (st[1].length != 10) {
+      let transformed_str = st[1].split(',').map(r => r.trim());
+      let arr = transformed_str[1].split(',').map(r => r.trim());
+      arr = arr.map(r => { return (r.split(' ').length > 3 ? r.replace(/(\d+)px black$/, '') : r.replace(/black$/, '')).trim(); });
+      transformed_str[1] = arr.map(r => r.replace(/-/g, '').replace(/px/g, '').replace(/(^| )0( |$)/g, ' ').trim()).join(' ');
+      arr = transformed_str[1].split(' ');
+      if (arr.length != 10) {
         console.info(`[WARN] VTT2ASS: Can't properly parse text-shadow: ${s.trim()}`);
         break;
       }
-      st[1] = [...new Set(st[1])];
-      if (st[1].length > 1) {
+      arr = [...new Set(arr)];
+      if (arr.length > 1) {
         console.info(`[WARN] VTT2ASS: Can't properly parse text-shadow: ${s.trim()}`);
         break;
       }
-      style[16] = st[1][0];
+      style[16] = arr[0];
       break;
     default:
       console.error(`[WARN] VTT2ASS: Unknown style: ${s.trim()}`);
@@ -148,13 +167,14 @@ function getPxSize(size_line: string, font_size: number) {
     console.error(`[WARN] VTT2ASS: Unknown size: ${size_line}`);
     return;
   }
-  if (m[2] === 'em') m[1] *= font_size;
-  return Math.round(m[1]);
+  let size = parseFloat(m[1]);
+  if (m[2] === 'em') size *= font_size;
+  return Math.round(size);
 }
 
-function getColor(c) {
+function getColor(c: string) {
   if (c[0] !== '#') {
-    c = colors[c];
+    c = colors[c as keyof typeof colors];
   }
   else if (c.length < 7) {
     c = `#${c[1]}${c[1]}${c[2]}${c[2]}${c[3]}${c[3]}`;
@@ -164,18 +184,18 @@ function getColor(c) {
   return `&H00${m[3]}${m[2]}${m[1]}`.toUpperCase();
 }
 
-function loadVTT(vttStr: string) {
+function loadVTT(vttStr: string): Vtt[] {
   const rx = /^([\d:.]*) --> ([\d:.]*)\s?(.*?)\s*$/;
   const lines = vttStr.replace(/\r?\n/g, '\n').split('\n');
   const data = [];
-  let record = null;
+  let record: null|Vtt = null;
   let lineBuf = [];
   for (const l of lines) {
     const m = l.match(rx);
     if (m) {
       let caption = '';
       if (lineBuf.length > 0) {
-        caption = lineBuf.pop();
+        caption = lineBuf.pop()!;
       }
       if (caption !== '' && lineBuf.length > 0) {
         lineBuf.pop();
@@ -189,7 +209,7 @@ function loadVTT(vttStr: string) {
         time: {
           start: m[1],
           end: m[2],
-          ext: m[3].split(' ').map(x => x.split(':')).reduce((p, c) => (p[c[0]] = c[1]) && p, {}),
+          ext: m[3].split(' ').map(x => x.split(':')).reduce((p, c) => ((p as any)[c[0]] = c[1]) && p, {}),
         }
       };
       lineBuf = [];
@@ -207,8 +227,8 @@ function loadVTT(vttStr: string) {
   return data;
 }
 
-function convert(css, vtt) {
-  const stylesMap = {};
+function convert(css: Css, vtt: Vtt[]) {
+  const stylesMap: Record<string, string> = {};
   let ass = [
     '\ufeff[Script Info]',
     'Title: ' + relGroup,
@@ -230,28 +250,33 @@ function convert(css, vtt) {
     '[Events]',
     'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text'
   ]);
-  const events = {
+  const events: {
+    subtitle: string[],
+    caption: string[],
+    capt_pos: string[],
+    song_cap: string[],
+  } = {
     subtitle: [],
     caption: [],
     capt_pos: [],
     song_cap: [],
   };
-  const linesMap = {};
+  const linesMap: Record<string, number> = {};
   for (const l in vtt) {
     const x = convertLine(stylesMap, vtt[l]);
     if (x.ind !== '' && linesMap[x.ind] !== undefined) {
       if (x.subInd > 1) {
-        const fx = convertLine(stylesMap, vtt[l - x.subInd + 1]);
+        const fx = convertLine(stylesMap, vtt[parseInt(l) - x.subInd + 1]);
         if (x.style != fx.style) {
           x.text = `{\\r${x.style}}${x.text}{\\r}`;
         }
       }
-      events[x.type][linesMap[x.ind]] += '\\N' + x.text;
+      events[x.type as keyof typeof events][linesMap[x.ind]] += '\\N' + x.text;
     }
     else {
-      events[x.type].push(x.res);
+      events[x.type as keyof typeof events].push(x.res);
       if (x.ind !== '') {
-        linesMap[x.ind] = events[x.type].length - 1;
+        linesMap[x.ind] = events[x.type as keyof typeof events].length - 1;
       }
     }
 
@@ -283,7 +308,7 @@ function convert(css, vtt) {
   return ass.join('\r\n') + '\r\n';
 }
 
-function convertLine(css: string, l: Record<any, any>) {
+function convertLine(css: Record<string, string>, l: Record<any, any>) {
   const start = convertTime(l.time.start);
   const end = convertTime(l.time.end);
   const txt = convertText(l.text);
@@ -373,7 +398,7 @@ function toSubTime(str: string) {
 function vtt(group: string | undefined, xFontSize: number | undefined, vttStr: string, cssStr: string, timeMargin?: number, replaceFont?: string) {
   relGroup = group ?? '';
   fontSize = xFontSize && xFontSize > 0 ? xFontSize : 34; // 1em to pix
-  tmMrg = timeMargin ? timeMargin : 0; // 
+  tmMrg = timeMargin ? timeMargin : 0; //
   rFont = replaceFont ? replaceFont : rFont;
   return convert(
     loadCSS(cssStr),
