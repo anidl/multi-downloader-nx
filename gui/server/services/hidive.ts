@@ -12,6 +12,7 @@ class HidiveHandler extends Base implements MessageHandler {
   constructor(ws: WebSocketHandler) {
     super(ws);
     this.hidive = new Hidive();
+    this.hidive.doInit();
   }
 
   public auth(data: AuthData) {
