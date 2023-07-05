@@ -85,6 +85,8 @@ export default class Hidive implements ServiceClass {
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
+    if (argv.debug)
+      this.debug = true;
 
     //below is for quickly testing API calls
     /*const searchItems = await this.reqData('Search', {'Query':''});
@@ -698,6 +700,7 @@ export default class Hidive implements ServiceClass {
             const getVttContent = await this.req.getData(await this.genSubsUrl('vtt', subsXUrl));
             if (getCssContent.ok && getVttContent.ok && getCssContent.res && getVttContent.res) {
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
+              //TODO: look into potentially having an option for native fontSize
               const sBody = vtt(undefined, options.fontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];

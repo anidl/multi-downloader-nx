@@ -63,6 +63,8 @@ export default class Crunchy implements ServiceClass {
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
+    if (argv.debug)
+      this.debug = true;
   
     // load binaries
     this.cfg.bin = await yamlCfg.loadBinCfg();
