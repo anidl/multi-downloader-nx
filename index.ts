@@ -36,6 +36,15 @@ import update from './modules/module.updater';
         type: argv.s === undefined ? 'srz' : 's'
       }, (argv.s === undefined ? argv.series : argv.s) as string);
       console.info('Added %s to the downloadArchive list', (argv.s === undefined ? argv.series : argv.s));
+    } else if (argv.service === 'hidive') {
+      if (argv.s === undefined)
+        return console.error('`-s` not found');
+      addToArchive({
+        service: 'hidive',
+        //type: argv.s === undefined ? 'srz' : 's'
+        type: 's'
+      }, (argv.s === undefined ? argv.series : argv.s) as string);
+      console.info('Added %s to the downloadArchive list', (argv.s === undefined ? argv.series : argv.s));
     }
   } else if (argv.downloadArchive) {
     const ids = makeCommand(argv.service);
@@ -43,14 +52,14 @@ import update from './modules/module.updater';
       overrideArguments(cfg.cli, id);
       /* Reimport module to override appArgv */
       Object.keys(require.cache).forEach(key => {
-        if (key.endsWith('crunchy.js') || key.endsWith('funi.js'))
+        if (key.endsWith('crunchy.js') || key.endsWith('funi.js') || key.endsWith('hidive.js'))
           delete require.cache[key];
       });
-      const service = new (argv.service === 'funi' ? (await import('./funi')).default : (await import('./crunchy')).default)() as ServiceClass;
+      const service = new (argv.service === 'funi' ? (await import('./funi')).default : argv.service === 'hidive' ? (await import('./hidive')).default : (await import('./crunchy')).default)() as ServiceClass;
       await service.cli();
     }
   } else {
-    const service = argv.service === 'funi' ? new (await import('./funi')).default() : new (await import('./crunchy')).default() as ServiceClass;
+    const service = new (argv.service === 'funi' ? (await import('./funi')).default : argv.service === 'hidive' ? (await import('./hidive')).default : (await import('./crunchy')).default)() as ServiceClass;
     await service.cli();
   }
 })();

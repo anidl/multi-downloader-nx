@@ -1,13 +1,14 @@
 {
   "name": "multi-downloader-nx",
   "short_name": "aniDL",
-  "version": "3.4.4",
-  "description": "Download videos from Funimation or Crunchyroll via cli",
+  "version": "4.0.0",
+  "description": "Download videos from Funimation, Crunchyroll, or Hidive via cli",
   "keywords": [
     "download",
     "downloader",
     "funimation",
     "funimationnow",
+    "hidive",
     "crunchy",
     "crunchyroll",
     "util",

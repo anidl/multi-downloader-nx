@@ -28,8 +28,8 @@ const parseSelect = (selectString: string, but = false) : {
           return;
         }
         const letters = firstPart.substring(0, match[0].length);
-        const number = parseInt(firstPart.substring(match[0].length));
-        const b = parseInt(splits[1]);
+        const number = parseFloat(firstPart.substring(match[0].length));
+        const b = parseFloat(splits[1]);
         if (isNaN(number) || isNaN(b)) {
           console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
@@ -39,8 +39,8 @@ const parseSelect = (selectString: string, but = false) : {
         }
 
       } else {
-        const a = parseInt(firstPart);
-        const b = parseInt(splits[1]);
+        const a = parseFloat(firstPart);
+        const b = parseFloat(splits[1]);
         if (isNaN(a) || isNaN(b)) {
           console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
@@ -62,14 +62,14 @@ const parseSelect = (selectString: string, but = false) : {
           return;
         }
         const letters = part.substring(0, match[0].length);
-        const number = parseInt(part.substring(match[0].length));
+        const number = parseFloat(part.substring(match[0].length));
         if (isNaN(number)) {
           console.warn(`[WARN] Unable to parse input "${part}"`);
           return;
         }
         select.push(`${letters}${number}`);
       } else {
-        select.push(`${parseInt(part)}`);
+        select.push(`${parseFloat(part)}`);
       }
     }
   });
@@ -89,14 +89,14 @@ const parseSelect = (selectString: string, but = false) : {
             return false;
           }
           const letter = st.substring(0, match[0].length);
-          const number = parseInt(st.substring(match[0].length));
+          const number = parseFloat(st.substring(match[0].length));
           if (isNaN(number)) {
             return false;
           }
           const included = select.includes(`${letter}${number}`);
           return but ? !included : included;
         } else {
-          const included =  select.includes(`${parseInt(st)}`);
+          const included =  select.includes(`${parseFloat(st)}`);
           return but ? !included : included;
         }
       });

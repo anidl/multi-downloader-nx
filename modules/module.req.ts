@@ -26,7 +26,8 @@ const usefulCookies = {
 
 // req
 class Req {
-  private sessCfg = yamlCfg.sessCfgFile;
+  private sessCfg: string;
+  private service: 'cr'|'funi'|'hd';
   private session: Record<string, {
     value: string;
     expires: Date;
@@ -38,7 +39,10 @@ class Req {
   private cfgDir = yamlCfg.cfgDir;
   private curl: boolean|string = false;
   
-  constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false) {}
+  constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false, private type: 'cr'|'funi'|'hd') {
+    this.sessCfg = yamlCfg.sessCfgFile[type];
+    this.service = type;
+  }
   async getData<T = string> (durl: string, params?: Params) {
     params = params || {};
     // options
@@ -168,7 +172,11 @@ class Req {
       if(this.debug){
         console.info('[SAVING FILE]',`${this.sessCfg}.yml`);
       }
-      yamlCfg.saveCRSession(this.session);
+      if (this.type === 'cr') {
+        yamlCfg.saveCRSession(this.session);
+      } else if (this.type === 'hd') {
+        yamlCfg.saveHDSession(this.session);
+      }
       console.info(`Cookies were updated! (${cookieUpdated.join(', ')})\n`);
     }
   }

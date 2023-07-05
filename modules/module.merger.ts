@@ -35,6 +35,7 @@ export type MergerOptions = {
   output: string,
   videoTitle?: string,
   simul?: boolean,
+  inverseTrackOrder?: boolean,
   fonts?: ParsedFont[],
   skipSubMux?: boolean,
   options: {
@@ -160,49 +161,52 @@ class Merger {
     }
 
     for (const vid of this.options.videoAndAudio) {
+      const audioTrackNum = this.options.inverseTrackOrder ? '0' : '1';
+      const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
       if (!hasVideo) {
         args.push(
-          '--video-tracks 0',
-          '--audio-tracks 1'
+          `--video-tracks ${videoTrackNum}`,
+          `--audio-tracks ${audioTrackNum}`
         );
         const trackName = ((this.options.videoTitle ?? vid.lang.name) + (this.options.simul ? ' [Simulcast]' : ' [Uncut]'));
         args.push('--track-name', `0:"${trackName}"`);
         //args.push('--track-name', `1:"${trackName}"`);
-        args.push(`--language 1:${vid.lang.code}`);
+        args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
         if (this.options.defaults.audio.code === vid.lang.code) {
-          args.push('--default-track 1');
+          args.push(`--default-track ${audioTrackNum}`);
         } else {
-          args.push('--default-track 1:0');
+          args.push(`--default-track ${audioTrackNum}:0`);
         }
         hasVideo = true;
       } else {
         args.push(
           '--no-video',
-          '--audio-tracks 1'
+          `--audio-tracks ${audioTrackNum}`
         );
         if (this.options.defaults.audio.code === vid.lang.code) {
-          args.push('--default-track 1');
+          args.push(`--default-track ${audioTrackNum}`);
         } else {
-          args.push('--default-track 1:0');
+          args.push(`--default-track ${audioTrackNum}:0`);
         }
-        args.push('--track-name', `1:"${vid.lang.name}"`);
-        args.push(`--language 1:${vid.lang.code}`);
+        args.push('--track-name', `${audioTrackNum}:"${vid.lang.name}"`);
+        args.push(`--language ${audioTrackNum}:${vid.lang.code}`);
       }
       args.push(`"${vid.path}"`);
     }
 
     for (const aud of this.options.onlyAudio) {
       const trackName = aud.lang.name;
-      args.push('--track-name', `0:"${trackName}"`);
-      args.push(`--language 0:${aud.lang.code}`);
+      const trackNum = this.options.inverseTrackOrder ? '0' : '1';
+      args.push('--track-name', `${trackNum}:"${trackName}"`);
+      args.push(`--language ${trackNum}:${aud.lang.code}`);
       args.push(
         '--no-video',
-        '--audio-tracks 0'
+        `--audio-tracks ${trackNum}`
       );
       if (this.options.defaults.audio.code === aud.lang.code) {
-        args.push('--default-track 0');
+        args.push(`--default-track ${trackNum}`);
       } else {
-        args.push('--default-track 0:0');
+        args.push(`--default-track ${trackNum}:0`);
       }
       args.push(`"${aud.path}"`);
     }

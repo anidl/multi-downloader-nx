@@ -53,7 +53,7 @@ export default class Crunchy implements ServiceClass {
   constructor(private debug = false) {
     this.cfg = yamlCfg.loadCfg();
     this.token = yamlCfg.loadCRToken();
-    this.req = new reqModule.Req(domain, false, false);
+    this.req = new reqModule.Req(domain, false, false, 'cr');
   }
 
   public checkToken(): boolean {
@@ -63,6 +63,8 @@ export default class Crunchy implements ServiceClass {
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
+    if (argv.debug)
+      this.debug = true;
   
     // load binaries
     this.cfg.bin = await yamlCfg.loadBinCfg();
@@ -837,7 +839,11 @@ export default class Crunchy implements ServiceClass {
     if (res === undefined || res.error) {
       return false;
     } else {
-      await this.muxStreams(res.data, { ...options, output: res.fileName });
+      if (!options.skipmux) {
+        await this.muxStreams(res.data, { ...options, output: res.fileName });
+      } else {
+        console.info('Skipping mux');
+      }
       downloaded({
         service: 'crunchy',
         type: 's'

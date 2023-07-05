@@ -26,7 +26,8 @@ export type CrunchyDownloadOptions = {
   defaultSub: LanguageItem,
   defaultAudio: LanguageItem,
   ccTag: string,
-  dlVideoOnce: boolean
+  dlVideoOnce: boolean,
+  skipmux?: boolean
 }
 
 export type CurnchyMultiDownload = {

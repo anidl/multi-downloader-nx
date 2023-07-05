@@ -2,6 +2,7 @@
 
 export type LanguageItem = {
   cr_locale?: string,
+  hd_locale?: string,
   locale: string,
   code: string,
   name: string,
@@ -12,25 +13,25 @@ export type LanguageItem = {
 }
 
 const languages: LanguageItem[] = [
-  { cr_locale: 'en-US', funi_locale: 'enUS', locale: 'en', code: 'eng', name: 'English' },
+  { cr_locale: 'en-US', hd_locale: 'English', funi_locale: 'enUS', locale: 'en', code: 'eng', name: 'English' },
   { cr_locale: 'en-IN', locale: 'en-IN', code: 'eng', name: 'English (India)', },
-  { cr_locale: 'es-LA', funi_name: 'Spanish (LAS)', funi_name_lagacy: 'Spanish (Latin Am)', funi_locale: 'esLA', locale: 'es-419', code: 'spa', name: 'Spanish', language: 'Latin American Spanish' },
-  { cr_locale: 'es-419', locale: 'es-419', code: 'spa-419', name: 'Spanish', language: 'Latin American Spanish' },
+  { cr_locale: 'es-LA', hd_locale: 'Spanish LatAm', funi_name: 'Spanish (LAS)', funi_name_lagacy: 'Spanish (Latin Am)', funi_locale: 'esLA', locale: 'es-419', code: 'spa', name: 'Spanish', language: 'Latin American Spanish' },
+  { cr_locale: 'es-419',hd_locale: 'Spanish', locale: 'es-419', code: 'spa-419', name: 'Spanish', language: 'Latin American Spanish' },
   { cr_locale: 'es-ES', locale: 'es-ES', code: 'spa-ES', name: 'Castilian', language: 'European Spanish' },
-  { cr_locale: 'pt-BR', funi_name: 'Portuguese (Brazil)', funi_locale: 'ptBR', locale: 'pt-BR', code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese' },
+  { cr_locale: 'pt-BR', hd_locale: 'Portuguese', funi_name: 'Portuguese (Brazil)', funi_locale: 'ptBR', locale: 'pt-BR', code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese' },
   { cr_locale: 'pt-PT', locale: 'pt-PT', code: 'por', name: 'Portuguese (Portugal)', language: 'Portugues (Portugal)' },
-  { cr_locale: 'fr-FR', locale: 'fr', code: 'fra', name: 'French' },
-  { cr_locale: 'de-DE', locale: 'de', code: 'deu', name: 'German' },
+  { cr_locale: 'fr-FR', hd_locale: 'French', locale: 'fr', code: 'fra', name: 'French' },
+  { cr_locale: 'de-DE', hd_locale: 'German', locale: 'de', code: 'deu', name: 'German' },
   { cr_locale: 'ar-ME', locale: 'ar', code: 'ara-ME', name: 'Arabic' },
   { cr_locale: 'ar-SA', locale: 'ar', code: 'ara', name: 'Arabic (Saudi Arabia)' },
-  { cr_locale: 'it-IT', locale: 'it', code: 'ita', name: 'Italian' },
+  { cr_locale: 'it-IT', hd_locale: 'Italian', locale: 'it', code: 'ita', name: 'Italian' },
   { cr_locale: 'ru-RU', locale: 'ru', code: 'rus', name: 'Russian' },
-  { cr_locale: 'tr-TR', locale: 'tr', code: 'tur', name: 'Turkish' },
+  { cr_locale: 'tr-TR', hd_locale: 'Turkish', locale: 'tr', code: 'tur', name: 'Turkish' },
   { cr_locale: 'hi-IN', locale: 'hi', code: 'hin', name: 'Hindi' },
   { funi_locale: 'zhMN', locale: 'zh', code: 'cmn', name: 'Chinese (Mandarin, PRC)' },
   { cr_locale: 'zh-CN', locale: 'zh-CN', code: 'zho', name: 'Chinese (Mainland China)' },
-  { cr_locale: 'ko-KR', locale: 'ko', code: 'kor', name: 'Korean' },
-  { cr_locale: 'ja-JP', funi_locale: 'jaJP', locale: 'ja', code: 'jpn', name: 'Japanese' },
+  { cr_locale: 'ko-KR', hd_locale: 'Korean', locale: 'ko', code: 'kor', name: 'Korean' },
+  { cr_locale: 'ja-JP', hd_locale: 'Japanese', funi_locale: 'jaJP', locale: 'ja', code: 'jpn', name: 'Japanese' },
 ];
 
 // add en language names
