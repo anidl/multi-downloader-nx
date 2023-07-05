@@ -82,7 +82,7 @@ function parseStyle(stylegroup: string, line: string, style: any) {
   for (const s of line.split(';')) {
     if (s == '') continue;
     const st = s.trim().split(':');
-    let cl;
+    let cl, arr, transformed_str;
     switch (st[0]) {
     case 'font-family':
       if (rFont != '') { //do rewrite if rFont is specified
@@ -138,8 +138,8 @@ function parseStyle(stylegroup: string, line: string, style: any) {
       if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song')) { //don't touch shadow if dialog
         break;
       }
-      let transformed_str = st[1].split(',').map(r => r.trim());
-      let arr = transformed_str[1].split(',').map(r => r.trim());
+      transformed_str = st[1].split(',').map(r => r.trim());
+      arr = transformed_str[1].split(',').map(r => r.trim());
       arr = arr.map(r => { return (r.split(' ').length > 3 ? r.replace(/(\d+)px black$/, '') : r.replace(/black$/, '')).trim(); });
       transformed_str[1] = arr.map(r => r.replace(/-/g, '').replace(/px/g, '').replace(/(^| )0( |$)/g, ' ').trim()).join(' ');
       arr = transformed_str[1].split(' ');
