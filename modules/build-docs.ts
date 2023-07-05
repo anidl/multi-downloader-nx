@@ -4,7 +4,24 @@ import path from 'path';
 import { args, groups } from './module.args';
 
 const transformService = (str: Array<'funi'|'crunchy'|'hidive'|'all'>) => {
-  return str.join(', ');
+  const services: string[] = [];
+  str.forEach(function(part) {
+    switch(part) {
+    case 'funi':
+      services.push('Funimation');
+      break;
+    case 'crunchy':
+      services.push('Crunchyroll');
+      break;
+    case 'hidive':
+      services.push('Hidive');
+      break;
+    case 'all':
+      services.push('All');
+      break;
+    }
+  });
+  return services.join(', ');
 };
 
 let docs = `# ${packageJSON.name} (${packageJSON.version}v)
