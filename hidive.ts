@@ -698,7 +698,7 @@ export default class Hidive implements ServiceClass {
             const getVttContent = await this.req.getData(await this.genSubsUrl('vtt', subsXUrl));
             if (getCssContent.ok && getVttContent.ok && getCssContent.res && getVttContent.res) {
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-              const sBody = vtt(undefined, options.fontSize, getVttContent.res.body, getCssContent.res.body, subsMargin);
+              const sBody = vtt(undefined, options.fontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);

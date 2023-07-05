@@ -481,7 +481,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'fonts',
     describe: 'Set the font to use in subtiles',
     docDescribe: true,
-    service: ['funi'],
+    service: ['funi', 'hidive'],
     type: 'string',
     usage: '${fontName}',
   },
