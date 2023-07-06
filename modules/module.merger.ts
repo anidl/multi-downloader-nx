@@ -215,7 +215,8 @@ class Merger {
       for (const subObj of this.options.subtitles) {
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
-        if (this.options.defaults.sub.code === subObj.language.code) {
+        //TODO: look into making Closed Caption default if it's the only sub of the default language downloaded
+        if (this.options.defaults.sub.code === subObj.language.code && !subObj.closedCaption) {
           args.push('--default-track 0');
         } else {
           args.push('--default-track 0:0');
