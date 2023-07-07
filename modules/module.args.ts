@@ -206,6 +206,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'originalFontSize',
+    describe: 'Keep original font size',
+    type: 'boolean',
+    group: 'dl',
+    service: ['hidive'],
+    docDescribe: 'If selected, it will prefer to keep the original Font Size defined by the service.',
+    usage: '',
+    default: {
+      default: true
+    }
+  },
+  {
     name: 'x',
     group: 'dl',
     describe: 'Select the server to use',

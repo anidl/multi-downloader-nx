@@ -63,6 +63,7 @@ let argvC: {
   $0: string; 
   dlVideoOnce: boolean; 
   removeBumpers: boolean;
+  originalFontSize: boolean;
 };
     
 export type ArgvType = typeof argvC;  
