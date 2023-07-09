@@ -1,10 +1,24 @@
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
 import React from 'react';
 import { messageChannelContext } from '../../provider/MessageChannel';
+import useStore from '../../hooks/useStore';
+import { StoreState } from '../../provider/Store'
 
 const MenuBar: React.FC = () => {
   const [ openMenu, setMenuOpen ] = React.useState<'settings'|'help'|undefined>(); 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [store] = useStore();
+
+  const transformService = (service: StoreState['service']) => {
+    switch(service) {
+      case 'crunchy': 
+        return "Crunchyroll"
+      case 'funi':
+        return "Funimation"
+      case "hidive":
+        return "Hidive"
+    }
+  }
 
   const msg = React.useContext(messageChannelContext);
 
@@ -79,6 +93,9 @@ const MenuBar: React.FC = () => {
         Discord
       </MenuItem>
     </Menu>
+    <Typography variant="h5" color="text.primary" component="div" align="center" sx={{flexGrow: 1}}>
+      {transformService(store.service)}
+    </Typography>
   </Box>;
 };
 
