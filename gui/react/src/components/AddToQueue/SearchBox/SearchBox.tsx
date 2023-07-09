@@ -32,7 +32,7 @@ const SearchBox: React.FC = () => {
   React.useEffect(() => {
     if (search.trim().length === 0)
       return setSearchResult({ isOk: true, value: [] });
-    
+
     const timeOutId = setTimeout(async () => {
       if (search.trim().length > 3) {
         const s = await messageHandler?.search({search});
@@ -49,12 +49,13 @@ const SearchBox: React.FC = () => {
     <Box sx={{ m: 2 }}>
       <TextField ref={anchor} value={search} onClick={() => setFocus(true)} onChange={e => setSearch(e.target.value)} variant='outlined' label='Search' fullWidth  />
       {searchResult !== undefined && searchResult.isOk && searchResult.value.length > 0 && focus &&
-      <Paper sx={{ position: 'fixed', maxHeight: '50%', width: `${anchorBounding?.width}px`, 
+      <Paper sx={{ position: 'fixed', maxHeight: '50%', width: `${anchorBounding?.width}px`,
         left: anchorBounding?.x, top: (anchorBounding?.y ?? 0) + (anchorBounding?.height ?? 0), zIndex: 99, overflowY: 'scroll'}}>
         <List>
           {searchResult && searchResult.isOk ?
             searchResult.value.map((a, ind, arr) => {
               const imageRef = React.createRef<HTMLImageElement>();
+              const summaryRef = React.createRef<HTMLParagraphElement>();
               return <Box key={a.id}>
                 <ListItem className='listitem-hover' onClick={() => {
                   selectItem(a.id);
@@ -68,7 +69,7 @@ const SearchBox: React.FC = () => {
                       <Typography variant='h6' component='h6' color='text.primary' sx={{  }}>
                         {a.name}
                       </Typography>
-                      {a.desc && <Typography variant='caption' component='p' color='text.primary' sx={{ pt: 1, pb: 1 }}>
+                      {a.desc && <Typography variant='caption' component='p' color='text.primary' sx={{ pt: 1, pb: 1 }} ref={summaryRef}>
                         {a.desc}
                       </Typography>}
                       {a.lang && <Typography variant='caption' component='p' color='text.primary' sx={{  }}>
@@ -90,8 +91,21 @@ const SearchBox: React.FC = () => {
                   text: 'Open image in new tab',
                   onClick: () => {
                     window.open(a.image);
-                  } 
+                  }
                 } ]} popupItem={imageRef} />
+                {a.desc &&
+                  <ContextMenu options={[
+                    {
+                      onClick: async () => {
+                        await navigator.clipboard.writeText(a.desc!);
+                        enqueueSnackbar('Copied summary to clipboard', {
+                          variant: 'info'
+                        })
+                      },
+                      text: "Copy summary to clipboard"
+                    }
+                  ]} popupItem={summaryRef} />
+                }
                 {(ind < arr.length - 1) && <Divider />}
               </Box>;
             })
