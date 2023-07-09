@@ -79,19 +79,17 @@ const EpisodeListing: React.FC = () => {
         const isSelected = selected.includes(e.toString());
         const imageRef = React.createRef<HTMLImageElement>();
         const summaryRef = React.createRef<HTMLParagraphElement>();
-        return <Box {...{ mouseData: isSelected }} key={`Episode_List_Item_${index}`} 
-        onClick={() => {
-          let arr: string[] = [];
-          if (isSelected) {
-            arr = [...selected.filter(a => a !== e.toString())];
-          } else {
-            arr = [...selected, e.toString()];
-          }
-          setSelected(arr.filter(a => a.length > 0));
-        }}>
-          <ListItem sx={{backdropFilter: isSelected ? 'brightness(1.5)' : '', 
-          '&:hover': {backdropFilter: 'brightness(1.5)'}, 
-          display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }}>
+        return <Box {...{ mouseData: isSelected }} key={`Episode_List_Item_${index}`}>
+          <ListItem sx={{backdropFilter: isSelected ? 'brightness(1.5)' : '', '&:hover': {backdropFilter: 'brightness(1.5)'}, display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }} 
+          onClick={() => {
+            let arr: string[] = [];
+            if (isSelected) {
+              arr = [...selected.filter(a => a !== e.toString())];
+            } else {
+              arr = [...selected, e.toString()];
+            }
+            setSelected(arr.filter(a => a.length > 0));
+          }}>
             { isSelected ? <CheckBox /> : <CheckBoxOutlineBlank /> }
             <Typography color='text.primary' sx={{ textAlign: 'center' }}>
               {idStr}
