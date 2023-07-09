@@ -1,4 +1,4 @@
-# multi-downloader-nx (4.0.3v)
+# multi-downloader-nx (4.1.0v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -136,6 +136,12 @@ This will speed up the download speed, if multiple languages are selected.
 
 If selected, it will remove the bumpers such as the hidive intro from the final file.
 Currently disabling this sometimes results in bugs such as video/audio desync
+#### `--originalFontSize`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Hidive | `--originalFontSize ` | `boolean` | `No`| `NaN` | `true`| `originalFontSize: ` |
+
+If selected, it will prefer to keep the original Font Size defined by the service.
 #### `-x`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 

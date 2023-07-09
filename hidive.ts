@@ -416,7 +416,7 @@ export default class Hidive implements ServiceClass {
       console.info(`[INFO] Selected dub(s): ${options.dubLang.join(', ')}`);
       const videoUrls = videoData.Data.VideoUrls;
       const subsUrls = videoData.Data.CaptionVttUrls;
-      const fontSize = videoData.Data.FontSize ? videoData.Data.FontSize : 34;
+      const fontSize = videoData.Data.FontSize ? videoData.Data.FontSize : options.fontSize;
       const subsSel = subsList;
       //Get Selected Video URLs
       const videoSel = videoList.sort().filter(videoLanguage => 
@@ -490,10 +490,11 @@ export default class Hidive implements ServiceClass {
     let mediaName = '...';
     let fileName;
     const files: DownloadedMedia[] = [];
+    const variables: Variable[] = [];
     let dlFailed = false;
     //let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
     let subsMargin = 0;
-    const variables: Variable[] = [];
+    const chosenFontSize = options.originalFontSize ? fontSize : options.fontSize;
     for (const videoData of videoUrls) {
       if(videoData.seriesTitle && videoData.episodeNumber && videoData.episodeTitle){
         mediaName = `${videoData.seriesTitle} - ${videoData.episodeNumber} - ${videoData.episodeTitle}`;
@@ -700,8 +701,7 @@ export default class Hidive implements ServiceClass {
             const getVttContent = await this.req.getData(await this.genSubsUrl('vtt', subsXUrl));
             if (getCssContent.ok && getVttContent.ok && getCssContent.res && getVttContent.res) {
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-              //TODO: look into potentially having an option for native fontSize
-              const sBody = vtt(undefined, options.fontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName);
+              const sBody = vtt(undefined, chosenFontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);

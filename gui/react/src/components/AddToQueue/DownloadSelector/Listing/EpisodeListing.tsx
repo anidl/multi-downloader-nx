@@ -2,12 +2,15 @@ import { Box, List, ListItem, Typography, Divider, Dialog, Select, MenuItem, For
 import { CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material';
 import React from 'react';
 import useStore from '../../../../hooks/useStore';
+import ContextMenu from '../../../reusable/ContextMenu';
+import { useSnackbar } from 'notistack';
 
 
 const EpisodeListing: React.FC = () => {
   const [store, dispatch] = useStore();
 
   const [season, setSeason] = React.useState<'all'|string>('all');
+  const { enqueueSnackbar } = useSnackbar();
 
   const seasons = React.useMemo(() => {
     const s: string[] = [];
@@ -72,28 +75,26 @@ const EpisodeListing: React.FC = () => {
       </ListItem>
       {store.episodeListing.filter((a) => season === 'all' ? true : a.season === season).map((item, index, { length }) => {
         const e = isNaN(parseInt(item.e)) ? item.e : parseInt(item.e);
+        const idStr = `S${item.season}E${e}`
         const isSelected = selected.includes(e.toString());
-        return <Box {...{ mouseData: isSelected }} key={`Episode_List_Item_${index}`} sx={{
-          backdropFilter: isSelected ? 'brightness(1.5)' : '',
-          '&:hover': {
-            backdropFilter: 'brightness(1.5)'
-          }
-        }}
-        onClick={() => {
-          let arr: string[] = [];
-          if (isSelected) {
-            arr = [...selected.filter(a => a !== e.toString())];
-          } else {
-            arr = [...selected, e.toString()];
-          }
-          setSelected(arr.filter(a => a.length > 0));
-        }}>
-          <ListItem sx={{ display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }}>
+        const imageRef = React.createRef<HTMLImageElement>();
+        const summaryRef = React.createRef<HTMLParagraphElement>();
+        return <Box {...{ mouseData: isSelected }} key={`Episode_List_Item_${index}`}>
+          <ListItem sx={{backdropFilter: isSelected ? 'brightness(1.5)' : '', '&:hover': {backdropFilter: 'brightness(1.5)'}, display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }} 
+          onClick={() => {
+            let arr: string[] = [];
+            if (isSelected) {
+              arr = [...selected.filter(a => a !== e.toString())];
+            } else {
+              arr = [...selected, e.toString()];
+            }
+            setSelected(arr.filter(a => a.length > 0));
+          }}>
             { isSelected ? <CheckBox /> : <CheckBoxOutlineBlank /> }
             <Typography color='text.primary' sx={{ textAlign: 'center' }}>
-              {e}
+              {idStr}
             </Typography>
-            <img style={{ width: 'inherit', maxHeight: '200px', minWidth: '150px' }} src={item.img} alt="thumbnail" />
+            <img ref={imageRef} style={{ width: 'inherit', maxHeight: '200px', minWidth: '150px' }} src={item.img} alt="thumbnail" />
             <Box sx={{ display: 'flex', flexDirection: 'column', pl: 1 }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr min-content' }}>
                 <Typography color='text.primary' variant="h5">
@@ -103,7 +104,7 @@ const EpisodeListing: React.FC = () => {
                   {item.time.startsWith('00:') ? item.time.slice(3) : item.time}
                 </Typography>
               </Box>
-              <Typography color='text.primary'>
+              <Typography color='text.primary' ref={summaryRef}>
                 {item.description}
               </Typography>
               <Box sx={{ display: 'grid', gridTemplateColumns: 'fit-content 1fr' }}>
@@ -114,6 +115,29 @@ const EpisodeListing: React.FC = () => {
               </Box>
             </Box>
           </ListItem>
+          <ContextMenu options={[ { text: 'Copy image URL', onClick: async () => {
+            await navigator.clipboard.writeText(item.img);
+            enqueueSnackbar('Copied URL to clipboard', {
+              variant: 'info'
+            });
+          }},
+          {
+            text: 'Open image in new tab',
+            onClick: () => {
+              window.open(item.img);
+            }
+          } ]} popupItem={imageRef} />
+          <ContextMenu options={[
+            {
+              onClick: async () => {
+                await navigator.clipboard.writeText(item.description!);
+                enqueueSnackbar('Copied summary to clipboard', {
+                  variant: 'info'
+                })
+              },
+              text: "Copy summary to clipboard"
+            }
+          ]} popupItem={summaryRef} />
           {index < length - 1 && <Divider />}
         </Box>;
       })}

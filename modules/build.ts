@@ -7,7 +7,7 @@ import { execSync } from 'child_process';
 import { console } from './log';
 
 const buildsDir = './_builds';
-const nodeVer = 'node16-';
+const nodeVer = 'node18-';
 
 type BuildTypes = `${'ubuntu'|'windows'|'macos'|'arm'}64`
 
