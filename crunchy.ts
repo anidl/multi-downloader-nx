@@ -1644,6 +1644,9 @@ export default class Crunchy implements ServiceClass {
           ret[season_number][lang.code] = item;
         } else if (item.is_dubbed && lang.code === 'eng' && !langsData.languages.some(a => item.title.includes(`(${a.name})`) || item.title.includes(`(${a.name} Dub)`))) { // Dubbed with no more infos will be treated as eng dubs
           ret[season_number][lang.code] = item;
+        //TODO: look into if below is stable
+        } else if (item.audio_locale == lang.cr_locale) {
+          ret[season_number][lang.code] = item;
         }
       }
     }
