@@ -798,4 +798,10 @@ export default class Hidive implements ServiceClass {
     if (isMuxed && !options.nocleanup)
       merger.cleanUp();
   }
+  
+  public sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
 }
