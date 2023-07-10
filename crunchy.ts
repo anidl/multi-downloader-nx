@@ -865,7 +865,7 @@ export default class Crunchy implements ServiceClass {
   public async getObjectById(e?: string, earlyReturn?: boolean, external_id?: boolean): Promise<ObjectInfo|Partial<CrunchyEpMeta>[]|undefined> {
     if(!this.cmsToken.cms){
       console.error('Authentication required!');
-      return;
+      return [];
     }
 
     let convertedObjects;
@@ -907,7 +907,7 @@ export default class Crunchy implements ServiceClass {
       
     if(doEpsFilter.values.length < 1){
       console.info('\nObjects not selected!\n');
-      return;
+      return [];
     }
       
     // node index.js --service crunchy -e G6497Z43Y,GRZXCMN1W,G62PEZ2E6,G25FVGDEK,GZ7UVPVX5
@@ -930,7 +930,7 @@ export default class Crunchy implements ServiceClass {
         objectInfo.error = true;
         return objectInfo;
       }
-      return;
+      return [];
     }
       
     const objectInfo = JSON.parse(objectReq.res.body) as ObjectInfo;
@@ -1354,6 +1354,11 @@ export default class Crunchy implements ServiceClass {
         
       if(options.hslang != 'none'){
         console.warn('Subtitles downloading disabled for hardsubs streams.');
+        options.skipsubs = true;
+      }
+
+      if (options.nosubs) {
+        console.info('Subtitles downloading disabled from nosubs flag.');
         options.skipsubs = true;
       }
   

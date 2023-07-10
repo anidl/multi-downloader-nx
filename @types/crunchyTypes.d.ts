@@ -17,6 +17,7 @@ export type CrunchyDownloadOptions = {
   fsRetryTime: number,
   dlsubs: string[],
   skipsubs: boolean,
+  nosubs?: boolean,
   mp4: boolean,
   override: string[],
   videoTitle: string,

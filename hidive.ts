@@ -681,6 +681,11 @@ export default class Hidive implements ServiceClass {
       options.dlsubs = ['all'];
     }
 
+    if (options.nosubs) {
+      console.info('Subtitles downloading disabled from nosubs flag.');
+      options.skipsubs = true;
+    }
+
     if(!options.skipsubs && options.dlsubs.indexOf('none') == -1) {
       if(subUrls.length > 0) {
         let subIndex = 0;
