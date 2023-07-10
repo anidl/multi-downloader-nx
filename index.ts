@@ -55,11 +55,11 @@ import update from './modules/module.updater';
         if (key.endsWith('crunchy.js') || key.endsWith('funi.js') || key.endsWith('hidive.js'))
           delete require.cache[key];
       });
-      const service = new (argv.service === 'funi' ? (await import('./funi')).default : argv.service === 'hidive' ? (await import('./hidive')).default : (await import('./crunchy')).default)() as ServiceClass;
+      const service = new (argv.service === 'funi' ? (await import('./funi')).default : argv.service === 'hidive' ? (await import('./hidive')).default : (await import('./crunchy')).default)(argv.debug) as ServiceClass;
       await service.cli();
     }
   } else {
-    const service = new (argv.service === 'funi' ? (await import('./funi')).default : argv.service === 'hidive' ? (await import('./hidive')).default : (await import('./crunchy')).default)() as ServiceClass;
+    const service = new (argv.service === 'funi' ? (await import('./funi')).default : argv.service === 'hidive' ? (await import('./hidive')).default : (await import('./crunchy')).default)(argv.debug) as ServiceClass;
     await service.cli();
   }
 })();

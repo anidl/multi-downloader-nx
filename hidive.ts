@@ -59,7 +59,7 @@ export default class Hidive implements ServiceClass {
     this.session = yamlCfg.loadHDSession();
     this.token = yamlCfg.loadHDToken();
     this.client = yamlCfg.loadHDProfile() as {ipAddress: string, xNonce: string, xSignature: string, visitId: string, profile: {userId: number, profileId: number, deviceId : string}};
-    this.req = new reqModule.Req(domain, false, false, 'hd');
+    this.req = new reqModule.Req(domain, debug, false, 'hd');
   }
 
   public async doInit() {
