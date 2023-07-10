@@ -315,7 +315,6 @@ export default class Crunchy implements ServiceClass {
     if (ifNeeded && this.cmsToken.cms) {
       if (!(Date.now() >= new Date(this.cmsToken.cms.expires).getTime())) {
         return;
-      } else {
       }
     }
 
