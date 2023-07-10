@@ -238,7 +238,7 @@ export default class Crunchy implements ServiceClass {
     yamlCfg.saveCRToken(this.token);
   }
 
-  public async getProfile() : Promise<boolean> {
+  public async getProfile(silent = false) : Promise<boolean> {
     if(!this.token.access_token){
       console.error('No access token!');
       return false;
@@ -255,7 +255,9 @@ export default class Crunchy implements ServiceClass {
       return false;
     }
     const profile = JSON.parse(profileReq.res.body);
-    console.info('USER: %s (%s)', profile.username, profile.email);
+    if (!silent) {
+      console.info('USER: %s (%s)', profile.username, profile.email);
+    }
     return true;
   }
 
@@ -297,19 +299,26 @@ export default class Crunchy implements ServiceClass {
       yamlCfg.saveCRToken(this.token);
     }
     if(this.token.refresh_token) {
-      if (!silent)
-        await this.getProfile();
+      await this.getProfile(silent);
     } else {
       console.info('USER: Anonymous');
     }
-    await this.getCMStoken();
+    await this.getCMStoken(ifNeeded);
   }
 
-  public async getCMStoken(){
+  public async getCMStoken(ifNeeded = false) {
     if(!this.token.access_token){
       console.error('No access token!');
       return;
     }
+
+    if (ifNeeded && this.cmsToken.cms) {
+      if (!(Date.now() >= new Date(this.cmsToken.cms.expires).getTime())) {
+        return;
+      } else {
+      }
+    }
+
     const cmsTokenReqOpts = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,

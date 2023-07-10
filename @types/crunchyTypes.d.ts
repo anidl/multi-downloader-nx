@@ -14,6 +14,7 @@ export type CrunchyDownloadOptions = {
   partsize: number,
   callbackMaker?: (data: DownloadInfo) => HLSCallback,
   timeout: number,
+  waittime: number,
   fsRetryTime: number,
   dlsubs: string[],
   skipsubs: boolean,
