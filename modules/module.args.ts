@@ -166,6 +166,17 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     alias: 'episode'
   },
   {
+    name: 'extid',
+    group: 'dl',
+    describe: 'Set the external id to lookup/download',
+    docDescribe: 'Set the external id to lookup/download.'
+      + '\nAllows you to download or view legacy Crunchyroll Ids ',
+    service: ['crunchy'],
+    type: 'string',
+    usage: '${selection}',
+    alias: 'externalid'
+  },
+  {
     name: 'q',
     group: 'dl',
     describe: 'Set the quality level. Use 0 to use the maximum quality.',

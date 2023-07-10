@@ -144,6 +144,16 @@ export default class Crunchy implements ServiceClass {
         }
       }
       return true;
+    } else if (argv.extid) {
+      await this.refreshToken();
+      const selected = await this.getObjectById(argv.extid, false, true);
+      for (const select of selected as Partial<CrunchyEpMeta>[]) {
+        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false }))) {
+          console.error(`Unable to download selected episode ${select.episodeNumber}`);
+          return false;
+        }
+      }
+      return true;
     }
     else{
       console.info('No option selected or invalid value entered. Try --help.');
@@ -852,13 +862,48 @@ export default class Crunchy implements ServiceClass {
     return true;
   }
 
-  public async getObjectById(e?: string, earlyReturn?: boolean): Promise<ObjectInfo|Partial<CrunchyEpMeta>[]|undefined> {
+  public async getObjectById(e?: string, earlyReturn?: boolean, external_id?: boolean): Promise<ObjectInfo|Partial<CrunchyEpMeta>[]|undefined> {
     if(!this.cmsToken.cms){
       console.error('Authentication required!');
       return;
     }
+
+    let convertedObjects;
+    if (external_id) {
+      const epFilter = parseSelect(e as string);
+      const objectIds = [];
+      for (const ob of epFilter.values) {
+        const extIdReqOpts = [
+          api.beta_cms,
+          this.cmsToken.cms.bucket,
+          '/channels/crunchyroll/objects',
+          '?',
+          new URLSearchParams({
+            'external_id': ob,
+            'Policy': this.cmsToken.cms.policy,
+            'Signature': this.cmsToken.cms.signature,
+            'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+          }),
+        ].join('');
+    
+        const extIdReq = await this.req.getData(extIdReqOpts);
+        if (!extIdReq.ok || !extIdReq.res) {
+          console.error('Objects Request FAILED!');
+          if (extIdReq.error && extIdReq.error.res && extIdReq.error.res.body) {
+            console.info('[INFO] Body:', extIdReq.error.res.body);
+          }
+          continue;
+        }
+    
+        const oldObjectInfo = JSON.parse(extIdReq.res.body) as Record<any, any>;
+        for (const object of oldObjectInfo.items) {
+          objectIds.push(object.id);
+        }
+      }
+      convertedObjects = objectIds.join(',');
+    }
       
-    const doEpsFilter = parseSelect(e as string);
+    const doEpsFilter = parseSelect(convertedObjects ?? e as string);
       
     if(doEpsFilter.values.length < 1){
       console.info('\nObjects not selected!\n');
@@ -951,7 +996,7 @@ export default class Crunchy implements ServiceClass {
       await this.logObject(item, 2);
     }
     console.info('');
-    return selectedMedia;      
+    return selectedMedia;
   }
 
   public async downloadMediaList(medias: CrunchyEpMeta, options: CrunchyDownloadOptions) : Promise<{

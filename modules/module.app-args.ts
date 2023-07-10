@@ -33,6 +33,7 @@ let argvC: {
   series: string | undefined; 
   s: string | undefined; 
   e: string | undefined; 
+  extid: string | undefined; 
   q: number; 
   x: number; 
   kstream: number; 
