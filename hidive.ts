@@ -675,6 +675,7 @@ export default class Hidive implements ServiceClass {
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
         console.info('Downloading skipped!');
       }
+      await this.sleep(options.waittime);
     }
     
     if(options.dlsubs.indexOf('all') > -1){

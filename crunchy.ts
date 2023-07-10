@@ -259,6 +259,12 @@ export default class Crunchy implements ServiceClass {
     return true;
   }
 
+  public sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
   public async refreshToken(ifNeeded = false,  silent = false) {
     if(!this.token.access_token && !this.token.refresh_token || this.token.access_token && !this.token.refresh_token){
       await this.doAnonymousAuth();
@@ -1415,6 +1421,7 @@ export default class Crunchy implements ServiceClass {
       else{
         console.info('Subtitles downloading skipped!');
       }
+      await this.sleep(options.waittime);
     }
     return {
       error: dlFailed,

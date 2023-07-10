@@ -48,6 +48,7 @@ let argvC: {
   fontSize: number; 
   allDubs: boolean; 
   timeout: number; 
+  waittime: number;
   simul: boolean; 
   mp4: boolean; 
   skipmux: boolean | undefined; 

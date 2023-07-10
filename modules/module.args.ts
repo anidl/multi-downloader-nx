@@ -372,6 +372,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'waittime',
+    group: 'dl',
+    type: 'number',
+    describe: 'Set the time the program waits between downloads. Set in millisecods',
+    docDescribe: true,
+    service: ['crunchy','hidive'],
+    usage: '${waittime}',
+    default: {
+      default: 0 * 1000
+    }
+  },
+  {
     name: 'simul',
     group: 'dl',
     describe: 'Force downloading simulcast version instead of uncut version (if available).',
