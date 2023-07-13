@@ -871,7 +871,7 @@ export default class Crunchy implements ServiceClass {
       downloaded({
         service: 'crunchy',
         type: 's'
-      }, data.showID, [data.episodeNumber]);
+      }, data.showID, [data.episodeNumber || data.e]);
     }
     return true;
   }
