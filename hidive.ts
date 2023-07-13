@@ -747,6 +747,7 @@ export default class Hidive implements ServiceClass {
       onlyVid: [],
       skipSubMux: options.skipSubMux,
       inverseTrackOrder: true,
+      keepAllVideos: options.keepAllVideos,
       onlyAudio: [],
       output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {

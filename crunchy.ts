@@ -1457,6 +1457,7 @@ export default class Crunchy implements ServiceClass {
         };
       }),
       simul: false,
+      keepAllVideos: options.keepAllVideos,
       fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
       videoAndAudio: data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         if (a.type === 'Subtitle')

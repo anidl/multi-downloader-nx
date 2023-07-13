@@ -36,6 +36,7 @@ export type MergerOptions = {
   videoTitle?: string,
   simul?: boolean,
   inverseTrackOrder?: boolean,
+  keepAllVideos?: boolean,
   fonts?: ParsedFont[],
   skipSubMux?: boolean,
   options: {
@@ -163,7 +164,7 @@ class Merger {
     for (const vid of this.options.videoAndAudio) {
       const audioTrackNum = this.options.inverseTrackOrder ? '0' : '1';
       const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
-      if (!hasVideo) {
+      if (!hasVideo || this.options.keepAllVideos) {
         args.push(
           `--video-tracks ${videoTrackNum}`,
           `--audio-tracks ${audioTrackNum}`

@@ -408,6 +408,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'keepAllVideos',
+    group: 'mux',
+    describe: 'Keeps all videos when merging instead of discarding extras',
+    docDescribe: 'If set to true, it will keep all videos in the merge process, rather than discarding the extra videos.',
+    service: ['crunchy','hidive'],
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
     name: 'skipmux',
     describe: 'Skip muxing video, audio and subtitles',
     docDescribe: true,

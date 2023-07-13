@@ -42,6 +42,7 @@ export type CurnchyMultiDownload = {
 export type CrunchyMuxOptions = {
   output: string,
   skipSubMux?: boolean
+  keepAllVideos?: bolean
   novids?: boolean,
   mp4: boolean,
   forceMuxer?: 'ffmpeg'|'mkvmerge',
