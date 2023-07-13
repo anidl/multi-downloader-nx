@@ -1,4 +1,4 @@
-# multi-downloader-nx (4.2.0b3v)
+# multi-downloader-nx (4.2.0v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -281,6 +281,12 @@ If a file already exists, the tool will ask you how to proceed. With this, you c
 | All | `--mp4 ` | `boolean` | `No`| `NaN` | `false`| `mp4: ` |
 
 If selected, the output file will be an mp4 file (not recommended tho)
+#### `--keepAllVideos`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll, Hidive | `--keepAllVideos ` | `boolean` | `No`| `NaN` | `false`| `keepAllVideos: ` |
+
+If set to true, it will keep all videos in the merge process, rather than discarding the extra videos.
 #### `--skipmux`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
