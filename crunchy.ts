@@ -1530,7 +1530,7 @@ export default class Crunchy implements ServiceClass {
             //Iterate over episode versions for audio languages
             for (const version of episode.versions) {
               //Make sure there is only one of the same language
-              if (!item.langs.find(a => a.cr_locale == version.audio_locale)) {
+              if (!item.langs.find(a => a?.cr_locale == version.audio_locale)) {
                 //Push to arrays if there is no duplicates of the same language.
                 item.items.push(episode);
                 item.langs.push(langsData.languages.find(a => a.cr_locale == version.audio_locale) as langsData.LanguageItem);
@@ -1540,7 +1540,7 @@ export default class Crunchy implements ServiceClass {
             //Episode didn't have versions, mark it as such to be logged.
             serieshasversions = false;
             //Make sure there is only one of the same language
-            if (!item.langs.find(a => a.cr_locale == episode.audio_locale)) {
+            if (!item.langs.find(a => a?.cr_locale == episode.audio_locale)) {
               //Push to arrays if there is no duplicates of the same language.
               item.items.push(episode);
               item.langs.push(langsData.languages.find(a => a.cr_locale == episode.audio_locale) as langsData.LanguageItem);
@@ -1572,7 +1572,7 @@ export default class Crunchy implements ServiceClass {
         item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
       } - Season ${item.items[0].season_number} - ${item.items[0].title} [${
         item.items.map((a, index) => {
-          return `${a.is_premium_only ? '☆ ' : ''}${item.langs[index].name}`;
+          return `${a.is_premium_only ? '☆ ' : ''}${item.langs[index]?.name ?? 'Unknown'}`;
         }).join(', ')
       }]`);
     }
@@ -1588,7 +1588,7 @@ export default class Crunchy implements ServiceClass {
       const seconds = Math.floor(value.items[0].duration_ms / 1000);
       return {
         e: key.startsWith('E') ? key.slice(1) : key,
-        lang: value.langs.map(a => a.code),
+        lang: value.langs.map(a => a?.code),
         name: value.items[0].title,
         season: value.items[0].season_number.toString(),
         seriesTitle: value.items[0].series_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
@@ -1630,7 +1630,7 @@ export default class Crunchy implements ServiceClass {
     for (const key of Object.keys(eps)) {
       const itemE = eps[key];
       itemE.items.forEach((item, index) => {
-        if (!dubLang.includes(itemE.langs[index].code))
+        if (!dubLang.includes(itemE.langs[index]?.code))
           return;
         item.hide_season_title = true;
         if(item.season_title == '' && item.series_title != ''){
