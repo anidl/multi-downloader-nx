@@ -166,6 +166,17 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     alias: 'episode'
   },
   {
+    name: 'extid',
+    group: 'dl',
+    describe: 'Set the external id to lookup/download',
+    docDescribe: 'Set the external id to lookup/download.'
+      + '\nAllows you to download or view legacy Crunchyroll Ids ',
+    service: ['crunchy'],
+    type: 'string',
+    usage: '${selection}',
+    alias: 'externalid'
+  },
+  {
     name: 'q',
     group: 'dl',
     describe: 'Set the quality level. Use 0 to use the maximum quality.',
@@ -361,6 +372,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'waittime',
+    group: 'dl',
+    type: 'number',
+    describe: 'Set the time the program waits between downloads. Set in millisecods',
+    docDescribe: true,
+    service: ['crunchy','hidive'],
+    usage: '${waittime}',
+    default: {
+      default: 0 * 1000
+    }
+  },
+  {
     name: 'simul',
     group: 'dl',
     describe: 'Force downloading simulcast version instead of uncut version (if available).',
@@ -378,6 +401,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Mux video into mp4',
     docDescribe: 'If selected, the output file will be an mp4 file (not recommended tho)',
     service: ['all'],
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
+    name: 'keepAllVideos',
+    group: 'mux',
+    describe: 'Keeps all videos when merging instead of discarding extras',
+    docDescribe: 'If set to true, it will keep all videos in the merge process, rather than discarding the extra videos.',
+    service: ['crunchy','hidive'],
     type: 'boolean',
     usage: '',
     default: {

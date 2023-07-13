@@ -36,6 +36,7 @@ export type MergerOptions = {
   videoTitle?: string,
   simul?: boolean,
   inverseTrackOrder?: boolean,
+  keepAllVideos?: boolean,
   fonts?: ParsedFont[],
   skipSubMux?: boolean,
   options: {
@@ -163,7 +164,7 @@ class Merger {
     for (const vid of this.options.videoAndAudio) {
       const audioTrackNum = this.options.inverseTrackOrder ? '0' : '1';
       const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
-      if (!hasVideo) {
+      if (!hasVideo || this.options.keepAllVideos) {
         args.push(
           `--video-tracks ${videoTrackNum}`,
           `--audio-tracks ${audioTrackNum}`
@@ -196,17 +197,16 @@ class Merger {
 
     for (const aud of this.options.onlyAudio) {
       const trackName = aud.lang.name;
-      const trackNum = this.options.inverseTrackOrder ? '0' : '1';
-      args.push('--track-name', `${trackNum}:"${trackName}"`);
-      args.push(`--language ${trackNum}:${aud.lang.code}`);
+      args.push('--track-name', `0:"${trackName}"`);
+      args.push(`--language 0:${aud.lang.code}`);
       args.push(
         '--no-video',
-        `--audio-tracks ${trackNum}`
+        '--audio-tracks 0'
       );
       if (this.options.defaults.audio.code === aud.lang.code) {
-        args.push(`--default-track ${trackNum}`);
+        args.push('--default-track 0');
       } else {
-        args.push(`--default-track ${trackNum}:0`);
+        args.push('--default-track 0:0');
       }
       args.push(`"${aud.path}"`);
     }

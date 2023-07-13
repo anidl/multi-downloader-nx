@@ -30,8 +30,15 @@ const languages: LanguageItem[] = [
   { cr_locale: 'hi-IN', locale: 'hi', code: 'hin', name: 'Hindi' },
   { funi_locale: 'zhMN', locale: 'zh', code: 'cmn', name: 'Chinese (Mandarin, PRC)' },
   { cr_locale: 'zh-CN', locale: 'zh-CN', code: 'zho', name: 'Chinese (Mainland China)' },
+  { cr_locale: 'zh-TW', locale: 'zh-TW', code: 'chi', name: 'Chinese (Taiwan)' },
   { cr_locale: 'ko-KR', hd_locale: 'Korean', locale: 'ko', code: 'kor', name: 'Korean' },
   { cr_locale: 'ja-JP', hd_locale: 'Japanese', funi_locale: 'jaJP', locale: 'ja', code: 'jpn', name: 'Japanese' },
+  { cr_locale: 'ca-ES', locale: 'ca-ES', code: 'cat', name: 'Catalan' },
+  { cr_locale: 'pl-PL', locale: 'pl-PL', code: 'pol', name: 'Polish' },
+  { cr_locale: 'th-TH', locale: 'th-TH', code: 'tha', name: 'Thai' },
+  { cr_locale: 'ta-IN', locale: 'ta-IN', code: 'tam', name: 'Tamil (India)' },
+  { cr_locale: 'ms-MY', locale: 'ms-MY', code: 'may', name: 'Malay (Malaysia)' },
+  { locale: 'un', code: 'und', name: 'Unknown' },
 ];
 
 // add en language names

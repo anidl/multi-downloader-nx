@@ -54,6 +54,9 @@ const parseSelect = (selectString: string, but = false) : {
       if (part.match(/[0-9A-Z]{9}/)) {
         select.push(part);
         return;
+      } else if (part.match(/[A-Z]{3}\.[0-9]*/)) {
+        select.push(part);
+        return;
       }
       const match = part.match(/[A-Za-z]+/);
       if (match && match.length > 0) {

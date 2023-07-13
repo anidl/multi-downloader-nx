@@ -33,6 +33,7 @@ let argvC: {
   series: string | undefined; 
   s: string | undefined; 
   e: string | undefined; 
+  extid: string | undefined; 
   q: number; 
   x: number; 
   kstream: number; 
@@ -47,6 +48,7 @@ let argvC: {
   fontSize: number; 
   allDubs: boolean; 
   timeout: number; 
+  waittime: number;
   simul: boolean; 
   mp4: boolean; 
   skipmux: boolean | undefined; 
@@ -64,6 +66,7 @@ let argvC: {
   dlVideoOnce: boolean; 
   removeBumpers: boolean;
   originalFontSize: boolean;
+  keepAllVideos: boolean;
 };
     
 export type ArgvType = typeof argvC;  

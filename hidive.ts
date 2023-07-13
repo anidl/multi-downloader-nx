@@ -59,7 +59,7 @@ export default class Hidive implements ServiceClass {
     this.session = yamlCfg.loadHDSession();
     this.token = yamlCfg.loadHDToken();
     this.client = yamlCfg.loadHDProfile() as {ipAddress: string, xNonce: string, xSignature: string, visitId: string, profile: {userId: number, profileId: number, deviceId : string}};
-    this.req = new reqModule.Req(domain, false, false, 'hd');
+    this.req = new reqModule.Req(domain, debug, false, 'hd');
   }
 
   public async doInit() {
@@ -494,6 +494,7 @@ export default class Hidive implements ServiceClass {
     let dlFailed = false;
     //let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
     let subsMargin = 0;
+    let videoIndex = 0;
     const chosenFontSize = options.originalFontSize ? fontSize : options.fontSize;
     for (const videoData of videoUrls) {
       if(videoData.seriesTitle && videoData.episodeNumber && videoData.episodeTitle){
@@ -616,7 +617,7 @@ export default class Hidive implements ServiceClass {
         console.info(`Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
         console.info('Stream URL:', selPlUrl);
         // TODO check filename
-        const outFile = parseFileName(options.fileName + '.' + lang.name, variables, options.numbers, options.override).join(path.sep);
+        const outFile = parseFileName(options.fileName + '.' + lang.name + '.' + videoIndex, variables, options.numbers, options.override).join(path.sep);
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
         console.info(`Output filename: ${outFile}`);
         const chunkPage = await this.req.getData(selPlUrl);
@@ -675,10 +676,17 @@ export default class Hidive implements ServiceClass {
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
         console.info('Downloading skipped!');
       }
+      videoIndex++;
+      await this.sleep(options.waittime);
     }
     
     if(options.dlsubs.indexOf('all') > -1){
       options.dlsubs = ['all'];
+    }
+
+    if (options.nosubs) {
+      console.info('Subtitles downloading disabled from nosubs flag.');
+      options.skipsubs = true;
     }
 
     if(!options.skipsubs && options.dlsubs.indexOf('none') == -1) {
@@ -739,6 +747,7 @@ export default class Hidive implements ServiceClass {
       onlyVid: [],
       skipSubMux: options.skipSubMux,
       inverseTrackOrder: true,
+      keepAllVideos: options.keepAllVideos,
       onlyAudio: [],
       output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
@@ -791,5 +800,11 @@ export default class Hidive implements ServiceClass {
     }
     if (isMuxed && !options.nocleanup)
       merger.cleanUp();
+  }
+  
+  public sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }

@@ -14,9 +14,11 @@ export type CrunchyDownloadOptions = {
   partsize: number,
   callbackMaker?: (data: DownloadInfo) => HLSCallback,
   timeout: number,
+  waittime: number,
   fsRetryTime: number,
   dlsubs: string[],
   skipsubs: boolean,
+  nosubs?: boolean,
   mp4: boolean,
   override: string[],
   videoTitle: string,
@@ -40,6 +42,7 @@ export type CurnchyMultiDownload = {
 export type CrunchyMuxOptions = {
   output: string,
   skipSubMux?: boolean
+  keepAllVideos?: bolean
   novids?: boolean,
   mp4: boolean,
   forceMuxer?: 'ffmpeg'|'mkvmerge',
