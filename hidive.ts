@@ -494,6 +494,7 @@ export default class Hidive implements ServiceClass {
     let dlFailed = false;
     //let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
     let subsMargin = 0;
+    let videoIndex = 0;
     const chosenFontSize = options.originalFontSize ? fontSize : options.fontSize;
     for (const videoData of videoUrls) {
       if(videoData.seriesTitle && videoData.episodeNumber && videoData.episodeTitle){
@@ -616,7 +617,7 @@ export default class Hidive implements ServiceClass {
         console.info(`Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
         console.info('Stream URL:', selPlUrl);
         // TODO check filename
-        const outFile = parseFileName(options.fileName + '.' + lang.name, variables, options.numbers, options.override).join(path.sep);
+        const outFile = parseFileName(options.fileName + '.' + lang.name + '.' + videoIndex, variables, options.numbers, options.override).join(path.sep);
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
         console.info(`Output filename: ${outFile}`);
         const chunkPage = await this.req.getData(selPlUrl);
@@ -675,6 +676,7 @@ export default class Hidive implements ServiceClass {
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
         console.info('Downloading skipped!');
       }
+      videoIndex++;
       await this.sleep(options.waittime);
     }
     
