@@ -1,4 +1,4 @@
-# multi-downloader-nx (4.1.0v)
+# multi-downloader-nx (4.2.0b2v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -77,7 +77,7 @@ The output is organized in pages. Use this command to output the items for the g
 #### `--search-locale`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--search-locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `ko-KR`] | ``| `search-locale: ` |
+| Crunchyroll | `--search-locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `ko-KR`, `ja-JP`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`] | ``| `search-locale: ` |
 
 Set the search local that will be used for searching for items.
 #### `--new`
@@ -114,6 +114,13 @@ Used to set the season ID to download from
 Set the episode(s) to download from any given show.
 For multiple selection: 1-4 OR 1,2,3,4 
 For special episodes: S1-4 OR S1,S2,S3,S4 where S is the special letter
+#### `--extid`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--extid ${selection}` | `string` | `No`| `--externalid` | `NaN` |
+
+Set the external id to lookup/download.
+Allows you to download or view legacy Crunchyroll Ids 
 #### `-q`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -157,17 +164,17 @@ Select specific stream
 #### `--hslang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--hslang ${hslang}` | `string` | `No`| `NaN` | [`none`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `ko`, `ja`] | `none`| `hslang: ` |
+| Crunchyroll | `--hslang ${hslang}` | `string` | `No`| `NaN` | [`none`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `zh-TW`, `ko`, `ja`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `un`] | `none`| `hslang: ` |
 
 Download video with specific hardsubs
 #### `--dlsubs`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--dlsubs ${sub1} ${sub2}` | `array` | `No`| `NaN` | [`all`, `none`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `ko`, `ja`] | `all`| `dlsubs: ` |
+| All | `--dlsubs ${sub1} ${sub2}` | `array` | `No`| `NaN` | [`all`, `none`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `zh-TW`, `ko`, `ja`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `un`] | `all`| `dlsubs: ` |
 
 Download subtitles by language tag (space-separated)
 Funi Only: zh
-Crunchy Only: en-IN, es-419, es-ES, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, ko
+Crunchy Only: en-IN, es-419, es-ES, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, zh-TW, ko, ca-ES, pl-PL, th-TH, ta-IN, ms-MY
 #### `--novids`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -189,11 +196,11 @@ Skip downloading subtitles
 #### `--dubLang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa`, `spa-419`, `spa-ES`, `por`, `fra`, `deu`, `ara-ME`, `ara`, `ita`, `rus`, `tur`, `hin`, `cmn`, `zho`, `kor`, `jpn`] | `jpn`| `dubLang: ` |
+| All | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa`, `spa-419`, `spa-ES`, `por`, `fra`, `deu`, `ara-ME`, `ara`, `ita`, `rus`, `tur`, `hin`, `cmn`, `zho`, `chi`, `kor`, `jpn`, `cat`, `pol`, `tha`, `tam`, `may`, `und`] | `und`| `dubLang: ` |
 
 Set the language to download: 
 Funi Only: cmn
-Crunchy Only: eng, spa-419, spa-ES, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, zho, kor
+Crunchy Only: eng, spa-419, spa-ES, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, zho, chi, kor, cat, pol, tha, tam, may
 #### `--all`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -218,6 +225,12 @@ If selected, all available dubs will get downloaded
 | All | `--timeout ${timeout}` | `number` | `No`| `NaN` | `15000`| `timeout: ` |
 
 Set the timeout of all download reqests. Set in millisecods
+#### `--waittime`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll, Hidive | `--waittime ${waittime}` | `number` | `No`| `NaN` | `0`| `waittime: ` |
+
+Set the time the program waits between downloads. Set in millisecods
 #### `--simul`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -316,14 +329,14 @@ Set the options given to ffmpeg
 | All | `--defaultAudio ${args}` | `string` | `No`| `NaN` | `eng`| `defaultAudio: ` |
 
 Set the default audio track by language code
-Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
+Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, kor, jpn, cat, pol, tha, tam, may, und
 #### `--defaultSub`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
 | All | `--defaultSub ${args}` | `string` | `No`| `NaN` | `eng`| `defaultSub: ` |
 
 Set the default subtitle track by language code
-Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, kor, jpn
+Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, kor, jpn, cat, pol, tha, tam, may, und
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
