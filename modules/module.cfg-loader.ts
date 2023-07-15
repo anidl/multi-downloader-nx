@@ -321,18 +321,18 @@ const getState = (): GuiState => {
   const fn = `${stateFile}.json`;
   if (!fs.existsSync(fn)) {
     return {
-      "setup": false,
-      "services": {}
-    }
+      'setup': false,
+      'services': {}
+    };
   }
   try {
     return JSON.parse(fs.readFileSync(fn).toString());
   } catch(e) {
     console.error('Invalid state file, regenerating');
     return {
-      "setup": false,
-      "services": {}
-    }
+      'setup': false,
+      'services': {}
+    };
   }
 };
 

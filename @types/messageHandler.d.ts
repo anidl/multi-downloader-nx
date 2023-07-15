@@ -149,7 +149,7 @@ export type ExtendedProgress = {
 }
 
 export type GuiState = {
-  setup: Boolean,
+  setup: boolean,
   services: Record<string, GuiStateService>
 }
 

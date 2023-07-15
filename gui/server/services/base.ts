@@ -26,7 +26,7 @@ export default class Base {
     } else {
       this.state.services[this.name] = {
         'queue': []
-      }
+      };
     }
   }
 
