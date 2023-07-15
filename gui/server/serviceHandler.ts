@@ -2,7 +2,6 @@ import { ServerResponse } from 'http';
 import { Server } from 'http';
 import { IncomingMessage } from 'http';
 import { MessageHandler } from '../../@types/messageHandler';
-import Funi from '../../funi';
 import { setSetuped, writeYamlCfgFile } from '../../modules/module.cfg-loader';
 import CrunchyHandler from './services/crunchyroll';
 import FunimationHandler from './services/funimation';
@@ -49,7 +48,7 @@ export default class ServiceHandler {
         return respond({ isOk: false, reason: new Error('No service selected') });
       respond(await this.service.auth(data));
     });
-    this.ws.events.on('type', async (_, respond) => respond(this.service === undefined ? undefined : this.service instanceof Funi ? 'funi' : 'crunchy'));
+    this.ws.events.on('type', async (_, respond) => respond(this.service === undefined ? undefined : this.service instanceof FunimationHandler ? 'funi' : this.service instanceof CrunchyHandler ? 'crunchy' : 'hidive'));
     this.ws.events.on('checkToken', async (_, respond) => {
       if (this.service === undefined)
         return respond({ isOk: false, reason: new Error('No service selected') });
