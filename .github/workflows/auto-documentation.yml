@@ -16,7 +16,7 @@ jobs:
         ref: ${{ github.head_ref }}
     - uses: pnpm/action-setup@v2
       with:
-        version: 6.0.2
+        version: 8.6.6
     - name: Use Node.js 16
       uses: actions/setup-node@v3
       with:
