@@ -257,7 +257,7 @@ export default class Hidive implements ServiceClass {
       if (!isGet) {
         const resJ = JSON.parse(apiReq.res.body);
         if (resJ.Code > 0) {
-          console.error(`[ERROR] Code ${resJ.Code} (${resJ.Status}): ${resJ.Message}\n`);
+          console.error(`Code ${resJ.Code} (${resJ.Status}): ${resJ.Message}\n`);
           if (resJ.Code == 81 || resJ.Code == 5) {
             console.info('[NOTE] App was broken because of changes in official app.');
             console.info('[NOTE] See: https://github.com/anidl/hidive-downloader-nx/issues/1\n');
