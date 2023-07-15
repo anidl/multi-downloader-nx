@@ -48,7 +48,7 @@ export default class ServiceHandler {
         return respond({ isOk: false, reason: new Error('No service selected') });
       respond(await this.service.auth(data));
     });
-    this.ws.events.on('type', async (_, respond) => respond(this.service === undefined ? undefined : this.service instanceof FunimationHandler ? 'funi' : this.service instanceof CrunchyHandler ? 'crunchy' : 'hidive'));
+    this.ws.events.on('type', async (_, respond) => respond(this.service === undefined ? undefined : this.service.name as 'hidive'|'crunchy'|'funi'));
     this.ws.events.on('checkToken', async (_, respond) => {
       if (this.service === undefined)
         return respond({ isOk: false, reason: new Error('No service selected') });

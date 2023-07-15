@@ -9,6 +9,7 @@ import * as yargs from '../../../modules/module.app-args';
 
 class FunimationHandler extends Base implements MessageHandler {
   private funi: Funimation;
+  public name = 'funi';
   constructor(ws: WebSocketHandler) {
     super(ws);
     this.funi = new Funimation();

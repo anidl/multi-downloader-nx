@@ -9,6 +9,7 @@ import * as yargs from '../../../modules/module.app-args';
 
 class HidiveHandler extends Base implements MessageHandler {
   private hidive: Hidive;
+  public name = 'hidive';
   constructor(ws: WebSocketHandler) {
     super(ws);
     this.hidive = new Hidive();

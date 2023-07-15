@@ -9,6 +9,7 @@ import * as yargs from '../../../modules/module.app-args';
 
 class CrunchyHandler extends Base implements MessageHandler {
   private crunchy: Crunchy;
+  public name = 'crunchy';
   constructor(ws: WebSocketHandler) {
     super(ws);
     this.crunchy = new Crunchy();

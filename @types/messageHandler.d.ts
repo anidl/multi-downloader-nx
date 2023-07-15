@@ -21,7 +21,8 @@ export interface MessageHandler {
   removeFromQueue: (index: number) => void,
   clearQueue: () => void,
   setDownloadQueue: (data: boolean) => void,
-  getDownloadQueue: () => Promise<boolean>
+  getDownloadQueue: () => Promise<boolean>,
+  name: string
 }
 
 export type FolderTypes = 'content' | 'config';
