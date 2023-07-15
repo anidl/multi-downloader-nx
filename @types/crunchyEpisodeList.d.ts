@@ -70,7 +70,6 @@ export enum Locale {
   es419 = 'es-419',
   esES = 'es-ES',
   ptBR = 'pt-BR',
-  ptBR = 'pt-BR',
   frFR = 'fr-FR',
   deDE = 'de-DE',
   arME = 'ar-ME',

@@ -30,7 +30,6 @@ export interface Streams {
   'es-419'?: StreamDetails;
   'es-ES'?:  StreamDetails;
   'pt-BR'?:  StreamDetails;
-  'pt-BR'?:  StreamDetails;
   'fr-FR'?:  StreamDetails;
   'de-DE'?:  StreamDetails;
   'ar-ME'?:  StreamDetails;
@@ -68,7 +67,6 @@ export interface Subtitles {
   'es-419'?: SubtitleInfo;
   'es-ES'?:  SubtitleInfo;
   'pt-BR'?:  SubtitleInfo;
-  'pt-BR'?:  SubtitleInfo;
   'fr-FR'?:  SubtitleInfo;
   'de-DE'?:  SubtitleInfo;
   'ar-ME'?:  SubtitleInfo;
@@ -104,7 +102,6 @@ export enum Locale {
   esLA = 'es-LA',
   es419 = 'es-419',
   esES = 'es-ES',
-  ptBR = 'pt-BR',
   ptBR = 'pt-BR',
   frFR = 'fr-FR',
   deDE = 'de-DE',
