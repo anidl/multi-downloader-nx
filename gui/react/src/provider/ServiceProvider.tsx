@@ -1,5 +1,5 @@
 import React from 'react';
-import {Divider, Box, Button, Typography} from '@mui/material';
+import {Divider, Box, Button, Typography, Avatar} from '@mui/material';
 import useStore from '../hooks/useStore';
 import { StoreState } from './Store';
 
@@ -21,11 +21,11 @@ const ServiceProvider: FCWithChildren = ({ children }) => {
     <Box>
       <Typography color="text.primary" variant='h3' sx={{ textAlign: 'center', mb: 5 }}>Please choose your service</Typography>
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-        <Button size='large' variant="contained" onClick={() => setService('funi')} >Funimation</Button>
+        <Button size='large' variant="contained" onClick={() => setService('funi')} startIcon={<Avatar src={'https://static.funimation.com/static/img/favicon.ico'} />}>Funimation</Button>
         <Divider orientation='vertical' flexItem />
-        <Button size='large' variant="contained" onClick={() => setService('crunchy')}>Crunchyroll</Button>
+        <Button size='large' variant="contained" onClick={() => setService('crunchy')} startIcon={<Avatar src={'https://static.crunchyroll.com/cxweb/assets/img/favicons/favicon-32x32.png'} />}>Crunchyroll</Button>
         <Divider orientation='vertical' flexItem />
-        <Button size='large' variant="contained" onClick={() => setService('hidive')}>Hidive</Button>
+        <Button size='large' variant="contained" onClick={() => setService('hidive')} startIcon={<Avatar src={'https://www.hidive.com/favicon.ico'} />}>Hidive</Button>
       </Box>
     </Box>
     : <serviceContext.Provider value={service}>
