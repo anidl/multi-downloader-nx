@@ -9,7 +9,7 @@ import { useSnackbar } from 'notistack';
 import { LockOutlined, PowerSettingsNew } from '@mui/icons-material';
 import { GUIConfig } from '../../../../modules/module.cfg-loader';
 
-export type FrontEndMessanges = (MessageHandler & { randomEvents: RandomEventHandler, logout: () => Promise<boolean> });
+export type FrontEndMessages = (MessageHandler & { randomEvents: RandomEventHandler, logout: () => Promise<boolean> });
 
 export class RandomEventHandler {
   private handler: {
@@ -38,7 +38,7 @@ export class RandomEventHandler {
   }
 }
 
-export const messageChannelContext = React.createContext<FrontEndMessanges|undefined>(undefined);
+export const messageChannelContext = React.createContext<FrontEndMessages|undefined>(undefined);
 
 async function messageAndResponse<T extends keyof MessageTypes>(socket: WebSocket, msg: WSMessage<T>): Promise<WSMessage<T, 1>> {
   const id = v4();
@@ -65,7 +65,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
   const [socket, setSocket] = React.useState<undefined|WebSocket>();
   const [publicWS, setPublicWS] = React.useState<undefined|WebSocket>();
   const [usePassword, setUsePassword] = React.useState<'waiting'|'yes'|'no'>('waiting');
-  const [isSetuped, setIsSetuped] = React.useState<'waiting'|'yes'|'no'>('waiting');
+  const [isSetup, setIsSetup] = React.useState<'waiting'|'yes'|'no'>('waiting');
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -84,7 +84,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       if (!publicWS)
         return;
       setUsePassword((await messageAndResponse(publicWS, { name: 'requirePassword', data: undefined })).data ? 'yes' : 'no');
-      setIsSetuped((await messageAndResponse(publicWS, { name: 'setuped', data: undefined })).data ? 'yes' : 'no');
+      setIsSetup((await messageAndResponse(publicWS, { name: 'isSetup', data: undefined })).data ? 'yes' : 'no');
     })();
   }, [publicWS]);
 
@@ -190,7 +190,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
     </Box>;
   }
 
-  if (isSetuped === 'no') {
+  if (isSetup === 'no') {
     return <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', justifyItems: 'center', alignItems: 'center' }}>
       <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
         <PowerSettingsNew />
@@ -211,7 +211,8 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
     </Box>;
   }
 
-  const messageHandler: FrontEndMessanges = {
+  const messageHandler: FrontEndMessages = {
+    name: "default",
     auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,
     checkToken: async () =>  (await messageAndResponse(socket, { name: 'checkToken', data: undefined })).data,
     search: async (data) => (await messageAndResponse(socket, { name: 'search', data })).data,

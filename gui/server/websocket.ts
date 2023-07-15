@@ -4,7 +4,7 @@ import { RandomEvent, RandomEvents } from '../../@types/randomEvents';
 import { MessageTypes, UnknownWSMessage, WSMessage } from '../../@types/ws';
 import { EventEmitter } from 'events';
 import { cfg } from '.';
-import { isSetuped } from '../../modules/module.cfg-loader';
+import { getState } from '../../modules/module.cfg-loader';
 import { console } from '../../modules/log';
 
 declare interface ExternalEvent {
@@ -81,6 +81,7 @@ export default class WebSocketHandler {
 export class PublicWebSocket {
   private wsServer: ws.Server;
 
+  private state = getState();
   constructor(server: Server) {
     this.wsServer = new ws.WebSocketServer({ noServer: true, path: '/public' });
 
@@ -90,8 +91,8 @@ export class PublicWebSocket {
       socket.on('message', (msg) => {       
         const data = JSON.parse(msg.toString()) as UnknownWSMessage;
         switch (data.name) {
-        case 'setuped':
-          this.send(socket, data.id, data.name, isSetuped());
+        case 'isSetup':
+          this.send(socket, data.id, data.name, this.state.setup);
           break;
         case 'requirePassword':
           this.send(socket, data.id, data.name, cfg.gui.password !== undefined);

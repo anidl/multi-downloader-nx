@@ -14,6 +14,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     super(ws);
     this.crunchy = new Crunchy();
     this.crunchy.refreshToken();
+    this.initState();
   }
   
   public async listEpisodes (id: string): Promise<EpisodeListResponse> {

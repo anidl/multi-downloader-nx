@@ -13,6 +13,7 @@ class FunimationHandler extends Base implements MessageHandler {
   constructor(ws: WebSocketHandler) {
     super(ws);
     this.funi = new Funimation();
+    this.initState();
   }
 
   public async listEpisodes (id: string) : Promise<EpisodeListResponse> {

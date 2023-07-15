@@ -14,6 +14,7 @@ class HidiveHandler extends Base implements MessageHandler {
     super(ws);
     this.hidive = new Hidive();
     this.hidive.doInit();
+    this.initState();
   }
 
   public auth(data: AuthData) {

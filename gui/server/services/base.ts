@@ -1,19 +1,34 @@
-import { DownloadInfo, FolderTypes, ProgressData, QueueItem } from '../../../@types/messageHandler';
+import { DownloadInfo, FolderTypes, GuiState, ProgressData, QueueItem } from '../../../@types/messageHandler';
 import { RandomEvent, RandomEvents } from '../../../@types/randomEvents';
 import WebSocketHandler from '../websocket';
 import open from 'open';
 import { cfg } from '..';
 import path from 'path';
 import { console } from '../../../modules/log';
+import { getState, setState } from '../../../modules/module.cfg-loader';
 
 export default class Base {
-
-  constructor(private ws: WebSocketHandler) {}
+  private state: GuiState;
+  public name = 'default';
+  constructor(private ws: WebSocketHandler) {
+    this.state = getState();
+  }
 
   private downloading = false;
 
   private queue: QueueItem[] = [];
   private workOnQueue = false;
+
+  initState() {
+    if (this.state.services[this.name]) {
+      this.queue = this.state.services[this.name].queue;
+      this.queueChange();
+    } else {
+      this.state.services[this.name] = {
+        'queue': []
+      }
+    }
+  }
 
   setDownloading(downloading: boolean) {
     this.downloading = downloading;
@@ -109,6 +124,8 @@ export default class Base {
       this.queue = this.queue.slice(1);
       this.queueChange();
     }
+    this.state.services[this.name].queue = this.queue;
+    setState(this.state);
   }
 
   public async onFinish() {

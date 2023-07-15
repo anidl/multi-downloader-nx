@@ -3,6 +3,7 @@ import yaml from 'yaml';
 import fs from 'fs-extra';
 import { lookpath } from 'lookpath';
 import { console } from './log';
+import { GuiState } from '../@types/messageHandler';
 
 // new-cfg
 const workingDir = (process as NodeJS.Process & {
@@ -15,17 +16,17 @@ const binCfgFile   = path.join(workingDir, 'config', 'bin-path');
 const dirCfgFile   = path.join(workingDir, 'config', 'dir-path');
 const guiCfgFile   = path.join(workingDir, 'config', 'gui');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
-const hdProfileCfgFile   = path.join(workingDir, 'config', 'hd_profile');
-const sessCfgFile    = {
+const hdPflCfgFile = path.join(workingDir, 'config', 'hd_profile');
+const sessCfgFile  = {
   funi: path.join(workingDir, 'config', 'funi_sess'),
-  cr: path.join(workingDir, 'config', 'cr_sess'),
-  hd: path.join(workingDir, 'config', 'hd_sess')
+  cr:   path.join(workingDir, 'config', 'cr_sess'),
+  hd:   path.join(workingDir, 'config', 'hd_sess')
 };
-const setupFile    = path.join(workingDir, 'config', 'setup');
+const stateFile    = path.join(workingDir, 'config', 'guistate');
 const tokenFile    = {
   funi: path.join(workingDir, 'config', 'funi_token'),
-  cr: path.join(workingDir, 'config', 'cr_token'),
-  hd: path.join(workingDir, 'config', 'hd_token')
+  cr:   path.join(workingDir, 'config', 'cr_token'),
+  hd:   path.join(workingDir, 'config', 'hd_token')
 };
 
 export const ensureConfig = () => {
@@ -256,10 +257,10 @@ const saveHDToken = (data: Record<string, unknown>) => {
 };
 
 const saveHDProfile = (data: Record<string, unknown>) => {
-  const cfgFolder = path.dirname(hdProfileCfgFile);
+  const cfgFolder = path.dirname(hdPflCfgFile);
   try{
     fs.ensureDirSync(cfgFolder);
-    fs.writeFileSync(`${hdProfileCfgFile}.yml`, yaml.stringify(data));
+    fs.writeFileSync(`${hdPflCfgFile}.yml`, yaml.stringify(data));
   }
   catch(e){
     console.error('Can\'t save profile file to disk!');
@@ -267,7 +268,7 @@ const saveHDProfile = (data: Record<string, unknown>) => {
 };
 
 const loadHDProfile = () => {
-  let profile = loadYamlCfgFile(hdProfileCfgFile, true);
+  let profile = loadYamlCfgFile(hdPflCfgFile, true);
   if(typeof profile !== 'object' || profile === null || Array.isArray(profile) || Object.keys(profile).length === 0){
     profile = {
       // base
@@ -316,23 +317,31 @@ const saveFuniToken = (data: {
 
 const cfgDir = path.join(workingDir, 'config');
 
-const isSetuped = (): boolean => {
-  const fn = `${setupFile}.json`;
-  if (!fs.existsSync(fn))
-    return false;
-  return JSON.parse(fs.readFileSync(fn).toString()).setuped;
+const getState = (): GuiState => {
+  const fn = `${stateFile}.json`;
+  if (!fs.existsSync(fn)) {
+    return {
+      "setup": false,
+      "services": {}
+    }
+  }
+  try {
+    return JSON.parse(fs.readFileSync(fn).toString());
+  } catch(e) {
+    console.error('Invalid state file, regenerating');
+    return {
+      "setup": false,
+      "services": {}
+    }
+  }
 };
 
-const setSetuped = (bool: boolean) => {
-  const fn = `${setupFile}.json`;
-  if (bool) {
-    fs.writeFileSync(fn, JSON.stringify({
-      setuped: true
-    }, null, 2));
-  } else {
-    if (fs.existsSync(fn)) {
-      fs.removeSync(fn);
-    }
+const setState = (state: GuiState) => {
+  const fn = `${stateFile}.json`;
+  try {
+    fs.writeFileSync(fn, JSON.stringify(state, null, 2));
+  } catch(e) {
+    console.error('Failed to write state file.');
   }
 };
 
@@ -352,10 +361,10 @@ export {
   loadHDToken,
   saveHDProfile,
   loadHDProfile,
-  isSetuped,
-  setSetuped,
+  getState,
+  setState,
   writeYamlCfgFile,
   sessCfgFile,
-  hdProfileCfgFile,
+  hdPflCfgFile,
   cfgDir
 };

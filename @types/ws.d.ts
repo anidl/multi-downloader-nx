@@ -33,7 +33,7 @@ export type MessageTypes = {
   'setup': ['funi'|'crunchy'|'hidive'|undefined, undefined],
   'openFile': [[FolderTypes, string], undefined],
   'openURL': [string, undefined],
-  'setuped': [undefined, boolean],
+  'isSetup': [undefined, boolean],
   'setupServer': [GUIConfig, boolean],
   'requirePassword': [undefined, boolean],
   'getQueue': [undefined, QueueItem[]],

@@ -4,6 +4,7 @@ import type { AvailableMuxer } from '../modules/module.args';
 import { LanguageItem } from '../modules/module.langsData';
 
 export interface MessageHandler {
+  name: string
   auth: (data: AuthData) => Promise<AuthResponse>;
   checkToken: () => Promise<CheckTokenResponse>;
   search: (data: SearchData) => Promise<SearchResponse>,
@@ -21,8 +22,7 @@ export interface MessageHandler {
   removeFromQueue: (index: number) => void,
   clearQueue: () => void,
   setDownloadQueue: (data: boolean) => void,
-  getDownloadQueue: () => Promise<boolean>,
-  name: string
+  getDownloadQueue: () => Promise<boolean>
 }
 
 export type FolderTypes = 'content' | 'config';
@@ -131,7 +131,7 @@ export type ProgressData = {
   bytes: number
 };
 
-export type PossibleMessanges = keyof ServiceHandler;
+export type PossibleMessages = keyof ServiceHandler;
 
 export type DownloadInfo = { 
   image: string,
@@ -146,4 +146,13 @@ export type DownloadInfo = {
 export type ExtendedProgress = {
   progress: ProgressData,
   downloadInfo: DownloadInfo
+}
+
+export type GuiState = {
+  setup: Boolean,
+  services: Record<string, GuiStateService>
+}
+
+export type GuiStateService = {
+  queue: QueueItem[]
 }

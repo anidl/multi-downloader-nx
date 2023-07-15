@@ -1,8 +1,8 @@
 import { ServerResponse } from 'http';
 import { Server } from 'http';
 import { IncomingMessage } from 'http';
-import { MessageHandler } from '../../@types/messageHandler';
-import { setSetuped, writeYamlCfgFile } from '../../modules/module.cfg-loader';
+import { MessageHandler, GuiState } from '../../@types/messageHandler';
+import { setState, getState, writeYamlCfgFile } from '../../modules/module.cfg-loader';
 import CrunchyHandler from './services/crunchyroll';
 import FunimationHandler from './services/funimation';
 import HidiveHandler from './services/hidive';
@@ -12,16 +12,19 @@ export default class ServiceHandler {
 
   private service: MessageHandler|undefined = undefined;
   private ws: WebSocketHandler;
+  private state: GuiState;
 
   constructor(server: Server<typeof IncomingMessage, typeof ServerResponse>) {
     this.ws = new WebSocketHandler(server);
-    this.handleMessanges();
+    this.handleMessages();
+    this.state = getState();
   }
 
-  private handleMessanges() {
+  private handleMessages() {
     this.ws.events.on('setupServer', ({ data }, respond) => {
       writeYamlCfgFile('gui', data);
-      setSetuped(true);
+      this.state.setup = true;
+      setState(this.state);
       respond(true);
       process.exit(0);
     });
