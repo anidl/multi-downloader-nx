@@ -38,7 +38,6 @@ const languages: LanguageItem[] = [
   { cr_locale: 'th-TH', locale: 'th-TH', code: 'tha', name: 'Thai' },
   { cr_locale: 'ta-IN', locale: 'ta-IN', code: 'tam', name: 'Tamil (India)' },
   { cr_locale: 'ms-MY', locale: 'ms-MY', code: 'may', name: 'Malay (Malaysia)' },
-  { locale: 'un', code: 'und', name: 'Unknown' },
 ];
 
 // add en language names
