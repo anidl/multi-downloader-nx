@@ -1,4 +1,4 @@
-# multi-downloader-nx (4.3.0b7v)
+# multi-downloader-nx (4.3.0b8v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -71,7 +71,7 @@ Search only for type of anime listings (e.g. episodes, series)
 #### `--page`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--page ${page}` | `number` | `No`| `-p` | `NaN` |
+| Crunchyroll, Hidive | `--page ${page}` | `number` | `No`| `-p` | `NaN` |
 
 The output is organized in pages. Use this command to output the items for the given page
 #### `--search-locale`
@@ -83,7 +83,7 @@ Set the search local that will be used for searching for items.
 #### `--new`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--new ` | `boolean` | `No`| `NaN` | `NaN` |
+| Crunchyroll, Hidive | `--new ` | `boolean` | `No`| `NaN` | `NaN` |
 
 Get last updated series list
 ### Downloading
