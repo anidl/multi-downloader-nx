@@ -7,6 +7,7 @@ import CrunchyHandler from './services/crunchyroll';
 import FunimationHandler from './services/funimation';
 import HidiveHandler from './services/hidive';
 import WebSocketHandler from './websocket';
+import packageJson from '../../package.json';
 
 export default class ServiceHandler {
 
@@ -50,6 +51,9 @@ export default class ServiceHandler {
       if (this.service === undefined)
         return respond({ isOk: false, reason: new Error('No service selected') });
       respond(await this.service.auth(data));
+    });
+    this.ws.events.on('version', async (_, respond) => {
+      respond(packageJson.version);
     });
     this.ws.events.on('type', async (_, respond) => respond(this.service === undefined ? undefined : this.service.name as 'hidive'|'crunchy'|'funi'));
     this.ws.events.on('checkToken', async (_, respond) => {

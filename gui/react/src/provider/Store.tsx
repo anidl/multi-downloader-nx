@@ -20,6 +20,7 @@ export type StoreState = {
   episodeListing: Episode[];
   downloadOptions: DownloadOptions,
   service: 'crunchy'|'funi'|'hidive'|undefined,
+  version: string,
 }
 
 export type StoreAction<T extends (keyof StoreState)> = {
@@ -51,6 +52,7 @@ const initialState: StoreState = {
   },
   service: undefined,
   episodeListing: [],
+  version: '',
 };
 
 const Store: FCWithChildren = ({children}) => {

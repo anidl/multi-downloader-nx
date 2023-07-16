@@ -18,6 +18,7 @@ export type UnknownWSMessage = {
 
 export type MessageTypes = {
   'auth': [AuthData, AuthResponse],
+  'version': [undefined, string],
   'checkToken': [undefined, CheckTokenResponse],
   'search': [SearchData, SearchResponse],
   'default': [string, unknown],

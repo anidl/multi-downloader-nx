@@ -6,6 +6,7 @@ import { LanguageItem } from '../modules/module.langsData';
 export interface MessageHandler {
   name: string
   auth: (data: AuthData) => Promise<AuthResponse>;
+  version: () => Promise<string>;
   checkToken: () => Promise<CheckTokenResponse>;
   search: (data: SearchData) => Promise<SearchResponse>,
   availableDubCodes: () => Promise<string[]>,

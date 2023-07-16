@@ -7,8 +7,18 @@ import { StoreState } from '../../provider/Store'
 const MenuBar: React.FC = () => {
   const [ openMenu, setMenuOpen ] = React.useState<'settings'|'help'|undefined>(); 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [store] = useStore();
+  const [store, dispatch] = useStore();
 
+  const messageChannel = React.useContext(messageChannelContext);
+  const getVersion = async() => {
+    dispatch({
+      type: 'version',
+      payload: await messageChannel?.version()
+    });  
+  }
+
+  getVersion();
+  
   const transformService = (service: StoreState['service']) => {
     switch(service) {
       case 'crunchy': 
@@ -91,6 +101,11 @@ const MenuBar: React.FC = () => {
         handleClose();
       }}>
         Discord
+      </MenuItem>
+      <MenuItem onClick={() => {
+        handleClose();
+      }}>
+        Version: {store.version}
       </MenuItem>
     </Menu>
     <Typography variant="h5" color="text.primary" component="div" align="center" sx={{flexGrow: 1}}>

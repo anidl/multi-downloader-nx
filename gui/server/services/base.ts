@@ -6,6 +6,7 @@ import { cfg } from '..';
 import path from 'path';
 import { console } from '../../../modules/log';
 import { getState, setState } from '../../../modules/module.cfg-loader';
+import packageJson from '../../../package.json';
 
 export default class Base {
   private state: GuiState;
@@ -18,6 +19,12 @@ export default class Base {
 
   private queue: QueueItem[] = [];
   private workOnQueue = false;
+
+  version(): Promise<string> {
+    return new Promise(() => {
+      return packageJson.version;
+    });
+  }
 
   initState() {
     if (this.state.services[this.name]) {

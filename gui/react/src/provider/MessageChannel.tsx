@@ -214,6 +214,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
   const messageHandler: FrontEndMessages = {
     name: "default",
     auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,
+    version: async () => (await messageAndResponse(socket, { name: 'version', data: undefined })).data,
     checkToken: async () =>  (await messageAndResponse(socket, { name: 'checkToken', data: undefined })).data,
     search: async (data) => (await messageAndResponse(socket, { name: 'search', data })).data,
     handleDefault: async (data) => (await messageAndResponse(socket, { name: 'default', data })).data,
