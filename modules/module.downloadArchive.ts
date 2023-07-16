@@ -95,7 +95,13 @@ const downloaded = (kind: {
     addToArchive(kind, ID);
     data = loadData(); // Load updated version
   }
-  (kind.service == 'crunchy' ? data[kind.service][kind.type] : data[kind.service][kind.type]).find(a => a.id === ID)?.already.push(...episode);
+
+  const archivedata = (kind.service == 'crunchy' ? data[kind.service][kind.type] : data[kind.service][kind.type]);
+  const alreadyData = archivedata.find(a => a.id === ID)?.already;
+  for (const ep of episode) {
+    if (alreadyData?.includes(ep)) continue;
+    alreadyData?.push(ep);
+  }
   fs.writeFileSync(archiveFile, JSON.stringify(data, null, 4));
 };
 
