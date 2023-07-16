@@ -68,7 +68,7 @@ class Merger {
 
     for (const vid of this.options.videoAndAudio) {
       args.push(`-i "${vid.path}"`);
-      if (!hasVideo) {
+      if (!hasVideo || this.options.keepAllVideos) {
         metaData.push(`-map ${index}:a -map ${index}:v`);
         metaData.push(`-metadata:s:a:${audioIndex} language=${vid.lang.code}`);
         metaData.push(`-metadata:s:v:${index} title="${this.options.videoTitle}"`);
@@ -82,7 +82,7 @@ class Merger {
     }
 
     for (const vid of this.options.onlyVid) {
-      if (!hasVideo) {
+      if (!hasVideo || this.options.keepAllVideos) {
         args.push(`-i "${vid.path}"`);
         metaData.push(`-map ${index} -map -${index}:a`);
         metaData.push(`-metadata:s:v:${index} title="${this.options.videoTitle}"`);
@@ -148,7 +148,7 @@ class Merger {
     args.push(...this.options.options.mkvmerge);
 
     for (const vid of this.options.onlyVid) {
-      if (!hasVideo) {
+      if (!hasVideo || this.options.keepAllVideos) {
         args.push(
           '--video-tracks 0',
           '--no-audio'
