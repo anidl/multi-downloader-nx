@@ -33,6 +33,7 @@ import { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem 
 import { ServiceClass } from './@types/serviceClassInterface';
 import { sxItem } from './crunchy';
 import { HidiveSearch } from './@types/hidiveSearch';
+import { HidiveDashboard } from './@types/hidiveDashboard';
 
 export default class Hidive implements ServiceClass { 
   public cfg: yamlCfg.ConfigObject;
@@ -89,9 +90,11 @@ export default class Hidive implements ServiceClass {
       this.debug = true;
 
     //below is for quickly testing API calls
-    /*const searchItems = await this.reqData('Search', {'Query':''});
+    /*const searchItems = await this.reqData('GetTitles', {'Filter': 'recently-added', 'Pager': {'Number': 1, 'Size': 30}, 'Sort': 'Date', 'Verbose': false});
+    const searchItems = await this.reqData('GetTitles', {'Id': 492});
     if(!searchItems.ok || !searchItems.res){return;}
-    console.info(searchItems.res.body);*/
+    console.info(searchItems.res.body);
+    fs.writeFileSync('apitest.json', JSON.stringify(JSON.parse(searchItems.res.body), null, 2));*/
 
     // load binaries
     this.cfg.bin = await yamlCfg.loadBinCfg();
@@ -126,6 +129,11 @@ export default class Hidive implements ServiceClass {
         }
       }
       return true;
+    } else if (argv.new) {
+      //Initilize session
+      await this.doInit();
+      //Get Newly Added
+      await this.getNewlyAdded(argv.page);
     } else {
       console.info('No option selected or invalid value entered. Try --help.');
     }
@@ -339,6 +347,33 @@ export default class Hidive implements ServiceClass {
         desc: a.LongSynopsis
       };
     })};
+  }
+
+  public async getNewlyAdded(page?: number) {
+    const pageNum = page ? page : 1;
+    const dashboardReq = await this.reqData('GetDashboard', {'Pager': {'Number': pageNum, 'Size': 30}, 'Verbose': false});
+    if(!dashboardReq.ok || !dashboardReq.res) {
+      console.error('Search for new episodes FAILED!');
+      return;
+    }
+
+    const dashboardData = JSON.parse(dashboardReq.res.body) as HidiveDashboard;
+    const dashboardItems = dashboardData.Data.TitleRows;
+    const recentlyAddedIndex = dashboardItems.findIndex(item => item.Name == 'Recently Added');
+    const recentlyAdded = recentlyAddedIndex >= 0 ? dashboardItems[recentlyAddedIndex] : undefined;
+    if (recentlyAdded) {
+      const searchItems = recentlyAdded?.Titles;
+      if(searchItems.length>0) {
+        console.info('[INFO] Recently Added:');
+        for(let i=0;i<searchItems.length;i++){
+          console.info(`[#${searchItems[i].Id}] ${searchItems[i].Name} [${searchItems[i].ShowInfoTitle}]`);
+        }
+      } else{
+        console.warn('No new episodes found!');
+      }
+    } else {
+      console.warn('New episode category not found!');
+    }
   }
 
   public async listShow(id: number) {

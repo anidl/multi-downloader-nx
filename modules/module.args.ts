@@ -97,7 +97,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Set the page number for search results',
     docDescribe: 'The output is organized in pages. Use this command to output the items for the given page',
     group: 'search',
-    service: ['crunchy'],
+    service: ['crunchy', 'hidive'],
     type: 'number',
     usage: '${page}'
   },
@@ -119,7 +119,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     name: 'new',
     describe: 'Get last updated series list',
     docDescribe: true,
-    service: ['crunchy'],
+    service: ['crunchy', 'hidive'],
     type: 'boolean',
     usage: '',
   },
