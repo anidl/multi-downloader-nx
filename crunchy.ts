@@ -105,7 +105,7 @@ export default class Crunchy implements ServiceClass {
       const selected = await this.downloadFromSeriesID(argv.series, { ...argv });
       if (selected.isOk) {
         for (const select of selected.value) {
-          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false }))) {
+          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false }, true))) {
             console.error(`Unable to download selected episode ${select.episodeNumber}`);
             return false;
           }
@@ -858,7 +858,7 @@ export default class Crunchy implements ServiceClass {
     return { isOk: true, value: selectedMedia };
   }
 
-  public async downloadEpisode(data: CrunchyEpMeta, options: CrunchyDownloadOptions): Promise<boolean> {
+  public async downloadEpisode(data: CrunchyEpMeta, options: CrunchyDownloadOptions, isSeries?: boolean): Promise<boolean> {
     const res = await this.downloadMediaList(data, options);
     if (res === undefined || res.error) {
       return false;
@@ -868,10 +868,17 @@ export default class Crunchy implements ServiceClass {
       } else {
         console.info('Skipping mux');
       }
-      downloaded({
-        service: 'crunchy',
-        type: 's'
-      }, data.showID, [data.episodeNumber || data.e]);
+      if (!isSeries) {
+        downloaded({
+          service: 'crunchy',
+          type: 's'
+        }, data.seasonID, [data.e]);
+      } else {
+        downloaded({
+          service: 'crunchy',
+          type: 'srz'
+        }, data.showID, [data.e]);
+      }
     }
     return true;
   }
