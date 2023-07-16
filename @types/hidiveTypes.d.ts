@@ -41,6 +41,7 @@ export interface HidiveStreamInfo extends HidiveStreamList {
   season?:        number;
   episodeNumber?: number;
   uncut?:         boolean;
+  image?:         string;
 }
 
 export interface HidiveSubtitleInfo {

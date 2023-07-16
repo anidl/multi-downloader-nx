@@ -451,6 +451,7 @@ export default class Hidive implements ServiceClass {
         videoinfo.season = parseFloat(selectedEpisode.SeasonNumberValue+'');
         videoinfo.episodeNumber = parseFloat(selectedEpisode.EpisodeNumberValue+'');
         videoinfo.uncut = videodetails[0] == 'Home Video' ? true : false;
+        videoinfo.image = selectedEpisode.ScreenShotSmallUrl;
         console.info(`[INFO] Selected release: ${videodetails[0]} ${videodetails[1]}`);
         selectedVideoUrls.push(videoinfo);
       });
@@ -652,7 +653,7 @@ export default class Hidive implements ServiceClass {
             override: options.force,
             callback: options.callbackMaker ? options.callbackMaker({
               fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-              image: '',
+              image: videoData.image,
               parent: {
                 title: videoData.seriesTitle
               },
