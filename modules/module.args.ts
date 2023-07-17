@@ -423,7 +423,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     name: 'syncTiming',
     group: 'mux',
     describe: 'Attempts to sync timing for multi-dub downloads EXPERIMENTAL',
-    docDescribe: 'In enabled attempts to sync timing for multi-dub downloads.'
+    docDescribe: 'If enabled attempts to sync timing for multi-dub downloads.'
     + '\nNOTE: This is currently experimental and syncs audio and subtitles, though subtitles has a lot of guesswork'
     + '\nIf you find bugs with this, please report it in the discord or github',
     service: ['crunchy','hidive'],
