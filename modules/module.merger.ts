@@ -83,7 +83,11 @@ class Merger {
       const shortestDuration = vnas[0].duration;
       for (const [vnaIndex, vna] of vnas.entries()) {
         //Don't calculate the shortestDuration track
-        if (vnaIndex == 0) continue;
+        if (vnaIndex == 0) {
+          if (!vna.isPrimary && vna.isPrimary !== undefined) 
+            console.warn('Shortest video isn\'t primary, this might lead to problems with subtitles. Please report on github or discord if you experience issues.');
+          continue;
+        }
         if (vna.duration && shortestDuration) {
           //Calculate the tracks delay
           vna.delay = Math.ceil((vna.duration-shortestDuration) * 1000) / 1000;
