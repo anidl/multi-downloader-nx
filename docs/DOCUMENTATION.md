@@ -292,7 +292,7 @@ If set to true, it will keep all videos in the merge process, rather than discar
 | --- | --- | --- | --- | --- | --- | ---| 
 | Crunchyroll, Hidive | `--syncTiming ` | `boolean` | `No`| `NaN` | `false`| `syncTiming: ` |
 
-In enabled attempts to sync timing for multi-dub downloads.
+If enabled attempts to sync timing for multi-dub downloads.
 NOTE: This is currently experimental and syncs audio and subtitles, though subtitles has a lot of guesswork
 If you find bugs with this, please report it in the discord or github
 #### `--skipmux`
