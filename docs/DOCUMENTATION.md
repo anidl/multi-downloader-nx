@@ -1,4 +1,4 @@
-# multi-downloader-nx (4.3.0b8v)
+# multi-downloader-nx (4.3.0v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -287,6 +287,14 @@ If selected, the output file will be an mp4 file (not recommended tho)
 | Crunchyroll, Hidive | `--keepAllVideos ` | `boolean` | `No`| `NaN` | `false`| `keepAllVideos: ` |
 
 If set to true, it will keep all videos in the merge process, rather than discarding the extra videos.
+#### `--syncTiming`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll, Hidive | `--syncTiming ` | `boolean` | `No`| `NaN` | `false`| `syncTiming: ` |
+
+In enabled attempts to sync timing for multi-dub downloads.
+NOTE: This is currently experimental and syncs audio and subtitles, though subtitles has a lot of guesswork
+If you find bugs with this, please report it in the discord or github
 #### `--skipmux`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
