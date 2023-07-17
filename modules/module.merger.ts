@@ -6,16 +6,22 @@ import { LanguageItem } from './module.langsData';
 import { AvailableMuxer } from './module.args';
 import { exec } from './sei-helper-fixes';
 import { console } from './log';
+import ffprobe from 'ffprobe';
+import ffprobeStatic from 'ffprobe-static';
 
 export type MergerInput = {
   path: string,
-  lang: LanguageItem
+  lang: LanguageItem,
+  duration?: number,
+  delay?: number,
+  isPrimary?: boolean,
 }
 
 export type SubtitleInput = {
   language: LanguageItem,
   file: string,
-  closedCaption?: boolean
+  closedCaption?: boolean,
+  delay?: number
 }
 
 export type Font = keyof typeof fontFamilies;
@@ -58,6 +64,43 @@ class Merger {
       this.options.videoTitle = this.options.videoTitle.replace(/"/g, '\'');
   }
 
+  public async createDelays() {
+    //Don't bother scanning it if there is only 1 vna stream
+    if (this.options.videoAndAudio.length > 1) {
+      const vnas = this.options.videoAndAudio;
+      //get and set durations on each videoAndAudio Stream
+      for (const [vnaIndex, vna] of vnas.entries()) {
+        const streamInfo = await ffprobe(vna.path, { path: ffprobeStatic.path });
+        const videoInfo = streamInfo.streams.filter(stream => stream.codec_type == 'video');
+        vnas[vnaIndex].duration = videoInfo[0].duration;
+      }
+      //Sort videoAndAudio streams by duration (shortest first)
+      vnas.sort((a,b) => {
+        if (!a.duration || !b.duration) return -1;
+        return a.duration - b.duration;
+      });
+      //Set Delays
+      const shortestDuration = vnas[0].duration;
+      for (const [vnaIndex, vna] of vnas.entries()) {
+        //Don't calculate the shortestDuration track
+        if (vnaIndex == 0) continue;
+        if (vna.duration && shortestDuration) {
+          //Calculate the tracks delay
+          vna.delay = Math.ceil((vna.duration-shortestDuration) * 1000) / 1000;
+          //TODO: set primary language for audio so it can be used to determine which track needs the delay
+          //The above is a problem in the event that it isn't the dub that needs the delay, but rather the sub.
+          //Alternatively: Might not work: it could be checked if there are multiple of the same video language, and if there is
+          //more than 1 of the same video language, then do the subtitle delay on CC, else normal language.
+          const subtitles = this.options.subtitles.filter(sub => sub.language.code == vna.lang.code);
+          for (const [subIndex, sub] of subtitles.entries()) {
+            if (vna.isPrimary) subtitles[subIndex].delay = vna.delay;
+            else if (sub.closedCaption) subtitles[subIndex].delay = vna.delay;
+          }
+        }
+      }
+    }
+  }
+
   public FFmpeg() : string {
     const args: string[] = [];
     const metaData: string[] = [];
@@ -67,6 +110,11 @@ class Merger {
     let hasVideo = false;
 
     for (const vid of this.options.videoAndAudio) {
+      if (vid.delay && hasVideo) {
+        args.push(
+          `-itsoffset -${Math.ceil(vid.delay*1000)}ms`
+        );
+      }
       args.push(`-i "${vid.path}"`);
       if (!hasVideo || this.options.keepAllVideos) {
         metaData.push(`-map ${index}:a -map ${index}:v`);
@@ -101,6 +149,11 @@ class Merger {
 
     for (const index in this.options.subtitles) {
       const sub = this.options.subtitles[index];
+      if (sub.delay) {
+        args.push(
+          `-itsoffset -${Math.ceil(sub.delay*1000)}ms`
+        );
+      }
       args.push(`-i "${sub.file}"`);
     }
 
@@ -164,6 +217,11 @@ class Merger {
     for (const vid of this.options.videoAndAudio) {
       const audioTrackNum = this.options.inverseTrackOrder ? '0' : '1';
       const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
+      if (vid.delay) {
+        args.push(
+          `--sync ${audioTrackNum}:-${Math.ceil(vid.delay*1000)}`
+        );
+      }
       if (!hasVideo || this.options.keepAllVideos) {
         args.push(
           `--video-tracks ${videoTrackNum}`,
@@ -213,6 +271,11 @@ class Merger {
 
     if (this.options.subtitles.length > 0) {
       for (const subObj of this.options.subtitles) {
+        if (subObj.delay) {
+          args.push(
+            `--sync 0:-${Math.ceil(subObj.delay*1000)}`
+          );
+        }
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
         //TODO: look into making Closed Caption default if it's the only sub of the default language downloaded

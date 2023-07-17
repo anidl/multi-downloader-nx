@@ -29,7 +29,8 @@ export type CrunchyDownloadOptions = {
   defaultAudio: LanguageItem,
   ccTag: string,
   dlVideoOnce: boolean,
-  skipmux?: boolean
+  skipmux?: boolean,
+  syncTiming: boolean,
 }
 
 export type CurnchyMultiDownload = {
@@ -52,7 +53,8 @@ export type CrunchyMuxOptions = {
   mkvmergeOptions: string[],
   defaultSub: LanguageItem,
   defaultAudio: LanguageItem,
-  ccTag: string
+  ccTag: string,
+  syncTiming: boolean,
 }
 
 export type CrunchyEpMeta = {
@@ -60,7 +62,9 @@ export type CrunchyEpMeta = {
     mediaId: string,
     lang?: LanguageItem,
     playback?: string,
-    versions?: EpisodeVersion[] | null
+    versions?: EpisodeVersion[] | null,
+    isSubbed: boolean,
+    isDubbed: boolean,
   }[],
   seriesTitle: string,
   seasonTitle: string,
@@ -76,7 +80,8 @@ export type CrunchyEpMeta = {
 export type DownloadedMedia = {
   type: 'Video',
   lang: LanguageItem,
-  path: string
+  path: string,
+  isPrimary?: boolean
 } | ({
   type: 'Subtitle',
   cc: boolean

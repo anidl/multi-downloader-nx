@@ -824,6 +824,9 @@ export default class Hidive implements ServiceClass {
     // collect fonts info
     // mergers
     let isMuxed = false;
+    if (options.syncTiming) {
+      await merger.createDelays();
+    }
     if (bin.MKVmerge) {
       await merger.merge('mkvmerge', bin.MKVmerge);
       isMuxed = true;

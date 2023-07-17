@@ -816,7 +816,9 @@ export default class Crunchy implements ServiceClass {
           {
             mediaId: item.id,
             versions: null,
-            lang: langsData.languages.find(a => a.code == yargs.appArgv(this.cfg.cli).dubLang[0])
+            lang: langsData.languages.find(a => a.code == yargs.appArgv(this.cfg.cli).dubLang[0]),
+            isSubbed: item.is_subbed,
+            isDubbed: item.is_dubbed
           }
         ],
         seriesTitle:   item.series_title,
@@ -974,7 +976,9 @@ export default class Crunchy implements ServiceClass {
         epMeta.data = [
           {
             mediaId: 'E:'+ item.id,
-            versions: item.episode_metadata.versions
+            versions: item.episode_metadata.versions,
+            isSubbed: item.episode_metadata.is_subbed,
+            isDubbed: item.episode_metadata.is_dubbed
           }
         ];        
         epMeta.seriesTitle = item.episode_metadata.series_title;
@@ -986,7 +990,9 @@ export default class Crunchy implements ServiceClass {
         item.f_num = 'F:' + item.id;
         epMeta.data = [
           {
-            mediaId: 'M:'+ item.id
+            mediaId: 'M:'+ item.id,
+            isSubbed: item.movie_listing_metadata.is_subbed,
+            isDubbed: item.movie_listing_metadata.is_dubbed
           }
         ];
         epMeta.seriesTitle = item.title;
@@ -997,7 +1003,9 @@ export default class Crunchy implements ServiceClass {
         item.f_num = 'F:' + item.id;
         epMeta.data = [
           {
-            mediaId: 'M:'+ item.id
+            mediaId: 'M:'+ item.id,
+            isSubbed: item.movie_metadata.is_subbed,
+            isDubbed: item.movie_metadata.is_dubbed
           }
         ];
         epMeta.season = 0;
@@ -1053,6 +1061,8 @@ export default class Crunchy implements ServiceClass {
       
       //Make sure token is up to date
       await this.refreshToken(true, true);
+      let currentVersion;
+      let isPrimary = mMeta.isSubbed;
       const AuthHeaders = {
         headers: {
           Authorization: `Bearer ${this.token.access_token}`,
@@ -1063,11 +1073,13 @@ export default class Crunchy implements ServiceClass {
       //Get Media GUID
       let mediaId = mMeta.mediaId;
       if (mMeta.versions && mMeta.lang) {
-        mediaId = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale)?.media_guid as string;
-        if (!mediaId) {
+        currentVersion = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale);
+        if (!currentVersion?.media_guid) {
           console.error('Selected language not found.');
-          return undefined;
+          continue;
         }
+        isPrimary = currentVersion.original;
+        mediaId = currentVersion?.media_guid;
       }
 
       // If for whatever reason mediaId has a :, return the ID only
@@ -1352,7 +1364,8 @@ export default class Crunchy implements ServiceClass {
               files.push({
                 type: 'Video',
                 path: `${tsFile}.ts`,
-                lang: lang
+                lang: lang,
+                isPrimary: isPrimary
               });
               dlVideoOnce = true;
             }
@@ -1489,6 +1502,9 @@ export default class Crunchy implements ServiceClass {
     // collect fonts info
     // mergers
     let isMuxed = false;
+    if (options.syncTiming) {
+      await merger.createDelays();
+    }
     if (bin.MKVmerge) {
       await merger.merge('mkvmerge', bin.MKVmerge);
       isMuxed = true;
@@ -1657,7 +1673,9 @@ export default class Crunchy implements ServiceClass {
           data: [
             {
               mediaId: item.id,
-              versions: item.versions
+              versions: item.versions,
+              isSubbed: item.is_subbed,
+              isDubbed: item.is_dubbed
             }
           ],          
           seriesTitle: itemE.items.find(a => !a.series_title.match(/\(\w+ Dub\)/))?.series_title ?? itemE.items[0].series_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),

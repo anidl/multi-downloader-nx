@@ -67,6 +67,7 @@ let argvC: {
   removeBumpers: boolean;
   originalFontSize: boolean;
   keepAllVideos: boolean;
+  syncTiming: boolean;
 };
     
 export type ArgvType = typeof argvC;  

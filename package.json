@@ -1,7 +1,7 @@
 {
   "name": "multi-downloader-nx",
   "short_name": "aniDL",
-  "version": "4.3.0b8",
+  "version": "4.3.0",
   "description": "Downloader for Crunchyroll, Funimation, or Hidive via CLI or GUI",
   "keywords": [
     "download",
@@ -50,6 +50,8 @@
     "dotenv": "^16.3.1",
     "eslint-plugin-import": "^2.27.5",
     "express": "^4.18.2",
+    "ffprobe": "^1.1.2",
+    "ffprobe-static": "^3.1.0",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
     "got": "^11.8.6",
@@ -67,6 +69,8 @@
   "devDependencies": {
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
+    "@types/ffprobe": "^1.1.4",
+    "@types/ffprobe-static": "^2.0.1",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.15.11",
     "@types/ws": "^8.5.5",
