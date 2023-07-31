@@ -54,7 +54,7 @@ class HidiveHandler extends Base implements MessageHandler {
       if (language.hd_locale)
         subLanguageCodesArray.push(language.locale);
     }
-    return [...new Set(subLanguageCodesArray)];
+    return ['all', 'none', ...new Set(subLanguageCodesArray)];
   }
 
   public async resolveItems(data: ResolveItemsData): Promise<boolean> {
