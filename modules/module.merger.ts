@@ -8,6 +8,7 @@ import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
+import lookssame from "looks-same";
 
 export type MergerInput = {
   path: string,
@@ -15,13 +16,15 @@ export type MergerInput = {
   duration?: number,
   delay?: number,
   isPrimary?: boolean,
+  frameRate?: number
 }
 
 export type SubtitleInput = {
   language: LanguageItem,
   file: string,
   closedCaption?: boolean,
-  delay?: number
+  delay?: number,
+  frameRate?: number
 }
 
 export type Font = keyof typeof fontFamilies;
@@ -55,8 +58,11 @@ export type MergerOptions = {
   }
 }
 
+const SECURITY_FRAMES = 30;
+const MAX_OFFSET_SEC = 15;
+
 class Merger {
-  
+
   constructor(private options: MergerOptions) {
     if (this.options.skipSubMux)
       this.options.subtitles = [];
@@ -65,7 +71,6 @@ class Merger {
   }
 
   public async createDelays() {
-    //Don't bother scanning it if there is only 1 vna stream
     if (this.options.videoAndAudio.length > 1) {
       const vnas = this.options.videoAndAudio;
       //get and set durations on each videoAndAudio Stream
@@ -73,35 +78,64 @@ class Merger {
         const streamInfo = await ffprobe(vna.path, { path: ffprobeStatic.path });
         const videoInfo = streamInfo.streams.filter(stream => stream.codec_type == 'video');
         vnas[vnaIndex].duration = videoInfo[0].duration;
+        vnas[vnaIndex].frameRate = eval(videoInfo[0].avg_frame_rate) as number
       }
       //Sort videoAndAudio streams by duration (shortest first)
       vnas.sort((a,b) => {
         if (!a.duration || !b.duration) return -1;
         return a.duration - b.duration;
       });
-      //Set Delays
-      const shortestDuration = vnas[0].duration;
-      for (const [vnaIndex, vna] of vnas.entries()) {
-        //Don't calculate the shortestDuration track
-        if (vnaIndex == 0) {
-          if (!vna.isPrimary && vna.isPrimary !== undefined) 
-            console.warn('Shortest video isn\'t primary, this might lead to problems with subtitles. Please report on github or discord if you experience issues.');
-          continue;
-        }
-        if (vna.duration && shortestDuration) {
-          //Calculate the tracks delay
-          vna.delay = Math.ceil((vna.duration-shortestDuration) * 1000) / 1000;
-          //TODO: set primary language for audio so it can be used to determine which track needs the delay
-          //The above is a problem in the event that it isn't the dub that needs the delay, but rather the sub.
-          //Alternatively: Might not work: it could be checked if there are multiple of the same video language, and if there is
-          //more than 1 of the same video language, then do the subtitle delay on CC, else normal language.
-          const subtitles = this.options.subtitles.filter(sub => sub.language.code == vna.lang.code);
-          for (const [subIndex, sub] of subtitles.entries()) {
-            if (vna.isPrimary) subtitles[subIndex].delay = vna.delay;
-            else if (sub.closedCaption) subtitles[subIndex].delay = vna.delay;
+
+      for (let item of vnas) {
+        fs.mkdirSync(`temp-${item.lang.code}`, { recursive: true });
+        exec("ffmpeg", "ffmpeg", `-i "${item.path}" -t ${MAX_OFFSET_SEC} temp-${item.lang.code}/%03d.png`)
+      }
+
+      let start = vnas[0];
+
+      console.info(`Using ${start.lang.code} as the base for syncing`);
+      let items = fs.readdirSync(`temp-${start.lang.code}`)
+      itemLoop: for (const vna of vnas.slice(1)) {
+        console.info(`Trying to find delay for ${vna.lang.code}...`)
+        for (let [index, file] of items.entries()) {
+          console.info(`${Math.ceil( (index / items.length) * 100 )} %`)
+          outer: for (let i = 1; i <= items.length; i++) {
+            let number = i.toString();
+            number = "0".repeat(3 - number.length) + number;
+
+            let result = await lookssame(`temp-${start.lang.code}/${file}`, `temp-${vna.lang.code}/${number}.png`);
+            if (result.equal) {
+              for (let b = i; b < Math.min(items.length, i + SECURITY_FRAMES); b++) {
+                let number = b.toString();
+                number = "0".repeat(3 - number.length) + number;
+                if (!await lookssame(`temp-${start.lang.code}/${file}`, `temp-${vna.lang.code}/${number}.png`)) {
+                  continue outer;
+                }
+              }
+              vna.delay = i;
+              const subtitles = this.options.subtitles.filter(sub => sub.language.code == vna.lang.code);
+              for (const [subIndex, sub] of subtitles.entries()) {
+                if (vna.isPrimary) {
+                  subtitles[subIndex].delay = vna.delay;
+                  subtitles[subIndex].frameRate = vna.frameRate;
+                } else if (sub.closedCaption) {
+                  subtitles[subIndex].delay = vna.delay
+                  subtitles[subIndex].frameRate = vna.frameRate;
+                };
+              }
+
+              console.info(`Found ${vna.delay} frames delay for ${vna.lang.code}`)
+              continue itemLoop;
+            }
           }
         }
+        console.error(`Unable to find delay for ${vna.lang.code}`);
       }
+      for (let item of vnas) {
+        fs.rmSync(`temp-${item.lang.code}`, { recursive: true, force: true });
+      }
+
+      console.info(`Processed all files to find a delay.`)
     }
   }
 
@@ -115,9 +149,13 @@ class Merger {
 
     for (const vid of this.options.videoAndAudio) {
       if (vid.delay && hasVideo) {
-        args.push(
-          `-itsoffset -${Math.ceil(vid.delay*1000)}ms`
-        );
+        if (vid.frameRate) {
+          args.push(
+            `-ss ${Math.ceil(vid.delay * (1000 / vid.frameRate))}ms`
+          );
+        } else {
+          console.error(`Missing framerate for video ${vid.lang.code}`)
+        }
       }
       args.push(`-i "${vid.path}"`);
       if (!hasVideo || this.options.keepAllVideos) {
@@ -154,9 +192,13 @@ class Merger {
     for (const index in this.options.subtitles) {
       const sub = this.options.subtitles[index];
       if (sub.delay) {
-        args.push(
-          `-itsoffset -${Math.ceil(sub.delay*1000)}ms`
-        );
+        if (sub.frameRate) {
+          args.push(
+            `-ss ${Math.ceil(sub.delay * (1000 / sub.frameRate))}ms`
+          );
+        } else {
+          console.error(`Missing framerate for subtitle: ${JSON.stringify(sub)}`)
+        }
       }
       args.push(`-i "${sub.file}"`);
     }
@@ -222,8 +264,12 @@ class Merger {
       const audioTrackNum = this.options.inverseTrackOrder ? '0' : '1';
       const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
       if (vid.delay) {
+        if (!vid.frameRate) {
+          console.error(`Unable to find framerate for stream ${vid.lang.code}`)
+          continue;
+        }
         args.push(
-          `--sync ${audioTrackNum}:-${Math.ceil(vid.delay*1000)}`
+          `--sync ${audioTrackNum}:-${Math.ceil(vid.delay*(1000 / vid.frameRate))}`
         );
       }
       if (!hasVideo || this.options.keepAllVideos) {
@@ -276,9 +322,13 @@ class Merger {
     if (this.options.subtitles.length > 0) {
       for (const subObj of this.options.subtitles) {
         if (subObj.delay) {
-          args.push(
-            `--sync 0:-${Math.ceil(subObj.delay*1000)}`
-          );
+          if (subObj.frameRate) {
+            args.push(
+              `--sync 0:-${Math.ceil(subObj.delay*(1000 / subObj.frameRate))}`
+            );
+          } else {
+            console.error(`Missing framerate for subtitle: ${JSON.stringify(subObj)}`)
+          }
         }
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
@@ -369,7 +419,7 @@ class Merger {
               path: fontPath,
               mime: mime,
             });
-          } 
+          }
         }
       }
     }
