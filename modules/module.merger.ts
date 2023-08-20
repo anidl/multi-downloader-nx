@@ -8,7 +8,7 @@ import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
-import lookssame from "looks-same";
+import lookssame from 'looks-same';
 
 export type MergerInput = {
   path: string,
@@ -78,7 +78,7 @@ class Merger {
         const streamInfo = await ffprobe(vna.path, { path: ffprobeStatic.path });
         const videoInfo = streamInfo.streams.filter(stream => stream.codec_type == 'video');
         vnas[vnaIndex].duration = videoInfo[0].duration;
-        vnas[vnaIndex].frameRate = eval(videoInfo[0].avg_frame_rate) as number
+        vnas[vnaIndex].frameRate = eval(videoInfo[0].avg_frame_rate) as number;
       }
       //Sort videoAndAudio streams by duration (shortest first)
       vnas.sort((a,b) => {
@@ -86,28 +86,28 @@ class Merger {
         return a.duration - b.duration;
       });
 
-      for (let item of vnas) {
+      for (const item of vnas) {
         fs.mkdirSync(`temp-${item.lang.code}`, { recursive: true });
-        exec("ffmpeg", "ffmpeg", `-i "${item.path}" -t ${MAX_OFFSET_SEC} temp-${item.lang.code}/%03d.png`)
+        exec('ffmpeg', 'ffmpeg', `-i "${item.path}" -t ${MAX_OFFSET_SEC} temp-${item.lang.code}/%03d.png`);
       }
 
-      let start = vnas[0];
+      const start = vnas[0];
 
       console.info(`Using ${start.lang.code} as the base for syncing`);
-      let items = fs.readdirSync(`temp-${start.lang.code}`)
+      const items = fs.readdirSync(`temp-${start.lang.code}`);
       itemLoop: for (const vna of vnas.slice(1)) {
-        console.info(`Trying to find delay for ${vna.lang.code}...`)
-        for (let [index, file] of items.entries()) {
-          console.info(`${Math.ceil( (index / items.length) * 100 )} %`)
+        console.info(`Trying to find delay for ${vna.lang.code}...`);
+        for (const [index, file] of items.entries()) {
+          console.info(`${Math.ceil( (index / items.length) * 100 )} %`);
           outer: for (let i = 1; i <= items.length; i++) {
             let number = i.toString();
-            number = "0".repeat(3 - number.length) + number;
+            number = '0'.repeat(3 - number.length) + number;
 
-            let result = await lookssame(`temp-${start.lang.code}/${file}`, `temp-${vna.lang.code}/${number}.png`);
+            const result = await lookssame(`temp-${start.lang.code}/${file}`, `temp-${vna.lang.code}/${number}.png`);
             if (result.equal) {
               for (let b = i; b < Math.min(items.length, i + SECURITY_FRAMES); b++) {
                 let number = b.toString();
-                number = "0".repeat(3 - number.length) + number;
+                number = '0'.repeat(3 - number.length) + number;
                 if (!await lookssame(`temp-${start.lang.code}/${file}`, `temp-${vna.lang.code}/${number}.png`)) {
                   continue outer;
                 }
@@ -119,23 +119,23 @@ class Merger {
                   subtitles[subIndex].delay = vna.delay;
                   subtitles[subIndex].frameRate = vna.frameRate;
                 } else if (sub.closedCaption) {
-                  subtitles[subIndex].delay = vna.delay
+                  subtitles[subIndex].delay = vna.delay;
                   subtitles[subIndex].frameRate = vna.frameRate;
-                };
+                }
               }
 
-              console.info(`Found ${vna.delay} frames delay for ${vna.lang.code}`)
+              console.info(`Found ${vna.delay} frames delay for ${vna.lang.code}`);
               continue itemLoop;
             }
           }
         }
         console.error(`Unable to find delay for ${vna.lang.code}`);
       }
-      for (let item of vnas) {
+      for (const item of vnas) {
         fs.rmSync(`temp-${item.lang.code}`, { recursive: true, force: true });
       }
 
-      console.info(`Processed all files to find a delay.`)
+      console.info('Processed all files to find a delay.');
     }
   }
 
@@ -154,7 +154,7 @@ class Merger {
             `-ss ${Math.ceil(vid.delay * (1000 / vid.frameRate))}ms`
           );
         } else {
-          console.error(`Missing framerate for video ${vid.lang.code}`)
+          console.error(`Missing framerate for video ${vid.lang.code}`);
         }
       }
       args.push(`-i "${vid.path}"`);
@@ -197,7 +197,7 @@ class Merger {
             `-ss ${Math.ceil(sub.delay * (1000 / sub.frameRate))}ms`
           );
         } else {
-          console.error(`Missing framerate for subtitle: ${JSON.stringify(sub)}`)
+          console.error(`Missing framerate for subtitle: ${JSON.stringify(sub)}`);
         }
       }
       args.push(`-i "${sub.file}"`);
@@ -265,7 +265,7 @@ class Merger {
       const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
       if (vid.delay) {
         if (!vid.frameRate) {
-          console.error(`Unable to find framerate for stream ${vid.lang.code}`)
+          console.error(`Unable to find framerate for stream ${vid.lang.code}`);
           continue;
         }
         args.push(
@@ -327,7 +327,7 @@ class Merger {
               `--sync 0:-${Math.ceil(subObj.delay*(1000 / subObj.frameRate))}`
             );
           } else {
-            console.error(`Missing framerate for subtitle: ${JSON.stringify(subObj)}`)
+            console.error(`Missing framerate for subtitle: ${JSON.stringify(subObj)}`);
           }
         }
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}`}"`);
