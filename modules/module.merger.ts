@@ -87,14 +87,14 @@ class Merger {
       });
 
       for (const item of vnas) {
-        fs.mkdirSync(`temp-${item.lang.code}`, { recursive: true });
-        exec('ffmpeg', 'ffmpeg', `-i "${item.path}" -t ${MAX_OFFSET_SEC} temp-${item.lang.code}/%03d.png`);
+        fs.mkdirSync(`tmp/temp-${item.lang.code}`, { recursive: true });
+        exec('ffmpeg', 'ffmpeg', `-i "${item.path}" -t ${MAX_OFFSET_SEC} tmp/temp-${item.lang.code}/%03d.png`);
       }
 
       const start = vnas[0];
 
       console.info(`Using ${start.lang.code} as the base for syncing`);
-      const items = fs.readdirSync(`temp-${start.lang.code}`);
+      const items = fs.readdirSync(`tmp/temp-${start.lang.code}`);
       itemLoop: for (const vna of vnas.slice(1)) {
         console.info(`Trying to find delay for ${vna.lang.code}...`);
         for (const [index, file] of items.entries()) {
@@ -103,12 +103,12 @@ class Merger {
             let number = i.toString();
             number = '0'.repeat(3 - number.length) + number;
 
-            const result = await lookssame(`temp-${start.lang.code}/${file}`, `temp-${vna.lang.code}/${number}.png`);
+            const result = await lookssame(`tmp/temp-${start.lang.code}/${file}`, `tmp/temp-${vna.lang.code}/${number}.png`);
             if (result.equal) {
               for (let b = i; b < Math.min(items.length, i + SECURITY_FRAMES); b++) {
                 let number = b.toString();
                 number = '0'.repeat(3 - number.length) + number;
-                if (!await lookssame(`temp-${start.lang.code}/${file}`, `temp-${vna.lang.code}/${number}.png`)) {
+                if (!await lookssame(`tmp/temp-${start.lang.code}/${file}`, `tmp/temp-${vna.lang.code}/${number}.png`)) {
                   continue outer;
                 }
               }
@@ -132,7 +132,7 @@ class Merger {
         console.error(`Unable to find delay for ${vna.lang.code}`);
       }
       for (const item of vnas) {
-        fs.rmSync(`temp-${item.lang.code}`, { recursive: true, force: true });
+        fs.rmSync(`tmp/temp-${item.lang.code}`, { recursive: true, force: true });
       }
 
       console.info('Processed all files to find a delay.');
