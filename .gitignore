@@ -35,3 +35,4 @@ crunchyendpoints
 .vscode
 /logs
 /tmp/*/
+/videos/*/

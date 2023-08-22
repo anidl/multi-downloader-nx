@@ -9,6 +9,7 @@ import { console } from './log';
 import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import lookssame from 'looks-same';
+import readline from 'readline';
 
 export type MergerInput = {
   path: string,
@@ -58,8 +59,9 @@ export type MergerOptions = {
   }
 }
 
-const SECURITY_FRAMES = 30;
-const MAX_OFFSET_SEC = 15;
+const SECURITY_FRAMES = 10;
+const MAX_OFFSET_SEC = 20;
+const LIKENESS_TARGET = 0.990;
 
 class Merger {
 
@@ -86,56 +88,108 @@ class Merger {
         return a.duration - b.duration;
       });
 
-      for (const item of vnas) {
-        fs.mkdirSync(`tmp/temp-${item.lang.code}`, { recursive: true });
-        exec('ffmpeg', 'ffmpeg', `-i "${item.path}" -t ${MAX_OFFSET_SEC} tmp/temp-${item.lang.code}/%03d.png`);
-      }
+      fs.mkdirSync('tmp/main-frames', { recursive: true });
+      exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i "${vnas[0].path}" -t ${MAX_OFFSET_SEC} tmp/main-frames/%03d.png`);
 
       const start = vnas[0];
 
       console.info(`Using ${start.lang.code} as the base for syncing`);
-      const items = fs.readdirSync(`tmp/temp-${start.lang.code}`);
+      const items = fs.readdirSync('tmp/main-frames');
+      console.info('Finding start frame from base...');
+      let offset = 0;
+      for (const [index, file] of items.entries()) {
+        const result = await lookssame(`tmp/main-frames/${file}`, 'tmp/main-frames/001.png', {tolerance: 3});
+        offset = index;
+        if (!result.equal) break;
+      }
+      items.splice(0, offset);
+      console.info(`Start frame from base is ${items[0]} - Generating differences`);
+      const filesToRemove: string[] = [];
       itemLoop: for (const vna of vnas.slice(1)) {
         console.info(`Trying to find delay for ${vna.lang.code}...`);
-        for (const [index, file] of items.entries()) {
-          console.info(`${Math.ceil( (index / items.length) * 100 )} %`);
-          outer: for (let i = 1; i <= items.length; i++) {
-            let number = i.toString();
-            number = '0'.repeat(3 - number.length) + number;
-
-            const result = await lookssame(`tmp/temp-${start.lang.code}/${file}`, `tmp/temp-${vna.lang.code}/${number}.png`);
-            if (result.equal) {
-              for (let b = i; b < Math.min(items.length, i + SECURITY_FRAMES); b++) {
-                let number = b.toString();
-                number = '0'.repeat(3 - number.length) + number;
-                if (!await lookssame(`tmp/temp-${start.lang.code}/${file}`, `tmp/temp-${vna.lang.code}/${number}.png`)) {
-                  continue outer;
-                }
-              }
-              vna.delay = i;
-              const subtitles = this.options.subtitles.filter(sub => sub.language.code == vna.lang.code);
-              for (const [subIndex, sub] of subtitles.entries()) {
-                if (vna.isPrimary) {
-                  subtitles[subIndex].delay = vna.delay;
-                  subtitles[subIndex].frameRate = vna.frameRate;
-                } else if (sub.closedCaption) {
-                  subtitles[subIndex].delay = vna.delay;
-                  subtitles[subIndex].frameRate = vna.frameRate;
-                }
-              }
-
-              console.info(`Found ${vna.delay} frames delay for ${vna.lang.code}`);
-              continue itemLoop;
-            }
+        outer: for (let i = 1; i <= (items.length-offset); i++) {
+          const closeness = [];
+          exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[i]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}.log;[0:v][1:v]psnr" -f null -`);
+          filesToRemove.push(`tmp/stats-${i}.log`);
+          const fileStream = fs.createReadStream(`tmp/stats-${i}.log`);
+          const rl = readline.createInterface({
+            input: fileStream
+          });
+          for await (const line of rl) {
+            const values = line.split(' ');
+            closeness.push({
+              frame: parseFloat(values[0].replace('n:', '')),
+              Y: parseFloat(values[1].replace('Y:', '')),
+              U: parseFloat(values[2].replace('U:', '')),
+              V: parseFloat(values[3].replace('V:', '')),
+              overall: parseFloat(values[4].replace('All:', '')),
+              calc: parseFloat(values[5].replace('(', '').replace(')', ''))
+            });
           }
+          closeness.sort(function(a, b) {
+            return b.overall - a.overall;
+          });
+          if (closeness[0].overall > LIKENESS_TARGET) {
+            closeness.sort(function(a, b) {
+              return a.frame - b.frame;
+            });
+            for (const frame of closeness) {
+              if (frame.overall > LIKENESS_TARGET) {
+                for (let b = i; b < Math.min(items.length, i + SECURITY_FRAMES); b++) {
+                  console.info('Verifying match...');
+                  exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[b]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}-${b}.log;[0:v][1:v]psnr" -f null -`);
+                  filesToRemove.push(`tmp/stats-${i}-${b}.log`);
+                  const fileStream = fs.createReadStream(`tmp/stats-${i}-${b}.log`);
+                  const rl = readline.createInterface({
+                    input: fileStream
+                  });
+                  for await (const line of rl) {
+                    const values = line.split(' ');
+                    const securityframe = {
+                      frame: parseFloat(values[0].replace('n:', '')),
+                      Y: parseFloat(values[1].replace('Y:', '')),
+                      U: parseFloat(values[2].replace('U:', '')),
+                      V: parseFloat(values[3].replace('V:', '')),
+                      overall: parseFloat(values[4].replace('All:', '')),
+                      calc: parseFloat(values[5].replace('(', '').replace(')', ''))
+                    };
+                    if (securityframe.frame === (frame.frame + b)) 
+                      if (!(securityframe.overall > LIKENESS_TARGET)) {
+                        console.info('Match failed, trying to find another match.');
+                        continue outer;
+                      }
+                  }
+                  console.info('Match Succesful');
+                }
+
+                vna.delay = frame.frame - offset;
+                const subtitles = this.options.subtitles.filter(sub => sub.language.code == vna.lang.code);
+                for (const [subIndex, sub] of subtitles.entries()) {
+                  if (vna.isPrimary) {
+                    subtitles[subIndex].delay = vna.delay;
+                    subtitles[subIndex].frameRate = vna.frameRate;
+                  } else if (sub.closedCaption) {
+                    subtitles[subIndex].delay = vna.delay;
+                    subtitles[subIndex].frameRate = vna.frameRate;
+                  }
+                }
+                console.info(`Found ${vna.delay} frames delay for ${vna.lang.code}`);
+                break;
+              }
+            }
+          } else {
+            continue outer;
+          }
+          continue itemLoop;
         }
         console.error(`Unable to find delay for ${vna.lang.code}`);
       }
-      for (const item of vnas) {
-        fs.rmSync(`tmp/temp-${item.lang.code}`, { recursive: true, force: true });
+      //Remove temp files
+      fs.rmSync('tmp/main-frames/', { recursive: true, force: true });
+      for (const file of filesToRemove) {
+        fs.rmSync(file, { recursive: true, force: true });
       }
-
-      console.info('Processed all files to find a delay.');
+      console.info('Processed all files to find delays.');
     }
   }
 
