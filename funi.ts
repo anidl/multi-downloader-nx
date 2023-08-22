@@ -37,7 +37,7 @@ import { TitleElement } from './@types/episode';
 import { AvailableFilenameVars } from './modules/module.args';
 import { AuthData, AuthResponse, CheckTokenResponse, FuniGetEpisodeData, FuniGetEpisodeResponse, FuniGetShowData, SearchData, FuniSearchReponse, FuniShowResponse, FuniStreamData, FuniSubsData, FuniEpisodeData, ResponseBase } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
-import { SubtitleRequest } from './@types/funiSubtitleRequest'; 
+import { SubtitleRequest } from './@types/funiSubtitleRequest';
 
 // program name
 const api_host = 'https://prod-api-funimationnow.dadcdigital.com/api';
@@ -213,10 +213,10 @@ export default class Funi implements ServiceClass {
       debug: this.debug,
     });
     if(!episodesData.ok || !episodesData.res){ return { isOk: false, reason: new Error('episodesData is not ok') }; }
-      
+
     let epsDataArr: Item[] = JSON.parse(episodesData.res.body).items;
     const epNumRegex = /^([A-Z0-9]*[A-Z])?(\d+)$/i;
-      
+
     const parseEpStr = (epStr: string) => {
       const match = epStr.match(epNumRegex);
       if (!match) {
@@ -230,7 +230,7 @@ export default class Funi implements ServiceClass {
       }
       else return [ '', match[0] ];
     };
-      
+
     epsDataArr = epsDataArr.map(e => {
       const baseId = e.ids.externalAsianId ? e.ids.externalAsianId : e.ids.externalEpisodeId;
       e.id = baseId.replace(new RegExp('^' + e.ids.externalShowId), '');
@@ -247,7 +247,7 @@ export default class Funi implements ServiceClass {
       }
       return e;
     });
-      
+
     epsDataArr.sort((a, b) => {
       if (a.item.seasonOrder < b.item.seasonOrder && a.id.localeCompare(b.id) < 0) {
         return -1;
@@ -269,7 +269,7 @@ export default class Funi implements ServiceClass {
     const epSelList = parseSelect(data.e as string, data.but);
     const fnSlug: FuniEpisodeData[] = [], epSelEpsTxt: string[] = []; let is_selected = false;
 
-      
+
     for(const e in eps){
       eps[e].id_split[1] = parseInt(eps[e].id_split[1].toString()).toString().padStart(Funi.epIdLen, '0');
       let epStrId = eps[e].id_split.join('');
@@ -339,13 +339,13 @@ export default class Funi implements ServiceClass {
       ep.number = ep.number !== '' ? ep.mediaCategory+ep.number : ep.mediaCategory+'#'+ep.id;
     }
     fnEpNum = isNaN(parseInt(ep.number)) ? ep.number : parseInt(ep.number);
-      
+
     // is uncut
     const uncut = {
       Japanese: false,
       English: false
     };
-      
+
     // end
     if (log) {
       console.info(
@@ -355,7 +355,7 @@ export default class Funi implements ServiceClass {
         (ep.number ? ep.number : '?'),
         ep.title
       );
-      
+
       console.info('Available streams (Non-Encrypted):');
     }
     // map medias
@@ -376,7 +376,7 @@ export default class Funi implements ServiceClass {
         return { id: 0, type: '' };
       }
     }));
-      
+
     // select
     stDlPath = [];
     for(const m of media){
@@ -386,8 +386,8 @@ export default class Funi implements ServiceClass {
         if (!dub_type)
           continue;
         let localSubs: Subtitle[] = [];
-        const selUncut = !data.simul && uncut[dub_type] && m.version?.match(/uncut/i) 
-          ? true 
+        const selUncut = !data.simul && uncut[dub_type] && m.version?.match(/uncut/i)
+          ? true
           : (!uncut[dub_type] || data.simul && m.version?.match(/simulcast/i) ? true : false);
         for (const curDub of data.dubLang) {
           const item = langsData.languages.find(a => a.code === curDub);
@@ -413,7 +413,7 @@ export default class Funi implements ServiceClass {
         }
       }
     }
-  
+
     const already: string[] = [];
     stDlPath = stDlPath.filter(a => {
       if (already.includes(`${a.closedCaption ? 'cc' : ''}-${a.lang.code}`)) {
@@ -481,33 +481,33 @@ export default class Funi implements ServiceClass {
       }
     }
   }
-  
+
   public async downloadStreams(log: boolean, episode: FunimationMediaDownload, data: FuniStreamData): Promise<boolean|void> {
-    
+
     // req playlist
-  
+
     const purvideo: DownloadedFile[] = [];
     const puraudio: DownloadedFile[] = [];
-    const audioAndVideo: DownloadedFile[] = []; 
+    const audioAndVideo: DownloadedFile[] = [];
     for (const streamPath of tsDlPath) {
       const plQualityReq = await getData({
         url: streamPath.path,
         debug: this.debug,
       });
       if(!plQualityReq.ok || !plQualityReq.res){return;}
-          
+
       const plQualityLinkList = m3u8(plQualityReq.res.body);
-          
+
       const mainServersList = [
         'vmfst-api.prd.funimationsvc.com',
         'd33et77evd9bgg.cloudfront.net',
         'd132fumi6di1wa.cloudfront.net',
         'funiprod.akamaized.net',
       ];
-          
+
       const plServerList: string[] = [],
         plStreams: Record<string|number, {
-        [key: string]: string   
+        [key: string]: string
       }> = {},
         plLayersStr: string[]  = [],
         plLayersRes: Record<string|number, {
@@ -520,7 +520,7 @@ export default class Funi implements ServiceClass {
         uri: string
         language: langsData.LanguageItem
       };
-          
+
       // new uris
       const vplReg = /streaming_video_(\d+)_(\d+)_(\d+)_index\.m3u8/;
       if(plQualityLinkList.playlists[0].uri.match(vplReg)){
@@ -562,7 +562,7 @@ export default class Funi implements ServiceClass {
           return 0;
         });
       }
-          
+
       for(const s of plQualityLinkList.playlists){
         if(s.uri.match(/_Layer(\d+)\.m3u8/) || s.uri.match(vplReg)){
           // set layer and max layer
@@ -608,7 +608,7 @@ export default class Funi implements ServiceClass {
           console.info(s.uri);
         }
       }
-  
+
       for(const s of mainServersList){
         if(plServerList.includes(s)){
           plServerList.splice(plServerList.indexOf(s), 1);
@@ -616,28 +616,28 @@ export default class Funi implements ServiceClass {
           break;
         }
       }
-  
-          
+
+
       const plSelectedServer = plServerList[data.x-1];
       const plSelectedList   = plStreams[plSelectedServer];
-          
+
       plLayersStr.sort();
       if (log) {
         console.info(`Servers available:\n\t${plServerList.join('\n\t')}`);
         console.info(`Available qualities:\n\t${plLayersStr.join('\n\t')}`);
       }
-  
+
       const selectedQuality = data.q === 0 || data.q > Object.keys(plLayersRes).length
         ? Object.keys(plLayersRes).pop() as string
         : data.q;
       const videoUrl = data.x < plServerList.length+1 && plSelectedList[selectedQuality] ? plSelectedList[selectedQuality] : '';
-  
+
       if(videoUrl != ''){
         if (log) {
           console.info(`Selected layer: ${selectedQuality} (${plLayersRes[selectedQuality].width}x${plLayersRes[selectedQuality].height}) @ ${plSelectedServer}`);
           console.info('Stream URL:',videoUrl);
         }
-      
+
         fnOutput = parseFileName(data.fileName, ([
           ['episode', isNaN(parseInt(fnEpNum as string)) ? fnEpNum : parseInt(fnEpNum as string), true],
           ['title', episode.title, true],
@@ -669,12 +669,12 @@ export default class Funi implements ServiceClass {
           console.error('Layer not selected!\n');
         return;
       }
-          
+
       let dlFailed = false;
       let dlFailedA = false;
-          
+
       await fs.promises.mkdir(path.join(this.cfg.dir.content, ...fnOutput.slice(0, -1)), { recursive: true });
-  
+
       video: if (!data.novids) {
         if (plAud && (purvideo.length > 0 || audioAndVideo.length > 0)) {
           break video;
@@ -687,9 +687,9 @@ export default class Funi implements ServiceClass {
           debug: this.debug,
         });
         if (!reqVideo.ok || !reqVideo.res) { break video; }
-              
+
         const chunkList = m3u8(reqVideo.res.body);
-              
+
         const tsFile = path.join(this.cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}`);
         dlFailed = !await this.downloadFile(tsFile, chunkList, data.timeout, data.partsize, data.fsRetryTime, data.force, data.callbackMaker ? data.callbackMaker({
           fileName: `${fnOutput.slice(-1)}.video${(plAud?.uri ? '' : '.' + streamPath.lang.code )}.ts`,
@@ -727,11 +727,11 @@ export default class Funi implements ServiceClass {
           debug: this.debug,
         });
         if (!reqAudio.ok || !reqAudio.res) { return; }
-              
+
         const chunkListA = m3u8(reqAudio.res.body);
-      
+
         const tsFileA = path.join(this.cfg.dir.content, ...fnOutput.slice(0, -1), `${fnOutput.slice(-1)}.audio.${plAud.language.code}`);
-      
+
         dlFailedA = !await this.downloadFile(tsFileA, chunkListA, data.timeout, data.partsize, data.fsRetryTime, data.force, data.callbackMaker ? data.callbackMaker({
           fileName: `${fnOutput.slice(-1)}.audio.${plAud.language.code}.ts`,
           parent: {
@@ -746,14 +746,14 @@ export default class Funi implements ServiceClass {
             path: `${tsFileA}.ts`,
             lang: plAud.language
           });
-  
+
       }
     }
-      
+
     // add subs
     const subsExt = !data.mp4 || data.mp4 && data.ass ? '.ass' : '.srt';
     let addSubs = true;
-  
+
     // download subtitles
     if(stDlPath.length > 0){
       if (log)
@@ -778,28 +778,28 @@ export default class Funi implements ServiceClass {
       if (addSubs && log)
         console.info('Subtitles downloaded!');
     }
-    
+
     if((puraudio.length < 1 && audioAndVideo.length < 1) || (purvideo.length < 1 && audioAndVideo.length < 1)){
       if (log)
         console.info('\nUnable to locate a video AND audio file\n');
       return;
     }
-      
+
     if(data.skipmux){
       if (log)
         console.info('Skipping muxing...');
       return;
     }
-      
+
     // check exec
     this.cfg.bin = await yamlCfg.loadBinCfg();
     const mergerBin = merger.checkMerger(this.cfg.bin, data.mp4, data.forceMuxer);
-      
+
     if ( data.novids ){
       if (log)
         console.info('Video not downloaded. Skip muxing video.');
     }
-  
+
     const ffext = !data.mp4 ? 'mkv' : 'mp4';
     const mergeInstance = new merger({
       onlyAudio: puraudio,
@@ -810,7 +810,8 @@ export default class Funi implements ServiceClass {
           file: a.out as string,
           language: a.lang,
           title: a.lang.name,
-          closedCaption: a.closedCaption
+          closedCaption: a.closedCaption,
+          belongsToFile: a.belongsToFile
         };
       }),
       videoAndAudio: audioAndVideo,
@@ -827,7 +828,7 @@ export default class Funi implements ServiceClass {
       },
       ccTag: data.ccTag
     });
-  
+
     if(mergerBin.MKVmerge){
       await mergeInstance.merge('mkvmerge', mergerBin.MKVmerge);
     }
@@ -842,13 +843,13 @@ export default class Funi implements ServiceClass {
     if (data.nocleanup) {
       return true;
     }
-      
+
     mergeInstance.cleanUp();
     if (log)
       console.info('\nDone!\n');
     return true;
   }
-  
+
   public async downloadFile(filename: string, chunkList: {
     segments: Record<string, unknown>[],
   }, timeout: number, partsize: number, fsRetryTime: number, override?: 'Y' | 'y' | 'N' | 'n' | 'C' | 'c', callback?: HLSCallback) {
@@ -861,7 +862,7 @@ export default class Funi implements ServiceClass {
       override,
       callback
     }).download();
-      
+
     return downloadStatus.ok;
   }
 
@@ -869,7 +870,7 @@ export default class Funi implements ServiceClass {
     if((data.nosubs && !data.sub) || data.dlsubs.includes('none')){
       return [];
     }
-  
+
     const subs = await getData({
       baseUrl: 'https://playback.prd.funimationsvc.com/v1/play',
       url: `/${episodeID}`,
@@ -883,7 +884,7 @@ export default class Funi implements ServiceClass {
       return [];
     }
     const parsed: SubtitleRequest = JSON.parse(subs.res.body);
-    
+
     const found: {
       isCC: boolean;
       url: string;
@@ -916,8 +917,9 @@ export default class Funi implements ServiceClass {
       ext: `.${a.lang.code}${a.isCC ? `.${ccTag}` : ''}`,
       lang: a.lang,
       url: a.url,
-      closedCaption: a.isCC
+      closedCaption: a.isCC,
+      belongsToFile: { hasFile: false }
     }));
   }
-  
+
 }

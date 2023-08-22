@@ -84,7 +84,13 @@ export type DownloadedMedia = {
   isPrimary?: boolean
 } | ({
   type: 'Subtitle',
-  cc: boolean
+  cc: boolean,
+  belongsToFile: {
+    hasFile: false,
+  } | {
+    hasFile: true,
+    file: string
+  }
 } & sxItem )
 
 export type ParseItem = {

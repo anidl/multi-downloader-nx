@@ -12,5 +12,11 @@ export type Subtitle = {
   lang: LanguageItem,
   ext: string,
   out?: string,
-  closedCaption?: boolean
+  closedCaption?: boolean,
+  belongsToFile: {
+    hasFile: false,
+  } | {
+    hasFile: true,
+    file: string
+  }
 }

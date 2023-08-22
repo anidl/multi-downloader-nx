@@ -23,6 +23,12 @@ export type MergerInput = {
 export type SubtitleInput = {
   language: LanguageItem,
   file: string,
+  belongsToFile:  {
+    hasFile: false,
+  } | {
+    hasFile: true,
+    file: string
+  },
   closedCaption?: boolean,
   delay?: number,
   frameRate?: number
@@ -59,9 +65,9 @@ export type MergerOptions = {
   }
 }
 
-const SECURITY_FRAMES = 10;
+const SECURITY_FRAMES = 20;
 const MAX_OFFSET_SEC = 20;
-const LIKENESS_TARGET = 0.990;
+const LIKENESS_TARGET = 0.95;
 
 class Merger {
 
@@ -89,7 +95,7 @@ class Merger {
       });
 
       fs.mkdirSync('tmp/main-frames', { recursive: true });
-      exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i "${vnas[0].path}" -t ${MAX_OFFSET_SEC} tmp/main-frames/%03d.png`);
+      exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i "${vnas[0].path}" -t ${MAX_OFFSET_SEC} tmp/main-frames/%03d.png`, false, true);
 
       const start = vnas[0];
 
@@ -109,7 +115,7 @@ class Merger {
         console.info(`Trying to find delay for ${vna.lang.code}...`);
         outer: for (let i = 1; i <= (items.length-offset); i++) {
           const closeness = [];
-          exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[i]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}.log;[0:v][1:v]psnr" -f null -`);
+          exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[i]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}.log;[0:v][1:v]psnr" -f null -`, false, true);
           filesToRemove.push(`tmp/stats-${i}.log`);
           const fileStream = fs.createReadStream(`tmp/stats-${i}.log`);
           const rl = readline.createInterface({
@@ -123,7 +129,7 @@ class Merger {
               U: parseFloat(values[2].replace('U:', '')),
               V: parseFloat(values[3].replace('V:', '')),
               overall: parseFloat(values[4].replace('All:', '')),
-              calc: parseFloat(values[5].replace('(', '').replace(')', ''))
+              db: parseFloat(values[5].replace('(', '').replace(')', ''))
             });
           }
           closeness.sort(function(a, b) {
@@ -136,8 +142,8 @@ class Merger {
             for (const frame of closeness) {
               if (frame.overall > LIKENESS_TARGET) {
                 for (let b = i; b < Math.min(items.length, i + SECURITY_FRAMES); b++) {
-                  console.info('Verifying match...');
-                  exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[b]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}-${b}.log;[0:v][1:v]psnr" -f null -`);
+                  console.info(`Verifying Security Frame ${b}...`);
+                  exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[b]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}-${b}.log;[0:v][1:v]psnr" -f null -`, false, true);
                   filesToRemove.push(`tmp/stats-${i}-${b}.log`);
                   const fileStream = fs.createReadStream(`tmp/stats-${i}-${b}.log`);
                   const rl = readline.createInterface({
@@ -151,7 +157,7 @@ class Merger {
                       U: parseFloat(values[2].replace('U:', '')),
                       V: parseFloat(values[3].replace('V:', '')),
                       overall: parseFloat(values[4].replace('All:', '')),
-                      calc: parseFloat(values[5].replace('(', '').replace(')', ''))
+                      db: parseFloat(values[5].replace('(', '').replace(')', ''))
                     };
                     if (securityframe.frame === (frame.frame + b)) 
                       if (!(securityframe.overall > LIKENESS_TARGET)) {
@@ -159,19 +165,17 @@ class Merger {
                         continue outer;
                       }
                   }
-                  console.info('Match Succesful');
+                  console.info(`Security Frame ${b} verified.`);
                 }
+                console.info('Match Succesful');
 
                 vna.delay = frame.frame - offset;
-                const subtitles = this.options.subtitles.filter(sub => sub.language.code == vna.lang.code);
-                for (const [subIndex, sub] of subtitles.entries()) {
-                  if (vna.isPrimary) {
-                    subtitles[subIndex].delay = vna.delay;
-                    subtitles[subIndex].frameRate = vna.frameRate;
-                  } else if (sub.closedCaption) {
-                    subtitles[subIndex].delay = vna.delay;
-                    subtitles[subIndex].frameRate = vna.frameRate;
-                  }
+                const subtitles = this.options.subtitles.filter(sub => {
+                  return sub.belongsToFile.hasFile && sub.belongsToFile.file === vna.path;
+                });
+                for (const sub of subtitles) {
+                  sub.delay = vna.delay;
+                  sub.frameRate = vna.frameRate;
                 }
                 console.info(`Found ${vna.delay} frames delay for ${vna.lang.code}`);
                 break;
@@ -248,7 +252,7 @@ class Merger {
       if (sub.delay) {
         if (sub.frameRate) {
           args.push(
-            `-ss ${Math.ceil(sub.delay * (1000 / sub.frameRate))}ms`
+            `-itsoffset -${Math.ceil(sub.delay * (1000 / sub.frameRate))}ms`
           );
         } else {
           console.error(`Missing framerate for subtitle: ${JSON.stringify(sub)}`);

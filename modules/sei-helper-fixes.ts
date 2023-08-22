@@ -1,14 +1,16 @@
 import childProcess from 'child_process';
 import { console } from './log';
 
-const exec = (pname: string, fpath: string, pargs: string, spc = false): {
+const exec = (pname: string, fpath: string, pargs: string, spc = false, quiet = false): {
   isOk: true
 } | {
   isOk: false,
   err: Error & { code: number }
 } => {
   pargs = pargs ? ' ' + pargs : '';
-  console.info(`\n> "${pname}"${pargs}${spc ? '\n' : ''}`);
+  if (quiet === false ){
+    console.info(`\n> "${pname}"${pargs}${spc ? '\n' : ''}`);
+  }
   try {
     childProcess.execSync((fpath + pargs), { stdio: 'inherit' });
     return {
