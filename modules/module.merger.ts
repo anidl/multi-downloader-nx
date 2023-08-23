@@ -134,6 +134,10 @@ class Merger {
               db: parseFloat(values[5].replace('(', '').replace(')', ''))
             });
           }
+          if (closeness.length === 0) {
+            console.info(`Failed to analyze time offset required for ${vna.lang.code}, check for addtional logs.`);
+            continue itemLoop;
+          }
           closeness.sort(function(a, b) {
             return b.overall - a.overall;
           });
