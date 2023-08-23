@@ -21,6 +21,7 @@ This application is not endorsed by or affiliated with *Funimation*, *Crunchyrol
 By default this application uses the following paths to programs (main executables):
 
 * `ffmpeg.exe` (From PATH)
+* `ffprobe.exe` (From PATH)
 * `mkvmerge.exe` (From PATH)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.

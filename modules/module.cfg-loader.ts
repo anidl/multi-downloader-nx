@@ -81,7 +81,8 @@ export type ConfigObject = {
   },
   bin: {
     ffmpeg?: string,
-    mkvmerge?: string  
+    mkvmerge?: string,
+    ffprobe?: string
   },
   cli: {
     [key: string]: any
@@ -143,8 +144,9 @@ const loadBinCfg = async () => {
   const binCfg = loadYamlCfgFile<ConfigObject['bin']>(binCfgFile);
   // binaries
   const defaultBin = {
-    ffmpeg: '${wdir}/bin/ffmpeg/ffmpeg',
-    mkvmerge: '${wdir}/bin/mkvtoolnix/mkvmerge',
+    ffmpeg: 'ffmpeg',
+    mkvmerge: 'mkvmerge',
+    ffprobe: 'ffprobe'
   };
   const keys = Object.keys(defaultBin) as (keyof typeof defaultBin)[];
   for(const dir of keys){

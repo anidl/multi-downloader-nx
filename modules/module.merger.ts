@@ -1,4 +1,5 @@
 import * as iso639 from 'iso-639';
+import * as yamlCfg from './module.cfg-loader';
 import { fontFamilies, fontMime } from './module.fontsData';
 import path from 'path';
 import fs from 'fs';
@@ -7,7 +8,6 @@ import { AvailableMuxer } from './module.args';
 import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
-import ffprobeStatic from 'ffprobe-static';
 import lookssame from 'looks-same';
 import readline from 'readline';
 
@@ -80,10 +80,11 @@ class Merger {
 
   public async createDelays() {
     if (this.options.videoAndAudio.length > 1) {
+      const bin = await yamlCfg.loadBinCfg();
       const vnas = this.options.videoAndAudio;
       //get and set durations on each videoAndAudio Stream
       for (const [vnaIndex, vna] of vnas.entries()) {
-        const streamInfo = await ffprobe(vna.path, { path: ffprobeStatic.path });
+        const streamInfo = await ffprobe(vna.path, { path: bin.ffprobe as string });
         const videoInfo = streamInfo.streams.filter(stream => stream.codec_type == 'video');
         vnas[vnaIndex].duration = videoInfo[0].duration;
         vnas[vnaIndex].frameRate = eval(videoInfo[0].avg_frame_rate) as number;
@@ -95,7 +96,7 @@ class Merger {
       });
 
       fs.mkdirSync('tmp/main-frames', { recursive: true });
-      exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i "${vnas[0].path}" -t ${MAX_OFFSET_SEC} tmp/main-frames/%03d.png`, false, true);
+      exec('ffmpeg', bin.ffmpeg as string, `-hide_banner -loglevel error -i "${vnas[0].path}" -t ${MAX_OFFSET_SEC} tmp/main-frames/%03d.png`, false, true);
 
       const start = vnas[0];
 
@@ -116,7 +117,7 @@ class Merger {
         outer: for (let i = 1; i < (items.length); i++) {
           console.info(`Trying to match likeness with frame ${i+offset}`);
           const closeness = [];
-          exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[i]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}.log;[0:v][1:v]psnr" -f null -`, false, true);
+          exec('ffmpeg', bin.ffmpeg as string, `-hide_banner -loglevel error -i tmp/main-frames/${items[i]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}.log;[0:v][1:v]psnr" -f null -`, false, true);
           filesToRemove.push(`tmp/stats-${i}.log`);
           const fileStream = fs.createReadStream(`tmp/stats-${i}.log`);
           const rl = readline.createInterface({
@@ -144,7 +145,7 @@ class Merger {
               if (frame.overall > LIKENESS_TARGET) {
                 for (let b = i; b < Math.min(items.length, i + SECURITY_FRAMES); b++) {
                   console.info(`Verifying Security Frame ${b}...`);
-                  exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[b]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}-${b}.log;[0:v][1:v]psnr" -f null -`, false, true);
+                  exec('ffmpeg', bin.ffmpeg as string, `-hide_banner -loglevel error -i tmp/main-frames/${items[b]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}-${b}.log;[0:v][1:v]psnr" -f null -`, false, true);
                   filesToRemove.push(`tmp/stats-${i}-${b}.log`);
                   const fileStream = fs.createReadStream(`tmp/stats-${i}-${b}.log`);
                   const rl = readline.createInterface({

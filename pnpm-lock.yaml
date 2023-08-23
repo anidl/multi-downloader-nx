@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@babel/core':
     specifier: ^7.22.9
@@ -28,9 +32,6 @@ dependencies:
   ffprobe:
     specifier: ^1.1.2
     version: 1.1.2
-  ffprobe-static:
-    specifier: ^3.1.0
-    version: 3.1.0
   form-data:
     specifier: ^4.0.0
     version: 4.0.0
@@ -3541,10 +3542,6 @@ packages:
     dependencies:
       reusify: 1.0.4
 
-  /ffprobe-static@3.1.0:
-    resolution: {integrity: sha512-Dvpa9uhVMOYivhHKWLGDoa512J751qN1WZAIO+Xw4L/mrUSPxS4DApzSUDbCFE/LUq2+xYnznEahTd63AqBSpA==}
-    dev: false
-
   /ffprobe@1.1.2:
     resolution: {integrity: sha512-a+oTbhyeM7Z8PRy+mpzmVUAnATZT7z4BO94HSKeqHupdmjiKZ1djzcZkyoyXA21zCOCG7oVRrsBMmvvtmzoz4g==}
     dependencies:
@@ -5534,7 +5531,3 @@ packages:
   /yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
