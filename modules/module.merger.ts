@@ -113,7 +113,8 @@ class Merger {
       const filesToRemove: string[] = [];
       itemLoop: for (const vna of vnas.slice(1)) {
         console.info(`Trying to find delay for ${vna.lang.code}...`);
-        outer: for (let i = 1; i <= (items.length-offset); i++) {
+        outer: for (let i = 1; i < (items.length); i++) {
+          console.info(`Trying to match likeness with frame ${i+offset}`);
           const closeness = [];
           exec('ffmpeg', 'ffmpeg', `-hide_banner -loglevel error -i tmp/main-frames/${items[i]} -i "${vna.path}" -t ${MAX_OFFSET_SEC} -lavfi "ssim=f=tmp/stats-${i}.log;[0:v][1:v]psnr" -f null -`, false, true);
           filesToRemove.push(`tmp/stats-${i}.log`);

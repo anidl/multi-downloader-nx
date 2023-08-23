@@ -36,3 +36,4 @@ crunchyendpoints
 /logs
 /tmp/*/
 /videos/*/
+/tmp/*.*

@@ -750,10 +750,21 @@ export default class Hidive implements ServiceClass {
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);
               console.info(`Subtitle downloaded: ${sxData.file}`);
+              let tsFile;
+              for (const file of files) {
+                if (file.type == 'Video') {
+                  if (sub.cc && file.lang.code == 'eng') {
+                    tsFile = `${file.path}.ts`;
+                  } else if (!sub.cc && file.lang.code == 'jpn') {
+                    tsFile = `${file.path}.ts`;
+                  }
+                }
+              }
               files.push({
                 type: 'Subtitle',
                 ...sxData as sxItem,
-                cc: sub.cc
+                cc: sub.cc,
+                belongsToFile: typeof tsFile === 'undefined' ? { hasFile: false } : { hasFile: true, file: `${tsFile}.ts`}
               });
             } else{
               console.warn(`Failed to download subtitle: ${sxData.file}`);
@@ -792,7 +803,8 @@ export default class Hidive implements ServiceClass {
         return {
           file: a.path,
           language: a.language,
-          closedCaption: a.cc
+          closedCaption: a.cc,
+          belongsToFile: a.belongsToFile
         };
       }),
       simul: data.filter(a => a.type === 'Video').map((a) : boolean => {

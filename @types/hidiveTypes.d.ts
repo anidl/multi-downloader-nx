@@ -1,3 +1,5 @@
+import { LanguageItem } from '../modules/module.langsData';
+
 export interface HidiveVideoList {
   Code:      number;
   Status:    string;
@@ -50,12 +52,26 @@ export interface HidiveSubtitleInfo {
   url:      string;
 }
 
+export type sxItem = {
+  language: LanguageItem,
+  path: string,
+  file: string
+  title: string,
+  fonts: Font[]
+}
+
 export type DownloadedMedia = {
   type:  'Video',
   lang:  LanguageItem,
   path:  string,
-  uncut: boolean
+  uncut?: boolean
 } | ({
   type: 'Subtitle',
-  cc: boolean
+  cc: boolean,
+  belongsToFile: {
+    hasFile: false,
+  } | {
+    hasFile: true,
+    file: string
+  }
 } & sxItem )
