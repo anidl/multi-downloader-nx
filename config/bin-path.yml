@@ -1,2 +1,3 @@
 ffmpeg: "ffmpeg.exe"
 mkvmerge: "mkvmerge.exe"
+ffprobe: "ffprobe.exe"

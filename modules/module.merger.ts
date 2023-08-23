@@ -1,4 +1,5 @@
 import * as iso639 from 'iso-639';
+import * as yamlCfg from './module.cfg-loader';
 import { fontFamilies, fontMime } from './module.fontsData';
 import path from 'path';
 import fs from 'fs';
@@ -7,7 +8,6 @@ import { AvailableMuxer } from './module.args';
 import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
-import ffprobeStatic from 'ffprobe-static';
 
 export type MergerInput = {
   path: string,
@@ -67,10 +67,11 @@ class Merger {
   public async createDelays() {
     //Don't bother scanning it if there is only 1 vna stream
     if (this.options.videoAndAudio.length > 1) {
+      const bin = await yamlCfg.loadBinCfg();
       const vnas = this.options.videoAndAudio;
       //get and set durations on each videoAndAudio Stream
       for (const [vnaIndex, vna] of vnas.entries()) {
-        const streamInfo = await ffprobe(vna.path, { path: ffprobeStatic.path });
+        const streamInfo = await ffprobe(vna.path, { path: bin.ffprobe as string });
         const videoInfo = streamInfo.streams.filter(stream => stream.codec_type == 'video');
         vnas[vnaIndex].duration = videoInfo[0].duration;
       }
