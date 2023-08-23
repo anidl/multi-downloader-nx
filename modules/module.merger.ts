@@ -65,7 +65,7 @@ export type MergerOptions = {
   }
 }
 
-const SECURITY_FRAMES = 20;
+const SECURITY_FRAMES = 10;
 const MAX_OFFSET_SEC = 20;
 const LIKENESS_TARGET = 0.95;
 
