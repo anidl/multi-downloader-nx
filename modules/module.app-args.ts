@@ -68,6 +68,10 @@ let argvC: {
   originalFontSize: boolean;
   keepAllVideos: boolean;
   syncTiming: boolean;
+  maxSecurityFrames: number;
+  maxOffsetSeconds: number;
+  targetLikeness: number;
+  syncMethod: number;
 };
     
 export type ArgvType = typeof argvC;  

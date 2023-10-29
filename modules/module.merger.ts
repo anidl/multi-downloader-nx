@@ -65,6 +65,7 @@ export type MergerOptions = {
   }
 }
 
+/* Defaults */
 const SECURITY_FRAMES = 10;
 const MAX_OFFSET_SEC = 20;
 const LIKENESS_TARGET = 0.95;
@@ -78,7 +79,7 @@ class Merger {
       this.options.videoTitle = this.options.videoTitle.replace(/"/g, '\'');
   }
 
-  public async createDelays() {
+  public async createDelays(syncMethod: number, LIKENESS_TARGET: number, MAX_OFFSET_SEC: number, SECURITY_FRAMES: number) {
     if (this.options.videoAndAudio.length > 1) {
       const bin = await yamlCfg.loadBinCfg();
       const vnas = this.options.videoAndAudio;

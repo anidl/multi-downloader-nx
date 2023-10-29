@@ -6,6 +6,7 @@ const groups = {
   'search': 'Search:',
   'dl': 'Downloading:',
   'mux': 'Muxing:',
+  'timing': 'Timing Sync Options:',
   'fileName': 'Filename Template:',
   'debug': 'Debug:',
   'util': 'Utilities:',
@@ -420,8 +421,17 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
-    name: 'syncTiming',
+    name: 'skipmux',
+    describe: 'Skip muxing video, audio and subtitles',
+    docDescribe: true,
     group: 'mux',
+    service: ['all'],
+    type: 'boolean',
+    usage: ''
+  },
+  {
+    name: 'syncTiming',
+    group: 'timing',
     describe: 'Attempts to sync timing for multi-dub downloads EXPERIMENTAL',
     docDescribe: 'If enabled attempts to sync timing for multi-dub downloads.'
     + '\nNOTE: This is currently experimental and syncs audio and subtitles, though subtitles has a lot of guesswork'
@@ -434,13 +444,59 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
-    name: 'skipmux',
-    describe: 'Skip muxing video, audio and subtitles',
-    docDescribe: true,
-    group: 'mux',
-    service: ['all'],
+    name: 'maxSecurityFrames',
+    group: 'timing',
+    describe: 'Sets the maximum consecutive frames to check when syncing timing',
+    docDescribe: 'Sets the maximum consecutive frames to check when syncing timing'
+    + '\nNOTE: The higher this is set, the longer it will take to process the timing differences.',
+    service: ['crunchy','hidive'],
     type: 'boolean',
-    usage: ''
+    usage: '',
+    default: {
+      default: 10
+    }
+  },
+  {
+    name: 'maxOffsetSeconds',
+    group: 'timing',
+    describe: 'The maximum amount of time that should be scanned for sync timing before failing.',
+    docDescribe: 'The maximum amount of time that should be scanned for sync timing before failing.'
+    + '\nNOTE: The higher this is set, the more temporary images will be stored in the temp folder.',
+    service: ['crunchy','hidive'],
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: 20
+    }
+  },
+  {
+    name: 'targetLikeness',
+    group: 'timing',
+    describe: 'The target for how like a frame should be to be considered a match.',
+    docDescribe: 'The target for how like a frame should be to be considered a match.'
+    + '\nNOTE: Setting this too high or too low could lead to issues.',
+    service: ['crunchy','hidive'],
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: 0.95
+    }
+  },
+  {
+    name: 'syncMethod',
+    choices: [1,2,3],
+    group: 'timing',
+    describe: 'Method for Syncing. Options: (1) Difference, (2) Frame Analysis, (3) Frame Analysis Slow',
+    docDescribe: 'Method for Syncing, Options:'
+    + '\nDifference: Calculates the length difference and uses that (Fastest)'
+    + '\nFrame Analysis: Analyzes frames to find a match and uses that (Medium) [Default]'
+    + '\nFrame Analysis Slow: Analyzes frames using the netflix library (may not be available on every platform) for accuracy to find a match and uses that (Very Slow)',
+    service: ['crunchy','hidive'],
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: 2
+    }
   },
   {
     name: 'fileName',

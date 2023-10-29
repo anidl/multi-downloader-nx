@@ -31,6 +31,10 @@ export type CrunchyDownloadOptions = {
   dlVideoOnce: boolean,
   skipmux?: boolean,
   syncTiming: boolean,
+  maxSecurityFrames: number,
+  maxOffsetSeconds: number,
+  targetLikeness: number,
+  syncMethod: number,
 }
 
 export type CurnchyMultiDownload = {
@@ -55,6 +59,10 @@ export type CrunchyMuxOptions = {
   defaultAudio: LanguageItem,
   ccTag: string,
   syncTiming: boolean,
+  maxSecurityFrames: number;
+  maxOffsetSeconds: number;
+  targetLikeness: number;
+  syncMethod: number;
 }
 
 export type CrunchyEpMeta = {

@@ -841,7 +841,7 @@ export default class Hidive implements ServiceClass {
     // mergers
     let isMuxed = false;
     if (options.syncTiming) {
-      await merger.createDelays();
+      await merger.createDelays(options.syncMethod, options.targetLikeness, options.maxOffsetSeconds, options.maxSecurityFrames);
     }
     if (bin.MKVmerge) {
       await merger.merge('mkvmerge', bin.MKVmerge);
