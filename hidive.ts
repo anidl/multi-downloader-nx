@@ -257,6 +257,10 @@ export default class Hidive implements ServiceClass {
         };
       }
 
+      if (this.debug) {
+        console.debug(apiReq.res.body);
+      }
+
       if (!isGet && apiReq.res.headers && apiReq.res.headers['set-cookie']) {
         const newReqCookies = shlp.cookie.parse(apiReq.res.headers['set-cookie'] as unknown as Record<string, string>);
         this.session = Object.assign(this.session, newReqCookies);
