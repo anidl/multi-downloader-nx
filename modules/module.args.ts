@@ -247,7 +247,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'dl',
     alias: 'k',
     describe: 'Select specific stream',
-    choices: [1, 2, 3, 4, 5, 6, 7],
+    choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     default: {
       default: 1
     },

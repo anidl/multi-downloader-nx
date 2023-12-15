@@ -33,3 +33,7 @@ gui/react/build/
 docker-compose.yml
 crunchyendpoints
 .vscode
+/logs
+/tmp/*/
+/videos/*/
+/tmp/*.*
