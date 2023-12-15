@@ -1087,10 +1087,10 @@ export default class Crunchy implements ServiceClass {
       if (mediaId.includes(':'))
         mediaId = mediaId.split(':')[1];
 
-      // /cms/v2/US/M3/crunchyroll/videos/MEDIAID/streams
+      // /cms/v2/BUCKET/crunchyroll/videos/MEDIAID/streams
       const videoStreamsReq = [
-        domain.api_beta,
-        `/cms/v2/US/M3/crunchyroll/videos/${mediaId}/streams`,
+        api.beta_cms,
+        `${this.cmsToken.cms.bucket}/videos/${mediaId}/streams`,
         '?',
         new URLSearchParams({
           streams: 'all',
