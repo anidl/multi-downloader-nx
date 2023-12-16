@@ -23,7 +23,7 @@ import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merge
 import { domain, api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.req';
 import { CrunchySearch } from './@types/crunchySearch';
-import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
+//import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
 import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CurnchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
@@ -34,6 +34,7 @@ import { AvailableFilenameVars, getDefault } from './modules/module.args';
 import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
 import { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
+import { CrunchyAndroidEpisodes, CrunchyEpisode } from './@types/crunchyAndroidEpisodes';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -763,12 +764,26 @@ export default class Crunchy implements ServiceClass {
     this.logObject(showInfo.data[0], 0);
 
     //get episode info
-    const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
+    const reqEpsListOpts = [
+      api.beta_cms,
+      this.cmsToken.cms.bucket,
+      '/episodes?',
+      new URLSearchParams({
+        'season_id': id,
+        'Policy': this.cmsToken.cms.policy,
+        'Signature': this.cmsToken.cms.signature,
+        'Key-Pair-Id': this.cmsToken.cms.key_pair_id, 
+      }),
+    ].join('');
+
+    const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
+    //const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!reqEpsList.ok || !reqEpsList.res){
       console.error('Episode List Request FAILED!');
       return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
     }
-    const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyEpisodeList;
+    //CrunchyEpisodeList
+    const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyAndroidEpisodes;
 
     const epNumList: {
         ep: number[],
@@ -784,7 +799,7 @@ export default class Crunchy implements ServiceClass {
     const doEpsFilter = parseSelect(e as string);
     const selectedMedia: CrunchyEpMeta[] = [];
 
-    episodeList.data.forEach((item) => {
+    episodeList.items.forEach((item) => {
       item.hide_season_title = true;
       if(item.season_title == '' && item.series_title != ''){
         item.season_title = item.series_title;
@@ -833,10 +848,10 @@ export default class Crunchy implements ServiceClass {
         image: images[Math.floor(images.length / 2)].source
       };
       // Check for streams_link and update playback var if needed
-      if (item.streams_link) {
-        epMeta.data[0].playback = item.streams_link;
+      if (item.__links__.streams.href) {
+        epMeta.data[0].playback = item.__links__.streams.href;
         if(!item.playback) {
-          item.playback = item.streams_link;
+          item.playback = item.__links__.streams.href;
         }
       }
       if (item.versions) {
@@ -1106,7 +1121,20 @@ export default class Crunchy implements ServiceClass {
       //let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
       if(!playbackReq.ok || !playbackReq.res){
         console.error('Request Stream URLs FAILED! Attempting fallback');
-        playbackReq = await this.req.getData(`${domain.api_beta}${mMeta.playback}`, AuthHeaders);
+        const videoStreamsReq = [
+          domain.api_beta,
+          mMeta.playback,
+          '?',
+          new URLSearchParams({
+            streams: 'all',
+            textType: 'all',
+            'Policy': this.cmsToken.cms.policy,
+            'Signature': this.cmsToken.cms.signature,
+            'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+          }),
+        ].join('');
+        playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
+        //playbackReq = await this.req.getData(`${domain.api_beta}${mMeta.playback}`, AuthHeaders);
         if(!playbackReq.ok || !playbackReq.res){
           console.error('Fallback Request Stream URLs FAILED!');
           return undefined;
@@ -1557,7 +1585,7 @@ export default class Crunchy implements ServiceClass {
     for(const season of Object.keys(result) as unknown as number[]) {
       for (const key of Object.keys(result[season])) {
         const s = result[season][key];
-        (await this.getSeasonDataById(s))?.data?.forEach(episode => {
+        (await this.getSeasonDataById(s))?.items?.forEach(episode => {
           //TODO: Make sure the below code is ok
           //Prepare the episode array
           let item;
@@ -1709,10 +1737,10 @@ export default class Crunchy implements ServiceClass {
           e: epNum,
           image: images[Math.floor(images.length / 2)].source,
         };
-        if (item.streams_link) {
-          epMeta.data[0].playback = item.streams_link;
+        if (item.__links__.streams.href) {
+          epMeta.data[0].playback = item.__links__.streams.href;
           if(!item.playback) {
-            item.playback = item.streams_link;
+            item.playback = item.__links__.streams.href;
           }
         }
         // find episode numbers
@@ -1816,12 +1844,27 @@ export default class Crunchy implements ServiceClass {
     if (log)
       this.logObject(showInfo, 0);
     //get episode info
-    const reqEpsList = await this.req.getData(`${api.cms}/seasons/${item.id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
+
+    const reqEpsListOpts = [
+      api.beta_cms,
+      this.cmsToken.cms.bucket,
+      '/episodes?',
+      new URLSearchParams({
+        'season_id': item.id,
+        'Policy': this.cmsToken.cms.policy,
+        'Signature': this.cmsToken.cms.signature,
+        'Key-Pair-Id': this.cmsToken.cms.key_pair_id, 
+      }),
+    ].join('');
+
+    const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
+    //const reqEpsList = await this.req.getData(`${api.cms}/seasons/${item.id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!reqEpsList.ok || !reqEpsList.res){
       console.error('Episode List Request FAILED!');
       return;
     }
-    const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyEpisodeList;
+    //CrunchyEpisodeList
+    const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyAndroidEpisodes;
 
     if(episodeList.total < 1){
       console.info('  Season is empty!');
