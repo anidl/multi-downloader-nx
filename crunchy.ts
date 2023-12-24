@@ -39,6 +39,7 @@ import { ServiceClass } from './@types/serviceClassInterface';
 import { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
 import { CrunchyAndroidEpisodes, CrunchyEpisode } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
+import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -964,7 +965,20 @@ export default class Crunchy implements ServiceClass {
     };
 
     // reqs
-    const objectReq = await this.req.getData(`${api.cms}/objects/${doEpsFilter.values.join(',')}?preferred_audio_language=ja-JP`, AuthHeaders);
+    const objectReqOpts = [
+      api.beta_cms,
+      this.cmsToken.cms.bucket,
+      '/objects/',
+      doEpsFilter.values.join(','),
+      '?',
+      new URLSearchParams({
+        'Policy': this.cmsToken.cms.policy,
+        'Signature': this.cmsToken.cms.signature,
+        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+      }),
+    ].join('');
+    const objectReq = await this.req.getData(objectReqOpts, AuthHeaders);
+    //const objectReq = await this.req.getData(`${api.cms}/objects/${doEpsFilter.values.join(',')}?preferred_audio_language=ja-JP`, AuthHeaders);
     if(!objectReq.ok || !objectReq.res){
       console.error('Objects Request FAILED!');
       if(objectReq.error && objectReq.error.res && objectReq.error.res.body){
@@ -976,7 +990,13 @@ export default class Crunchy implements ServiceClass {
       return [];
     }
 
-    const objectInfo = JSON.parse(objectReq.res.body) as ObjectInfo;
+    //const objectInfo = JSON.parse(objectReq.res.body) as ObjectInfo;
+    const objectInfoAndroid = JSON.parse(objectReq.res.body) as CrunchyAndroidObject;
+    const objectInfo: ObjectInfo = {
+      total: objectInfoAndroid.total,
+      data: objectInfoAndroid.items,
+      meta: {}
+    };
     if(earlyReturn){
       return objectInfo;
     }
@@ -1038,6 +1058,13 @@ export default class Crunchy implements ServiceClass {
         epMeta.data[0].playback = item.streams_link;
         if(!item.playback) {
           item.playback = item.streams_link;
+        }
+        selectedMedia.push(epMeta);
+        item.isSelected = true;
+      } else if (item.__links__) {
+        epMeta.data[0].playback = item.__links__.streams.href;
+        if(!item.playback) {
+          item.playback = item.__links__.streams.href;
         }
         selectedMedia.push(epMeta);
         item.isSelected = true;

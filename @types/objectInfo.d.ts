@@ -7,6 +7,7 @@ export interface ObjectInfo {
 }
 
 export interface CrunchyObject {
+  __links__?:              Links;
   channel_id:              string;
   slug:                    string;
   images:                  Images;
@@ -29,6 +30,18 @@ export interface CrunchyObject {
   isSelected?:             boolean;
   f_num:                   string;
   s_num:                   string;
+}
+
+export interface Links {
+  'episode/season':   LinkData;
+  'episode/series':   LinkData;
+  resource:           LinkData;
+  'resource/channel': LinkData;
+  streams:            LinkData;
+}
+
+export interface LinkData {
+  href: string;
 }
 
 export interface EpisodeMetadata {
