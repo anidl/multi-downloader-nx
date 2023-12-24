@@ -773,7 +773,7 @@ export default class Crunchy implements ServiceClass {
         'season_id': id,
         'Policy': this.cmsToken.cms.policy,
         'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id, 
+        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
       }),
     ].join('');
 
@@ -1116,7 +1116,7 @@ export default class Crunchy implements ServiceClass {
           'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
         }),
       ].join('');
-        
+
       let playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
       //console.info(playbackReq.res.body);
       //let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
@@ -1271,20 +1271,6 @@ export default class Crunchy implements ServiceClass {
           if (streamPlaylistsReq.res.body.match('MPD')) {
             //Parse MPD Playlists
             const streamPlaylists = parse(streamPlaylistsReq.res.body, langsData.findLang(langsData.fixLanguageTag(pbData.audio_locale as string) || ''));
-            const videoQuality: {
-              bandwidth: number,
-              str: string,
-              dim: string,
-              RESOLUTION: {
-                width: number,
-                height: number
-              }
-            }[] = [], audioQuality: {
-              bandwidth: number,
-              str: string,
-              dim: string,
-              RESOLUTION: number
-            }[] = [];
 
             //Get name of CDNs/Servers
             const streamServers = Object.keys(streamPlaylists);
@@ -1295,89 +1281,58 @@ export default class Crunchy implements ServiceClass {
             const selectedList = streamPlaylists[selectedServer];
 
             //set Video Qualities
-            selectedList.video.forEach(function(playlist) {
-              if (playlist.type == 'video') {
-                const bandwidth = Math.round(playlist.bandwidth/1024);
-                const resolutionText = `${playlist.quality.width}x${playlist.quality.height}`;
-                const resolutionTextAdd = `${resolutionText} (${bandwidth}KiB/s)`;
-                videoQuality.push({
-                  bandwidth: bandwidth,
-                  str: resolutionTextAdd,
-                  dim: resolutionText,
-                  RESOLUTION: playlist.quality
-                });
-              } else {
-                console.warn('Found non-video in video typed stream. Skipping...');
+            const videos = selectedList.video.map(item => {
+              return {
+                ...item,
+                resolutionText: `${item.quality.width}x${item.quality.height} (${Math.round(item.bandwidth/1024)}KiB/s)`
               }
             });
 
-            //set Audio Qualities
-            selectedList.audio.forEach(function(playlist) {
-              if (playlist.type == 'audio') {
-                const bandwidth = Math.round(playlist.bandwidth/1000);
-                const resolutionText = `${bandwidth}Kb/s`;
-                audioQuality.push({
-                  bandwidth: bandwidth,
-                  str: resolutionText,
-                  dim: resolutionText,
-                  RESOLUTION: playlist.bandwidth
-                });
-              } else {
-                console.warn('Found non-audio in audio typed stream. Skipping...');
+            const audios = selectedList.audio.map(item => {
+              return {
+                ...item,
+                resolutionText: `${Math.round(item.bandwidth/1000)}kB/s`
               }
+            })
+
+
+            videos.sort((a, b) => {
+              return a.quality.width - b.quality.width
             });
 
-            videoQuality.sort((a, b) => {
-              const aMatch: RegExpMatchArray | never[] = a.dim.match(/[0-9]+/) || [];
-              const bMatch: RegExpMatchArray | never[] = b.dim.match(/[0-9]+/) || [];
-              return parseInt(aMatch[0]) - parseInt(bMatch[0]);
+            audios.sort((a, b) => {
+              return a.bandwidth - b.bandwidth
             });
 
-            audioQuality.sort((a, b) => {
-              const aMatch: RegExpMatchArray | never[] = a.dim.match(/[0-9]+/) || [];
-              const bMatch: RegExpMatchArray | never[] = b.dim.match(/[0-9]+/) || [];
-              return parseInt(aMatch[0]) - parseInt(bMatch[0]);
-            });
-
-            let chosenVideoQuality = options.q === 0 ? videoQuality.length : options.q;
-            if(chosenVideoQuality > videoQuality.length) {
-              console.warn(`The requested quality of ${options.q} is greater than the maximum ${videoQuality.length}.\n[WARN] Therefor the maximum will be capped at ${videoQuality.length}.`);
-              chosenVideoQuality = videoQuality.length;
+            let chosenVideoQuality = options.q === 0 ? videos.length : options.q;
+            if(chosenVideoQuality > videos.length) {
+              console.warn(`The requested quality of ${options.q} is greater than the maximum ${videos.length}.\n[WARN] Therefor the maximum will be capped at ${videos.length}.`);
+              chosenVideoQuality = videos.length;
             }
+            chosenVideoQuality--;
 
-            let chosenAudioQuality = options.q === 0 ? audioQuality.length : options.q;
-            if(chosenAudioQuality > audioQuality.length) {
-              chosenAudioQuality = audioQuality.length;
+            let chosenAudioQuality = options.q === 0 ? audios.length : options.q;
+            if(chosenAudioQuality > audios.length) {
+              chosenAudioQuality = audios.length;
             }
+            chosenAudioQuality--;
 
-            
-            //TODO: fix this, lol, the below code I thought would work so that it actually chooses the right resolution but it didn't work and I need sleep
-            /*const chosenVideoSegments = selectedList.video.map(function(playlist) {
-              if (playlist.bandwidth == videoQuality[chosenVideoQuality - 1].bandwidth) {
-                return playlist;
-              }
-            });
-            const chosenAudioSegments = selectedList.audio.map(function(playlist) {
-              if (playlist.bandwidth == audioQuality[chosenAudioQuality - 1].bandwidth) {
-                return playlist;
-              }
-            });*/
 
-            const chosenVideoSegments = selectedList.video[chosenVideoQuality - 1];
-            const chosenAudioSegments = selectedList.audio[chosenAudioQuality - 1];
+            const chosenVideoSegments = videos[chosenVideoQuality];
+            const chosenAudioSegments = audios[chosenAudioQuality];
 
             console.info(`Servers available:\n\t${streamServers.join('\n\t')}`);
-            console.info(`Available Video Qualities:\n\t${videoQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
-            console.info(`Available Audio Qualities:\n\t${audioQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
+            console.info(`Available Video Qualities:\n\t${videos.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
+            console.info(`Available Audio Qualities:\n\t${audios.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
 
             variables.push({
               name: 'height',
               type: 'number',
-              replaceWith: chosenVideoQuality === 0 ? videoQuality[videoQuality.length - 1].RESOLUTION.height as number : videoQuality[chosenVideoQuality - 1].RESOLUTION.height
+              replaceWith: chosenVideoSegments.quality.height
             }, {
               name: 'width',
               type: 'number',
-              replaceWith: chosenVideoQuality === 0 ? videoQuality[videoQuality.length - 1].RESOLUTION.width as number : videoQuality[chosenVideoQuality - 1].RESOLUTION.width
+              replaceWith: chosenVideoSegments.quality.width
             });
 
             const lang = langsData.languages.find(a => a.code === curStream?.audio_lang);
@@ -1385,7 +1340,7 @@ export default class Crunchy implements ServiceClass {
               console.error(`Unable to find language for code ${curStream.audio_lang}`);
               return;
             }
-            console.info(`Selected quality: \n\tVideo: ${videoQuality.map(a => a.dim)[chosenVideoQuality - 1]}\n\tAudio: ${audioQuality.map(a => a.dim)[chosenAudioQuality - 1]}\n\tServer: ${selectedServer}`);
+            console.info(`Selected quality: \n\tVideo: ${chosenVideoSegments.resolutionText}\n\tAudio: ${chosenAudioSegments.resolutionText}\n\tServer: ${selectedServer}`);
             console.info('Stream URL:', chosenVideoSegments.segments[0].uri.split(',.urlset')[0]);
             // TODO check filename
             fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
@@ -2084,7 +2039,7 @@ export default class Crunchy implements ServiceClass {
         'season_id': item.id,
         'Policy': this.cmsToken.cms.policy,
         'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id, 
+        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
       }),
     ].join('');
 

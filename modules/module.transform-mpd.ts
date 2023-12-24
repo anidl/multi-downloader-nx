@@ -12,26 +12,28 @@ type Segment = {
   presentationTime: number;
 }
 
-type PlayListTypeItem = {
-  type: 'audio',
-  language: LanguageItem
-} | {
-  type: 'video',
-  quality: {
-    width: number,
-    height: number
-  }
-}
-
 export type PlaylistItem = {
   pssh?: string,
   bandwidth: number,
   segments: Segment[]
-} & PlayListTypeItem
+}
+
+
+type AudioPlayList = {
+  language: LanguageItem
+} & PlaylistItem
+
+type VideoPlayList = {
+  quality: {
+    width: number,
+    height: number
+  }
+} & PlaylistItem
 
 export type MPDParsed = {
   [server: string]: {
-    [type in 'audio'|'video']: PlaylistItem[]
+    audio: AudioPlayList[],
+    video: VideoPlayList[]
   }
 }
 
@@ -45,10 +47,9 @@ export function parse(manifest: string, language: LanguageItem) {
       if (!Object.prototype.hasOwnProperty.call(ret, host))
         ret[host] = { audio: [], video: [] };
 
-      const pItem: PlaylistItem = {
+      const pItem: AudioPlayList = {
         bandwidth: playlist.attributes.BANDWIDTH,
         language: language,
-        type: 'audio',
         segments: playlist.segments.map((segment): Segment => {
           const uri = segment.resolvedUri;
           const map_uri = segment.map.resolvedUri;
@@ -76,9 +77,8 @@ export function parse(manifest: string, language: LanguageItem) {
     if (!Object.prototype.hasOwnProperty.call(ret, host))
       ret[host] = { audio: [], video: [] };
 
-    const pItem: PlaylistItem = {
+    const pItem: VideoPlayList = {
       bandwidth: playlist.attributes.BANDWIDTH,
-      type: 'video',
       quality: playlist.attributes.RESOLUTION!,
       segments: playlist.segments.map((segment): Segment => {
         const uri = segment.resolvedUri;
