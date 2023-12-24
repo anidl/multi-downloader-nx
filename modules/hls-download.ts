@@ -26,7 +26,7 @@ const fixMiddleWare = (res: Response) => {
 
 export type HLSCallback = (data: ProgressData) => unknown;
 
-type M3U8Json = {
+export type M3U8Json = {
   segments: Record<string, unknown>[],
   mediaSequence?: number,
 }
