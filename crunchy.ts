@@ -1436,7 +1436,7 @@ export default class Crunchy implements ServiceClass {
                 dlFailed = true;
               }
               files.push({
-                type: 'Video',
+                type: 'Audio',
                 path: `${tsFile}.audio.ts`,
                 lang: lang,
                 isPrimary: isPrimary
@@ -1695,15 +1695,35 @@ export default class Crunchy implements ServiceClass {
 
   public async muxStreams(data: DownloadedMedia[], options: CrunchyMuxOptions) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
+    let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
       return console.info('Skip muxing since no vids are downloaded');
+    if (data.some(a => a.type === 'Audio')) {
+      hasAudioStreams = true;
+    }
     const merger = new Merger({
-      onlyVid: [],
+      onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
+        if (a.type === 'Subtitle')
+          throw new Error('Never');
+        return {
+          lang: a.lang,
+          path: a.path,
+        };
+      }) : [],
       skipSubMux: options.skipSubMux,
-      onlyAudio: [],
+      onlyAudio: hasAudioStreams ? data.filter(a => a.type === 'Audio').map((a) : MergerInput => {
+        if (a.type === 'Subtitle')
+          throw new Error('Never');
+        return {
+          lang: a.lang,
+          path: a.path,
+        };
+      }) : [],
       output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
         if (a.type === 'Video')
+          throw new Error('Never');
+        if (a.type === 'Audio')
           throw new Error('Never');
         return {
           file: a.path,
@@ -1714,7 +1734,7 @@ export default class Crunchy implements ServiceClass {
       simul: false,
       keepAllVideos: options.keepAllVideos,
       fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
-      videoAndAudio: data.filter(a => a.type === 'Video').map((a) : MergerInput => {
+      videoAndAudio: hasAudioStreams ? [] : data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         if (a.type === 'Subtitle')
           throw new Error('Never');
         return {
