@@ -1285,23 +1285,23 @@ export default class Crunchy implements ServiceClass {
               return {
                 ...item,
                 resolutionText: `${item.quality.width}x${item.quality.height} (${Math.round(item.bandwidth/1024)}KiB/s)`
-              }
+              };
             });
 
             const audios = selectedList.audio.map(item => {
               return {
                 ...item,
                 resolutionText: `${Math.round(item.bandwidth/1000)}kB/s`
-              }
-            })
+              };
+            });
 
 
             videos.sort((a, b) => {
-              return a.quality.width - b.quality.width
+              return a.quality.width - b.quality.width;
             });
 
             audios.sort((a, b) => {
-              return a.bandwidth - b.bandwidth
+              return a.bandwidth - b.bandwidth;
             });
 
             let chosenVideoQuality = options.q === 0 ? videos.length : options.q;
