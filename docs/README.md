@@ -15,6 +15,7 @@ This application is not endorsed by or affiliated with *Funimation*, *Crunchyrol
 * PNPM >= 7.0.0 (https://pnpm.io/)
 * ffmpeg >= 4.0.0 (https://www.videohelp.com/software/ffmpeg)
 * MKVToolNix >= 60.0.0 (https://www.videohelp.com/software/MKVToolNix)
+* mp4decrypt >= Any (http://www.bento4.com/) - Only required for decrypting
 
 ### Paths Configuration
 
@@ -23,6 +24,7 @@ By default this application uses the following paths to programs (main executabl
 * `ffmpeg.exe` (From PATH)
 * `ffprobe.exe` (From PATH)
 * `mkvmerge.exe` (From PATH)
+* `mp4decrypt.exe` (From PATH)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 

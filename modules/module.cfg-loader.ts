@@ -82,7 +82,8 @@ export type ConfigObject = {
   bin: {
     ffmpeg?: string,
     mkvmerge?: string,
-    ffprobe?: string
+    ffprobe?: string,
+    mp4decrypt?: string
   },
   cli: {
     [key: string]: any
@@ -146,7 +147,8 @@ const loadBinCfg = async () => {
   const defaultBin = {
     ffmpeg: 'ffmpeg',
     mkvmerge: 'mkvmerge',
-    ffprobe: 'ffprobe'
+    ffprobe: 'ffprobe',
+    mp4decrypt: 'mp4decrypt'
   };
   const keys = Object.keys(defaultBin) as (keyof typeof defaultBin)[];
   for(const dir of keys){

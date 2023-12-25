@@ -4,11 +4,13 @@ import fs from 'fs-extra';
 
 // package program
 import packageJson from './package.json';
+
 // plugins
 import { console } from './modules/log';
 import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
 import streamdl, { M3U8Json } from './modules/hls-download';
+import { exec } from './modules/sei-helper-fixes';
 
 // custom modules
 import * as fontsData from './modules/module.fontsData';
@@ -16,6 +18,7 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
+import getKeys from './modules/cr_widevine';
 
 // args
 
@@ -1388,12 +1391,12 @@ export default class Crunchy implements ServiceClass {
                 console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
                 dlFailed = true;
               }
-              files.push({
+              /*files.push({
                 type: 'Video',
                 path: `${tsFile}.video.ts`,
                 lang: lang,
                 isPrimary: isPrimary
-              });
+              });*/
               dlVideoOnce = true;
             }
 
@@ -1435,21 +1438,110 @@ export default class Crunchy implements ServiceClass {
                 console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
                 dlFailed = true;
               }
+              /*files.push({
+                type: 'Audio',
+                path: `${tsFile}.audio.ts`,
+                lang: lang,
+                isPrimary: isPrimary
+              });*/
+            }
+
+            //Handle Decryption if needed
+            if (chosenVideoSegments.pssh || chosenAudioSegments.pssh) {
+              const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
+              const assetId = assetIdRegex ? assetIdRegex[1] : null;
+              const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
+              console.info('Decryption Needed, attempting to decrypt');
+
+              const decReq = await this.req.getData('https://pl.crunchyroll.com/drm/v1/auth', {
+                'method': 'POST',
+                'body': JSON.stringify({
+                  'accounting_id': 'crunchyroll',
+                  'asset_id': assetId,
+                  'session_id': sessionId,
+                  'user_id': this.token.account_id
+                })
+              });
+              console.info({
+                'body': JSON.stringify({
+                  'accounting_id': 'crunchyroll',
+                  'asset_id': assetId,
+                  'session_id': sessionId,
+                  'user_id': this.token.account_id
+                })
+              });
+              if(!decReq.ok || !decReq.res){
+                console.error('Request to DRM Authentication failed:', decReq.error?.code, decReq.error?.message);
+                return undefined;
+              }
+              const authData = JSON.parse(decReq.res.body) as {'custom_data': string, 'token': string};
+              console.info(authData);
+              const encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
+                'dt-custom-data': authData.custom_data,
+                'x-dt-auth-token': authData.token
+              });
+              if (encryptionKeys.length == 0) {
+                console.error('Failed to get encryption keys');
+                return undefined;
+              }
+              /*const keys = {} as Record<string, string>;
+              encryptionKeys.forEach(function(key) {
+                keys[key.kid] = key.key;
+              });*/
+
+              if (this.cfg.bin.mp4decrypt) {
+                const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+                const commandVideo = commandBase+`"${tsFile}.video.ts" "${tsFile}.dec.video.ts"`;
+                const commandAudio = commandBase+`"${tsFile}.audio.ts" "${tsFile}.dec.audio.ts"`;
+
+                console.info('Started decrypting video');
+                const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+                if (!decryptVideo.isOk) {
+                  console.error(decryptVideo.err);
+                  console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
+                  return undefined;
+                } else {
+                  console.info('Decryption done for video');
+                }
+
+                console.info('Started decrypting audio');
+                const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                if (!decryptAudio.isOk) {
+                  console.error(decryptAudio.err);
+                  console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
+                  return undefined;
+                } else {
+                  console.info('Decryption done for video');
+                }
+
+                files.push({
+                  type: 'Video',
+                  path: `${tsFile}.dec.video.ts`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
+                files.push({
+                  type: 'Audio',
+                  path: `${tsFile}.dec.audio.ts`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
+              } else {
+                console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
+              }
+            } else {
+              files.push({
+                type: 'Video',
+                path: `${tsFile}.video.ts`,
+                lang: lang,
+                isPrimary: isPrimary
+              });
               files.push({
                 type: 'Audio',
                 path: `${tsFile}.audio.ts`,
                 lang: lang,
                 isPrimary: isPrimary
               });
-            }
-
-            //Handle Decryption if needed
-            if (chosenVideoSegments.pssh) {
-              console.info('Decryption of Video Needed');
-            }
-
-            if (chosenAudioSegments.pssh) {
-              console.info('Decryption of Audio Needed');
             }
           } else {
             const streamPlaylists = m3u8(streamPlaylistsReq.res.body);
