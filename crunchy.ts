@@ -1376,6 +1376,7 @@ export default class Crunchy implements ServiceClass {
             fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
             const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
 
+            let [audioDownloaded, videoDownloaded] = [false, false];
 
             // When best selected video quality is already downloaded
             if(dlVideoOnce && options.dlVideoOnce) {
@@ -1397,7 +1398,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenVideoSegments.segments
               };
               const videoDownload = await new streamdl({
-                output: `${tsFile}.video.ts`,
+                output: `${tsFile}.video.enc.ts`,
                 timeout: options.timeout,
                 m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1418,13 +1419,8 @@ export default class Crunchy implements ServiceClass {
                 console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
                 dlFailed = true;
               }
-              /*files.push({
-                type: 'Video',
-                path: `${tsFile}.video.ts`,
-                lang: lang,
-                isPrimary: isPrimary
-              });*/
               dlVideoOnce = true;
+              videoDownloaded = true;
             }
 
             if (chosenAudioSegments) {
@@ -1444,7 +1440,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenAudioSegments.segments
               };
               const audioDownload = await new streamdl({
-                output: `${tsFile}.audio.ts`,
+                output: `${tsFile}.audio.enc.ts`,
                 timeout: options.timeout,
                 m3u8json: audioJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1465,16 +1461,11 @@ export default class Crunchy implements ServiceClass {
                 console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
                 dlFailed = true;
               }
-              /*files.push({
-                type: 'Audio',
-                path: `${tsFile}.audio.ts`,
-                lang: lang,
-                isPrimary: isPrimary
-              });*/
+              audioDownloaded = true;
             }
 
             //Handle Decryption if needed
-            if (chosenVideoSegments.pssh || chosenAudioSegments.pssh) {
+            if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded)) {
               const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
               const assetId = assetIdRegex ? assetIdRegex[1] : null;
               const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
@@ -1509,54 +1500,59 @@ export default class Crunchy implements ServiceClass {
 
               if (this.cfg.bin.mp4decrypt) {
                 const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-                const commandVideo = commandBase+`"${tsFile}.video.ts" "${tsFile}.dec.video.ts"`;
-                const commandAudio = commandBase+`"${tsFile}.audio.ts" "${tsFile}.dec.audio.ts"`;
+                const commandVideo = commandBase+`"${tsFile}.video.enc.ts" "${tsFile}.video.ts"`;
+                const commandAudio = commandBase+`"${tsFile}.audio.enc.ts" "${tsFile}.audio.ts"`;
 
-                console.info('Started decrypting video');
-                const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
-                if (!decryptVideo.isOk) {
-                  console.error(decryptVideo.err);
-                  console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
-                  return undefined;
-                } else {
-                  console.info('Decryption done for video');
+                if (videoDownloaded) {
+                  console.info('Started decrypting video');
+                  const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+                  if (!decryptVideo.isOk) {
+                    console.error(decryptVideo.err);
+                    console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
+                    return undefined;
+                  } else {
+                    console.info('Decryption done for video');
+                    fs.removeSync(`${tsFile}.video.enc.ts`);
+                    files.push({
+                      type: 'Video',
+                      path: `${tsFile}.video.ts`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
+                  }
                 }
 
-                console.info('Started decrypting audio');
-                const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
-                if (!decryptAudio.isOk) {
-                  console.error(decryptAudio.err);
-                  console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
-                  return undefined;
-                } else {
-                  console.info('Decryption done for video');
+                if (audioDownloaded) {
+                  console.info('Started decrypting audio');
+                  const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                  if (!decryptAudio.isOk) {
+                    console.error(decryptAudio.err);
+                    console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
+                    return undefined;
+                  } else {
+                    fs.removeSync(`${tsFile}.audio.enc.ts`);
+                    files.push({
+                      type: 'Audio',
+                      path: `${tsFile}.audio.ts`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
+                    console.info('Decryption done for audio');
+                  }
                 }
-
-                files.push({
-                  type: 'Video',
-                  path: `${tsFile}.dec.video.ts`,
-                  lang: lang,
-                  isPrimary: isPrimary
-                });
-                files.push({
-                  type: 'Audio',
-                  path: `${tsFile}.dec.audio.ts`,
-                  lang: lang,
-                  isPrimary: isPrimary
-                });
               } else {
                 console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
               }
             } else {
               files.push({
                 type: 'Video',
-                path: `${tsFile}.video.ts`,
+                path: `${tsFile}.video.enc.ts`,
                 lang: lang,
                 isPrimary: isPrimary
               });
               files.push({
                 type: 'Audio',
-                path: `${tsFile}.audio.ts`,
+                path: `${tsFile}.audio.enc.ts`,
                 lang: lang,
                 isPrimary: isPrimary
               });
@@ -2053,7 +2049,7 @@ export default class Crunchy implements ServiceClass {
           e: epNum,
           image: images[Math.floor(images.length / 2)].source,
         };
-        if (item.__links__.streams.href) {
+        if (item.__links__?.streams?.href) {
           epMeta.data[0].playback = item.__links__.streams.href;
           if(!item.playback) {
             item.playback = item.__links__.streams.href;

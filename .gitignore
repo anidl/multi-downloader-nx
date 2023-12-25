@@ -37,3 +37,6 @@ crunchyendpoints
 /tmp/*/
 /videos/*/
 /tmp/*.*
+bin
+widevine/*
+!widevine/.gitkeep
