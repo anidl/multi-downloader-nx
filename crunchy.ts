@@ -1489,20 +1489,11 @@ export default class Crunchy implements ServiceClass {
                   'user_id': this.token.account_id
                 })
               });
-              console.info({
-                'body': JSON.stringify({
-                  'accounting_id': 'crunchyroll',
-                  'asset_id': assetId,
-                  'session_id': sessionId,
-                  'user_id': this.token.account_id
-                })
-              });
               if(!decReq.ok || !decReq.res){
                 console.error('Request to DRM Authentication failed:', decReq.error?.code, decReq.error?.message);
                 return undefined;
               }
               const authData = JSON.parse(decReq.res.body) as {'custom_data': string, 'token': string};
-              console.info(authData);
               const encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
                 'dt-custom-data': authData.custom_data,
                 'x-dt-auth-token': authData.token
