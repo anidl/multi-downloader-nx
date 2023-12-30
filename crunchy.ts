@@ -41,8 +41,6 @@ import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
 import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
 
-import util from 'util';
-
 export type sxItem = {
   language: langsData.LanguageItem,
   path: string,
