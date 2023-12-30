@@ -2105,6 +2105,12 @@ export default class Crunchy implements ServiceClass {
             item.playback = item.__links__.streams.href;
           }
         }
+        if (item.streams_link) {
+          epMeta.data[0].playback = item.streams_link;
+          if(!item.playback) {
+            item.playback = item.streams_link;
+          }
+        }
         // find episode numbers
         if(item.playback && ((but && !doEpsFilter.isSelected([epNum, item.id])) || (all || (doEpsFilter.isSelected([epNum, item.id])) && !but))) {
           if (Object.prototype.hasOwnProperty.call(ret, key)) {
