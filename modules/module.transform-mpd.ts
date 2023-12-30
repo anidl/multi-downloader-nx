@@ -37,7 +37,10 @@ export type MPDParsed = {
   }
 }
 
-export function parse(manifest: string, language: LanguageItem) {
+export function parse(manifest: string, language: LanguageItem, url?: string) {
+  if (!manifest.includes('BaseURL') && url) {
+    manifest = manifest.replace(/(<MPD[^]^[^]*?>)/gm, `$1<BaseURL>${url}</BaseURL>`);
+  }
   const parsed = mpdParse(manifest);
   const ret: MPDParsed = {};
 
