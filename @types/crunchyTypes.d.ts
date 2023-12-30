@@ -31,13 +31,15 @@ export type CrunchyDownloadOptions = {
   dlVideoOnce: boolean,
   skipmux?: boolean,
   syncTiming: boolean,
+  apiType: 'web' | 'android'
 }
 
-export type CurnchyMultiDownload = {
+export type CrunchyMultiDownload = {
   dubLang: string[],
   all?: boolean,
   but?: boolean,
-  e?: string
+  e?: string,
+  crapi: 'web' | 'android'
 }
 
 export type CrunchyMuxOptions = {

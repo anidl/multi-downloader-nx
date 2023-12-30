@@ -204,6 +204,20 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'crapi',
+    describe: 'Selects the API type for Crunchyroll',
+    type: 'string',
+    group: 'dl',
+    service: ['crunchy'],
+    docDescribe: 'If set to Android, it has lower quality, but Non-DRM streams,'
+      + '\nIf set to Web, it has a higher quality adaptive stream, but everything is DRM.',
+    usage: '',
+    choices: ['android', 'web'],
+    default: {
+      default: 'android'
+    }
+  },
+  {
     name: 'removeBumpers',
     describe: 'Remove bumpers from final video',
     type: 'boolean',

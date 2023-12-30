@@ -14,6 +14,9 @@ dependencies:
   '@babel/plugin-transform-react-jsx':
     specifier: ^7.22.5
     version: 7.22.5(@babel/core@7.22.9)
+  '@types/xmldom':
+    specifier: ^0.1.34
+    version: 0.1.34
   cheerio:
     specifier: 1.0.0-rc.12
     version: 1.0.0-rc.12
@@ -74,6 +77,9 @@ dependencies:
   ws:
     specifier: ^8.13.0
     version: 8.13.0
+  xmldom:
+    specifier: ^0.6.0
+    version: 0.6.0
   yaml:
     specifier: ^2.3.1
     version: 2.3.1
@@ -1981,6 +1987,10 @@ packages:
     dependencies:
       '@types/node': 18.15.11
     dev: true
+
+  /@types/xmldom@0.1.34:
+    resolution: {integrity: sha512-7eZFfxI9XHYjJJuugddV6N5YNeXgQE1lArWOcd1eCOKWb/FGs5SIjacSYuEJuwhsGS3gy4RuZ5EUIcqYscuPDA==}
+    dev: false
 
   /@types/yargs-parser@21.0.0:
     resolution: {integrity: sha512-iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==}
@@ -5679,6 +5689,11 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dev: false
+
+  /xmldom@0.6.0:
+    resolution: {integrity: sha512-iAcin401y58LckRZ0TkI4k0VSM1Qg0KGSc3i8rU+xrxe19A/BN1zHyVSJY7uoutVlaTSzYyk/v5AmkewAP7jtg==}
+    engines: {node: '>=10.0.0'}
     dev: false
 
   /y18n@5.0.8:
