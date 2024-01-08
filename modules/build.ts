@@ -2,7 +2,7 @@
 import fs from 'fs-extra';
 import pkg from '../package.json';
 import modulesCleanup from 'removeNPMAbsolutePaths';
-import { exec } from 'pkg';
+import { exec } from '@yao-pkg/pkg';
 import { execSync } from 'child_process';
 import { console } from './log';
 
