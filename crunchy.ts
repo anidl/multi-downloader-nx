@@ -1192,6 +1192,20 @@ export default class Crunchy implements ServiceClass {
         let playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
         if(!playbackReq.ok || !playbackReq.res){
           console.error('Request Stream URLs FAILED! Attempting fallback');
+
+          const videoStreamsReq = [
+            domain.api_beta,
+            mMeta.playback,
+            '?',
+            new URLSearchParams({
+              'preferred_audio_language': 'ja-JP',
+              streams: 'all',
+              textType: 'all',
+              'Policy': this.cmsToken.cms.policy,
+              'Signature': this.cmsToken.cms.signature,
+              'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+            }),
+          ].join('');
           playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
           if(!playbackReq.ok || !playbackReq.res){
             console.error('Fallback Request Stream URLs FAILED!');
