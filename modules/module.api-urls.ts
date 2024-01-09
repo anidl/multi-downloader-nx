@@ -61,7 +61,7 @@ const api: APIType = {
   // beta api
   beta_auth:         `${domain.api_beta}/auth/v1/token`,
   beta_authBasic:    'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
-  beta_authBasicMob: 'Basic YTZ5eGxvYW04c2VqaThsZDhldnc6aFQ3d2FjWHhNaURJcDhSNE9kekJybWVoQUtLTEVKUEE=',
+  beta_authBasicMob: 'Basic b2VkYXJteHN0bGgxanZhd2ltbnE6OWxFaHZIWkpEMzJqdVY1ZFc5Vk9TNTdkb3BkSnBnbzE=',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
   search:            `${domain.api_beta}/content/v2/discover/search`,
