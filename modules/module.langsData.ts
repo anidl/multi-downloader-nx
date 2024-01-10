@@ -37,8 +37,9 @@ const languages: LanguageItem[] = [
   { cr_locale: 'th-TH', locale: 'th-TH', code: 'tha', name: 'Thai', language: 'ไทย' },
   { cr_locale: 'ta-IN', locale: 'ta-IN', code: 'tam', name: 'Tamil (India)', language: 'தமிழ்' },
   { cr_locale: 'ms-MY', locale: 'ms-MY', code: 'may', name: 'Malay (Malaysia)', language: 'Bahasa Melayu' },
-  { cr_locale: 'vi-VN', locale: 'vi-VN', code: 'vie', name: 'Vietnamese', language: 'Tiếng Việt', },
-  { cr_locale: 'id-ID', locale: 'id-ID', code: 'ind', name: 'Indonesian', language: 'Bahasa Indonesia', },
+  { cr_locale: 'vi-VN', locale: 'vi-VN', code: 'vie', name: 'Vietnamese', language: 'Tiếng Việt' },
+  { cr_locale: 'id-ID', locale: 'id-ID', code: 'ind', name: 'Indonesian', language: 'Bahasa Indonesia' },
+  { cr_locale: 'te-IN', locale: 'te-IN', code: 'tel', name: 'Telugu (India)', language: 'తెలుగు' },
   { cr_locale: 'ja-JP', hd_locale: 'Japanese', funi_locale: 'jaJP', locale: 'ja', code: 'jpn', name: 'Japanese' },
 ];
 
