@@ -208,7 +208,7 @@ function loadVTT(vttStr: string): Vtt[] {
         time: {
           start: m[1],
           end: m[2],
-          ext: m[3].split(' ').map(x => x.split(':')).reduce((p, c) => ((p as any)[c[0]] = c[1]) && p, {}),
+          ext: m[3].split(' ').map(x => x.split(':')).reduce((p, c) => ((p as any)[c[0]] = c[1] ?? 'invalid-input') && p, {}),
         }
       };
       lineBuf = [];
@@ -312,20 +312,20 @@ function convertLine(css: Record<string, string>, l: Record<any, any>) {
   const end = convertTime(l.time.end);
   const txt = convertText(l.text);
   let type = txt.style.match(/Caption/i) ? 'caption' : (txt.style.match(/SongCap/i) ? 'song_cap' : 'subtitle');
-  type = type == 'caption' && l.time.ext.position !== undefined ? 'capt_pos' : type;
-  if (l.time.ext.align === 'left') {
+  type = type == 'caption' && l.time.ext?.position !== undefined ? 'capt_pos' : type;
+  if (l.time.ext?.align === 'left') {
     txt.text = `{\\an7}${txt.text}`;
   }
   let ind = '', subInd = 1;
   const sMinus = 0; // (19.2 * 2);
-  if (l.time.ext.position !== undefined) {
+  if (l.time.ext?.position !== undefined) {
     const pos = parseInt(l.time.ext.position);
     const PosX = pos < 0 ? (1280 / 100 * (100 - pos)) : ((1280 - sMinus) / 100 * pos);
     const line = parseInt(l.time.ext.line) || 0;
     const PosY = line < 0 ? (720 / 100 * (100 - line)) : ((720 - sMinus) / 100 * line);
     txt.text = `{\\pos(${parseFloat(PosX.toFixed(3))},${parseFloat(PosY.toFixed(3))})}${txt.text}`;
   }
-  else if (l.time.ext.line !== undefined && type == 'caption') {
+  else if (l.time.ext?.line !== undefined && type == 'caption') {
     const line = parseInt(l.time.ext.line);
     const PosY = line < 0 ? (720 / 100 * (100 - line)) : ((720 - sMinus) / 100 * line);
     txt.text = `{\\pos(640,${parseFloat(PosY.toFixed(3))})}${txt.text}`;
