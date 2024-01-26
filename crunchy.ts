@@ -18,7 +18,7 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-import getKeys from './modules/cr_widevine';
+import getKeys, { canDecrypt } from './modules/cr_widevine';
 
 // args
 
@@ -1260,8 +1260,12 @@ export default class Crunchy implements ServiceClass {
       const pbStreams = pbData.data[0];
 
       for(const s of Object.keys(pbStreams)){
-        //if(s.match(/hls/) && !s.match(/drm/) && !s.match(/trailer/)) {
-        if((s.match(/hls/) || s.match(/dash/)) && !(s.match(/hls/) && s.match(/drm/)) && !s.match(/trailer/)) {
+        if (
+          (s.match(/hls/) || s.match(/dash/)) 
+          && !(s.match(/hls/) && s.match(/drm/)) 
+          && !((!canDecrypt || !this.cfg.bin.mp4decrypt) && s.match(/drm/))
+          && !s.match(/trailer/)
+        ) {
           const pb = Object.values(pbStreams[s]).map(v => {
             v.hardsub_lang = v.hardsub_locale
               ? langsData.fixAndFindCrLC(v.hardsub_locale).locale
