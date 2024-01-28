@@ -1,4 +1,4 @@
 ffmpeg: "ffmpeg.exe"
 mkvmerge: "mkvmerge.exe"
 ffprobe: "ffprobe.exe"
-mp4decrypt: "./bin/mp4decrypt"
+mp4decrypt: "mp4decrypt.exe"

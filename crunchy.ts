@@ -1123,6 +1123,9 @@ export default class Crunchy implements ServiceClass {
       return;
     }
 
+    if (!this.cfg.bin.ffmpeg) 
+      this.cfg.bin = await yamlCfg.loadBinCfg();
+
     let mediaName = '...';
     let fileName;
     const variables: Variable[] = [];
