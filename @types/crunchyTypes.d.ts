@@ -33,7 +33,7 @@ export type CrunchyDownloadOptions = {
   syncTiming: boolean,
   nocleanup: boolean,
   chapters: boolean,
-  apiType: 'web' | 'android'
+  apiType?: 'web' | 'android'
 }
 
 export type CrunchyMultiDownload = {
@@ -41,7 +41,7 @@ export type CrunchyMultiDownload = {
   all?: boolean,
   but?: boolean,
   e?: string,
-  crapi: 'web' | 'android'
+  crapi?: 'web' | 'android'
 }
 
 export type CrunchyMuxOptions = {

@@ -2092,7 +2092,7 @@ export default class Crunchy implements ServiceClass {
       merger.cleanUp();
   }
 
-  public async listSeriesID(id: string, apiType: 'android' | 'web'): Promise<{ list: Episode[], data: Record<string, {
+  public async listSeriesID(id: string, apiType: 'android' | 'web' = 'android'): Promise<{ list: Episode[], data: Record<string, {
     items: CrunchyEpisode[];
     langs: langsData.LanguageItem[];
   }>}> {
@@ -2351,7 +2351,7 @@ export default class Crunchy implements ServiceClass {
     return seasonsList;
   }
 
-  public async getSeasonDataById(item: SeriesSearchItem, apiType: 'android' | 'web', log = false){
+  public async getSeasonDataById(item: SeriesSearchItem, apiType: 'android' | 'web' = 'android', log = false){
     if(!this.cmsToken.cms){
       console.error('Authentication required!');
       return;
