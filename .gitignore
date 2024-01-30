@@ -25,6 +25,7 @@ hd_profile.yml
 hd_sess.yml
 hd_token.yml
 archive.json
+guistate.json
 fonts
 .webpack/
 out/
