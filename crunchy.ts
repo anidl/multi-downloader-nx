@@ -1492,6 +1492,12 @@ export default class Crunchy implements ServiceClass {
             const isCC = langItem.code === audDub;
             sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC, options.ccTag);
             sxData.path = path.join(this.cfg.dir.content, sxData.file);
+            const split = sxData.path.split(path.sep).slice(0, -1);
+            split.forEach((val, ind, arr) => {
+              const isAbsolut = path.isAbsolute(sxData.path as string);
+              if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+                fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
+            });
             if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC))
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
