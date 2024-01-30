@@ -10,7 +10,11 @@ const exec = (pname: string, fpath: string, pargs: string, spc = false): {
   pargs = pargs ? ' ' + pargs : '';
   console.info(`\n> "${pname}"${pargs}${spc ? '\n' : ''}`);
   try {
-    childProcess.execSync((fpath + pargs), { stdio: 'inherit' });
+    if (process.platform === 'win32') {
+      childProcess.execSync(('& ' + fpath + pargs), { stdio: 'inherit', 'shell': 'powershell.exe', 'windowsHide': true });
+    } else {
+      childProcess.execSync((fpath + pargs), { stdio: 'inherit' });
+    }
     return {
       isOk: true
     };
