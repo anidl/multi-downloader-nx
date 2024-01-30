@@ -40,7 +40,7 @@ import { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
 import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
 import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
-import { CrunchyChapters, CrunchyChapter } from './@types/crunchyChapters';
+import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -1175,51 +1175,93 @@ export default class Crunchy implements ServiceClass {
       if (mediaId.includes(':'))
         mediaId = mediaId.split(':')[1];
 
-      const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${mMeta.mediaId}.json`);
-      let chapterData: CrunchyChapters;
       const compiledChapters: string[] = [];
-      if(!chapterRequest.ok || !chapterRequest.res){
-        console.warn('Chapter request failed');
-      } else {
-        chapterData = JSON.parse(chapterRequest.res.body);
-        const chapters: CrunchyChapter[] = [];
-        for (const chapter in chapterData) {
-          if (typeof chapterData[chapter] == 'object') {
-            chapters.push(chapterData[chapter]);
-          }
-        }
-        if (chapters.length > 0) {
-          chapters.sort((a, b) => a.start - b.start);
-          for (const chapter of chapters) {
+      if (options.chapters) {
+        //Make Chapter Request
+        const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${mMeta.mediaId}.json`);
+        if(!chapterRequest.ok || !chapterRequest.res){
+        //Old Chapter Request Fallback
+          console.warn('Chapter request failed, attempting old API');
+          const oldChapterRequest = await this.req.getData(`https://static.crunchyroll.com/datalab-intro-v2/${mMeta.mediaId}.json`);
+          if(!oldChapterRequest.ok || !oldChapterRequest.res) {
+            console.warn('Old Chapter API request failed');
+          } else {
+            console.info('Old Chapter request successful');
+            const chapterData = JSON.parse(oldChapterRequest.res.body) as CrunchyOldChapter;
+
+            //Generate Timestamps
             const startTime = new Date(0), endTime = new Date(0);
-            startTime.setSeconds(chapter.start);
-            endTime.setSeconds(chapter.end);
-            const startFormatted = startTime.toISOString().substring(11, 19)+'.00';
-            const endFormatted = endTime.toISOString().substring(11, 19)+'.00';
-            if (chapter.type == 'intro') {
-              if (chapter.start > 0) {
+            startTime.setSeconds(chapterData.startTime);
+            endTime.setSeconds(chapterData.endTime);
+            const startFormatted = startTime.toISOString().substring(11, 19)+'.'+String(chapterData.startTime).split('.')[1];
+            const endFormatted = endTime.toISOString().substring(11, 19)+'.'+String(chapterData.endTime).split('.')[1];
+           
+            //Push Generated Chapters
+            if (chapterData.startTime > 1) {
+              compiledChapters.push(
+                `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+              );
+            }
+            compiledChapters.push(
+              `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+              `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+            );
+            compiledChapters.push(
+              `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+              `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+            );
+          }
+        } else {
+        //Chapter request succeeded, now let's parse them
+          console.info('Chapter request successful');
+          const chapterData = JSON.parse(chapterRequest.res.body) as CrunchyChapters;
+          const chapters: CrunchyChapter[] = [];
+
+          //Make a format more usable for the crunchy chapters
+          for (const chapter in chapterData) {
+            if (typeof chapterData[chapter] == 'object') {
+              chapters.push(chapterData[chapter]);
+            }
+          }
+
+          if (chapters.length > 0) {
+            chapters.sort((a, b) => a.start - b.start);
+            //Loop through all the chapters
+            for (const chapter of chapters) {
+            //Generate timestamps
+              const startTime = new Date(0), endTime = new Date(0);
+              startTime.setSeconds(chapter.start);
+              endTime.setSeconds(chapter.end);
+              const startFormatted = startTime.toISOString().substring(11, 19)+'.00';
+              const endFormatted = endTime.toISOString().substring(11, 19)+'.00';
+            
+              //Push generated chapters
+              if (chapter.type == 'intro') {
+                if (chapter.start > 0) {
+                  compiledChapters.push(
+                    `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+                    `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+                  );
+                }
                 compiledChapters.push(
-                  `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
-                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+                  `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+                );
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+                );
+              } else {
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} Start`
+                );
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} End`
                 );
               }
-              compiledChapters.push(
-                `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
-                `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
-              );
-              compiledChapters.push(
-                `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
-                `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
-              );
-            } else {
-              compiledChapters.push(
-                `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
-                `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} Start`
-              );
-              compiledChapters.push(
-                `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
-                `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} End`
-              );
             }
           }
         }

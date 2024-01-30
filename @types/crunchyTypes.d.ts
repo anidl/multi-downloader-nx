@@ -32,6 +32,7 @@ export type CrunchyDownloadOptions = {
   skipmux?: boolean,
   syncTiming: boolean,
   nocleanup: boolean,
+  chapters: boolean,
   apiType: 'web' | 'android'
 }
 

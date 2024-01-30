@@ -204,6 +204,19 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'chapters',
+    describe: 'Will fetch the chapters and add them into the final video',
+    type: 'boolean',
+    group: 'dl',
+    service: ['crunchy'],
+    docDescribe: 'Will fetch the chapters and add them into the final video.' 
+     + '\nCurrently only works with mkvmerge.',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
     name: 'crapi',
     describe: 'Selects the API type for Crunchyroll',
     type: 'string',

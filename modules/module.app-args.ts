@@ -64,6 +64,7 @@ let argvC: {
   _: (string | number)[]; 
   $0: string; 
   dlVideoOnce: boolean; 
+  chapters: boolean;
   crapi: 'android' | 'web';
   removeBumpers: boolean;
   originalFontSize: boolean;

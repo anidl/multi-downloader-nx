@@ -14,3 +14,13 @@ export interface CrunchyChapter {
   new:                boolean;
   type:               string;
 }
+
+export interface CrunchyOldChapter {
+  media_id:     string;
+  startTime:    number;
+  endTime:      number;
+  duration:     number;
+  comparedWith: string;
+  ordering:     string;
+  last_updated: Date;
+}
