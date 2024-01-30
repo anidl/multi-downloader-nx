@@ -37,6 +37,7 @@ export type MergerOptions = {
   onlyVid: MergerInput[],
   onlyAudio: MergerInput[],
   subtitles: SubtitleInput[],
+  chapters?: MergerInput[],
   ccTag: string,
   output: string,
   videoTitle?: string,
@@ -162,7 +163,7 @@ class Merger {
       args.push(`-i "${sub.file}"`);
     }
 
-    if (this.options.output.split('.').pop() === 'mkv')
+    if (this.options.output.split('.').pop() === 'mkv') {
       if (this.options.fonts) {
         let fontIndex = 0;
         for (const font of this.options.fonts) {
@@ -170,6 +171,9 @@ class Merger {
           fontIndex++;
         }
       }
+    }
+
+    //TODO: Make it possible for chapters to work with ffmpeg merging
 
     args.push(...metaData);
     args.push(...this.options.subtitles.map((_, subIndex) => `-map ${subIndex + index}`));
@@ -296,6 +300,7 @@ class Merger {
         '--no-subtitles',
       );
     }
+
     if (this.options.fonts && this.options.fonts.length > 0) {
       for (const f of this.options.fonts) {
         args.push('--attachment-name', f.name);
@@ -306,6 +311,10 @@ class Merger {
       args.push(
         '--no-attachments'
       );
+    }
+
+    if (this.options.chapters && this.options.chapters.length > 0) {
+      args.push(`--chapters "${this.options.chapters[0].path}"`);
     }
 
     return args.join(' ');
@@ -405,6 +414,7 @@ class Merger {
 
   public cleanUp() {
     this.options.onlyAudio.concat(this.options.onlyVid).concat(this.options.videoAndAudio).forEach(a => fs.unlinkSync(a.path));
+    this.options.chapters?.forEach(a => fs.unlinkSync(a.path));
     this.options.subtitles.forEach(a => fs.unlinkSync(a.file));
   }
 

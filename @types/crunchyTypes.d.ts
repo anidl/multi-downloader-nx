@@ -90,6 +90,10 @@ export type DownloadedMedia = {
   lang: LanguageItem,
   path: string,
   isPrimary?: boolean
+} | {
+  type: 'Chapters',
+  lang: LanguageItem,
+  path: string
 } | ({
   type: 'Subtitle',
   cc: boolean

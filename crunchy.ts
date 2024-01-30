@@ -40,6 +40,7 @@ import { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
 import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
 import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
+import { CrunchyChapters, CrunchyChapter } from './@types/crunchyChapters';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -1174,7 +1175,55 @@ export default class Crunchy implements ServiceClass {
       if (mediaId.includes(':'))
         mediaId = mediaId.split(':')[1];
 
-      // /cms/v2/BUCKET/crunchyroll/videos/MEDIAID/streams
+      const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${mMeta.mediaId}.json`);
+      let chapterData: CrunchyChapters;
+      const compiledChapters: string[] = [];
+      if(!chapterRequest.ok || !chapterRequest.res){
+        console.warn('Chapter request failed');
+      } else {
+        chapterData = JSON.parse(chapterRequest.res.body);
+        const chapters: CrunchyChapter[] = [];
+        for (const chapter in chapterData) {
+          if (typeof chapterData[chapter] == 'object') {
+            chapters.push(chapterData[chapter]);
+          }
+        }
+        if (chapters.length > 0) {
+          chapters.sort((a, b) => a.start - b.start);
+          for (const chapter of chapters) {
+            const startTime = new Date(0), endTime = new Date(0);
+            startTime.setSeconds(chapter.start);
+            endTime.setSeconds(chapter.end);
+            const startFormatted = startTime.toISOString().substring(11, 19)+'.00';
+            const endFormatted = endTime.toISOString().substring(11, 19)+'.00';
+            if (chapter.type == 'intro') {
+              if (chapter.start > 0) {
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+                );
+              }
+              compiledChapters.push(
+                `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+              );
+              compiledChapters.push(
+                `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+              );
+            } else {
+              compiledChapters.push(
+                `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} Start`
+              );
+              compiledChapters.push(
+                `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} End`
+              );
+            }
+          }
+        }
+      }
 
       let pbData = { total: 0, data: {}, meta: {} } as PlaybackData;
       if (options.apiType == 'android') {
@@ -1797,6 +1846,32 @@ export default class Crunchy implements ServiceClass {
         console.info('Downloading skipped!');
       }
 
+      if (compiledChapters.length > 0) {
+        try {
+          fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+          const outFile = parseFileName(options.fileName + '.' + mMeta.lang?.name, variables, options.numbers, options.override).join(path.sep);
+          tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+          const split = outFile.split(path.sep).slice(0, -1);
+          split.forEach((val, ind, arr) => {
+            const isAbsolut = path.isAbsolute(outFile as string);
+            if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+              fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
+          });
+          const lang = langsData.languages.find(a => a.code === curStream?.audio_lang);
+          if (!lang) {
+            console.error(`Unable to find language for code ${curStream.audio_lang}`);
+            return;
+          }
+          fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
+          files.push({
+            path: `${tsFile}.txt`,
+            lang: lang,
+            type: 'Chapters'
+          });
+        } catch {
+          console.error('Failed to write chapter file');
+        }
+      }
 
       if(options.dlsubs.indexOf('all') > -1){
         options.dlsubs = ['all'];
@@ -1912,6 +1987,8 @@ export default class Crunchy implements ServiceClass {
           throw new Error('Never');
         if (a.type === 'Audio')
           throw new Error('Never');
+        if (a.type === 'Chapters')
+          throw new Error('Never');
         return {
           file: a.path,
           language: a.language,
@@ -1927,6 +2004,18 @@ export default class Crunchy implements ServiceClass {
         return {
           lang: a.lang,
           path: a.path,
+        };
+      }),
+      chapters: data.filter(a => a.type === 'Chapters').map((a) : MergerInput => {
+        if (a.type === 'Video')
+          throw new Error('Never');
+        if (a.type === 'Audio')
+          throw new Error('Never');
+        if (a.type === 'Subtitle')
+          throw new Error('Never');
+        return {
+          path: a.path,
+          lang: a.lang
         };
       }),
       videoTitle: options.videoTitle,
