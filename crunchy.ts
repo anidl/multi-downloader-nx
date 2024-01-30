@@ -1583,7 +1583,9 @@ export default class Crunchy implements ServiceClass {
                     return undefined;
                   } else {
                     console.info('Decryption done for video');
-                    fs.removeSync(`${tsFile}.video.enc.ts`);
+                    if (!options.nocleanup) {
+                      fs.removeSync(`${tsFile}.video.enc.ts`);
+                    }
                     files.push({
                       type: 'Video',
                       path: `${tsFile}.video.ts`,
@@ -1601,7 +1603,9 @@ export default class Crunchy implements ServiceClass {
                     console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
                     return undefined;
                   } else {
-                    fs.removeSync(`${tsFile}.audio.enc.ts`);
+                    if (!options.nocleanup) {
+                      fs.removeSync(`${tsFile}.audio.enc.ts`);
+                    }
                     files.push({
                       type: 'Audio',
                       path: `${tsFile}.audio.ts`,

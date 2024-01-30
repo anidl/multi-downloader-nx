@@ -31,6 +31,7 @@ export type CrunchyDownloadOptions = {
   dlVideoOnce: boolean,
   skipmux?: boolean,
   syncTiming: boolean,
+  nocleanup: boolean,
   apiType: 'web' | 'android'
 }
 
