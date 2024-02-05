@@ -91,6 +91,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     console.debug(`Got download options: ${JSON.stringify(data)}`);
     this.setDownloading(true);
     const _default = yargs.appArgv(this.crunchy.cfg.cli, true);
+    this.crunchy.api = _default.crapi;
     const res = await this.crunchy.downloadFromSeriesID(data.id, {
       dubLang: data.dubLang,
       e: data.e

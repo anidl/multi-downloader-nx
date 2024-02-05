@@ -32,16 +32,14 @@ export type CrunchyDownloadOptions = {
   skipmux?: boolean,
   syncTiming: boolean,
   nocleanup: boolean,
-  chapters: boolean,
-  apiType?: 'web' | 'android'
+  chapters: boolean
 }
 
 export type CrunchyMultiDownload = {
   dubLang: string[],
   all?: boolean,
   but?: boolean,
-  e?: string,
-  crapi?: 'web' | 'android'
+  e?: string
 }
 
 export type CrunchyMuxOptions = {

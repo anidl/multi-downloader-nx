@@ -52,6 +52,7 @@ export type sxItem = {
 
 export default class Crunchy implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;
+  public api: 'android' | 'web';
   private token: Record<string, any>;
   private req: reqModule.Req;
   private cmsToken: {
@@ -62,6 +63,7 @@ export default class Crunchy implements ServiceClass {
     this.cfg = yamlCfg.loadCfg();
     this.token = yamlCfg.loadCRToken();
     this.req = new reqModule.Req(domain, debug, false, 'cr');
+    this.api = 'android';
   }
 
   public checkToken(): boolean {
@@ -71,6 +73,7 @@ export default class Crunchy implements ServiceClass {
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
+    this.api = argv.crapi;
     if (argv.debug)
       this.debug = true;
 
@@ -113,7 +116,7 @@ export default class Crunchy implements ServiceClass {
       const selected = await this.downloadFromSeriesID(argv.series, { ...argv });
       if (selected.isOk) {
         for (const select of selected.value) {
-          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false, apiType: argv.crapi }, true))) {
+          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false}, true))) {
             console.error(`Unable to download selected episode ${select.episodeNumber}`);
             return false;
           }
@@ -131,10 +134,10 @@ export default class Crunchy implements ServiceClass {
         console.info('One show can only be downloaded with one dub. Use --srz instead.');
       }
       argv.dubLang = [argv.dubLang[0]];
-      const selected = await this.getSeasonById(argv.s, argv.numbers, argv.e, argv.but, argv.all, argv.crapi);
+      const selected = await this.getSeasonById(argv.s, argv.numbers, argv.e, argv.but, argv.all);
       if (selected.isOk) {
         for (const select of selected.value) {
-          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false, apiType: argv.crapi }))) {
+          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false }))) {
             console.error(`Unable to download selected episode ${select.episodeNumber}`);
             return false;
           }
@@ -144,9 +147,9 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.e){
       await this.refreshToken();
-      const selected = await this.getObjectById(argv.crapi, argv.e, false);
+      const selected = await this.getObjectById(argv.e, false);
       for (const select of selected as Partial<CrunchyEpMeta>[]) {
-        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false, apiType: argv.crapi }))) {
+        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false}))) {
           console.error(`Unable to download selected episode ${select.episodeNumber}`);
           return false;
         }
@@ -154,9 +157,9 @@ export default class Crunchy implements ServiceClass {
       return true;
     } else if (argv.extid) {
       await this.refreshToken();
-      const selected = await this.getObjectById(argv.crapi, argv.extid, false, true);
+      const selected = await this.getObjectById(argv.extid, false, true);
       for (const select of selected as Partial<CrunchyEpMeta>[]) {
-        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false, apiType: argv.crapi }))) {
+        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false}))) {
           console.error(`Unable to download selected episode ${select.episodeNumber}`);
           return false;
         }
@@ -747,7 +750,7 @@ export default class Crunchy implements ServiceClass {
     console.info(`  Total results: ${newlyAddedResults.total} (Page: ${pageCur}/${pageMax})`);
   }
 
-  public async getSeasonById(id: string, numbers: number, e: string|undefined, but: boolean, all: boolean, apiType: 'web' | 'android') : Promise<ResponseBase<CrunchyEpMeta[]>> {
+  public async getSeasonById(id: string, numbers: number, e: string|undefined, but: boolean, all: boolean) : Promise<ResponseBase<CrunchyEpMeta[]>> {
     if(!this.cmsToken.cms){
       console.error('Authentication required!');
       return { isOk: false, reason: new Error('Authentication required') };
@@ -772,7 +775,7 @@ export default class Crunchy implements ServiceClass {
 
     let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info
-    if (apiType == 'android') {
+    if (this.api == 'android') {
       const reqEpsListOpts = [
         api.beta_cms,
         this.cmsToken.cms.bucket,
@@ -929,7 +932,7 @@ export default class Crunchy implements ServiceClass {
     return true;
   }
 
-  public async getObjectById(apiType: 'web' | 'android', e?: string, earlyReturn?: boolean, external_id?: boolean): Promise<ObjectInfo|Partial<CrunchyEpMeta>[]|undefined> {
+  public async getObjectById(e?: string, earlyReturn?: boolean, external_id?: boolean): Promise<ObjectInfo|Partial<CrunchyEpMeta>[]|undefined> {
     if(!this.cmsToken.cms){
       console.error('Authentication required!');
       return [];
@@ -990,7 +993,7 @@ export default class Crunchy implements ServiceClass {
 
     // reqs
     let objectInfo: ObjectInfo = { total: 0, data: [], meta: {} };
-    if (apiType == 'android') {
+    if (this.api == 'android') {
       const objectReqOpts = [
         api.beta_cms,
         this.cmsToken.cms.bucket,
@@ -1268,7 +1271,7 @@ export default class Crunchy implements ServiceClass {
       }
 
       let pbData = { total: 0, data: {}, meta: {} } as PlaybackData;
-      if (options.apiType == 'android') {
+      if (this.api == 'android') {
         const videoStreamsReq = [
           api.beta_cms,
           `${this.cmsToken.cms.bucket}/videos/${mediaId}/streams`,
@@ -2092,7 +2095,7 @@ export default class Crunchy implements ServiceClass {
       merger.cleanUp();
   }
 
-  public async listSeriesID(id: string, apiType: 'android' | 'web' = 'android'): Promise<{ list: Episode[], data: Record<string, {
+  public async listSeriesID(id: string): Promise<{ list: Episode[], data: Record<string, {
     items: CrunchyEpisode[];
     langs: langsData.LanguageItem[];
   }>}> {
@@ -2109,7 +2112,7 @@ export default class Crunchy implements ServiceClass {
     for(const season of Object.keys(result) as unknown as number[]) {
       for (const key of Object.keys(result[season])) {
         const s = result[season][key];
-        (await this.getSeasonDataById(s, apiType))?.data?.forEach(episode => {
+        (await this.getSeasonDataById(s))?.data?.forEach(episode => {
           //TODO: Make sure the below code is ok
           //Prepare the episode array
           let item;
@@ -2200,7 +2203,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async downloadFromSeriesID(id: string, data: CrunchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
-    const { data: episodes } = await this.listSeriesID(id, data.crapi);
+    const { data: episodes } = await this.listSeriesID(id);
     console.info('');
     console.info('-'.repeat(30));
     console.info('');
@@ -2351,7 +2354,7 @@ export default class Crunchy implements ServiceClass {
     return seasonsList;
   }
 
-  public async getSeasonDataById(item: SeriesSearchItem, apiType: 'android' | 'web' = 'android', log = false){
+  public async getSeasonDataById(item: SeriesSearchItem, log = false){
     if(!this.cmsToken.cms){
       console.error('Authentication required!');
       return;
@@ -2376,7 +2379,7 @@ export default class Crunchy implements ServiceClass {
 
     let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info
-    if (apiType == 'android') {
+    if (this.api == 'android') {
       const reqEpsListOpts = [
         api.beta_cms,
         this.cmsToken.cms.bucket,
