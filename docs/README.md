@@ -75,7 +75,7 @@ Afterwards run `pnpm run tsc false [true if you want gui, false otherwise]`.
 
 If you want the `js` files you are done. Just `cd` into the `lib` folder, and run `node index.js --help` to get started with the CLI, or run `node gui.js` to run the GUI
 
-If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, ubuntu, macos, and arm) and `{type}` is cli or gui.
+If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, linux, macos, alpine, android, and arm) and `{type}` is cli or gui.
 
 ## DRM Decryption
 
