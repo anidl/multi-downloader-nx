@@ -97,6 +97,7 @@ export type DownloadedMedia = {
   path: string
 } | ({
   type: 'Subtitle',
+  signs: boolean,
   cc: boolean
 } & sxItem )
 

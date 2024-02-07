@@ -1972,7 +1972,7 @@ export default class Crunchy implements ServiceClass {
               if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
                 fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
             });
-            if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC))
+            if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC && a.signs === isSigns))
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
               const subsAssReq = await this.req.getData(subsItem.url);
@@ -1999,6 +1999,7 @@ export default class Crunchy implements ServiceClass {
                   type: 'Subtitle',
                   ...sxData as sxItem,
                   cc: isCC,
+                  signs: isSigns,
                 });
               }
               else{
@@ -2061,6 +2062,7 @@ export default class Crunchy implements ServiceClass {
           file: a.path,
           language: a.language,
           closedCaption: a.cc,
+          signs: a.signs,
         };
       }),
       simul: false,

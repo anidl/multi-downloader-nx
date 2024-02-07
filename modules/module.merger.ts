@@ -21,6 +21,7 @@ export type SubtitleInput = {
   language: LanguageItem,
   file: string,
   closedCaption?: boolean,
+  signs?: boolean,
   delay?: number
 }
 
@@ -182,7 +183,7 @@ class Merger {
       '-c:a copy',
       this.options.output.split('.').pop()?.toLowerCase() === 'mp4' ? '-c:s mov_text' : '-c:s ass',
       ...this.options.subtitles.map((sub, subindex) => `-metadata:s:s:${subindex} title="${
-        (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ` ${this.options.ccTag}` : ''}`
+        (sub.language.language || sub.language.name) + `${sub.closedCaption === true ? ` ${this.options.ccTag}` : ''}` + `${sub.signs === true ? ' Signs' : ''}`
       }" -metadata:s:s:${subindex} language=${sub.language.code}`)
     );
     args.push(...this.options.options.ffmpeg);
@@ -285,7 +286,7 @@ class Merger {
             `--sync 0:-${Math.ceil(subObj.delay*1000)}`
           );
         }
-        args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}`}"`);
+        args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}` + `${subObj.signs === true ? ' Signs' : ''}`}"`);
         args.push('--language', `0:"${subObj.language.code}"`);
         //TODO: look into making Closed Caption default if it's the only sub of the default language downloaded
         if (this.options.defaults.sub.code === subObj.language.code && !subObj.closedCaption) {
