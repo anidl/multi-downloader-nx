@@ -56,7 +56,7 @@ export interface Meta {
   bifs:            string[];
   versions:        Version[];
   audio_locale:    Locale;
-  closed_captions: Record<unknown>;
+  closed_captions: Subtitles;
   captions:        Record<unknown>;
 }
 

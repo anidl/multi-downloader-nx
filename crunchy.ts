@@ -19,6 +19,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import getKeys, { canDecrypt } from './modules/cr_widevine';
+//import vttConvert from './modules/module.vttconvert';
 
 // args
 
@@ -1935,22 +1936,35 @@ export default class Crunchy implements ServiceClass {
       if(!options.skipsubs && options.dlsubs.indexOf('none') == -1){
         if(pbData.meta.subtitles && Object.values(pbData.meta.subtitles).length > 0){
           const subsData = Object.values(pbData.meta.subtitles);
+          const capsData = Object.values(pbData.meta.closed_captions);
           const subsDataMapped = subsData.map((s) => {
             const subLang = langsData.fixAndFindCrLC(s.locale);
             return {
               ...s,
+              isCC: false,
               locale: subLang,
               language: subLang.locale
             };
-          });
+          }).concat(
+            capsData.map((s) => {
+              const subLang = langsData.fixAndFindCrLC(s.locale);
+              return {
+                ...s,
+                isCC: true,
+                locale: subLang,
+                language: subLang.locale
+              };
+            })
+          );
           const subsArr = langsData.sortSubtitles<typeof subsDataMapped[0]>(subsDataMapped, 'language');
           for(const subsIndex in subsArr){
             const subsItem = subsArr[subsIndex];
             const langItem = subsItem.locale;
             const sxData: Partial<sxItem> = {};
             sxData.language = langItem;
-            const isCC = langItem.code === audDub;
-            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC, options.ccTag);
+            const isSigns = langItem.code === audDub && !subsItem.isCC;
+            const isCC = subsItem.isCC;
+            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC, options.ccTag, isSigns, subsItem.format);
             sxData.path = path.join(this.cfg.dir.content, sxData.file);
             const split = sxData.path.split(path.sep).slice(0, -1);
             split.forEach((val, ind, arr) => {
@@ -1963,13 +1977,22 @@ export default class Crunchy implements ServiceClass {
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
               const subsAssReq = await this.req.getData(subsItem.url);
               if(subsAssReq.ok && subsAssReq.res){
-                let sBody = '\ufeff' + subsAssReq.res.body;
-                const sBodySplit = sBody.split('\r\n');
-                sBodySplit.splice(2, 0, 'ScaledBorderAndShadow: yes');
-                sBody = sBodySplit.join('\r\n');
-                sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
-                sxData.title = `${langItem.language} / ${sxData.title}`;
-                sxData.fonts = fontsData.assFonts(sBody) as Font[];
+                let sBody;
+                if (subsItem.format == 'vtt') {
+                  //TODO: look into converting downloaded vtt into ASS
+                  //sBody = vttConvert(subsAssReq.res.body, false, langItem.language, options.fontSize, options.fontName);
+                  sBody = subsAssReq.res.body;
+                  //TODO: look into parsing the fonts from the styles field in the VTT
+                  sxData.fonts = options.fontName ? [options.fontName] as Font[] : [];
+                } else {
+                  sBody = '\ufeff' + subsAssReq.res.body;
+                  const sBodySplit = sBody.split('\r\n');
+                  sBodySplit.splice(2, 0, 'ScaledBorderAndShadow: yes');
+                  sBody = sBodySplit.join('\r\n');
+                  sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
+                  sxData.title = `${langItem.language} / ${sxData.title}`;
+                  sxData.fonts = fontsData.assFonts(sBody) as Font[];
+                }
                 fs.writeFileSync(sxData.path, sBody);
                 console.info(`Subtitle downloaded: ${sxData.file}`);
                 files.push({

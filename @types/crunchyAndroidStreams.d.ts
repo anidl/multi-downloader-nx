@@ -3,15 +3,15 @@ export interface CrunchyAndroidStreams {
   __href__:         string;
   __resource_key__: string;
   __links__:        Links;
-  __actions__:      Actions;
+  __actions__:      Record<unknown, unknown>;
   media_id:         string;
   audio_locale:     Locale;
   subtitles:        Subtitles;
-  closed_captions:  Actions;
+  closed_captions:  Subtitles;
   streams:          Streams;
   bifs:             string[];
   versions:         Version[];
-  captions:         Actions;
+  captions:         Record<unknown, unknown>;
 }
 
 export interface Subtitles {
@@ -32,9 +32,6 @@ export interface Subtitles {
   'zh-CN'?:  Subtitle;
   'ko-KR'?:  Subtitle;
   'ja-JP'?:  Subtitle;
-}
-
-export interface Actions {
 }
 
 export interface Links {

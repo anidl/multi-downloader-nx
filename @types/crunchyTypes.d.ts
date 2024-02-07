@@ -32,7 +32,9 @@ export type CrunchyDownloadOptions = {
   skipmux?: boolean,
   syncTiming: boolean,
   nocleanup: boolean,
-  chapters: boolean
+  chapters: boolean,
+  fontName: string | undefined,
+  fontSize: number,
 }
 
 export type CrunchyMultiDownload = {
