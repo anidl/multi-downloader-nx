@@ -98,14 +98,14 @@
     "tsc": "ts-node tsc.ts",
     "prebuild-cli": "pnpm run tsc false false",
     "build-windows-cli": "pnpm run prebuild-cli && cd lib && node modules/build windows-x64",
-    "build-linux-cli": "pnpm run prebuild-cli && cd lib && node modules/build linux-x64",
+    "build-linux-cli": "pnpm run prebuild-cli && cd lib && node modules/build linuxstatic-x64",
     "build-arm-cli": "pnpm run prebuild-cli && cd lib && node modules/build linux-arm64",
     "build-macos-cli": "pnpm run prebuild-cli && cd lib && node modules/build macos-x64",
     "build-alpine-cli": "pnpm run prebuild-cli && cd lib && node modules/build alpine-x64",
     "build-android-cli": "pnpm run prebuild-cli && cd lib && node modules/build linuxstatic-armv7",
     "prebuild-gui": "pnpm run tsc",
     "build-windows-gui": "pnpm run prebuild-gui && cd lib && node modules/build windows-x64 true",
-    "build-linux-gui": "pnpm run prebuild-gui && cd lib && node modules/build linux-x64 true",
+    "build-linux-gui": "pnpm run prebuild-gui && cd lib && node modules/build linuxstatic-x64 true",
     "build-arm-gui": "pnpm run prebuild-gui && cd lib && node modules/build linux-arm64 true",
     "build-macos-gui": "pnpm run prebuild-gui && cd lib && node modules/build macos-x64 true",
     "build-alpine-gui": "pnpm run prebuild-gui && cd lib && node modules/build alpine-x64 true",
@@ -113,6 +113,6 @@
     "eslint": "eslint *.js modules",
     "eslint-fix": "eslint *.js modules --fix",
     "pretest": "pnpm run tsc",
-    "test": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build linux-x64 && node modules/build macos-x64 && node modules/build alpine-x64"
+    "test": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build linuxstatic-x64 && node modules/build macos-x64"
   }
 }
