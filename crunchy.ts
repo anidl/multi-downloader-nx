@@ -1233,7 +1233,8 @@ export default class Crunchy implements ServiceClass {
             chapters.sort((a, b) => a.start - b.start);
             //Loop through all the chapters
             for (const chapter of chapters) {
-            //Generate timestamps
+              if (!chapter.start || !chapter.end) continue;
+              //Generate timestamps
               const startTime = new Date(0), endTime = new Date(0);
               startTime.setSeconds(chapter.start);
               endTime.setSeconds(chapter.end);
