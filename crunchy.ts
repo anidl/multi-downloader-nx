@@ -1197,8 +1197,10 @@ export default class Crunchy implements ServiceClass {
             const startTime = new Date(0), endTime = new Date(0);
             startTime.setSeconds(chapterData.startTime);
             endTime.setSeconds(chapterData.endTime);
-            const startFormatted = startTime.toISOString().substring(11, 19)+'.'+String(chapterData.startTime).split('.')[1];
-            const endFormatted = endTime.toISOString().substring(11, 19)+'.'+String(chapterData.endTime).split('.')[1];
+            const startTimeMS = String(chapterData.startTime).split('.')[1], endTimeMS = String(chapterData.endTime).split('.')[1];
+            const startMS = startTimeMS ? startTimeMS : '00', endMS = endTimeMS ? endTimeMS : '00';
+            const startFormatted = startTime.toISOString().substring(11, 19)+'.'+startMS;
+            const endFormatted = endTime.toISOString().substring(11, 19)+'.'+endMS;
            
             //Push Generated Chapters
             if (chapterData.startTime > 1) {
