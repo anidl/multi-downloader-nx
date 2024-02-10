@@ -148,6 +148,10 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.e){
       await this.refreshToken();
+      if (argv.dubLang.length > 1) {
+        console.info('One show can only be downloaded with one dub. Use --srz instead.');
+      }
+      argv.dubLang = [argv.dubLang[0]];
       const selected = await this.getObjectById(argv.e, false);
       for (const select of selected as Partial<CrunchyEpMeta>[]) {
         if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false}))) {
@@ -158,6 +162,10 @@ export default class Crunchy implements ServiceClass {
       return true;
     } else if (argv.extid) {
       await this.refreshToken();
+      if (argv.dubLang.length > 1) {
+        console.info('One show can only be downloaded with one dub. Use --srz instead.');
+      }
+      argv.dubLang = [argv.dubLang[0]];
       const selected = await this.getObjectById(argv.extid, false, true);
       for (const select of selected as Partial<CrunchyEpMeta>[]) {
         if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false}))) {
@@ -1165,10 +1173,17 @@ export default class Crunchy implements ServiceClass {
 
       //Get Media GUID
       let mediaId = mMeta.mediaId;
-      if (mMeta.versions && mMeta.lang) {
-        currentVersion = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale);
+      if (mMeta.versions) {
+        if (mMeta.lang) {
+          currentVersion = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale);
+        } else if (options.dubLang.length == 1) {
+          const currentLang = langsData.languages.find(a => a.code == options.dubLang[0]);
+          currentVersion = mMeta.versions.find(a => a.audio_locale == currentLang?.cr_locale);
+        } else if (mMeta.versions.length == 1) {
+          currentVersion = mMeta.versions[0];
+        }
         if (!currentVersion?.media_guid) {
-          console.error('Selected language not found.');
+          console.error('Selected language not found in versions.');
           continue;
         }
         isPrimary = currentVersion.original;

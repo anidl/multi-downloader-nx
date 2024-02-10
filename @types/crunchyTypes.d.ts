@@ -35,6 +35,7 @@ export type CrunchyDownloadOptions = {
   chapters: boolean,
   fontName: string | undefined,
   fontSize: number,
+  dubLang: string[],
 }
 
 export type CrunchyMultiDownload = {
