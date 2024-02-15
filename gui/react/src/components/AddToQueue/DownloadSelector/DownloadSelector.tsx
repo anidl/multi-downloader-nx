@@ -1,10 +1,11 @@
 import React from 'react';
-import { Box, Button, TextField } from '@mui/material';
+import { Box, Button, Divider, InputBase, Link, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material';
 import useStore from '../../../hooks/useStore';
 import MultiSelect from '../../reusable/MultiSelect';
 import { messageChannelContext } from '../../../provider/MessageChannel';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useSnackbar } from 'notistack';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 type DownloadSelectorProps = {
   onFinish?: () => unknown
@@ -78,14 +79,36 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
     setLoading(false);
   };
 
-  return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-    <Box sx={{ m: 2, gap: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+  return <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+    <Box sx={{display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      margin: '5px',
+      }}>
+        <Box sx={{
+          width: '50rem',
+          height: '21rem',
+          margin: '10px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          //backgroundColor: '#ffffff30',
+          }}>
+        <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '0.7rem',
+      //backgroundColor: '#ff000030'
+    }}>
+      <Typography sx={{fontSize: '1.4rem'}}>
+        General Options
+      </Typography>
       <TextField value={store.downloadOptions.id} required onChange={e => {
         dispatch({
           type: 'downloadOptions',
           payload: { ...store.downloadOptions, id: e.target.value }
         });
-      }} label='Item ID' />
+      }} label='Show ID'/>
       <TextField type='number' value={store.downloadOptions.q} required onChange={e => {
         const parsed = parseInt(e.target.value);
         if (isNaN(parsed) || parsed < 0 || parsed > 10)
@@ -94,13 +117,77 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
           type: 'downloadOptions',
           payload: { ...store.downloadOptions, q: parsed }
         });
-      }} label='Quality Level (0 for max)' />
-      <TextField disabled={store.downloadOptions.all} value={store.downloadOptions.e} required onChange={e => {
-        dispatch({
-          type: 'downloadOptions',
-          payload: { ...store.downloadOptions, e: e.target.value }
-        });
-      }} label='Episode Select' />
+      }} label='Quality Level (0 for max)'/>
+      <Box sx={{ display: 'flex', gap: '5px' }}>
+      <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, noaudio: !store.downloadOptions.noaudio } })} variant={store.downloadOptions.noaudio ? 'contained' : 'outlined'}>Skip Audio</Button>
+      <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, novids: !store.downloadOptions.novids } })} variant={store.downloadOptions.novids ? 'contained' : 'outlined'}>Skip Video</Button>
+      </Box>
+      <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, dlVideoOnce: !store.downloadOptions.dlVideoOnce } })} variant={store.downloadOptions.dlVideoOnce ? 'contained' : 'outlined'}>Skip Unnecessary</Button>
+      <Tooltip title={
+        <Typography>
+          Currently only supported on Hidive
+        </Typography>
+      }
+      arrow
+      placement='top'>
+      <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, simul: !store.downloadOptions.simul } })} variant={store.downloadOptions.simul ? 'contained' : 'outlined'}>Download Simulcast ver.</Button>
+      </Tooltip>
+      </Box>
+    <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.7rem',
+        //backgroundColor: '#00000020'
+      }}>
+        <Typography sx={{fontSize: '1.4rem'}}>
+        Episode Options
+      </Typography>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1px'
+      }}>
+        <Box sx={{
+          borderColor: '#595959',
+          borderStyle: 'solid',
+          borderWidth: '1px',
+          borderRadius: '5px',
+          //backgroundColor: '#ff4567',
+          width: '15rem',
+          height: '3.5rem',
+          display: 'flex',
+          '&:hover' : {
+            borderColor: '#ffffff',
+          },
+        }}>
+          <InputBase sx={{
+            ml: 2,
+            flex: 1,
+          }}
+          disabled={store.downloadOptions.all} value={store.downloadOptions.e} required onChange={e => {
+            dispatch({
+              type: 'downloadOptions',
+              payload: { ...store.downloadOptions, e: e.target.value }
+            });
+          }} placeholder='Episode Select'/>
+          <Divider orientation='vertical'/>
+          <LoadingButton loading={loading} disableElevation disableFocusRipple disableRipple disableTouchRipple onClick={listEpisodes} variant='text' sx={{ textTransform: 'none'}}><Typography>List<br/>Episodes</Typography></LoadingButton>
+        </Box>
+      </Box>
+      <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, all: !store.downloadOptions.all } })} variant={store.downloadOptions.all ? 'contained' : 'outlined'}>Download All</Button>
+      <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, but: !store.downloadOptions.but } })} variant={store.downloadOptions.but ? 'contained' : 'outlined'}>Download All but</Button>
+      </Box>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.7rem',
+        //backgroundColor: '#00ff0020'
+      }}>
+      <Typography sx={{fontSize: '1.4rem'}}>
+        Language Options
+      </Typography>
       <MultiSelect
         title='Dub Languages'
         values={availableDubs}
@@ -113,6 +200,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
         }}
         allOption
       />
+      
       <MultiSelect
         title='Sub Languages'
         values={availableSubs}
@@ -124,22 +212,105 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
           });
         }}
       />
-      <TextField value={store.downloadOptions.fileName} onChange={e => {
+      <Tooltip title={
+            <Typography>
+              Comming Soon™
+            </Typography>
+          }
+          arrow placement='top'>
+      <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100%',
+      gap: '1rem'
+    }}>
+      
+      <Box sx={{
+          borderColor: '#595959',
+          borderStyle: 'solid',
+          borderWidth: '1px',
+          borderRadius: '5px',
+          //backgroundColor: '#ff4567',
+          width: '15rem',
+          height: '3.5rem',
+          display: 'flex',
+          '&:hover' : {
+            borderColor: '#ffffff',
+          },
+        }}>
+          
+          <Button sx={{ textTransform: 'none' }} variant='outlined' disabled={true}>Hardsub</Button>
+          <Divider orientation='vertical'/>
+          <Select sx={{
+            flex: 1
+          }}
+          title='Hardsub lang.'
+          placeholder='Hardsub lang.'
+          disabled={true}
+          value={store.downloadOptions.hslang}
+          onChange={(e) => {
+            dispatch({
+              type: 'downloadOptions',
+              payload: { ...store.downloadOptions, hslang: (e.target.value as string) === '' ? undefined : e.target.value as string }
+            });
+          }}
+          >
+            <MenuItem>Deutsch</MenuItem>
+            </Select>
+        </Box>
+        <Tooltip title={
+        <Typography>
+           Burns the selected subtitle <b>PERMANENTLY</b> onto the video<br/>You can choose only <b>1</b> subtitle per video
+           </Typography>
+      } arrow placement='top'>
+        <InfoOutlinedIcon sx={{
+          transition: '100ms',
+          ml: '0.35rem',
+          mr: '0.65rem',
+          '&:hover' : {
+            color: '#ffffff30',
+          }
+        }} />
+      </Tooltip>
+        </Box>
+        </Tooltip>
+      </Box>
+    </Box>
+    <Box sx={{width: '95%', height: '0.3rem', backgroundColor: '#ffffff50', borderRadius: '10px', marginBottom: '20px'}}/>
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100%',
+      gap: '15px'
+    }}>
+    <TextField value={store.downloadOptions.fileName} onChange={e => {
         dispatch({
           type: 'downloadOptions',
           payload: { ...store.downloadOptions, fileName: e.target.value }
         });
-      }} sx={{ width: '50%' }} label='Filename' />
-      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, all: !store.downloadOptions.all } })} variant={store.downloadOptions.all ? 'contained' : 'outlined'}>Download all</Button>
-      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, but: !store.downloadOptions.but } })} variant={store.downloadOptions.but ? 'contained' : 'outlined'}>Download all but</Button>
-      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, noaudio: !store.downloadOptions.noaudio } })} variant={store.downloadOptions.noaudio ? 'contained' : 'outlined'}>Skip Audio</Button>
-      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, novids: !store.downloadOptions.novids } })} variant={store.downloadOptions.novids ? 'contained' : 'outlined'}>Skip Video</Button>
-      <Button onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, dlVideoOnce: !store.downloadOptions.dlVideoOnce } })} variant={store.downloadOptions.dlVideoOnce ? 'contained' : 'outlined'}>Skip unnecessary Downloads</Button>
+      }} sx={{ width: '87%' }} label='Filename Overwrite' />
+      <Tooltip title={
+        <Typography>
+           Click here to see the documentation
+           </Typography>
+      } arrow placement='top'>
+        <Link href='https://github.com/anidl/multi-downloader-nx/blob/master/docs/DOCUMENTATION.md#filename-template' rel="noopener noreferrer" target="_blank">
+        <InfoOutlinedIcon sx={{
+          transition: '100ms',
+          '&:hover' : {
+            color: '#ffffff30',
+          }
+        }} />
+        </Link>
+      </Tooltip>
+      </Box>
     </Box>
-    <Box sx={{ gap: 2, flex: 0, m: 1, mb: 3, display: 'flex', justifyContent: 'center' }}>
-      <LoadingButton loading={loading} onClick={listEpisodes} variant='contained'>List episodes</LoadingButton>
-      <LoadingButton loading={loading} onClick={addToQueue} variant='contained'>Add to Queue</LoadingButton>
-    </Box>
+    <Box sx={{width: '95%', height: '0.3rem', backgroundColor: '#ffffff50', borderRadius: '10px', marginTop: '10px'}}/>
+    
+      <LoadingButton sx={{ margin: '15px', textTransform: 'none' }}  loading={loading} onClick={addToQueue} variant='contained'>Add to Queue</LoadingButton>
+     
   </Box>; 
 };
 
