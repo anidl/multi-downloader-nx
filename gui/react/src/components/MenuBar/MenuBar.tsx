@@ -44,7 +44,7 @@ const MenuBar: React.FC = () => {
   if (!msg)
     return <></>;
 
-  return <Box sx={{ width: '100%', display: 'flex' }}>
+  return <Box sx={{ width: '95rem', display: 'flex', marginBottom: '1rem' }}>
     <Button onClick={(e) => handleClick(e, 'settings')}>
       Settings
     </Button>
@@ -108,7 +108,7 @@ const MenuBar: React.FC = () => {
         Version: {store.version}
       </MenuItem>
     </Menu>
-    <Typography variant="h5" color="text.primary" component="div" align="center" sx={{flexGrow: 1}}>
+    <Typography variant="h5" color="text.primary"  sx={{ alignSelf: 'center', textAlign: 'center', width: '100%'}}>
       {transformService(store.service)}
     </Typography>
   </Box>;
