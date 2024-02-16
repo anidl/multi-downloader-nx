@@ -4,12 +4,16 @@ import App from './App';
 import ServiceProvider from './provider/ServiceProvider';
 import Style from './Style';
 import MessageChannel from './provider/MessageChannel';
-import { IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { CloseOutlined } from '@mui/icons-material';
 import { SnackbarProvider, SnackbarKey } from 'notistack';
 import Store from './provider/Store';
 import ErrorHandler from './provider/ErrorHandler';
 import QueueProvider from './provider/QueueProvider';
+
+document.body.style.backgroundColor = "rgb(0, 30, 60)";
+document.body.style.display = 'flex';
+document.body.style.justifyContent = 'center';
 
 const notistackRef = React.createRef<SnackbarProvider>();
 const onClickDismiss = (key: SnackbarKey | undefined) => () => { 
@@ -34,7 +38,9 @@ root.render(
           <MessageChannel>
             <ServiceProvider>
               <QueueProvider>
-                <App />
+                <Box>
+                  <App />
+                </Box>
               </QueueProvider>
             </ServiceProvider>
           </MessageChannel>

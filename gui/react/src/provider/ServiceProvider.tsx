@@ -18,7 +18,7 @@ const ServiceProvider: FCWithChildren = ({ children }) => {
   };
 
   return service === undefined ? 
-    <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', flexDirection: 'column', height: '50rem'}}>
+    <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', flexDirection: 'column', position: 'relative', top: '40vh'}}>
       <Typography color="text.primary" variant='h3' sx={{ textAlign: 'center', mb: 5 }}>Please select your service</Typography>
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
         <Button size='large' variant="contained" onClick={() => setService('funi')} startIcon={<Avatar src={'https://static.funimation.com/static/img/favicon.ico'} />}>Funimation</Button>

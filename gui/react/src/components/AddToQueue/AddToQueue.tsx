@@ -17,7 +17,7 @@ const AddToQueue: React.FC = () => {
         <DownloadSelector onFinish={() => setOpen(false)} />
       </Box>
     </Dialog>
-    <Button variant='contained' onClick={() => setOpen(true)}>
+    <Button variant='contained' onClick={() => setOpen(true)} sx={{ maxHeight: '2.3rem' }}>
       <Add />
       Add to Queue
     </Button>

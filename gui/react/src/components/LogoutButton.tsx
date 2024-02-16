@@ -26,6 +26,7 @@ const LogoutButton: React.FC = () => {
       startIcon={<ExitToApp />}
       variant='contained'
       onClick={logout}
+      sx={{ maxHeight: '2.3rem' }}
     >
       Service select
     </Button>

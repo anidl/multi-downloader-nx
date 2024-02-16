@@ -11,7 +11,7 @@ const makeTheme = (mode: 'dark'|'light') : Partial<Theme> => {
 
 const Style: FCWithChildren = ({children}) => {
   return <ThemeProvider theme={makeTheme('dark')}>
-      <Box sx={{ position: 'fixed', height: '100%', width: '100%', zIndex: -500, backgroundColor: 'rgb(0, 30, 60)', top: 0, left: 0 }}/>
+      <Box sx={{   }}/>
       {children}
   </ThemeProvider>;
 };

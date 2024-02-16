@@ -13,14 +13,15 @@ const Layout: React.FC = () => {
 
   const messageHandler = React.useContext(messageChannelContext);
 
-  return <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+  return <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%', alignItems: 'center',}}>
     <MenuBar />
     <Box sx={{
-      height: 50,
-      width: '95rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
+      width: '93vw',
+      maxWidth: '93rem',
+      maxHeight: '3rem'
       //backgroundColor: '#ffffff',
       }}>
       <LogoutButton />

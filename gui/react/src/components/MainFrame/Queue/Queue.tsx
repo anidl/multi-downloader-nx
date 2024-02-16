@@ -26,8 +26,9 @@ const Queue: React.FC = () => {
       <Box sx={{
           marginTop: '2rem',
           marginBottom: '1rem',
-          height: '11rem',
-          width: '95rem',
+          height: '12rem',
+          width: '93vw',
+          maxWidth: '93rem',
           backgroundColor: '#282828',
           boxShadow: '0px 0px 50px #00000090',
           borderRadius: '10px',
@@ -123,19 +124,20 @@ const Queue: React.FC = () => {
       current && !data && <>
       <Box sx={{
         display: 'flex',
-        width: '100%',
         flexDirection: 'column',
         alignItems: 'center',
       }}>
         <Box sx={{
           marginTop: '2rem',
           marginBottom: '1rem',
-          height: '13rem',
-          width: '93rem',
+          height: '12rem',
+          width: '93vw',
+          maxWidth: '93rem',
           backgroundColor: '#282828',
           boxShadow: '0px 0px 50px #00000090',
           borderRadius: '10px',
           display: 'flex',
+          overflow: 'hidden',
           transition: '250ms'
           }}>
         <img style={{
@@ -143,6 +145,7 @@ const Queue: React.FC = () => {
             margin: '5px',
             boxShadow: '0px 0px 10px #00000090',
             userSelect: 'none',
+            maxWidth: '20.5rem',
           }}
         src={current.image} height='auto' width='auto' alt="Thumbnail" />
         <Box
@@ -150,13 +153,14 @@ const Queue: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           width: '100%',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          //backgroundColor: '#ffffff0f'
         }}>
         <Box sx={{
           display: 'flex',
+          
         }}>
         <Box sx={{
-          //backgroundColor: '#ff0000', 
           width: '70%',
           marginLeft: '10px'
         }}>
@@ -188,7 +192,8 @@ const Queue: React.FC = () => {
           <Box sx={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            position: 'relative',
           }}>
           <Typography color='text.primary' sx={{
             fontSize: '1.8rem',
@@ -235,8 +240,7 @@ const Queue: React.FC = () => {
     {queue.map((queueItem, index, { length }) => {
       return <Box key={`queue_item_${index}`} sx={{
         display: 'flex',
-        width: '100%',
-        height: '12rem',
+        mb: '-1.5rem',
         flexDirection: 'column',
         alignItems: 'center',
       }}>
@@ -244,26 +248,30 @@ const Queue: React.FC = () => {
           marginTop: '1.5rem',
           marginBottom: '1.5rem',
           height: '11rem',
-          width: '90rem',
+          width: '90vw',
+          maxWidth: '90rem',
           backgroundColor: '#282828',
           boxShadow: '0px 0px 10px #00000090',
           borderRadius: '10px',
           display: 'flex',
+          overflow: 'hidden',
           }}>
           <img style={{
             borderRadius: '5px',
             margin: '5px',
             boxShadow: '0px 0px 5px #00000090',
             userSelect: 'none',
+            maxWidth: '18.5rem'
           }}
           src={queueItem.image} height='auto' width='auto' alt="Thumbnail" />
           <Box sx={{
             margin: '5px',
             display: 'flex',
+            width: '100%',
             justifyContent: 'space-between',
             }}>
               <Box sx={{
-                width: '30rem',
+                width: '30%',
                 marginRight: '5px',
                 marginLeft: '5px',
                 display: 'flex',
@@ -297,7 +305,7 @@ const Queue: React.FC = () => {
               </Typography>
               </Box>
               <Box sx={{
-                width: '30rem',
+                width: '40%',
                 marginRight: '5px',
                 marginLeft: '5px',
                 display: 'flex',
@@ -330,9 +338,12 @@ const Queue: React.FC = () => {
                 </Typography>
               </Box>
               <Box sx={{
-                //backgroundColor: '#ffffff',
                 marginRight: '5px',
                 marginLeft: '5px',
+                width: '30%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex'
               }}>
               <Tooltip title="Delete from queue" arrow placement='top'>
                 <IconButton
@@ -342,8 +353,6 @@ const Queue: React.FC = () => {
             sx={{
               backgroundColor: '#ff573a25',
               height: '40px',
-              width: '40px',
-              margin: '4rem',
               transition: '250ms',
               '&:hover' : {
                 backgroundColor: '#ff573a',
