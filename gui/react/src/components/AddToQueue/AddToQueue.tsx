@@ -1,5 +1,5 @@
 import { Add } from '@mui/icons-material';
-import { Box, Button, Dialog, Divider } from '@mui/material';
+import { Box, Button, Dialog, Divider, Typography } from '@mui/material';
 import React from 'react';
 import DownloadSelector from './DownloadSelector/DownloadSelector';
 import EpisodeListing from './DownloadSelector/Listing/EpisodeListing';
@@ -10,14 +10,14 @@ const AddToQueue: React.FC = () => {
 
   return <Box>
     <EpisodeListing />
-    <Dialog open={isOpen} onClose={() => setOpen(false)} maxWidth='md'>
-      <Box sx={{ border: '2px solid white', p: 2 }}>
+    <Dialog open={isOpen} onClose={() => setOpen(false)} maxWidth='md' PaperProps={{ elevation:4 }}>
+      <Box>
         <SearchBox />
-        <Divider variant='middle' className="divider-width" light sx={{ color: 'text.primary', fontSize: '1.2rem' }}>Options</Divider>
+        <Divider variant='middle'/>
         <DownloadSelector onFinish={() => setOpen(false)} />
       </Box>
     </Dialog>
-    <Button  variant='contained' onClick={() => setOpen(true)}>
+    <Button variant='contained' onClick={() => setOpen(true)} sx={{ maxHeight: '2.3rem' }}>
       <Add />
       Add to Queue
     </Button>

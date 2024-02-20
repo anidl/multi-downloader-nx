@@ -29,6 +29,7 @@ const StartQueueButton: React.FC = () => {
       startIcon={start ? <PauseCircleFilled /> : <PlayCircleFilled /> }
       variant='contained'
       onClick={change}
+      sx={{ maxHeight: '2.3rem' }}
     >
       {
         start ? 'Stop Queue' : 'Start Queue'

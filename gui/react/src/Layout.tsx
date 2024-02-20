@@ -13,15 +13,21 @@ const Layout: React.FC = () => {
 
   const messageHandler = React.useContext(messageChannelContext);
 
-  return <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+  return <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%', alignItems: 'center',}}>
     <MenuBar />
-    <Box sx={{ height: 50, mb: 4, display: 'flex', gap: 1, mt: 3 }}>
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '93vw',
+      maxWidth: '93rem',
+      maxHeight: '3rem'
+      //backgroundColor: '#ffffff',
+      }}>
       <LogoutButton />
       <AuthButton />
-      <Box sx={{ display: 'flex', gap: 1, height: 36 }}>
-        <Button variant="contained" startIcon={<Folder />} onClick={() => messageHandler?.openFolder('content')}>Open Output Directory</Button>
-        <Button variant="contained" startIcon={<ClearAll />} onClick={() => messageHandler?.clearQueue() }>Clear Queue</Button>
-      </Box>
+        <Button variant="contained" startIcon={<Folder />} onClick={() => messageHandler?.openFolder('content')} sx={{ height: '37px' }}>Open Output Directory</Button>
+        <Button variant="contained" startIcon={<ClearAll />} onClick={() => messageHandler?.clearQueue() } sx={{ height: '37px' }}>Clear Queue</Button>
       <AddToQueue />
       <StartQueueButton />
     </Box>

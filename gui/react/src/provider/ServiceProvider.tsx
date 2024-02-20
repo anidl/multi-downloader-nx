@@ -18,13 +18,11 @@ const ServiceProvider: FCWithChildren = ({ children }) => {
   };
 
   return service === undefined ? 
-    <Box>
-      <Typography color="text.primary" variant='h3' sx={{ textAlign: 'center', mb: 5 }}>Please choose your service</Typography>
+    <Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', flexDirection: 'column', position: 'relative', top: '40vh'}}>
+      <Typography color="text.primary" variant='h3' sx={{ textAlign: 'center', mb: 5 }}>Please select your service</Typography>
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
         <Button size='large' variant="contained" onClick={() => setService('funi')} startIcon={<Avatar src={'https://static.funimation.com/static/img/favicon.ico'} />}>Funimation</Button>
-        <Divider orientation='vertical' flexItem />
         <Button size='large' variant="contained" onClick={() => setService('crunchy')} startIcon={<Avatar src={'https://static.crunchyroll.com/cxweb/assets/img/favicons/favicon-32x32.png'} />}>Crunchyroll</Button>
-        <Divider orientation='vertical' flexItem />
         <Button size='large' variant="contained" onClick={() => setService('hidive')} startIcon={<Avatar src={'https://www.hidive.com/favicon.ico'} />}>Hidive</Button>
       </Box>
     </Box>

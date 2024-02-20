@@ -118,7 +118,7 @@ class HidiveHandler extends Base implements MessageHandler {
       return this.alertError(new Error('Download failed upstream, check for additional logs'));
 
     for (const ep of res.value) {
-      await this.hidive.getEpisode(ep, {..._default, callbackMaker: this.makeProgressHandler.bind(this), dubLang: data.dubLang, dlsubs: data.dlsubs, fileName: data.fileName, q: data.q, force: 'y', noaudio: data.noaudio, novids: data.novids});
+      await this.hidive.getEpisode(ep, {..._default, callbackMaker: this.makeProgressHandler.bind(this), dubLang: data.dubLang, dlsubs: data.dlsubs, fileName: data.fileName, q: data.q, force: 'y', noaudio: data.noaudio, novids: data.novids });
     }
     this.sendMessage({ name: 'finish', data: undefined });
     this.setDownloading(false);
