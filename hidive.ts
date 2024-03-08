@@ -316,7 +316,7 @@ export default class Hidive implements ServiceClass {
 
   public async genSubsUrl(type: string, file: string) {
     return [
-      `${domain.hd_www}/caption/${type}/`,
+      `${domain.hd_api}/caption/${type}/`,
       ( type == 'css' ? '?id=' : '' ),
       `${file}.${type}`
     ].join('');
