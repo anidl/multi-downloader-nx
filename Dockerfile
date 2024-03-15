@@ -21,7 +21,7 @@ RUN pnpm run build-linux-gui
 
 FROM node
 WORKDIR "/app"
-COPY --from=builder /app/lib/_builds/multi-downloader-nx-linux64-gui ./
+COPY --from=builder /app/lib/_builds/multi-downloader-nx-linux-x64-gui ./
 
 # Install mkvmerge and ffmpeg
 
