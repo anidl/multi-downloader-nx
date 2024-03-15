@@ -1315,8 +1315,6 @@ export default class Crunchy implements ServiceClass {
             '?',
             new URLSearchParams({
               'preferred_audio_language': 'ja-JP',
-              streams: 'all',
-              textType: 'all',
               'Policy': this.cmsToken.cms.policy,
               'Signature': this.cmsToken.cms.signature,
               'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
