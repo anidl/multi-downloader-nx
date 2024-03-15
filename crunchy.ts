@@ -50,7 +50,9 @@ export default class Crunchy implements ServiceClass {
   private token: Record<string, any>;
   private req: reqModule.Req;
   private cmsToken: {
-    cms?: Record<string, string>
+    cms?: Record<string, string>,
+    cms_beta?: Record<string, string>,
+    cms_web?: Record<string, string>
   } = {};
 
   constructor(private debug = false) {
@@ -1153,8 +1155,7 @@ export default class Crunchy implements ServiceClass {
           mMeta.playback,
           '?',
           new URLSearchParams({
-            streams: 'all',
-            textType: 'all',
+            'preferred_audio_language': 'ja-JP',
             'Policy': this.cmsToken.cms.policy,
             'Signature': this.cmsToken.cms.signature,
             'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
