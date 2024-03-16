@@ -18,7 +18,7 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-import getKeys, { canDecrypt } from './modules/cr_widevine';
+import getKeys, { canDecrypt } from './modules/widevine';
 //import vttConvert from './modules/module.vttconvert';
 
 // args
