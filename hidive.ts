@@ -120,13 +120,13 @@ export default class Hidive implements ServiceClass {
       await this.doSearch({ ...argv, search: argv.search as string });
     } else if (argv.s && !isNaN(parseInt(argv.s,10)) && parseInt(argv.s,10) > 0) {
       if (this.api == 'old') {
-      //Initilize session
+        //Initilize session
         await this.doInit();
         //get selected episodes
         const selected = await this.getShow(parseInt(argv.s), argv.e, argv.but, argv.all);
         if (selected.isOk && selected.showData) {
           for (const select of selected.value) {
-          //download episode
+            //download episode
             if (!(await this.getEpisode(select, {...argv}))) {
               console.error(`Unable to download selected episode ${parseFloat(select.EpisodeNumberValue+'')}`);
               return false;
@@ -150,7 +150,7 @@ export default class Hidive implements ServiceClass {
       const selected = await this.selectSeries(parseInt(argv.srz), argv.e, argv.but, argv.all);
       if (selected.isOk && selected.showData) {
         for (const select of selected.value) {
-        //download episode
+          //download episode
           if (!(await this.downloadEpisode(select, {...argv}))) {
             console.error(`Unable to download selected episode ${select.episodeInformation.episodeNumber}`);
             return false;
@@ -159,7 +159,7 @@ export default class Hidive implements ServiceClass {
       }
     } else if (argv.new) {
       if (this.api == 'old') {
-      //Initilize session
+        //Initilize session
         await this.doInit();
         //Get Newly Added
         await this.getNewlyAdded(argv.page);
