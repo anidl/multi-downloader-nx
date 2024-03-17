@@ -138,8 +138,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'dl',
     alias: 'srz',
     describe: 'Get season list by series ID',
-    docDescribe: 'This command is used only for crunchyroll.'
-      + '\n Requested is the ID of a show not a season.',
+    docDescribe: 'Requested is the ID of a show not a season.',
     service: ['crunchy'],
     type: 'string',
     usage: '${ID}'

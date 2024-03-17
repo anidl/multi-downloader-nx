@@ -134,24 +134,32 @@ export default class Hidive implements ServiceClass {
           }
         }
       } else {
-        const selected = await this.selectSeries(parseInt(argv.s), argv.e, argv.but, argv.all);
-        if (selected.isOk && selected.showData) {
-          for (const select of selected.value) {
-          //download episode
-            if (!(await this.downloadEpisode(select, {...argv}))) {
-              console.error(`Unable to download selected episode ${select.episodeInformation.episodeNumber}`);
-              return false;
-            }
+        console.error('-s is not yet implemented in the new API, use --srz instead');
+      }
+      return true;
+    } else if (argv.srz && !isNaN(parseInt(argv.srz,10)) && parseInt(argv.srz,10) > 0) {
+      const selected = await this.selectSeries(parseInt(argv.srz), argv.e, argv.but, argv.all);
+      if (selected.isOk && selected.showData) {
+        for (const select of selected.value) {
+        //download episode
+          if (!(await this.downloadEpisode(select, {...argv}))) {
+            console.error(`Unable to download selected episode ${select.episodeInformation.episodeNumber}`);
+            return false;
           }
         }
       }
-      return true;
     } else if (argv.new) {
+      if (this.api == 'old') {
       //Initilize session
-      await this.doInit();
-      //Get Newly Added
-      await this.getNewlyAdded(argv.page);
-    } else {
+        await this.doInit();
+        //Get Newly Added
+        await this.getNewlyAdded(argv.page);
+      } else {
+        console.error('--new is not yet implemented in the new API');
+      }
+    } else if(argv.e) { 
+      console.error('-e is not yet supported');
+    }else {
       console.info('No option selected or invalid value entered. Try --help.');
     }
   }

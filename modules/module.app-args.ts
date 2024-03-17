@@ -31,7 +31,8 @@ let argvC: {
   new: boolean | undefined; 
   'movie-listing': string | undefined; 
   series: string | undefined; 
-  s: string | undefined; 
+  s: string | undefined;  
+  srz: string | undefined; 
   e: string | undefined; 
   extid: string | undefined; 
   q: number; 
