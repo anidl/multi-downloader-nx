@@ -410,6 +410,23 @@ function vtt(group: string | undefined, xFontSize: number | undefined, vttStr: s
   fontSize = xFontSize && xFontSize > 0 ? xFontSize : 34; // 1em to pix
   tmMrg = timeMargin ? timeMargin : 0; //
   rFont = replaceFont ? replaceFont : rFont;
+  if (vttStr.match(/::cue(?:.(.+)\))?{([^}]+)}/g)) {
+    const cssLines = [];
+    let defaultCss = '';
+    const cssGroups = vttStr.matchAll(/::cue(?:.(.+)\))?{([^}]+)}/g);
+    for (const cssGroup of cssGroups) {
+      //Below code will bulldoze defined sizes for custom ones
+      /*if (!options.originalFontSize) {
+        cssGroup[2] = cssGroup[2].replace(/( font-size:.+?;)/g, '').replace(/(font-size:.+?;)/g, '');
+      }*/
+      if (cssGroup[1]) {
+        cssLines.push(`${cssGroup[1]}{${defaultCss}${cssGroup[2]}}`);
+      } else {
+        defaultCss = cssGroup[2];
+      }
+    }
+    cssStr += cssLines.join('\r\n');
+  }
   return convert(
     loadCSS(cssStr),
     loadVTT(vttStr)
