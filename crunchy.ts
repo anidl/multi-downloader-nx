@@ -1373,6 +1373,10 @@ export default class Crunchy implements ServiceClass {
       let hsLangs: string[] = [];
       const pbStreams = pbData.data[0];
 
+      if (!canDecrypt) {
+        console.warn('Decryption not enabled!');
+      }
+
       for(const s of Object.keys(pbStreams)){
         if (
           (s.match(/hls/) || s.match(/dash/)) 
