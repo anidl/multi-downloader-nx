@@ -69,7 +69,7 @@ function loadCSS(cssStr: string): Css {
 function parseStyle(stylegroup: string, line: string, style: any) {
   const defaultSFont = rFont == '' ? defaultStyleFont : rFont; //redeclare cause of let
 
-  if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song') || stylegroup.startsWith('Q0')) { //base for dialog, everything else use defaultStyle
+  if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song') || stylegroup.startsWith('Q0') || stylegroup.startsWith('Q1')) { //base for dialog, everything else use defaultStyle
     style = `${defaultSFont},${fontSize},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2.6,0,2,20,20,46,1`;
   }
 
