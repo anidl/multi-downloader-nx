@@ -167,8 +167,15 @@ export default class Hidive implements ServiceClass {
         console.error('--new is not yet implemented in the new API');
       }
     } else if(argv.e) { 
-      console.error('-e is not yet supported');
-    }else {
+      if (this.api == 'new') {
+        if (!(await this.downloadSingleEpisode(parseInt(argv.e), {...argv}))) {
+          console.error(`Unable to download selected episode ${argv.e}`);
+          return false;
+        }
+      } else {
+        console.error('-e is not supported in the old API');
+      }
+    } else {
       console.info('No option selected or invalid value entered. Try --help.');
     }
   }
@@ -994,6 +1001,86 @@ export default class Hidive implements ServiceClass {
     }
     const mpd = mpdRequest.res.body as string;
 
+    selectedEpisode.jwtToken = playbackData.dash[0].drm.jwtToken;
+
+    //Output metadata and prepare for download
+    const availableSubs = playbackData.dash[0].subtitles.filter(a => a.format === 'vtt');
+    const showTitle = `${selectedEpisode.seriesTitle} S${selectedEpisode.episodeInformation.seasonNumber}`;
+    console.info(`[INFO] ${showTitle} - ${selectedEpisode.episodeInformation.episodeNumber}`);
+    console.info('[INFO] Available dubs and subtitles:');
+    console.info('\tAudios: ' + episodeData.offlinePlaybackLanguages.map(a => langsData.languages.find(b => b.code == a)?.name).join('\n\t\t'));
+    console.info('\tSubs  : ' + availableSubs.map(a => langsData.languages.find(b => b.new_hd_locale == a.language)?.name).join('\n\t\t'));
+    console.info(`[INFO] Selected dub(s): ${options.dubLang.join(', ')}`);
+    const baseUrl = playbackData.dash[0].url.split('master')[0];
+    const parsedmpd = parse(mpd, undefined, baseUrl);
+    const res = await this.downloadMPD(parsedmpd, availableSubs, selectedEpisode, options);
+    if (res === undefined || res.error) {
+      console.error('Failed to download media list');
+      return { isOk: false, reason: new Error('Failed to download media list') };
+    } else {
+      if (!options.skipmux) {
+        await this.muxStreams(res.data, { ...options, output: res.fileName }, false);
+      } else {
+        console.info('Skipping mux');
+      }
+      downloaded({
+        service: 'hidive',
+        type: 's'
+      }, selectedEpisode.titleId+'', [selectedEpisode.episodeInformation.episodeNumber+'']);
+      return { isOk: res, value: undefined };
+    }
+  }
+
+  public async downloadSingleEpisode(id: number, options: Record<any, any>) {
+    //Get Episode data
+    const episodeDataReq = await this.apiReq(`/v4/vod/${id}?includePlaybackDetails=URL`, '', 'auth', 'GET');
+    if (!episodeDataReq.ok || !episodeDataReq.res) { 
+      console.error('Failed to get episode data');
+      return { isOk: false, reason: new Error('Failed to get Episode Data') };
+    }
+    const episodeData = JSON.parse(episodeDataReq.res.body) as NewHidiveEpisode;
+
+    if (episodeData.title.includes(' - ')) {
+      episodeData.episodeInformation.episodeNumber = parseFloat(episodeData.title.split(' - ')[0].replace('E', ''));
+      episodeData.title = episodeData.title.split(' - ')[1];
+    }
+
+    if (!episodeData.playerUrlCallback) {
+      console.error('Failed to download episode: You do not have access to this');
+      return { isOk: false, reason: new Error('You do not have access to this') };
+    }
+
+    const seasonData = await this.getSeason(episodeData.episodeInformation.season);
+    if (!seasonData.isOk || !seasonData.value) { 
+      console.error('Failed to get season data');
+      return { isOk: false, reason: new Error('Failed to get season data') };
+    }
+
+    //Get Playback data
+    const playbackReq = await this.req.getData(episodeData.playerUrlCallback);
+    if(!playbackReq.ok || !playbackReq.res){
+      console.error('Playback Request Failed');
+      return { isOk: false, reason: new Error('Playback request failed') };
+    }
+    const playbackData = JSON.parse(playbackReq.res.body) as NewHidivePlayback;
+
+    //Get actual MPD
+    const mpdRequest = await this.req.getData(playbackData.dash[0].url);
+    if(!mpdRequest.ok || !mpdRequest.res){
+      console.error('MPD Request Failed');
+      return { isOk: false, reason: new Error('MPD request failed') };
+    }
+    const mpd = mpdRequest.res.body as string;
+
+    const selectedEpisode: NewHidiveEpisodeExtra = {
+      ...episodeData,
+      nameLong: episodeData.title,
+      titleId: episodeData.id,
+      seasonTitle: seasonData.value.title,
+      seriesTitle: seasonData.value.series.title,
+      isSelected: true
+    };
+    
     selectedEpisode.jwtToken = playbackData.dash[0].drm.jwtToken;
 
     //Output metadata and prepare for download

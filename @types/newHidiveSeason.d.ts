@@ -25,8 +25,8 @@ export interface Rating {
 
 export interface Episode {
   accessLevel:              string;
-  availablePurchases:       any[];
-  licenceIds:               any[];
+  availablePurchases?:      any[];
+  licenceIds?:              any[];
   type:                     string;
   id:                       number;
   title:                    string;
