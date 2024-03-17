@@ -74,6 +74,10 @@ export interface Series {
   contentRating:   Rating;
 }
 
+export interface NewHidiveSeriesExtra extends Series {
+  season: NewHidiveSeason;
+}
+
 export interface NewHidiveEpisodeExtra extends Episode {
   titleId:      number;
   nameLong:     string;

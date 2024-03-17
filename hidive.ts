@@ -36,7 +36,7 @@ import { HidiveSearch } from './@types/hidiveSearch';
 import { HidiveDashboard } from './@types/hidiveDashboard';
 import { Hit, NewHidiveSearch } from './@types/newHidiveSearch';
 import { NewHidiveSeries } from './@types/newHidiveSeries';
-import { Episode, NewHidiveEpisodeExtra, NewHidiveSeason } from './@types/newHidiveSeason';
+import { Episode, NewHidiveEpisodeExtra, NewHidiveSeason, NewHidiveSeriesExtra } from './@types/newHidiveSeason';
 import { NewHidiveEpisode } from './@types/newHidiveEpisode';
 import { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
 import { MPDParsed, parse } from './modules/module.transform-mpd';
@@ -134,7 +134,16 @@ export default class Hidive implements ServiceClass {
           }
         }
       } else {
-        console.error('-s is not yet implemented in the new API, use --srz instead');
+        const selected = await this.selectSeason(parseInt(argv.s), argv.e, argv.but, argv.all);
+        if (selected.isOk && selected.showData) {
+          for (const select of selected.value) {
+            //download episode
+            if (!(await this.downloadEpisode(select, {...argv}))) {
+              console.error(`Unable to download selected episode ${select.episodeInformation.episodeNumber}`);
+              return false;
+            }
+          }
+        }
       }
       return true;
     } else if (argv.srz && !isNaN(parseInt(argv.srz,10)) && parseInt(argv.srz,10) > 0) {
@@ -694,6 +703,34 @@ export default class Hidive implements ServiceClass {
     return { isOk: false };
   }
 
+  public async listSeason(id: number) {
+    const season = await this.getSeason(id);
+    if (!season.isOk || !season.value) {
+      console.error('Failed to list series data: Failed to get season '+id);
+      return { isOk: false };
+    }
+    console.info(`  [S.${season.value.id}] ${season.value.title} (${season.value.episodeCount} Episodes)`);
+    while (season.value.paging.moreDataAvailable) {
+      const seasonPage = await this.getSeason(id, season.value.paging.lastSeen);
+      if (!seasonPage.isOk || !seasonPage.value) break;
+      season.value.episodes = season.value.episodes.concat(seasonPage.value.episodes);
+      season.value.paging.lastSeen = seasonPage.value.paging.lastSeen;
+      season.value.paging.moreDataAvailable = seasonPage.value.paging.moreDataAvailable;
+    }
+    const episodes: Episode[] = [];
+    for (const episode of season.value.episodes) {
+      if (episode.title.includes(' - ')) {
+        episode.episodeInformation.episodeNumber = parseFloat(episode.title.split(' - ')[0].replace('E', ''));
+        episode.title = episode.title.split(' - ')[1];
+      }
+      //S${episode.episodeInformation.seasonNumber}E${episode.episodeInformation.episodeNumber} - 
+      episodes.push(episode);
+      console.info(`    [E.${episode.id}] ${episode.title}`);
+    }
+    const series: NewHidiveSeriesExtra = {...season.value.series, season: season.value};
+    return { isOk: true, value: episodes, series: series };
+  }
+
   /**
    * Lists the requested series, and returns the selected episodes
    * @param id Series ID
@@ -725,6 +762,50 @@ export default class Hidive implements ServiceClass {
       if (all || 
       but && !doEpsFilter.isSelected([parseFloat(showData[i].episodeInformation.episodeNumber+'')+'', showData[i].id+'']) || 
       !but && doEpsFilter.isSelected([parseFloat(showData[i].episodeInformation.episodeNumber+'')+'', showData[i].id+''])
+      ) {
+        selEpsArr.push({ isSelected: true, titleId, nameLong, seasonTitle, seriesTitle, ...showData[i] });
+        selMark = '✓ ';
+      }
+      console.info('%s[%s] %s',
+        selMark,
+        'S'+parseFloat(showData[i].episodeInformation.seasonNumber+'')+'E'+parseFloat(showData[i].episodeInformation.episodeNumber+''),
+        showData[i].title,
+      );
+    }
+    return { isOk: true, value: selEpsArr, showData: getShowData.series };
+  }
+
+  /**
+   * Lists the requested season, and returns the selected episodes
+   * @param id Season ID
+   * @param e Selector
+   * @param but Download all but selected videos
+   * @param all Whether to download all available videos
+   * @returns 
+   */
+  public async selectSeason(id: number, e: string | undefined, but: boolean, all: boolean) {
+    const getShowData = await this.listSeason(id);
+    if (!getShowData.isOk || !getShowData.value) {
+      return { isOk: false, value: [] };
+    }
+    const showData = getShowData.value;
+    const doEpsFilter = parseSelect(e as string);
+    // build selected episodes
+    const selEpsArr: NewHidiveEpisodeExtra[] = []; let ovaSeq = 1; let movieSeq = 1;
+    for (let i = 0; i < showData.length; i++) {
+      const titleId = showData[i].id;
+      const seriesTitle = getShowData.series.title;
+      const seasonTitle = getShowData.series.season.title;
+      let nameLong = showData[i].title;
+      if (nameLong.match(/OVA/i)) {
+        nameLong = 'ova' + (('0' + ovaSeq).slice(-2)); ovaSeq++;
+      } else if (nameLong.match(/Theatrical/i)) {
+        nameLong = 'movie' + (('0' + movieSeq).slice(-2)); movieSeq++;
+      }
+      let selMark = '';
+      if (all || 
+        but && !doEpsFilter.isSelected([parseFloat(showData[i].episodeInformation.episodeNumber+'')+'', showData[i].id+'']) || 
+        !but && doEpsFilter.isSelected([parseFloat(showData[i].episodeInformation.episodeNumber+'')+'', showData[i].id+''])
       ) {
         selEpsArr.push({ isSelected: true, titleId, nameLong, seasonTitle, seriesTitle, ...showData[i] });
         selMark = '✓ ';
