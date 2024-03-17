@@ -601,7 +601,6 @@ export default class Hidive implements ServiceClass {
         }
       }
       return { isOk: true, value: searchItems.filter(a => a.type == 'VOD_SERIES').flatMap((a): SearchResponseItem => {
-        console.info(a);
         return {
           id: a.id+'',
           image: a.coverUrl ?? '/notFound.png',
