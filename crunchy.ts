@@ -2162,13 +2162,13 @@ export default class Crunchy implements ServiceClass {
           //Prepare the episode array
           let item;
           const seasonIdentifier = s.identifier ? s.identifier.split('|')[1] : `S${episode.season_number}`;
-          if (!(Object.prototype.hasOwnProperty.call(episodes, `${seasonIdentifier}E${episode.episode_number || episode.episode}`))) {
-            item = episodes[`${seasonIdentifier}E${episode.episode_number || episode.episode}`] = {
+          if (!(Object.prototype.hasOwnProperty.call(episodes, `${seasonIdentifier}E${episode.episode || episode.episode_number}`))) {
+            item = episodes[`${seasonIdentifier}E${episode.episode || episode.episode_number}`] = {
               items: [] as CrunchyEpisode[],
               langs: [] as langsData.LanguageItem[]
             };
           } else {
-            item = episodes[`${seasonIdentifier}E${episode.episode_number || episode.episode}`];
+            item = episodes[`${seasonIdentifier}E${episode.episode || episode.episode_number}`];
           }
 
           if (episode.versions) {
