@@ -1031,7 +1031,7 @@ export default class Hidive implements ServiceClass {
     const variables: Variable[] = [];
     let dlFailed = false;
     const subsMargin = 0;
-    const chosenFontSize = options.fontSize;
+    const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] | undefined = undefined;
     if (!canDecrypt) console.warn('Decryption not enabled!');
 
@@ -1322,6 +1322,10 @@ export default class Hidive implements ServiceClass {
               const cssGroups = getVttContent.res.body.matchAll(/::cue(?:.(.+)\))?{([^}]+)}/g);
               let defaultCss = '';
               for (const cssGroup of cssGroups) {
+                //Below code will bulldoze defined sizes for custom ones
+                /*if (!options.originalFontSize) {
+                  cssGroup[2] = cssGroup[2].replace(/( font-size:.+?;)/g, '').replace(/(font-size:.+?;)/g, '');
+                }*/
                 if (cssGroup[1]) {
                   cssLines.push(`${cssGroup[1]}{${defaultCss}${cssGroup[2]}}`);
                 } else {
