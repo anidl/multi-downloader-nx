@@ -1030,9 +1030,8 @@ export default class Hidive implements ServiceClass {
     const files: DownloadedMedia[] = [];
     const variables: Variable[] = [];
     let dlFailed = false;
-    /*const subsMargin = 0;
-    const videoIndex = 0;
-    const chosenFontSize = options.fontSize;*/
+    const subsMargin = 0;
+    const chosenFontSize = options.fontSize;
     let encryptionKeys: KeyContainer[] | undefined = undefined;
     if (!canDecrypt) console.warn('Decryption not enabled!');
 
@@ -1316,27 +1315,25 @@ export default class Hidive implements ServiceClass {
           sxData.path = path.join(this.cfg.dir.content, sxData.file);
           sxData.language = subLang;
           if(options.dlsubs.includes('all') || options.dlsubs.includes(subLang.locale)) {
-            /*const subs4XUrl = sub.url.split('/');
-            const subsXUrl = subs4XUrl[subs4XUrl.length - 1].replace(/.vtt$/, '');
-            const getCssContent = await this.req.getData(await this.genSubsUrl('css', subsXUrl));
-            const getVttContent = await this.req.getData(await this.genSubsUrl('vtt', subsXUrl));*/
             const getVttContent = await this.req.getData(sub.url);
-            console.log(sub.url);
             if (getVttContent.ok && getVttContent.res) {
-              //TODO: Get vtt2ass working with css format of new hidive app
-              /*const cssLines = [];
+              console.info(`Subtitle Downloaded: ${sub.url}`);
+              const cssLines = [];
               const cssGroups = getVttContent.res.body.matchAll(/::cue(?:.(.+)\))?{([^}]+)}/g);
+              let defaultCss = '';
               for (const cssGroup of cssGroups) {
-                cssLines.push(`${cssGroup[1]} {${cssGroup[2]}}`);
-              }*/
+                if (cssGroup[1]) {
+                  cssLines.push(`${cssGroup[1]}{${defaultCss}${cssGroup[2]}}`);
+                } else {
+                  defaultCss = cssGroup[2];
+                }
+              }
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-              //.replace(/#FFFF00/g, '#FFFFFF')
-              const sBody = getVttContent.res.body.replace(/yellow/g, '#FFFFFF');
-              //const sBody = vtt(undefined, chosenFontSize, getVttContent.res.body, cssLines.join('\r\n'), subsMargin, options.fontName);
+              const sBody = vtt(undefined, chosenFontSize, getVttContent.res.body, cssLines.join('\r\n'), subsMargin, options.fontName);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);
-              console.info(`Subtitle downloaded: ${sxData.file}`);
+              console.info(`Subtitle converted: ${sxData.file}`);
               files.push({
                 type: 'Subtitle',
                 ...sxData as sxItem,

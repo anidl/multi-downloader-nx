@@ -261,6 +261,7 @@ function convert(css: Css, vtt: Vtt[]) {
     song_cap: [],
   };
   const linesMap: Record<string, number> = {};
+  let previousLine: ReturnType<typeof convertLine> | undefined = undefined;
   for (const l in vtt) {
     const x = convertLine(stylesMap, vtt[l]);
     if (x.ind !== '' && linesMap[x.ind] !== undefined) {
@@ -278,7 +279,17 @@ function convert(css: Css, vtt: Vtt[]) {
         linesMap[x.ind] = events[x.type as keyof typeof events].length - 1;
       }
     }
-
+    /**
+     * What cursed code have I brought upon this land?
+     * This checks if a subtitle should be multi-line, and if it is, pops the just inserted 
+     * subtitle and the previous subtitle, and merges them into a single subtitle.
+     */
+    if (previousLine?.start == x.start && previousLine.type == x.type && previousLine.style == x.style) {
+      events[x.type as keyof typeof events].pop();
+      const previousLinePop = events[x.type as keyof typeof events].pop();
+      events[x.type as keyof typeof events].push(previousLinePop + '\\N'+x.text);
+    }
+    previousLine = x;
   }
   if (events.subtitle.length > 0) {
     ass = ass.concat(
