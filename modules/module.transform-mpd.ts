@@ -1,5 +1,5 @@
-import { Playlist, parse as mpdParse } from 'mpd-parser';
-import { LanguageItem } from './module.langsData';
+import { parse as mpdParse } from 'mpd-parser';
+import { LanguageItem, findLang, languages } from './module.langsData';
 
 type Segment = {
   uri: string;
@@ -20,7 +20,8 @@ export type PlaylistItem = {
 
 
 type AudioPlayList = {
-  language: LanguageItem
+  language: LanguageItem,
+  default: boolean
 } & PlaylistItem
 
 type VideoPlayList = {
@@ -37,9 +38,9 @@ export type MPDParsed = {
   }
 }
 
-export function parse(manifest: string, language: LanguageItem, url?: string) {
+export function parse(manifest: string, language?: LanguageItem, url?: string) {
   if (!manifest.includes('BaseURL') && url) {
-    manifest = manifest.replace(/(<MPD[^]^[^]*?>)/gm, `$1<BaseURL>${url}</BaseURL>`);
+    manifest = manifest.replace(/(<MPD*\b[^>]*>)/gm, `$1<BaseURL>${url}</BaseURL>`);
   }
   const parsed = mpdParse(manifest);
   const ret: MPDParsed = {};
@@ -50,9 +51,18 @@ export function parse(manifest: string, language: LanguageItem, url?: string) {
       if (!Object.prototype.hasOwnProperty.call(ret, host))
         ret[host] = { audio: [], video: [] };
 
+      //Find and add audio language if it is found in the MPD
+      let audiolang: LanguageItem;
+      const foundlanguage = findLang(languages.find(a => a.code === item.language)?.cr_locale ?? 'unknown');
+      if (item.language) {
+        audiolang = foundlanguage;
+      } else {
+        audiolang = language ? language : foundlanguage;
+      }
       const pItem: AudioPlayList = {
         bandwidth: playlist.attributes.BANDWIDTH,
-        language: language,
+        language: audiolang,
+        default: item.default,
         segments: playlist.segments.map((segment): Segment => {
           const uri = segment.resolvedUri;
           const map_uri = segment.map.resolvedUri;

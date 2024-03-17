@@ -231,6 +231,20 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'hdapi',
+    describe: 'Selects the API type for Hidive',
+    type: 'string',
+    group: 'dl',
+    service: ['hidive'],
+    docDescribe: 'If set to Old, it has lower quality, but Non-DRM streams, but some people can\'t use it,'
+      + '\nIf set to New, it has a higher quality stream, but everything is DRM.',
+    usage: '',
+    choices: ['old', 'new'],
+    default: {
+      default: 'old'
+    }
+  },
+  {
     name: 'removeBumpers',
     describe: 'Remove bumpers from final video',
     type: 'boolean',
