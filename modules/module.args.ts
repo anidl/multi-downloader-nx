@@ -138,8 +138,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'dl',
     alias: 'srz',
     describe: 'Get season list by series ID',
-    docDescribe: 'This command is used only for crunchyroll.'
-      + '\n Requested is the ID of a show not a season.',
+    docDescribe: 'Requested is the ID of a show not a season.',
     service: ['crunchy'],
     type: 'string',
     usage: '${ID}'
@@ -228,6 +227,20 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     choices: ['android', 'web'],
     default: {
       default: 'android'
+    }
+  },
+  {
+    name: 'hdapi',
+    describe: 'Selects the API type for Hidive',
+    type: 'string',
+    group: 'dl',
+    service: ['hidive'],
+    docDescribe: 'If set to Old, it has lower quality, but Non-DRM streams, but some people can\'t use it,'
+      + '\nIf set to New, it has a higher quality stream, but everything is DRM.',
+    usage: '',
+    choices: ['old', 'new'],
+    default: {
+      default: 'old'
     }
   },
   {

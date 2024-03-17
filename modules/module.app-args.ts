@@ -31,7 +31,8 @@ let argvC: {
   new: boolean | undefined; 
   'movie-listing': string | undefined; 
   series: string | undefined; 
-  s: string | undefined; 
+  s: string | undefined;  
+  srz: string | undefined; 
   e: string | undefined; 
   extid: string | undefined; 
   q: number; 
@@ -66,6 +67,7 @@ let argvC: {
   dlVideoOnce: boolean; 
   chapters: boolean;
   crapi: 'android' | 'web';
+  hdapi: 'old' | 'new';
   removeBumpers: boolean;
   originalFontSize: boolean;
   keepAllVideos: boolean;

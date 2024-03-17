@@ -61,7 +61,9 @@ class Req {
       options.headers = {...options.headers, ...params.headers};
     }
     if(options.method == 'POST'){
-      (options.headers as Headers)['Content-Type'] = 'application/x-www-form-urlencoded';
+      if (!(options.headers as Headers)['Content-Type']) {
+        (options.headers as Headers)['Content-Type'] = 'application/x-www-form-urlencoded';
+      }
     }
     if(params.body){
       options.body = params.body;

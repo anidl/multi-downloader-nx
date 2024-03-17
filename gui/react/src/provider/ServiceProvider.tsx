@@ -23,7 +23,7 @@ const ServiceProvider: FCWithChildren = ({ children }) => {
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
         <Button size='large' variant="contained" onClick={() => setService('funi')} startIcon={<Avatar src={'https://static.funimation.com/static/img/favicon.ico'} />}>Funimation</Button>
         <Button size='large' variant="contained" onClick={() => setService('crunchy')} startIcon={<Avatar src={'https://static.crunchyroll.com/cxweb/assets/img/favicons/favicon-32x32.png'} />}>Crunchyroll</Button>
-        <Button size='large' variant="contained" onClick={() => setService('hidive')} startIcon={<Avatar src={'https://www.hidive.com/favicon.ico'} />}>Hidive</Button>
+        <Button size='large' variant="contained" onClick={() => setService('hidive')} startIcon={<Avatar src={'https://static.diceplatform.com/prod/original/dce.hidive/settings/HIDIVE_AppLogo_1024x1024.0G0vK.jpg'} />}>Hidive</Button>
       </Box>
     </Box>
     : <serviceContext.Provider value={service}>

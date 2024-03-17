@@ -69,7 +69,7 @@ function loadCSS(cssStr: string): Css {
 function parseStyle(stylegroup: string, line: string, style: any) {
   const defaultSFont = rFont == '' ? defaultStyleFont : rFont; //redeclare cause of let
 
-  if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song')) { //base for dialog, everything else use defaultStyle
+  if (stylegroup.startsWith('Subtitle') || stylegroup.startsWith('Song') || stylegroup.startsWith('Q0') || stylegroup.startsWith('Q1')) { //base for dialog, everything else use defaultStyle
     style = `${defaultSFont},${fontSize},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2.6,0,2,20,20,46,1`;
   }
 
@@ -261,6 +261,7 @@ function convert(css: Css, vtt: Vtt[]) {
     song_cap: [],
   };
   const linesMap: Record<string, number> = {};
+  let previousLine: ReturnType<typeof convertLine> | undefined = undefined;
   for (const l in vtt) {
     const x = convertLine(stylesMap, vtt[l]);
     if (x.ind !== '' && linesMap[x.ind] !== undefined) {
@@ -278,7 +279,17 @@ function convert(css: Css, vtt: Vtt[]) {
         linesMap[x.ind] = events[x.type as keyof typeof events].length - 1;
       }
     }
-
+    /**
+     * What cursed code have I brought upon this land?
+     * This checks if a subtitle should be multi-line, and if it is, pops the just inserted 
+     * subtitle and the previous subtitle, and merges them into a single subtitle.
+     */
+    if (previousLine?.start == x.start && previousLine.type == x.type && previousLine.style == x.style) {
+      events[x.type as keyof typeof events].pop();
+      const previousLinePop = events[x.type as keyof typeof events].pop();
+      events[x.type as keyof typeof events].push(previousLinePop + '\\N'+x.text);
+    }
+    previousLine = x;
   }
   if (events.subtitle.length > 0) {
     ass = ass.concat(
@@ -399,6 +410,23 @@ function vtt(group: string | undefined, xFontSize: number | undefined, vttStr: s
   fontSize = xFontSize && xFontSize > 0 ? xFontSize : 34; // 1em to pix
   tmMrg = timeMargin ? timeMargin : 0; //
   rFont = replaceFont ? replaceFont : rFont;
+  if (vttStr.match(/::cue(?:.(.+)\))?{([^}]+)}/g)) {
+    const cssLines = [];
+    let defaultCss = '';
+    const cssGroups = vttStr.matchAll(/::cue(?:.(.+)\))?{([^}]+)}/g);
+    for (const cssGroup of cssGroups) {
+      //Below code will bulldoze defined sizes for custom ones
+      /*if (!options.originalFontSize) {
+        cssGroup[2] = cssGroup[2].replace(/( font-size:.+?;)/g, '').replace(/(font-size:.+?;)/g, '');
+      }*/
+      if (cssGroup[1]) {
+        cssLines.push(`${cssGroup[1]}{${defaultCss}${cssGroup[2]}}`);
+      } else {
+        defaultCss = cssGroup[2];
+      }
+    }
+    cssStr += cssLines.join('\r\n');
+  }
   return convert(
     loadCSS(cssStr),
     loadVTT(vttStr)
