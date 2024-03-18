@@ -7,6 +7,7 @@ export type CrunchyDownloadOptions = {
   hslang: string,
   kstream: number,
   novids?: boolean,
+  noaudio?: boolean,
   x: number,
   q: number,
   fileName: string,

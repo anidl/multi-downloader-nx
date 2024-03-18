@@ -1477,13 +1477,12 @@ export default class Crunchy implements ServiceClass {
 
       let tsFile = undefined;
 
-      if(!options.novids && !dlFailed && curStream !== undefined){
+      if(!dlFailed && curStream !== undefined && !(!options.novids && !options.noaudio)){
         const streamPlaylistsReq = await this.req.getData(curStream.url);
         if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
           console.error('CAN\'T FETCH VIDEO PLAYLISTS!');
           dlFailed = true;
-        }
-        else{
+        } else {
           if (streamPlaylistsReq.res.body.match('MPD')) {
             //Parse MPD Playlists
             const streamPlaylists = parse(streamPlaylistsReq.res.body, langsData.findLang(langsData.fixLanguageTag(pbData.meta.audio_locale as string) || ''), curStream.url.match(/.*\.urlset\//)[0]);
@@ -1567,6 +1566,8 @@ export default class Crunchy implements ServiceClass {
             // When best selected video quality is already downloaded
             if(dlVideoOnce && options.dlVideoOnce) {
               console.info('Already downloaded video, skipping video download...');
+            } else if (options.novids) {
+              console.info('Skipping video download...');
             } else {
               //Download Video
               const totalParts = chosenVideoSegments.segments.length;
@@ -1609,7 +1610,7 @@ export default class Crunchy implements ServiceClass {
               videoDownloaded = true;
             }
 
-            if (chosenAudioSegments) {
+            if (chosenAudioSegments && !options.noaudio) {
               //Download Audio (if available)
               const totalParts = chosenAudioSegments.segments.length;
               const mathParts  = Math.ceil(totalParts / options.partsize);
@@ -1648,6 +1649,8 @@ export default class Crunchy implements ServiceClass {
                 dlFailed = true;
               }
               audioDownloaded = true;
+            } else if (options.noaudio) {
+              console.info('Skipping audio download...');
             }
 
             //Handle Decryption if needed
@@ -1747,7 +1750,7 @@ export default class Crunchy implements ServiceClass {
                 isPrimary: isPrimary
               });
             }
-          } else {
+          } else if (!options.novids) {
             const streamPlaylists = m3u8(streamPlaylistsReq.res.body);
             const plServerList: string[] = [],
               plStreams: Record<string, Record<string, string>> = {},
@@ -1770,24 +1773,23 @@ export default class Crunchy implements ServiceClass {
               const plUri = new URL(pl.uri);
               let plServer = plUri.hostname;
               // set server list
-              if(plUri.searchParams.get('cdn')){
+              if (plUri.searchParams.get('cdn')){
                 plServer += ` (${plUri.searchParams.get('cdn')})`;
               }
-              if(!plServerList.includes(plServer)){
+              if (!plServerList.includes(plServer)){
                 plServerList.push(plServer);
               }
               // add to server
-              if(!Object.keys(plStreams).includes(plServer)){
+              if (!Object.keys(plStreams).includes(plServer)){
                 plStreams[plServer] = {};
               }
               if(
                 plStreams[plServer][plResolutionText]
                           && plStreams[plServer][plResolutionText] != pl.uri
                           && typeof plStreams[plServer][plResolutionText] != 'undefined'
-              ){
+              ) {
                 console.error(`Non duplicate url for ${plServer} detected, please report to developer!`);
-              }
-              else{
+              } else{
                 plStreams[plServer][plResolutionText] = pl.uri;
               }
               // set plQualityStr
@@ -1855,8 +1857,7 @@ export default class Crunchy implements ServiceClass {
               if(!chunkPage.ok || !chunkPage.res){
                 console.error('CAN\'T FETCH VIDEO PLAYLIST!');
                 dlFailed = true;
-              }
-              else{
+              } else {
                 const chunkPlaylist = m3u8(chunkPage.res.body);
                 const totalParts = chunkPlaylist.segments.length;
                 const mathParts  = Math.ceil(totalParts / options.partsize);
@@ -1887,7 +1888,7 @@ export default class Crunchy implements ServiceClass {
                     language: lang
                   }) : undefined
                 }).download();
-                if(!dlStreamByPl.ok){
+                if (!dlStreamByPl.ok) {
                   console.error(`DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
                   dlFailed = true;
                 }
@@ -1899,17 +1900,15 @@ export default class Crunchy implements ServiceClass {
                 });
                 dlVideoOnce = true;
               }
-            }
-            else{
+            } else{
               console.error('Quality not selected!\n');
               dlFailed = true;
             }
+          } else if (options.novids) {
+            fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+            console.info('Downloading skipped!');
           }
         }
-      }
-      else if(options.novids){
-        fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
-        console.info('Downloading skipped!');
       }
 
       if (compiledChapters.length > 0) {
