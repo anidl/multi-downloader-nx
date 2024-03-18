@@ -1120,6 +1120,9 @@ export default class Hidive implements ServiceClass {
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] | undefined = undefined;
     if (!canDecrypt) console.warn('Decryption not enabled!');
+    
+    if (!this.cfg.bin.ffmpeg) 
+      this.cfg.bin = await yamlCfg.loadBinCfg();
 
     variables.push(...([
       ['title', selectedEpisode.title, true],
