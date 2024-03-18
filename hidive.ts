@@ -679,6 +679,11 @@ export default class Hidive implements ServiceClass {
       return { isOk: false };
     }
     console.info(`[Z.${series.value.id}] ${series.value.title} (${series.value.seasons.length} Seasons)`);
+    if (series.value.seasons.length === 0) {
+      console.info('  No Seasons found!');
+      return { isOk: false };
+    }
+    const episodes: Episode[] = [];
     for (const seasonData of series.value.seasons) {
       const season = await this.getSeason(seasonData.id);
       if (!season.isOk || !season.value) {
@@ -693,7 +698,6 @@ export default class Hidive implements ServiceClass {
         season.value.paging.lastSeen = seasonPage.value.paging.lastSeen;
         season.value.paging.moreDataAvailable = seasonPage.value.paging.moreDataAvailable;
       }
-      const episodes: Episode[] = [];
       for (const episode of season.value.episodes) {
         if (episode.title.includes(' - ')) {
           episode.episodeInformation.episodeNumber = parseFloat(episode.title.split(' - ')[0].replace('E', ''));
@@ -703,10 +707,8 @@ export default class Hidive implements ServiceClass {
         episodes.push(episode);
         console.info(`    [E.${episode.id}] ${episode.title}`);
       }
-      return { isOk: true, value: episodes, series: series.value };
     }
-    console.info('  No Seasons found!');
-    return { isOk: false };
+    return { isOk: true, value: episodes, series: series.value };
   }
 
   public async listSeason(id: number) {
@@ -1120,7 +1122,7 @@ export default class Hidive implements ServiceClass {
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] | undefined = undefined;
     if (!canDecrypt) console.warn('Decryption not enabled!');
-    
+
     if (!this.cfg.bin.ffmpeg) 
       this.cfg.bin = await yamlCfg.loadBinCfg();
 
