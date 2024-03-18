@@ -26,7 +26,8 @@ const stateFile    = path.join(workingDir, 'config', 'guistate');
 const tokenFile    = {
   funi: path.join(workingDir, 'config', 'funi_token'),
   cr:   path.join(workingDir, 'config', 'cr_token'),
-  hd:   path.join(workingDir, 'config', 'hd_token')
+  hd:   path.join(workingDir, 'config', 'hd_token'),
+  hdNew:   path.join(workingDir, 'config', 'hd_new_token')
 };
 
 export const ensureConfig = () => {
@@ -82,7 +83,8 @@ export type ConfigObject = {
   bin: {
     ffmpeg?: string,
     mkvmerge?: string,
-    ffprobe?: string
+    ffprobe?: string,
+    mp4decrypt?: string
   },
   cli: {
     [key: string]: any
@@ -146,7 +148,8 @@ const loadBinCfg = async () => {
   const defaultBin = {
     ffmpeg: 'ffmpeg',
     mkvmerge: 'mkvmerge',
-    ffprobe: 'ffprobe'
+    ffprobe: 'ffprobe',
+    mp4decrypt: 'mp4decrypt'
   };
   const keys = Object.keys(defaultBin) as (keyof typeof defaultBin)[];
   for(const dir of keys){
@@ -240,7 +243,7 @@ const saveHDSession = (data: Record<string, unknown>) => {
 
 
 const loadHDToken = () => {
-  let token = loadYamlCfgFile(tokenFile.cr, true);
+  let token = loadYamlCfgFile(tokenFile.hd, true);
   if(typeof token !== 'object' || token === null || Array.isArray(token)){
     token = {};
   }
@@ -288,6 +291,25 @@ const loadHDProfile = () => {
     };
   }
   return profile;
+};
+
+const loadNewHDToken = () => {
+  let token = loadYamlCfgFile(tokenFile.hdNew, true);
+  if(typeof token !== 'object' || token === null || Array.isArray(token)){
+    token = {};
+  }
+  return token;
+};
+
+const saveNewHDToken = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(tokenFile.hdNew);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${tokenFile.hdNew}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.error('Can\'t save token file to disk!');
+  }
 };
 
 const loadFuniToken = () => {
@@ -361,6 +383,8 @@ export {
   loadHDSession,
   saveHDToken,
   loadHDToken,
+  saveNewHDToken,
+  loadNewHDToken,
   saveHDProfile,
   loadHDProfile,
   getState,

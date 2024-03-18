@@ -1,3 +1,5 @@
+import { Images } from './crunchyEpisodeList';
+
 export interface CrunchyAndroidEpisodes {
   __class__:        string;
   __href__:         string;
@@ -5,13 +7,13 @@ export interface CrunchyAndroidEpisodes {
   __links__:        Actions;
   __actions__:      Actions;
   total:            number;
-  items:            CrunchyEpisode[];
+  items:            CrunchyAndroidEpisode[];
 }
 
 export interface Actions {
 }
 
-export interface CrunchyEpisode {
+export interface CrunchyAndroidEpisode {
   __class__:                 string;
   __href__:                  string;
   __resource_key__:          string;
@@ -19,7 +21,7 @@ export interface CrunchyEpisode {
   __actions__:               Actions;
   playback:                  string;
   id:                        string;
-  channel_id:                string;
+  channel_id:                ChannelID;
   series_id:                 string;
   series_title:              string;
   series_slug_title:         string;
@@ -37,19 +39,19 @@ export interface CrunchyEpisode {
   next_episode_id:           string;
   next_episode_title:        string;
   hd_flag:                   boolean;
-  maturity_ratings:          string[];
+  maturity_ratings:          MaturityRating[];
   extended_maturity_rating:  Actions;
   is_mature:                 boolean;
   mature_blocked:            boolean;
-  episode_air_date:          string;
-  upload_date:               string;
-  availability_starts:       string;
-  availability_ends:         string;
+  episode_air_date:          Date;
+  upload_date:               Date;
+  availability_starts:       Date;
+  availability_ends:         Date;
   eligible_region:           string;
   available_date:            Date;
-  free_available_date:       string;
+  free_available_date:       Date;
   premium_date:              Date;
-  premium_available_date:    string;
+  premium_available_date:    Date;
   is_subbed:                 boolean;
   is_dubbed:                 boolean;
   is_clip:                   boolean;
@@ -57,13 +59,13 @@ export interface CrunchyEpisode {
   seo_description:           string;
   season_tags:               string[];
   available_offline:         boolean;
-  subtitle_locales:          string[];
+  subtitle_locales:          Locale[];
   availability_notes:        string;
-  audio_locale:              string;
+  audio_locale:              Locale;
   versions:                  Version[];
   closed_captions_available: boolean;
   identifier:                string;
-  media_type:                string;
+  media_type:                MediaType;
   slug:                      string;
   images:                    Images;
   duration_ms:               number;
@@ -76,19 +78,15 @@ export interface CrunchyEpisode {
 }
 
 export interface Links {
-  'episode/channel':      EpisodeChannel;
-  'episode/next_episode': EpisodeChannel;
-  'episode/season':       EpisodeChannel;
-  'episode/series':       EpisodeChannel;
-  streams:                EpisodeChannel;
+  'episode/channel':      Link;
+  'episode/next_episode': Link;
+  'episode/season':       Link;
+  'episode/series':       Link;
+  streams:                Link;
 }
 
-export interface EpisodeChannel {
+export interface Link {
   href: string;
-}
-
-export interface Images {
-  thumbnail: Array<Thumbnail[]>;
 }
 
 export interface Thumbnail {
@@ -115,6 +113,18 @@ export enum Locale {
   zhCN = 'zh-CN',
   koKR = 'ko-KR',
   jaJP = 'ja-JP',
+}
+
+export enum MediaType {
+  Episode = 'episode',
+}
+
+export enum ChannelID {
+  Crunchyroll = 'crunchyroll',
+}
+
+export enum MaturityRating {
+  Tv14 = 'TV-14',
 }
 
 export interface Version {

@@ -1,3 +1,5 @@
+import { Links } from './crunchyAndroidEpisodes';
+
 export interface CrunchyEpisodeList {
   total: number;
   data:  CrunchyEpisode[];
@@ -41,27 +43,28 @@ export interface CrunchyEpisode {
   listing_id:                string;
   episode_air_date:          Date;
   slug:                      string;
-  available_date:            null;
+  available_date:            Date;
   subtitle_locales:          Locale[];
   slug_title:                string;
   available_offline:         boolean;
   description:               string;
   is_subbed:                 boolean;
-  premium_date:              null;
+  premium_date:              Date;
   upload_date:               Date;
   season_slug_title:         string;
   closed_captions_available: boolean;
   episode_number:            number;
   season_tags:               any[];
   maturity_ratings:          MaturityRating[];
-  streams_link:              string;
+  streams_link?:             string;
   mature_blocked:            boolean;
   is_clip:                   boolean;
   hd_flag:                   boolean;
-  hide_season_title?:    boolean;
-  hide_season_number?:   boolean;
-  isSelected?:           boolean;
-  seq_id:                string;
+  hide_season_title?:        boolean;
+  hide_season_number?:       boolean;
+  isSelected?:               boolean;
+  seq_id:                    string;
+  __links__?:                Links;
 }
 
 export enum Locale {
@@ -127,5 +130,5 @@ export interface Version {
 }
 
 export interface Meta {
-  versions_considered: boolean;
+  versions_considered?: boolean;
 }

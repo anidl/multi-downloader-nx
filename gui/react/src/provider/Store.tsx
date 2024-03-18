@@ -13,6 +13,8 @@ export type DownloadOptions = {
   all: boolean,
   but: boolean,
   novids: boolean,
+  hslang?: string,
+  simul: boolean,
   noaudio: boolean
 }
 
@@ -48,7 +50,8 @@ const initialState: StoreState = {
     all: false,
     but: false,
     noaudio: false,
-    novids: false
+    novids: false,
+    simul: false
   },
   service: undefined,
   episodeListing: [],

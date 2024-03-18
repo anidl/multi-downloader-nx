@@ -8,9 +8,10 @@ jobs:
   build:
     strategy:
       matrix:
-        build_type: [ ubuntu, macos, windows ]
+        build_type: [ linux, macos, windows ]
+        build_arch: [ x64 ]
         gui: [ gui, cli ]
-    runs-on: ${{ matrix.build_type }}-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -38,7 +39,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_name: multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.gui }}.7z
-          asset_path: ./lib/_builds/multi-downloader-nx-${{ matrix.build_type }}64-${{ matrix.gui }}.7z
+          asset_path: ./lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}.7z
           asset_content_type: application/x-7z-compressed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

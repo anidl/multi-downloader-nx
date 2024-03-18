@@ -15,13 +15,13 @@ RUN echo 'ffmpeg: "./bin/ffmpeg/ffmpeg"\nmkvmerge: "./bin/mkvtoolnix/mkvmerge"' 
 
 RUN npm install -g pnpm
 RUN pnpm i
-RUN pnpm run build-ubuntu-gui
+RUN pnpm run build-linux-gui
 
 # Move build to new Clean Image
 
 FROM node
 WORKDIR "/app"
-COPY --from=builder /app/lib/_builds/multi-downloader-nx-ubuntu64-gui ./
+COPY --from=builder /app/lib/_builds/multi-downloader-nx-linux-x64-gui ./
 
 # Install mkvmerge and ffmpeg
 

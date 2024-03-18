@@ -34,6 +34,7 @@ const ignore = [
   './config/updates.json$',
   './config/cr_token.yml$',
   './config/funi_token.yml$',
+  './config/new_hd_token.yml$',
   './config/hd_token.yml$',
   './config/hd_sess.yml$',
   './config/hd_profile.yml$',
@@ -42,7 +43,10 @@ const ignore = [
   './fonts*',
   './gui/react*',
   './dev.js$',
-  '*/node_modules/*'
+  '*/node_modules/*',
+  './widevine/*',
+  './videos/*',
+  './logs/*',
 ].map(a => a.replace(/\*/g, '[^]*').replace(/\.\//g, escapeRegExp(__dirname) + '/').replace(/\//g, path.sep === '\\' ? '\\\\' : '/')).map(a => new RegExp(a, 'i'));
 
 export { ignore };

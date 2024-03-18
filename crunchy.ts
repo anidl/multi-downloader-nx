@@ -4,11 +4,13 @@ import fs from 'fs-extra';
 
 // package program
 import packageJson from './package.json';
+
 // plugins
 import { console } from './modules/log';
 import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
-import streamdl from './modules/hls-download';
+import streamdl, { M3U8Json } from './modules/hls-download';
+import { exec } from './modules/sei-helper-fixes';
 
 // custom modules
 import * as fontsData from './modules/module.fontsData';
@@ -16,6 +18,8 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
+import getKeys, { canDecrypt } from './modules/widevine';
+//import vttConvert from './modules/module.vttconvert';
 
 // args
 
@@ -23,19 +27,21 @@ import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merge
 import { domain, api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.req';
 import { CrunchySearch } from './@types/crunchySearch';
-//import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
-import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CurnchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
+import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
+import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-//import { PlaybackData } from './@types/playbackData';
+import { PlaybackData } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
 import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
 import { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
-import { CrunchyAndroidEpisodes, CrunchyEpisode } from './@types/crunchyAndroidEpisodes';
+import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
+import { parse } from './modules/module.transform-mpd';
 import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
+import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -47,6 +53,7 @@ export type sxItem = {
 
 export default class Crunchy implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;
+  public api: 'android' | 'web';
   private token: Record<string, any>;
   private req: reqModule.Req;
   private cmsToken: {
@@ -59,6 +66,7 @@ export default class Crunchy implements ServiceClass {
     this.cfg = yamlCfg.loadCfg();
     this.token = yamlCfg.loadCRToken();
     this.req = new reqModule.Req(domain, debug, false, 'cr');
+    this.api = 'android';
   }
 
   public checkToken(): boolean {
@@ -68,6 +76,7 @@ export default class Crunchy implements ServiceClass {
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
+    this.api = argv.crapi;
     if (argv.debug)
       this.debug = true;
 
@@ -110,7 +119,7 @@ export default class Crunchy implements ServiceClass {
       const selected = await this.downloadFromSeriesID(argv.series, { ...argv });
       if (selected.isOk) {
         for (const select of selected.value) {
-          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false }, true))) {
+          if (!(await this.downloadEpisode(select, {...argv, skipsubs: false}, true))) {
             console.error(`Unable to download selected episode ${select.episodeNumber}`);
             return false;
           }
@@ -141,9 +150,13 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.e){
       await this.refreshToken();
+      if (argv.dubLang.length > 1) {
+        console.info('One show can only be downloaded with one dub. Use --srz instead.');
+      }
+      argv.dubLang = [argv.dubLang[0]];
       const selected = await this.getObjectById(argv.e, false);
       for (const select of selected as Partial<CrunchyEpMeta>[]) {
-        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false }))) {
+        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false}))) {
           console.error(`Unable to download selected episode ${select.episodeNumber}`);
           return false;
         }
@@ -151,9 +164,13 @@ export default class Crunchy implements ServiceClass {
       return true;
     } else if (argv.extid) {
       await this.refreshToken();
+      if (argv.dubLang.length > 1) {
+        console.info('One show can only be downloaded with one dub. Use --srz instead.');
+      }
+      argv.dubLang = [argv.dubLang[0]];
       const selected = await this.getObjectById(argv.extid, false, true);
       for (const select of selected as Partial<CrunchyEpMeta>[]) {
-        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false }))) {
+        if (!(await this.downloadEpisode(select as CrunchyEpMeta, {...argv, skipsubs: false}))) {
           console.error(`Unable to download selected episode ${select.episodeNumber}`);
           return false;
         }
@@ -350,6 +367,7 @@ export default class Crunchy implements ServiceClass {
       this.cmsToken.cms.bucket,
       '/index?',
       new URLSearchParams({
+        'preferred_audio_language': 'ja-JP',
         'Policy': this.cmsToken.cms.policy,
         'Signature': this.cmsToken.cms.signature,
         'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
@@ -766,27 +784,42 @@ export default class Crunchy implements ServiceClass {
     const showInfo = JSON.parse(showInfoReq.res.body);
     this.logObject(showInfo.data[0], 0);
 
+    let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info
-    const reqEpsListOpts = [
-      api.beta_cms,
-      this.cmsToken.cms.bucket,
-      '/episodes?',
-      new URLSearchParams({
-        'season_id': id,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id, 
-      }),
-    ].join('');
-
-    const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
-    //const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
-    if(!reqEpsList.ok || !reqEpsList.res){
-      console.error('Episode List Request FAILED!');
-      return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
+    if (this.api == 'android') {
+      const reqEpsListOpts = [
+        api.beta_cms,
+        this.cmsToken.cms.bucket,
+        '/episodes?',
+        new URLSearchParams({
+          'preferred_audio_language': 'ja-JP',
+          'season_id': id,
+          'Policy': this.cmsToken.cms.policy,
+          'Signature': this.cmsToken.cms.signature,
+          'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        }),
+      ].join('');
+      const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
+      if(!reqEpsList.ok || !reqEpsList.res){
+        console.error('Episode List Request FAILED!');
+        return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
+      }
+      //CrunchyEpisodeList
+      const episodeListAndroid = JSON.parse(reqEpsList.res.body) as CrunchyAndroidEpisodes;
+      episodeList = {
+        total: episodeListAndroid.total,
+        data: episodeListAndroid.items,
+        meta: {}
+      };
+    } else {
+      const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
+      if(!reqEpsList.ok || !reqEpsList.res){
+        console.error('Episode List Request FAILED!');
+        return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
+      }
+      //CrunchyEpisodeList
+      episodeList = JSON.parse(reqEpsList.res.body) as CrunchyEpisodeList;
     }
-    //CrunchyEpisodeList
-    const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyAndroidEpisodes;
 
     const epNumList: {
         ep: number[],
@@ -802,7 +835,7 @@ export default class Crunchy implements ServiceClass {
     const doEpsFilter = parseSelect(e as string);
     const selectedMedia: CrunchyEpMeta[] = [];
 
-    episodeList.items.forEach((item) => {
+    episodeList.data.forEach((item) => {
       item.hide_season_title = true;
       if(item.season_title == '' && item.series_title != ''){
         item.season_title = item.series_title;
@@ -851,10 +884,16 @@ export default class Crunchy implements ServiceClass {
         image: images[Math.floor(images.length / 2)].source
       };
       // Check for streams_link and update playback var if needed
-      if (item.__links__.streams.href) {
+      if (item.__links__?.streams.href) {
         epMeta.data[0].playback = item.__links__.streams.href;
         if(!item.playback) {
           item.playback = item.__links__.streams.href;
+        }
+      }
+      if (item.streams_link) {
+        epMeta.data[0].playback = item.streams_link;
+        if(!item.playback) {
+          item.playback = item.streams_link;
         }
       }
       if (item.versions) {
@@ -921,6 +960,7 @@ export default class Crunchy implements ServiceClass {
           '/channels/crunchyroll/objects',
           '?',
           new URLSearchParams({
+            'preferred_audio_language': 'ja-JP',
             'external_id': ob,
             'Policy': this.cmsToken.cms.policy,
             'Signature': this.cmsToken.cms.signature,
@@ -963,38 +1003,53 @@ export default class Crunchy implements ServiceClass {
     };
 
     // reqs
-    const objectReqOpts = [
-      api.beta_cms,
-      this.cmsToken.cms.bucket,
-      '/objects/',
-      doEpsFilter.values.join(','),
-      '?',
-      new URLSearchParams({
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
-      }),
-    ].join('');
-    const objectReq = await this.req.getData(objectReqOpts, AuthHeaders);
-    //const objectReq = await this.req.getData(`${api.cms}/objects/${doEpsFilter.values.join(',')}?preferred_audio_language=ja-JP`, AuthHeaders);
-    if(!objectReq.ok || !objectReq.res){
-      console.error('Objects Request FAILED!');
-      if(objectReq.error && objectReq.error.res && objectReq.error.res.body){
-        const objectInfo = JSON.parse(objectReq.error.res.body as string);
-        console.info('Body:', JSON.stringify(objectInfo, null, '\t'));
-        objectInfo.error = true;
-        return objectInfo;
+    let objectInfo: ObjectInfo = { total: 0, data: [], meta: {} };
+    if (this.api == 'android') {
+      const objectReqOpts = [
+        api.beta_cms,
+        this.cmsToken.cms.bucket,
+        '/objects/',
+        doEpsFilter.values.join(','),
+        '?',
+        new URLSearchParams({
+          'preferred_audio_language': 'ja-JP',
+          'Policy': this.cmsToken.cms.policy,
+          'Signature': this.cmsToken.cms.signature,
+          'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        }),
+      ].join('');
+      const objectReq = await this.req.getData(objectReqOpts, AuthHeaders);
+      if(!objectReq.ok || !objectReq.res){
+        console.error('Objects Request FAILED!');
+        if(objectReq.error && objectReq.error.res && objectReq.error.res.body){
+          const objectInfo = JSON.parse(objectReq.error.res.body as string);
+          console.info('Body:', JSON.stringify(objectInfo, null, '\t'));
+          objectInfo.error = true;
+          return objectInfo;
+        }
+        return [];
       }
-      return [];
+      const objectInfoAndroid = JSON.parse(objectReq.res.body) as CrunchyAndroidObject;
+      objectInfo = {
+        total: objectInfoAndroid.total,
+        data: objectInfoAndroid.items,
+        meta: {}
+      };
+    } else {
+      const objectReq = await this.req.getData(`${api.cms}/objects/${doEpsFilter.values.join(',')}?preferred_audio_language=ja-JP`, AuthHeaders);
+      if(!objectReq.ok || !objectReq.res){
+        console.error('Objects Request FAILED!');
+        if(objectReq.error && objectReq.error.res && objectReq.error.res.body){
+          const objectInfo = JSON.parse(objectReq.error.res.body as string);
+          console.info('Body:', JSON.stringify(objectInfo, null, '\t'));
+          objectInfo.error = true;
+          return objectInfo;
+        }
+        return [];
+      }
+      objectInfo = JSON.parse(objectReq.res.body) as ObjectInfo;
     }
 
-    //const objectInfo = JSON.parse(objectReq.res.body) as ObjectInfo;
-    const objectInfoAndroid = JSON.parse(objectReq.res.body) as CrunchyAndroidObject;
-    const objectInfo: ObjectInfo = {
-      total: objectInfoAndroid.total,
-      data: objectInfoAndroid.items,
-      meta: {}
-    };
     if(earlyReturn){
       return objectInfo;
     }
@@ -1083,6 +1138,9 @@ export default class Crunchy implements ServiceClass {
       return;
     }
 
+    if (!this.cfg.bin.ffmpeg) 
+      this.cfg.bin = await yamlCfg.loadBinCfg();
+
     let mediaName = '...';
     let fileName;
     const variables: Variable[] = [];
@@ -1117,10 +1175,17 @@ export default class Crunchy implements ServiceClass {
 
       //Get Media GUID
       let mediaId = mMeta.mediaId;
-      if (mMeta.versions && mMeta.lang) {
-        currentVersion = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale);
+      if (mMeta.versions) {
+        if (mMeta.lang) {
+          currentVersion = mMeta.versions.find(a => a.audio_locale == mMeta.lang?.cr_locale);
+        } else if (options.dubLang.length == 1) {
+          const currentLang = langsData.languages.find(a => a.code == options.dubLang[0]);
+          currentVersion = mMeta.versions.find(a => a.audio_locale == currentLang?.cr_locale);
+        } else if (mMeta.versions.length == 1) {
+          currentVersion = mMeta.versions[0];
+        }
         if (!currentVersion?.media_guid) {
-          console.error('Selected language not found.');
+          console.error('Selected language not found in versions.');
           continue;
         }
         isPrimary = currentVersion.original;
@@ -1131,26 +1196,106 @@ export default class Crunchy implements ServiceClass {
       if (mediaId.includes(':'))
         mediaId = mediaId.split(':')[1];
 
-      // /cms/v2/BUCKET/crunchyroll/videos/MEDIAID/streams
-      const videoStreamsReq = [
-        api.beta_cms,
-        `${this.cmsToken.cms.bucket}/videos/${mediaId}/streams`,
-        '?',
-        new URLSearchParams({
-          'Policy': this.cmsToken.cms.policy,
-          'Signature': this.cmsToken.cms.signature,
-          'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
-        }),
-      ].join('');
-        
-      let playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
-      //console.info(playbackReq.res.body);
-      //let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
-      if(!playbackReq.ok || !playbackReq.res){
-        console.error('Request Stream URLs FAILED! Attempting fallback');
+      const compiledChapters: string[] = [];
+      if (options.chapters) {
+        //Make Chapter Request
+        const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${mMeta.mediaId}.json`);
+        if(!chapterRequest.ok || !chapterRequest.res){
+        //Old Chapter Request Fallback
+          console.warn('Chapter request failed, attempting old API');
+          const oldChapterRequest = await this.req.getData(`https://static.crunchyroll.com/datalab-intro-v2/${mMeta.mediaId}.json`);
+          if(!oldChapterRequest.ok || !oldChapterRequest.res) {
+            console.warn('Old Chapter API request failed');
+          } else {
+            console.info('Old Chapter request successful');
+            const chapterData = JSON.parse(oldChapterRequest.res.body) as CrunchyOldChapter;
+
+            //Generate Timestamps
+            const startTime = new Date(0), endTime = new Date(0);
+            startTime.setSeconds(chapterData.startTime);
+            endTime.setSeconds(chapterData.endTime);
+            const startTimeMS = String(chapterData.startTime).split('.')[1], endTimeMS = String(chapterData.endTime).split('.')[1];
+            const startMS = startTimeMS ? startTimeMS : '00', endMS = endTimeMS ? endTimeMS : '00';
+            const startFormatted = startTime.toISOString().substring(11, 19)+'.'+startMS;
+            const endFormatted = endTime.toISOString().substring(11, 19)+'.'+endMS;
+           
+            //Push Generated Chapters
+            if (chapterData.startTime > 1) {
+              compiledChapters.push(
+                `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+              );
+            }
+            compiledChapters.push(
+              `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+              `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+            );
+            compiledChapters.push(
+              `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+              `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+            );
+          }
+        } else {
+        //Chapter request succeeded, now let's parse them
+          console.info('Chapter request successful');
+          const chapterData = JSON.parse(chapterRequest.res.body) as CrunchyChapters;
+          const chapters: CrunchyChapter[] = [];
+
+          //Make a format more usable for the crunchy chapters
+          for (const chapter in chapterData) {
+            if (typeof chapterData[chapter] == 'object') {
+              chapters.push(chapterData[chapter]);
+            }
+          }
+
+          if (chapters.length > 0) {
+            chapters.sort((a, b) => a.start - b.start);
+            //Loop through all the chapters
+            for (const chapter of chapters) {
+              if (!chapter.start || !chapter.end) continue;
+              //Generate timestamps
+              const startTime = new Date(0), endTime = new Date(0);
+              startTime.setSeconds(chapter.start);
+              endTime.setSeconds(chapter.end);
+              const startFormatted = startTime.toISOString().substring(11, 19)+'.00';
+              const endFormatted = endTime.toISOString().substring(11, 19)+'.00';
+            
+              //Push generated chapters
+              if (chapter.type == 'intro') {
+                if (chapter.start > 0) {
+                  compiledChapters.push(
+                    `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+                    `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+                  );
+                }
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+                );
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+                );
+              } else {
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} Start`
+                );
+                compiledChapters.push(
+                  `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} End`
+                );
+              }
+            }
+          }
+        }
+      }
+
+      let pbData = { total: 0, data: {}, meta: {} } as PlaybackData;
+      if (this.api == 'android') {
         const videoStreamsReq = [
-          domain.api_beta,
-          mMeta.playback,
+          api.beta_cms,
+          `${this.cmsToken.cms.bucket}/videos/${mediaId}/streams`,
           '?',
           new URLSearchParams({
             'preferred_audio_language': 'ja-JP',
@@ -1159,16 +1304,54 @@ export default class Crunchy implements ServiceClass {
             'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
           }),
         ].join('');
-        playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
-        //playbackReq = await this.req.getData(`${domain.api_beta}${mMeta.playback}`, AuthHeaders);
-        if(!playbackReq.ok || !playbackReq.res){
-          console.error('Fallback Request Stream URLs FAILED!');
-          return undefined;
-        }
-      }
 
-      //const pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
-      const pbData = JSON.parse(playbackReq.res.body) as CrunchyAndroidStreams;
+        let playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
+        if(!playbackReq.ok || !playbackReq.res){
+          console.error('Request Stream URLs FAILED! Attempting fallback');
+
+          const videoStreamsReq = [
+            domain.api_beta,
+            mMeta.playback,
+            '?',
+            new URLSearchParams({
+              'preferred_audio_language': 'ja-JP',
+              'Policy': this.cmsToken.cms.policy,
+              'Signature': this.cmsToken.cms.signature,
+              'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+            }),
+          ].join('');
+          playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
+          if(!playbackReq.ok || !playbackReq.res){
+            console.error('Fallback Request Stream URLs FAILED!');
+            return undefined;
+          }
+        }
+        const pbDataAndroid = JSON.parse(playbackReq.res.body) as CrunchyAndroidStreams;
+        pbData = {
+          total: 0,
+          data: [pbDataAndroid.streams],
+          meta: {
+            audio_locale: pbDataAndroid.audio_locale,
+            bifs: pbDataAndroid.bifs,
+            captions: pbDataAndroid.captions,
+            closed_captions: pbDataAndroid.closed_captions,
+            media_id: pbDataAndroid.media_id,
+            subtitles: pbDataAndroid.subtitles,
+            versions: pbDataAndroid.versions
+          }
+        };
+      } else {
+        let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
+        if(!playbackReq.ok || !playbackReq.res){
+          console.error('Request Stream URLs FAILED! Attempting fallback');
+          playbackReq = await this.req.getData(`${domain.api_beta}${mMeta.playback}`, AuthHeaders);
+          if(!playbackReq.ok || !playbackReq.res){
+            console.error('Fallback Request Stream URLs FAILED!');
+            return undefined;
+          }
+        }
+        pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
+      }
 
       variables.push(...([
         ['title', medias.episodeTitle, true],
@@ -1188,11 +1371,19 @@ export default class Crunchy implements ServiceClass {
 
       let streams: any[] = [];
       let hsLangs: string[] = [];
-      const pbStreams = pbData.streams;
+      const pbStreams = pbData.data[0];
+
+      if (!canDecrypt) {
+        console.warn('Decryption not enabled!');
+      }
 
       for(const s of Object.keys(pbStreams)){
-        if(s.match(/hls/) && !s.match(/drm/) && !s.match(/trailer/)) {
-        //if((s.match(/hls/) || s.match(/dash/)) && !s.match(/trailer/)) {
+        if (
+          (s.match(/hls/) || s.match(/dash/)) 
+          && !(s.match(/hls/) && s.match(/drm/)) 
+          && !((!canDecrypt || !this.cfg.bin.mp4decrypt) && s.match(/drm/))
+          && !s.match(/trailer/)
+        ) {
           const pb = Object.values(pbStreams[s]).map(v => {
             v.hardsub_lang = v.hardsub_locale
               ? langsData.fixAndFindCrLC(v.hardsub_locale).locale
@@ -1214,7 +1405,7 @@ export default class Crunchy implements ServiceClass {
         return undefined;
       }
 
-      const audDub = langsData.findLang(langsData.fixLanguageTag(pbData.audio_locale as string) || '').code;
+      const audDub = langsData.findLang(langsData.fixLanguageTag(pbData.meta.audio_locale as string) || '').code;
       hsLangs = langsData.sortTags(hsLangs);
 
       streams = streams.map((s) => {
@@ -1293,120 +1484,95 @@ export default class Crunchy implements ServiceClass {
           dlFailed = true;
         }
         else{
-          const streamPlaylists = m3u8(streamPlaylistsReq.res.body);
-          const plServerList: string[] = [],
-            plStreams: Record<string, Record<string, string>> = {},
-            plQuality: {
-                      str: string,
-                      dim: string,
-                      CODECS: string,
-                      RESOLUTION: {
-                        width: number,
-                        height: number
-                      }
-                    }[] = [];
-          for(const pl of streamPlaylists.playlists){
-            // set quality
-            const plResolution     = pl.attributes.RESOLUTION;
-            const plResolutionText = `${plResolution.width}x${plResolution.height}`;
-            // set codecs
-            const plCodecs     = pl.attributes.CODECS;
-            // parse uri
-            const plUri = new URL(pl.uri);
-            let plServer = plUri.hostname;
-            // set server list
-            if(plUri.searchParams.get('cdn')){
-              plServer += ` (${plUri.searchParams.get('cdn')})`;
-            }
-            if(!plServerList.includes(plServer)){
-              plServerList.push(plServer);
-            }
-            // add to server
-            if(!Object.keys(plStreams).includes(plServer)){
-              plStreams[plServer] = {};
-            }
-            if(
-              plStreams[plServer][plResolutionText]
-                        && plStreams[plServer][plResolutionText] != pl.uri
-                        && typeof plStreams[plServer][plResolutionText] != 'undefined'
-            ){
-              console.error(`Non duplicate url for ${plServer} detected, please report to developer!`);
-            }
-            else{
-              plStreams[plServer][plResolutionText] = pl.uri;
-            }
-            // set plQualityStr
-            const plBandwidth  = Math.round(pl.attributes.BANDWIDTH/1024);
-            const qualityStrAdd   = `${plResolutionText} (${plBandwidth}KiB/s)`;
-            const qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
-            const qualityStrMatch = !plQuality.map(a => a.str).join('\r\n').match(qualityStrRegx);
-            if(qualityStrMatch){
-              plQuality.push({
-                str: qualityStrAdd,
-                dim: plResolutionText,
-                CODECS: plCodecs,
-                RESOLUTION: plResolution
-              });
-            }
-          }
+          if (streamPlaylistsReq.res.body.match('MPD')) {
+            //Parse MPD Playlists
+            const streamPlaylists = parse(streamPlaylistsReq.res.body, langsData.findLang(langsData.fixLanguageTag(pbData.meta.audio_locale as string) || ''), curStream.url.match(/.*\.urlset\//)[0]);
 
-          options.x = options.x > plServerList.length ? 1 : options.x;
+            //Get name of CDNs/Servers
+            const streamServers = Object.keys(streamPlaylists);
 
-          const plSelectedServer = plServerList[options.x - 1];
-          const plSelectedList   = plStreams[plSelectedServer];
-          plQuality.sort((a, b) => {
-            const aMatch: RegExpMatchArray | never[] = a.dim.match(/[0-9]+/) || [];
-            const bMatch: RegExpMatchArray | never[] = b.dim.match(/[0-9]+/) || [];
-            return parseInt(aMatch[0]) - parseInt(bMatch[0]);
-          });
-          let quality = options.q === 0 ? plQuality.length : options.q;
-          if(quality > plQuality.length) {
-            console.warn(`The requested quality of ${options.q} is greater than the maximun ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
-            quality = plQuality.length;
-          }
-          // When best selected video quality is already downloaded
-          if(dlVideoOnce && options.dlVideoOnce) {
-            // Select the lowest resolution with the same codecs
-            while(quality !=1 && plQuality[quality - 1].CODECS == plQuality[quality - 2].CODECS) {
-              quality--;
+            options.x = options.x > streamServers.length ? 1 : options.x;
+
+            const selectedServer = streamServers[options.x - 1];
+            const selectedList = streamPlaylists[selectedServer];
+
+            //set Video Qualities
+            const videos = selectedList.video.map(item => {
+              return {
+                ...item,
+                resolutionText: `${item.quality.width}x${item.quality.height} (${Math.round(item.bandwidth/1024)}KiB/s)`
+              };
+            });
+
+            const audios = selectedList.audio.map(item => {
+              return {
+                ...item,
+                resolutionText: `${Math.round(item.bandwidth/1000)}kB/s`
+              };
+            });
+
+
+            videos.sort((a, b) => {
+              return a.quality.width - b.quality.width;
+            });
+
+            audios.sort((a, b) => {
+              return a.bandwidth - b.bandwidth;
+            });
+
+            let chosenVideoQuality = options.q === 0 ? videos.length : options.q;
+            if(chosenVideoQuality > videos.length) {
+              console.warn(`The requested quality of ${options.q} is greater than the maximum ${videos.length}.\n[WARN] Therefor the maximum will be capped at ${videos.length}.`);
+              chosenVideoQuality = videos.length;
             }
-          }
-          const selPlUrl = plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
-          console.info(`Servers available:\n\t${plServerList.join('\n\t')}`);
-          console.info(`Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
+            chosenVideoQuality--;
 
-          if(selPlUrl != ''){
+            let chosenAudioQuality = options.q === 0 ? audios.length : options.q;
+            if(chosenAudioQuality > audios.length) {
+              chosenAudioQuality = audios.length;
+            }
+            chosenAudioQuality--;
+
+
+            const chosenVideoSegments = videos[chosenVideoQuality];
+            const chosenAudioSegments = audios[chosenAudioQuality];
+
+            console.info(`Servers available:\n\t${streamServers.join('\n\t')}`);
+            console.info(`Available Video Qualities:\n\t${videos.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
+            console.info(`Available Audio Qualities:\n\t${audios.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
+
             variables.push({
               name: 'height',
               type: 'number',
-              replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
+              replaceWith: chosenVideoSegments.quality.height
             }, {
               name: 'width',
               type: 'number',
-              replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
+              replaceWith: chosenVideoSegments.quality.width
             });
+
             const lang = langsData.languages.find(a => a.code === curStream?.audio_lang);
             if (!lang) {
               console.error(`Unable to find language for code ${curStream.audio_lang}`);
               return;
             }
-            console.info(`Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
-            console.info('Stream URL:', selPlUrl);
+            console.info(`Selected quality: \n\tVideo: ${chosenVideoSegments.resolutionText}\n\tAudio: ${chosenAudioSegments.resolutionText}\n\tServer: ${selectedServer}`);
+            console.info('Stream URL:', chosenVideoSegments.segments[0].uri.split(',.urlset')[0]);
             // TODO check filename
             fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
             const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
-            console.info(`Output filename: ${outFile}`);
-            const chunkPage = await this.req.getData(selPlUrl);
-            if(!chunkPage.ok || !chunkPage.res){
-              console.error('CAN\'T FETCH VIDEO PLAYLIST!');
-              dlFailed = true;
-            }
-            else{
-              const chunkPlaylist = m3u8(chunkPage.res.body);
-              const totalParts = chunkPlaylist.segments.length;
+
+            let [audioDownloaded, videoDownloaded] = [false, false];
+
+            // When best selected video quality is already downloaded
+            if(dlVideoOnce && options.dlVideoOnce) {
+              console.info('Already downloaded video, skipping video download...');
+            } else {
+              //Download Video
+              const totalParts = chosenVideoSegments.segments.length;
               const mathParts  = Math.ceil(totalParts / options.partsize);
               const mathMsg    = `(${mathParts}*${options.partsize})`;
-              console.info('Total parts in stream:', totalParts, mathMsg);
+              console.info('Total parts in video stream:', totalParts, mathMsg);
               tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
               const split = outFile.split(path.sep).slice(0, -1);
               split.forEach((val, ind, arr) => {
@@ -1414,10 +1580,13 @@ export default class Crunchy implements ServiceClass {
                 if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
                   fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
               });
-              const dlStreamByPl = await new streamdl({
-                output: `${tsFile}.ts`,
+              const videoJson: M3U8Json = {
+                segments: chosenVideoSegments.segments
+              };
+              const videoDownload = await new streamdl({
+                output: `${tsFile}.video.enc.ts`,
                 timeout: options.timeout,
-                m3u8json: chunkPlaylist,
+                m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
                 threads: options.partsize,
                 fsRetryTime: options.fsRetryTime * 1000,
@@ -1432,22 +1601,309 @@ export default class Crunchy implements ServiceClass {
                   language: lang
                 }) : undefined
               }).download();
-              if(!dlStreamByPl.ok){
-                console.error(`DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
+              if(!videoDownload.ok){
+                console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
                 dlFailed = true;
               }
+              dlVideoOnce = true;
+              videoDownloaded = true;
+            }
+
+            if (chosenAudioSegments) {
+              //Download Audio (if available)
+              const totalParts = chosenAudioSegments.segments.length;
+              const mathParts  = Math.ceil(totalParts / options.partsize);
+              const mathMsg    = `(${mathParts}*${options.partsize})`;
+              console.info('Total parts in audio stream:', totalParts, mathMsg);
+              tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+              const split = outFile.split(path.sep).slice(0, -1);
+              split.forEach((val, ind, arr) => {
+                const isAbsolut = path.isAbsolute(outFile as string);
+                if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+                  fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
+              });
+              const audioJson: M3U8Json = {
+                segments: chosenAudioSegments.segments
+              };
+              const audioDownload = await new streamdl({
+                output: `${tsFile}.audio.enc.ts`,
+                timeout: options.timeout,
+                m3u8json: audioJson,
+                // baseurl: chunkPlaylist.baseUrl,
+                threads: options.partsize,
+                fsRetryTime: options.fsRetryTime * 1000,
+                override: options.force,
+                callback: options.callbackMaker ? options.callbackMaker({
+                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                  image: medias.image,
+                  parent: {
+                    title: medias.seasonTitle
+                  },
+                  title: medias.episodeTitle,
+                  language: lang
+                }) : undefined
+              }).download();
+              if(!audioDownload.ok){
+                console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
+                dlFailed = true;
+              }
+              audioDownloaded = true;
+            }
+
+            //Handle Decryption if needed
+            if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded)) {
+              const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
+              const assetId = assetIdRegex ? assetIdRegex[1] : null;
+              const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
+              console.info('Decryption Needed, attempting to decrypt');
+
+              const decReq = await this.req.getData('https://pl.crunchyroll.com/drm/v1/auth', {
+                'method': 'POST',
+                'body': JSON.stringify({
+                  'accounting_id': 'crunchyroll',
+                  'asset_id': assetId,
+                  'session_id': sessionId,
+                  'user_id': this.token.account_id
+                })
+              });
+              if(!decReq.ok || !decReq.res){
+                console.error('Request to DRM Authentication failed:', decReq.error?.code, decReq.error?.message);
+                return undefined;
+              }
+              const authData = JSON.parse(decReq.res.body) as {'custom_data': string, 'token': string};
+              const encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
+                'dt-custom-data': authData.custom_data,
+                'x-dt-auth-token': authData.token
+              });
+              if (encryptionKeys.length == 0) {
+                console.error('Failed to get encryption keys');
+                return undefined;
+              }
+              /*const keys = {} as Record<string, string>;
+              encryptionKeys.forEach(function(key) {
+                keys[key.kid] = key.key;
+              });*/
+
+              if (this.cfg.bin.mp4decrypt) {
+                const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+                const commandVideo = commandBase+`"${tsFile}.video.enc.ts" "${tsFile}.video.ts"`;
+                const commandAudio = commandBase+`"${tsFile}.audio.enc.ts" "${tsFile}.audio.ts"`;
+
+                if (videoDownloaded) {
+                  console.info('Started decrypting video');
+                  const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+                  if (!decryptVideo.isOk) {
+                    console.error(decryptVideo.err);
+                    console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
+                    return undefined;
+                  } else {
+                    console.info('Decryption done for video');
+                    if (!options.nocleanup) {
+                      fs.removeSync(`${tsFile}.video.enc.ts`);
+                    }
+                    files.push({
+                      type: 'Video',
+                      path: `${tsFile}.video.ts`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
+                  }
+                }
+
+                if (audioDownloaded) {
+                  console.info('Started decrypting audio');
+                  const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                  if (!decryptAudio.isOk) {
+                    console.error(decryptAudio.err);
+                    console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
+                    return undefined;
+                  } else {
+                    if (!options.nocleanup) {
+                      fs.removeSync(`${tsFile}.audio.enc.ts`);
+                    }
+                    files.push({
+                      type: 'Audio',
+                      path: `${tsFile}.audio.ts`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
+                    console.info('Decryption done for audio');
+                  }
+                }
+              } else {
+                console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
+              }
+            } else {
               files.push({
                 type: 'Video',
-                path: `${tsFile}.ts`,
+                path: `${tsFile}.video.enc.ts`,
                 lang: lang,
                 isPrimary: isPrimary
               });
-              dlVideoOnce = true;
+              files.push({
+                type: 'Audio',
+                path: `${tsFile}.audio.enc.ts`,
+                lang: lang,
+                isPrimary: isPrimary
+              });
             }
-          }
-          else{
-            console.error('Quality not selected!\n');
-            dlFailed = true;
+          } else {
+            const streamPlaylists = m3u8(streamPlaylistsReq.res.body);
+            const plServerList: string[] = [],
+              plStreams: Record<string, Record<string, string>> = {},
+              plQuality: {
+                        str: string,
+                        dim: string,
+                        CODECS: string,
+                        RESOLUTION: {
+                          width: number,
+                          height: number
+                        }
+                      }[] = [];
+            for(const pl of streamPlaylists.playlists){
+              // set quality
+              const plResolution     = pl.attributes.RESOLUTION;
+              const plResolutionText = `${plResolution.width}x${plResolution.height}`;
+              // set codecs
+              const plCodecs     = pl.attributes.CODECS;
+              // parse uri
+              const plUri = new URL(pl.uri);
+              let plServer = plUri.hostname;
+              // set server list
+              if(plUri.searchParams.get('cdn')){
+                plServer += ` (${plUri.searchParams.get('cdn')})`;
+              }
+              if(!plServerList.includes(plServer)){
+                plServerList.push(plServer);
+              }
+              // add to server
+              if(!Object.keys(plStreams).includes(plServer)){
+                plStreams[plServer] = {};
+              }
+              if(
+                plStreams[plServer][plResolutionText]
+                          && plStreams[plServer][plResolutionText] != pl.uri
+                          && typeof plStreams[plServer][plResolutionText] != 'undefined'
+              ){
+                console.error(`Non duplicate url for ${plServer} detected, please report to developer!`);
+              }
+              else{
+                plStreams[plServer][plResolutionText] = pl.uri;
+              }
+              // set plQualityStr
+              const plBandwidth  = Math.round(pl.attributes.BANDWIDTH/1024);
+              const qualityStrAdd   = `${plResolutionText} (${plBandwidth}KiB/s)`;
+              const qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
+              const qualityStrMatch = !plQuality.map(a => a.str).join('\r\n').match(qualityStrRegx);
+              if(qualityStrMatch){
+                plQuality.push({
+                  str: qualityStrAdd,
+                  dim: plResolutionText,
+                  CODECS: plCodecs,
+                  RESOLUTION: plResolution
+                });
+              }
+            }
+
+            options.x = options.x > plServerList.length ? 1 : options.x;
+
+            const plSelectedServer = plServerList[options.x - 1];
+            const plSelectedList   = plStreams[plSelectedServer];
+            plQuality.sort((a, b) => {
+              const aMatch: RegExpMatchArray | never[] = a.dim.match(/[0-9]+/) || [];
+              const bMatch: RegExpMatchArray | never[] = b.dim.match(/[0-9]+/) || [];
+              return parseInt(aMatch[0]) - parseInt(bMatch[0]);
+            });
+            let quality = options.q === 0 ? plQuality.length : options.q;
+            if(quality > plQuality.length) {
+              console.warn(`The requested quality of ${options.q} is greater than the maximum ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
+              quality = plQuality.length;
+            }
+            // When best selected video quality is already downloaded
+            if(dlVideoOnce && options.dlVideoOnce) {
+              // Select the lowest resolution with the same codecs
+              while(quality !=1 && plQuality[quality - 1].CODECS == plQuality[quality - 2].CODECS) {
+                quality--;
+              }
+            }
+            const selPlUrl = plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
+            console.info(`Servers available:\n\t${plServerList.join('\n\t')}`);
+            console.info(`Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
+
+            if(selPlUrl != ''){
+              variables.push({
+                name: 'height',
+                type: 'number',
+                replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
+              }, {
+                name: 'width',
+                type: 'number',
+                replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
+              });
+              const lang = langsData.languages.find(a => a.code === curStream?.audio_lang);
+              if (!lang) {
+                console.error(`Unable to find language for code ${curStream.audio_lang}`);
+                return;
+              }
+              console.info(`Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
+              console.info('Stream URL:', selPlUrl);
+              // TODO check filename
+              fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+              const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
+              console.info(`Output filename: ${outFile}`);
+              const chunkPage = await this.req.getData(selPlUrl);
+              if(!chunkPage.ok || !chunkPage.res){
+                console.error('CAN\'T FETCH VIDEO PLAYLIST!');
+                dlFailed = true;
+              }
+              else{
+                const chunkPlaylist = m3u8(chunkPage.res.body);
+                const totalParts = chunkPlaylist.segments.length;
+                const mathParts  = Math.ceil(totalParts / options.partsize);
+                const mathMsg    = `(${mathParts}*${options.partsize})`;
+                console.info('Total parts in stream:', totalParts, mathMsg);
+                tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+                const split = outFile.split(path.sep).slice(0, -1);
+                split.forEach((val, ind, arr) => {
+                  const isAbsolut = path.isAbsolute(outFile as string);
+                  if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+                    fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
+                });
+                const dlStreamByPl = await new streamdl({
+                  output: `${tsFile}.ts`,
+                  timeout: options.timeout,
+                  m3u8json: chunkPlaylist,
+                  // baseurl: chunkPlaylist.baseUrl,
+                  threads: options.partsize,
+                  fsRetryTime: options.fsRetryTime * 1000,
+                  override: options.force,
+                  callback: options.callbackMaker ? options.callbackMaker({
+                    fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                    image: medias.image,
+                    parent: {
+                      title: medias.seasonTitle
+                    },
+                    title: medias.episodeTitle,
+                    language: lang
+                  }) : undefined
+                }).download();
+                if(!dlStreamByPl.ok){
+                  console.error(`DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
+                  dlFailed = true;
+                }
+                files.push({
+                  type: 'Video',
+                  path: `${tsFile}.ts`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
+                dlVideoOnce = true;
+              }
+            }
+            else{
+              console.error('Quality not selected!\n');
+              dlFailed = true;
+            }
           }
         }
       }
@@ -1456,6 +1912,32 @@ export default class Crunchy implements ServiceClass {
         console.info('Downloading skipped!');
       }
 
+      if (compiledChapters.length > 0) {
+        try {
+          fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+          const outFile = parseFileName(options.fileName + '.' + mMeta.lang?.name, variables, options.numbers, options.override).join(path.sep);
+          tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+          const split = outFile.split(path.sep).slice(0, -1);
+          split.forEach((val, ind, arr) => {
+            const isAbsolut = path.isAbsolute(outFile as string);
+            if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+              fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
+          });
+          const lang = langsData.languages.find(a => a.code === curStream?.audio_lang);
+          if (!lang) {
+            console.error(`Unable to find language for code ${curStream.audio_lang}`);
+            return;
+          }
+          fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
+          files.push({
+            path: `${tsFile}.txt`,
+            lang: lang,
+            type: 'Chapters'
+          });
+        } catch {
+          console.error('Failed to write chapter file');
+        }
+      }
 
       if(options.dlsubs.indexOf('all') > -1){
         options.dlsubs = ['all'];
@@ -1472,24 +1954,37 @@ export default class Crunchy implements ServiceClass {
       }
 
       if(!options.skipsubs && options.dlsubs.indexOf('none') == -1){
-        if(pbData.subtitles && Object.values(pbData.subtitles).length > 0){
-          const subsData = Object.values(pbData.subtitles);
+        if(pbData.meta.subtitles && Object.values(pbData.meta.subtitles).length > 0){
+          const subsData = Object.values(pbData.meta.subtitles);
+          const capsData = Object.values(pbData.meta.closed_captions);
           const subsDataMapped = subsData.map((s) => {
             const subLang = langsData.fixAndFindCrLC(s.locale);
             return {
               ...s,
+              isCC: false,
               locale: subLang,
               language: subLang.locale
             };
-          });
+          }).concat(
+            capsData.map((s) => {
+              const subLang = langsData.fixAndFindCrLC(s.locale);
+              return {
+                ...s,
+                isCC: true,
+                locale: subLang,
+                language: subLang.locale
+              };
+            })
+          );
           const subsArr = langsData.sortSubtitles<typeof subsDataMapped[0]>(subsDataMapped, 'language');
           for(const subsIndex in subsArr){
             const subsItem = subsArr[subsIndex];
             const langItem = subsItem.locale;
             const sxData: Partial<sxItem> = {};
             sxData.language = langItem;
-            const isCC = langItem.code === audDub;
-            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC, options.ccTag);
+            const isSigns = langItem.code === audDub && !subsItem.isCC;
+            const isCC = subsItem.isCC;
+            sxData.file = langsData.subsFile(fileName as string, subsIndex, langItem, isCC, options.ccTag, isSigns, subsItem.format);
             sxData.path = path.join(this.cfg.dir.content, sxData.file);
             const split = sxData.path.split(path.sep).slice(0, -1);
             split.forEach((val, ind, arr) => {
@@ -1497,24 +1992,34 @@ export default class Crunchy implements ServiceClass {
               if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
                 fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
             });
-            if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC))
+            if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC && a.signs === isSigns))
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
               const subsAssReq = await this.req.getData(subsItem.url);
               if(subsAssReq.ok && subsAssReq.res){
-                let sBody = '\ufeff' + subsAssReq.res.body;
-                const sBodySplit = sBody.split('\r\n');
-                sBodySplit.splice(2, 0, 'ScaledBorderAndShadow: yes');
-                sBody = sBodySplit.join('\r\n');
-                sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
-                sxData.title = `${langItem.language} / ${sxData.title}`;
-                sxData.fonts = fontsData.assFonts(sBody) as Font[];
+                let sBody;
+                if (subsItem.format == 'vtt') {
+                  //TODO: look into converting downloaded vtt into ASS
+                  //sBody = vttConvert(subsAssReq.res.body, false, langItem.language, options.fontSize, options.fontName);
+                  sBody = subsAssReq.res.body;
+                  //TODO: look into parsing the fonts from the styles field in the VTT
+                  sxData.fonts = options.fontName ? [options.fontName] as Font[] : [];
+                } else {
+                  sBody = '\ufeff' + subsAssReq.res.body;
+                  const sBodySplit = sBody.split('\r\n');
+                  sBodySplit.splice(2, 0, 'ScaledBorderAndShadow: yes');
+                  sBody = sBodySplit.join('\r\n');
+                  sxData.title = sBody.split('\r\n')[1].replace(/^Title: /, '');
+                  sxData.title = `${langItem.language} / ${sxData.title}`;
+                  sxData.fonts = fontsData.assFonts(sBody) as Font[];
+                }
                 fs.writeFileSync(sxData.path, sBody);
                 console.info(`Subtitle downloaded: ${sxData.file}`);
                 files.push({
                   type: 'Subtitle',
                   ...sxData as sxItem,
                   cc: isCC,
+                  signs: isSigns,
                 });
               }
               else{
@@ -1541,31 +2046,66 @@ export default class Crunchy implements ServiceClass {
 
   public async muxStreams(data: DownloadedMedia[], options: CrunchyMuxOptions) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
+    let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
       return console.info('Skip muxing since no vids are downloaded');
+    if (data.some(a => a.type === 'Audio')) {
+      hasAudioStreams = true;
+    }
     const merger = new Merger({
-      onlyVid: [],
-      skipSubMux: options.skipSubMux,
-      onlyAudio: [],
-      output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
-      subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
-        if (a.type === 'Video')
-          throw new Error('Never');
-        return {
-          file: a.path,
-          language: a.language,
-          closedCaption: a.cc,
-        };
-      }),
-      simul: false,
-      keepAllVideos: options.keepAllVideos,
-      fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
-      videoAndAudio: data.filter(a => a.type === 'Video').map((a) : MergerInput => {
+      onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         if (a.type === 'Subtitle')
           throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
+        };
+      }) : [],
+      skipSubMux: options.skipSubMux,
+      onlyAudio: hasAudioStreams ? data.filter(a => a.type === 'Audio').map((a) : MergerInput => {
+        if (a.type === 'Subtitle')
+          throw new Error('Never');
+        return {
+          lang: a.lang,
+          path: a.path,
+        };
+      }) : [],
+      output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
+      subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
+        if (a.type === 'Video')
+          throw new Error('Never');
+        if (a.type === 'Audio')
+          throw new Error('Never');
+        if (a.type === 'Chapters')
+          throw new Error('Never');
+        return {
+          file: a.path,
+          language: a.language,
+          closedCaption: a.cc,
+          signs: a.signs,
+        };
+      }),
+      simul: false,
+      keepAllVideos: options.keepAllVideos,
+      fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
+      videoAndAudio: hasAudioStreams ? [] : data.filter(a => a.type === 'Video').map((a) : MergerInput => {
+        if (a.type === 'Subtitle')
+          throw new Error('Never');
+        return {
+          lang: a.lang,
+          path: a.path,
+        };
+      }),
+      chapters: data.filter(a => a.type === 'Chapters').map((a) : MergerInput => {
+        if (a.type === 'Video')
+          throw new Error('Never');
+        if (a.type === 'Audio')
+          throw new Error('Never');
+        if (a.type === 'Subtitle')
+          throw new Error('Never');
+        return {
+          path: a.path,
+          lang: a.lang
         };
       }),
       videoTitle: options.videoTitle,
@@ -1617,18 +2157,18 @@ export default class Crunchy implements ServiceClass {
     for(const season of Object.keys(result) as unknown as number[]) {
       for (const key of Object.keys(result[season])) {
         const s = result[season][key];
-        (await this.getSeasonDataById(s))?.items?.forEach(episode => {
+        (await this.getSeasonDataById(s))?.data?.forEach(episode => {
           //TODO: Make sure the below code is ok
           //Prepare the episode array
           let item;
           const seasonIdentifier = s.identifier ? s.identifier.split('|')[1] : `S${episode.season_number}`;
-          if (!(Object.prototype.hasOwnProperty.call(episodes, `${seasonIdentifier}E${episode.episode_number || episode.episode}`))) {
-            item = episodes[`${seasonIdentifier}E${episode.episode_number || episode.episode}`] = {
+          if (!(Object.prototype.hasOwnProperty.call(episodes, `${seasonIdentifier}E${episode.episode || episode.episode_number}`))) {
+            item = episodes[`${seasonIdentifier}E${episode.episode || episode.episode_number}`] = {
               items: [] as CrunchyEpisode[],
               langs: [] as langsData.LanguageItem[]
             };
           } else {
-            item = episodes[`${seasonIdentifier}E${episode.episode_number || episode.episode}`];
+            item = episodes[`${seasonIdentifier}E${episode.episode || episode.episode_number}`];
           }
 
           if (episode.versions) {
@@ -1707,7 +2247,7 @@ export default class Crunchy implements ServiceClass {
     })};
   }
 
-  public async downloadFromSeriesID(id: string, data: CurnchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
+  public async downloadFromSeriesID(id: string, data: CrunchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
     const { data: episodes } = await this.listSeriesID(id);
     console.info('');
     console.info('-'.repeat(30));
@@ -1769,10 +2309,16 @@ export default class Crunchy implements ServiceClass {
           e: epNum,
           image: images[Math.floor(images.length / 2)].source,
         };
-        if (item.__links__.streams.href) {
+        if (item.__links__?.streams?.href) {
           epMeta.data[0].playback = item.__links__.streams.href;
           if(!item.playback) {
             item.playback = item.__links__.streams.href;
+          }
+        }
+        if (item.streams_link) {
+          epMeta.data[0].playback = item.streams_link;
+          if(!item.playback) {
+            item.playback = item.streams_link;
           }
         }
         // find episode numbers
@@ -1875,28 +2421,43 @@ export default class Crunchy implements ServiceClass {
     const showInfo = JSON.parse(showInfoReq.res.body);
     if (log)
       this.logObject(showInfo, 0);
+
+    let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info
-
-    const reqEpsListOpts = [
-      api.beta_cms,
-      this.cmsToken.cms.bucket,
-      '/episodes?',
-      new URLSearchParams({
-        'season_id': item.id,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id, 
-      }),
-    ].join('');
-
-    const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
-    //const reqEpsList = await this.req.getData(`${api.cms}/seasons/${item.id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
-    if(!reqEpsList.ok || !reqEpsList.res){
-      console.error('Episode List Request FAILED!');
-      return;
+    if (this.api == 'android') {
+      const reqEpsListOpts = [
+        api.beta_cms,
+        this.cmsToken.cms.bucket,
+        '/episodes?',
+        new URLSearchParams({
+          'preferred_audio_language': 'ja-JP',
+          'season_id': item.id,
+          'Policy': this.cmsToken.cms.policy,
+          'Signature': this.cmsToken.cms.signature,
+          'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        }),
+      ].join('');
+      const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
+      if(!reqEpsList.ok || !reqEpsList.res){
+        console.error('Episode List Request FAILED!');
+        return;
+      }
+      //CrunchyEpisodeList
+      const episodeListAndroid = JSON.parse(reqEpsList.res.body) as CrunchyAndroidEpisodes;
+      episodeList = {
+        total: episodeListAndroid.total,
+        data: episodeListAndroid.items,
+        meta: {}
+      };
+    } else {
+      const reqEpsList = await this.req.getData(`${api.cms}/seasons/${item.id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
+      if(!reqEpsList.ok || !reqEpsList.res){
+        console.error('Episode List Request FAILED!');
+        return;
+      }
+      //CrunchyEpisodeList
+      episodeList = JSON.parse(reqEpsList.res.body) as CrunchyEpisodeList;
     }
-    //CrunchyEpisodeList
-    const episodeList = JSON.parse(reqEpsList.res.body) as CrunchyAndroidEpisodes;
 
     if(episodeList.total < 1){
       console.info('  Season is empty!');

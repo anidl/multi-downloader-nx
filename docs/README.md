@@ -8,11 +8,8 @@ This downloader can download anime from different sites. Currently supported are
 
 This application is not endorsed by or affiliated with *Funimation*, *Crunchyroll*, or *Hidive*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
 
-## Prerequisites
+## Dependencies
 
-* NodeJS >= 14.6.0 (https://nodejs.org/)
-* NPM >= 6.9.0 (https://www.npmjs.org/)
-* PNPM >= 7.0.0 (https://pnpm.io/)
 * ffmpeg >= 4.0.0 (https://www.videohelp.com/software/ffmpeg)
 * MKVToolNix >= 60.0.0 (https://www.videohelp.com/software/MKVToolNix)
 
@@ -23,22 +20,53 @@ By default this application uses the following paths to programs (main executabl
 * `ffmpeg.exe` (From PATH)
 * `ffprobe.exe` (From PATH)
 * `mkvmerge.exe` (From PATH)
+* `mp4decrypt.exe` (From PATH)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
-### Node Modules
+## CLI Information
 
-After installing NodeJS with NPM go to directory with `package.json` file and type: `npm i`. Afterwards run `npm run tsc`. You can now find a lib folder containing the js code execute.
+See [the documentation](https://github.com/anidl/multi-downloader-nx/blob/master/docs/DOCUMENTATION.md) for a complete list of what options are available. You can define defaults for the commands by editing the `cli-defaults.yml` file in the `./config/` directory.
 
-* [check dependencies](https://david-dm.org/anidl/funimation-downloader-nx)
+### Example usage
 
-## CLI Options
+#### Logging in
 
-See [the documentation](https://github.com/anidl/multi-downloader-nx/blob/master/docs/DOCUMENTATION.md)
+Most services require you to be logged in, in order to download from, an example of how you would login is:
 
-## Build instructions
+```shell
+AniDL --service {ServiceName} --auth
+```
 
-Please note that nodejs, npm, and pnpm must be installed in your system. For instructions on how to install pnpm, check (https://pnpm.io/installation)
+#### Searching
+
+In order to find the IDs to download, you can search from each service by using the `--search` flag like this:
+
+```shell
+AniDL --service {ServiceName} --search {SearchTerm}
+```
+
+#### Downloading
+
+Once you have the ID which you can obtain from using the search or other means, you are ready to download, which you can do like this:
+
+```shell
+AniDL --service {ServiceName} -s {SeasonID} -e {EpisodeNumber}
+```
+
+## Building and running from source
+
+### Build Dependencies
+
+Dependencies that are only required for running from code. These are not required if you are using the prebuilt binaries.
+
+* NodeJS >= 14.6.0 (https://nodejs.org/)
+* NPM >= 6.9.0 (https://www.npmjs.org/)
+* PNPM >= 7.0.0 (https://pnpm.io/)
+
+### Build Instructions
+
+Please note that NodeJS, NPM, and PNPM must be installed on your system. For instructions on how to install pnpm, check (https://pnpm.io/installation)
 
 First clone this repo `git clone https://github.com/anidl/multi-downloader-nx.git`.
 
@@ -47,4 +75,14 @@ Afterwards run `pnpm run tsc false [true if you want gui, false otherwise]`.
 
 If you want the `js` files you are done. Just `cd` into the `lib` folder, and run `node index.js --help` to get started with the CLI, or run `node gui.js` to run the GUI
 
-If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, ubuntu, macos, and arm) and `{type}` is cli or gui.
+If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, linux, macos, alpine, android, and arm) and `{type}` is cli or gui.
+
+## DRM Decryption
+
+### Decryption Requirements
+
+* mp4decrypt >= Any (http://www.bento4.com/) - Only required for decrypting
+
+### Instructions
+
+In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (`device_client_id_blob` and `device_private_key`) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.

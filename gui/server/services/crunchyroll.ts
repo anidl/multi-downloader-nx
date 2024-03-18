@@ -91,6 +91,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     console.debug(`Got download options: ${JSON.stringify(data)}`);
     this.setDownloading(true);
     const _default = yargs.appArgv(this.crunchy.cfg.cli, true);
+    this.crunchy.api = _default.crapi;
     const res = await this.crunchy.downloadFromSeriesID(data.id, {
       dubLang: data.dubLang,
       e: data.e
@@ -98,7 +99,7 @@ class CrunchyHandler extends Base implements MessageHandler {
     if (res.isOk) {
       for (const select of res.value) {
         if (!(await this.crunchy.downloadEpisode(select, {..._default, skipsubs: false, callbackMaker: this.makeProgressHandler.bind(this), q: data.q, fileName: data.fileName, dlsubs: data.dlsubs, dlVideoOnce: data.dlVideoOnce, force: 'y', 
-          novids: data.novids  }))) {
+          novids: data.novids, hslang: data.hslang || 'none'  }))) {
           const er = new Error(`Unable to download episode ${data.e} from ${data.id}`);
           er.name = 'Download error';
           this.alertError(er);

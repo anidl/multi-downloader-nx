@@ -70,7 +70,7 @@ class FunimationHandler extends Base implements MessageHandler {
         },
         image: a.image,
         e: a.episodeID,
-        episode: a.epsiodeNumber,
+        episode: a.epsiodeNumber
       };
     }));
     return true;

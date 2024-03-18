@@ -31,9 +31,14 @@ export type CrunchyDownloadOptions = {
   dlVideoOnce: boolean,
   skipmux?: boolean,
   syncTiming: boolean,
+  nocleanup: boolean,
+  chapters: boolean,
+  fontName: string | undefined,
+  fontSize: number,
+  dubLang: string[],
 }
 
-export type CurnchyMultiDownload = {
+export type CrunchyMultiDownload = {
   dubLang: string[],
   all?: boolean,
   but?: boolean,
@@ -82,8 +87,18 @@ export type DownloadedMedia = {
   lang: LanguageItem,
   path: string,
   isPrimary?: boolean
+} | {
+  type: 'Audio',
+  lang: LanguageItem,
+  path: string,
+  isPrimary?: boolean
+} | {
+  type: 'Chapters',
+  lang: LanguageItem,
+  path: string
 } | ({
   type: 'Subtitle',
+  signs: boolean,
   cc: boolean
 } & sxItem )
 

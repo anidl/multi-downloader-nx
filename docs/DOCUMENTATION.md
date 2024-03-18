@@ -1,4 +1,4 @@
-# multi-downloader-nx (4.4.4v)
+# multi-downloader-nx (4.5.1v)
 
 If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -98,8 +98,7 @@ Get video list by Movie Listing ID
 | --- | --- | --- | --- | --- | ---| 
 | Crunchyroll | `--series ${ID}` | `string` | `No`| `--srz` | `NaN` |
 
-This command is used only for crunchyroll.
- Requested is the ID of a show not a season.
+Requested is the ID of a show not a season.
 #### `-s`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -136,6 +135,27 @@ If selected, the best selected quality will be downloaded only for the first lan
 then the worst video quality with the same audio quality will be downloaded for every other language.
 By the later merge of the videos, no quality difference will be present.
 This will speed up the download speed, if multiple languages are selected.
+#### `--chapters`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--chapters ` | `boolean` | `No`| `NaN` | `false`| `chapters: ` |
+
+Will fetch the chapters and add them into the final video.
+Currently only works with mkvmerge.
+#### `--crapi`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--crapi ` | `string` | `No`| `NaN` | [`android`, `web`] | `android`| `crapi: ` |
+
+If set to Android, it has lower quality, but Non-DRM streams,
+If set to Web, it has a higher quality adaptive stream, but everything is DRM.
+#### `--hdapi`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | --- | ---| 
+| Hidive | `--hdapi ` | `string` | `No`| `NaN` | [`old`, `new`] | `old`| `hdapi: ` |
+
+If set to Old, it has lower quality, but Non-DRM streams, but some people can't use it,
+If set to New, it has a higher quality stream, but everything is DRM.
 #### `--removeBumpers`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
