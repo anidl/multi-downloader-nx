@@ -17,7 +17,8 @@ class HidiveHandler extends Base implements MessageHandler {
     this.initState();
   }
 
-  public auth(data: AuthData) {
+  public async auth(data: AuthData) {
+    await this.getAPIVersion();
     return this.hidive.doAuth(data);
   }
 
