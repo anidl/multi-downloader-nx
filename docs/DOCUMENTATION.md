@@ -41,6 +41,12 @@ Set the password to use for the authentication. If not provided, you will be pro
 | Funimation, Crunchyroll | `--silentAuth ` | `boolean` | `No`| `NaN` | `false`| `silentAuth: ` |
 
 Authenticate every time the script runs. Use at your own risk.
+#### `--token`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
+
+Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)
 ### Fonts
 #### `--dlFonts`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
