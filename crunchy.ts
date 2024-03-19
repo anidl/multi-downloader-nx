@@ -1503,7 +1503,7 @@ export default class Crunchy implements ServiceClass {
 
       let tsFile = undefined;
 
-      if(!dlFailed && curStream !== undefined && !(!options.novids && !options.noaudio)){
+      if(!dlFailed && curStream !== undefined && !(options.novids && options.noaudio)){
         const streamPlaylistsReq = await this.req.getData(curStream.url);
         if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
           console.error('CAN\'T FETCH VIDEO PLAYLISTS!');
