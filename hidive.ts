@@ -18,7 +18,7 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-import { vtt } from './modules/module.vtt2ass';
+import vtt2ass from './modules/module.vtt2ass';
 
 // load req
 import { domain, api } from './modules/module.api-urls';
@@ -1410,7 +1410,7 @@ export default class Hidive implements ServiceClass {
             if (getVttContent.ok && getVttContent.res) {
               console.info(`Subtitle Downloaded: ${sub.url}`);
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-              const sBody = vtt(undefined, chosenFontSize, getVttContent.res.body, '', subsMargin, options.fontName);
+              const sBody = vtt2ass(undefined, chosenFontSize, getVttContent.res.body, '', subsMargin, options.fontName);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);
@@ -1664,7 +1664,7 @@ export default class Hidive implements ServiceClass {
             if (getCssContent.ok && getVttContent.ok && getCssContent.res && getVttContent.res) {
               console.info(`Subtitle Downloaded: ${await this.genSubsUrl('vtt', subsXUrl)}`);
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-              const sBody = vtt(undefined, chosenFontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName);
+              const sBody = vtt2ass(undefined, chosenFontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);

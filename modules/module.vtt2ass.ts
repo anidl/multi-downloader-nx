@@ -405,7 +405,7 @@ function toSubTime(str: string) {
   return n.slice(0, 3).join(':') + '.' + n[3];
 }
 
-function vtt(group: string | undefined, xFontSize: number | undefined, vttStr: string, cssStr: string, timeMargin?: number, replaceFont?: string) {
+export default function vtt2ass(group: string | undefined, xFontSize: number | undefined, vttStr: string, cssStr: string, timeMargin?: number, replaceFont?: string) {
   relGroup = group ?? '';
   fontSize = xFontSize && xFontSize > 0 ? xFontSize : 34; // 1em to pix
   tmMrg = timeMargin ? timeMargin : 0; //
@@ -432,5 +432,3 @@ function vtt(group: string | undefined, xFontSize: number | undefined, vttStr: s
     loadVTT(vttStr)
   );
 }
-
-export { vtt };
