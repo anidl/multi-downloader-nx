@@ -44,7 +44,7 @@ function loadCSS(cssStr: string): Css {
     if (l === '') continue;
     const m = l.match(/^(.*)\{(.*)\}$/);
     if (!m) {
-      console.error(`[WARN] VTT2ASS: Invalid css in line ${i}: ${l}`);
+      console.error(`VTT2ASS: Invalid css in line ${i}: ${l}`);
       continue;
     }
 
@@ -82,6 +82,8 @@ function parseStyle(stylegroup: string, line: string, style: any) {
   for (const s of line.split(';')) {
     if (s == '') continue;
     const st = s.trim().split(':');
+    st[0] = st[0].trim();
+    st[1] = st[1].trim();
     let cl, arr, transformed_str;
     switch (st[0]) {
     case 'font-family':
@@ -129,6 +131,7 @@ function parseStyle(stylegroup: string, line: string, style: any) {
         break;
       }
       break;
+    case 'background-color':
     case 'background':
       if (st[1] === 'none') {
         break;
@@ -143,18 +146,18 @@ function parseStyle(stylegroup: string, line: string, style: any) {
       transformed_str[1] = arr.map(r => r.replace(/-/g, '').replace(/px/g, '').replace(/(^| )0( |$)/g, ' ').trim()).join(' ');
       arr = transformed_str[1].split(' ');
       if (arr.length != 10) {
-        console.info(`[WARN] VTT2ASS: Can't properly parse text-shadow: ${s.trim()}`);
+        console.warn(`VTT2ASS: Can't properly parse text-shadow: ${s.trim()}`);
         break;
       }
       arr = [...new Set(arr)];
       if (arr.length > 1) {
-        console.info(`[WARN] VTT2ASS: Can't properly parse text-shadow: ${s.trim()}`);
+        console.warn(`VTT2ASS: Can't properly parse text-shadow: ${s.trim()}`);
         break;
       }
       style[16] = arr[0];
       break;
     default:
-      console.error(`[WARN] VTT2ASS: Unknown style: ${s.trim()}`);
+      console.error(`VTT2ASS: Unknown style: ${s.trim()}`);
     }
   }
   return style.join(',');
@@ -163,7 +166,7 @@ function parseStyle(stylegroup: string, line: string, style: any) {
 function getPxSize(size_line: string, font_size: number) {
   const m = size_line.trim().match(/([\d.]+)(.*)/);
   if (!m) {
-    console.error(`[WARN] VTT2ASS: Unknown size: ${size_line}`);
+    console.error(`VTT2ASS: Unknown size: ${size_line}`);
     return;
   }
   let size = parseFloat(m[1]);
@@ -174,8 +177,7 @@ function getPxSize(size_line: string, font_size: number) {
 function getColor(c: string) {
   if (c[0] !== '#') {
     c = colors[c as keyof typeof colors];
-  }
-  else if (c.length < 7) {
+  } else if (c.length < 7 || c.length > 7) {
     c = `#${c[1]}${c[1]}${c[2]}${c[2]}${c[3]}${c[3]}`;
   }
   const m = c.match(/#(..)(..)(..)/);
@@ -354,7 +356,8 @@ function convertLine(css: Record<string, string>, l: Record<any, any>) {
 }
 
 function convertText(text: string) {
-  const m = text.match(/<c\.([^>]*)>([\S\s]*)<\/c>/);
+  //const m = text.match(/<c\.([^>]*)>([\S\s]*)<\/c>/);
+  const m = text.match(/<(?:c\.|)([^>]*)>([\S\s]*)<\/(?:c|Default)>/);
   let style = '';
   if (m) {
     style = m[1];
@@ -364,7 +367,7 @@ function convertText(text: string) {
     // .replace(/<c[^>]*>[^<]*<\/c>/g, '')
     // .replace(/<ruby[^>]*>[^<]*<\/ruby>/g, '')
     .replace(/ \\N$/g, '\\N')
-    .replace(/<[^>]>/g, '')
+    //.replace(/<[^>]>/g, '')
     .replace(/\\N$/, '')
     .replace(/\r/g, '')
     .replace(/\n/g, '\\N')
@@ -410,19 +413,20 @@ export default function vtt2ass(group: string | undefined, xFontSize: number | u
   fontSize = xFontSize && xFontSize > 0 ? xFontSize : 34; // 1em to pix
   tmMrg = timeMargin ? timeMargin : 0; //
   rFont = replaceFont ? replaceFont : rFont;
-  if (vttStr.match(/::cue(?:.(.+)\))?{([^}]+)}/g)) {
+  if (vttStr.match(/::cue(?:.(.+)\) *)?{([^}]+)}/g)) {
     const cssLines = [];
     let defaultCss = '';
-    const cssGroups = vttStr.matchAll(/::cue(?:.(.+)\))?{([^}]+)}/g);
+    const cssGroups = vttStr.matchAll(/::cue(?:.(.+)\) *)?{([^}]+)}/g);
     for (const cssGroup of cssGroups) {
       //Below code will bulldoze defined sizes for custom ones
       /*if (!options.originalFontSize) {
         cssGroup[2] = cssGroup[2].replace(/( font-size:.+?;)/g, '').replace(/(font-size:.+?;)/g, '');
       }*/
       if (cssGroup[1]) {
-        cssLines.push(`${cssGroup[1]}{${defaultCss}${cssGroup[2]}}`);
+        cssLines.push(`${cssGroup[1]}{${defaultCss}${cssGroup[2].replace(/(\r\n|\n|\r)/gm, '')}}`);
       } else {
-        defaultCss = cssGroup[2];
+        defaultCss = cssGroup[2].replace(/(\r\n|\n|\r)/gm, '');
+        //cssLines.push(`{${defaultCss}}`);
       }
     }
     cssStr += cssLines.join('\r\n');
