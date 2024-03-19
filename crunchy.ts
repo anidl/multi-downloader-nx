@@ -101,6 +101,9 @@ export default class Crunchy implements ServiceClass {
         password: argv.password ?? await shlp.question('[Q] PASSWORD   ')
       });
     }
+    else if (argv.token) {
+      await this.loginWithToken(argv.token);
+    }
     else if(argv.cmsindex){
       await this.refreshToken();
       await this.getCmsData();
@@ -287,6 +290,29 @@ export default class Crunchy implements ServiceClass {
     return new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
+  }
+
+  public async loginWithToken(refreshToken: string) {
+    const authData = new URLSearchParams({
+      'refresh_token': refreshToken,
+      'grant_type': 'refresh_token',
+      'scope': 'offline_access'
+    }).toString();
+    const authReqOpts: reqModule.Params = {
+      method: 'POST',
+      headers: api.beta_authHeaderMob,
+      body: authData
+    };
+    const authReq = await this.req.getData(api.beta_auth, authReqOpts);
+    if(!authReq.ok || !authReq.res){
+      console.error('Token Authentication failed!');
+      return;
+    }
+    this.token = JSON.parse(authReq.res.body);
+    this.token.expires = new Date(Date.now() + this.token.expires_in);
+    yamlCfg.saveCRToken(this.token);
+    await this.getProfile(false);
+    await this.getCMStoken(true);
   }
 
   public async refreshToken(ifNeeded = false,  silent = false) {

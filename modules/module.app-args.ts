@@ -17,6 +17,7 @@ let argvC: {
   forceMuxer: AvailableMuxer|undefined; 
   username: string|undefined, 
   password: string|undefined, 
+  token: string|undefined, 
   silentAuth: boolean, 
   skipSubMux: boolean, 
   downloadArchive: boolean, 

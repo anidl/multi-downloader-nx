@@ -674,6 +674,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'token',
+    describe: 'Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)',
+    docDescribe: true,
+    group: 'auth',
+    service: ['crunchy'],
+    type: 'string',
+    usage: '${token}',
+    default: {
+      default: undefined
+    }
+  },
+  {
     name: 'forceMuxer',
     describe: 'Force the program to use said muxer or don\'t mux if the given muxer is not present',
     docDescribe: true,
