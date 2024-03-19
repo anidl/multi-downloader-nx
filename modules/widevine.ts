@@ -7,13 +7,35 @@ import path from 'path';
 import { ReadError, Response } from 'got';
 
 //read cdm files located in the same directory
-let privateKey: Buffer, identifierBlob: Buffer;
+let privateKey: Buffer = Buffer.from([]), identifierBlob: Buffer = Buffer.from([]);
 export let canDecrypt: boolean;
 try {
-  privateKey = fs.readFileSync(path.join(workingDir, 'widevine', 'device_private_key'));
-  identifierBlob = fs.readFileSync(path.join(workingDir, 'widevine', 'device_client_id_blob'));
-  canDecrypt = true;
+  const files = fs.readdirSync(path.join(workingDir, 'widevine'));
+  files.forEach(function(file) {
+    file = path.join(workingDir, 'widevine', file);
+    const stats = fs.statSync(file);
+    if (stats.size < 1024*8) {
+      const fileContents = fs.readFileSync(file, {'encoding': 'utf8'});
+      if (fileContents.includes('-BEGIN RSA PRIVATE KEY-')) {
+        privateKey = fs.readFileSync(file);
+      }
+      if (fileContents.includes('widevine_cdm_version')) {
+        identifierBlob = fs.readFileSync(file);
+      }
+    }
+  });
+
+  if (privateKey.length !== 0 && identifierBlob.length !== 0) {
+    canDecrypt = true;
+  } else if (privateKey.length == 0) {
+    console.warn('Private key missing');
+    canDecrypt = false;
+  } else if (identifierBlob.length == 0) {
+    console.warn('Identifier blob missing');
+    canDecrypt = false;
+  }
 } catch (e) {
+  console.error(e);
   canDecrypt = false;
 }
 
