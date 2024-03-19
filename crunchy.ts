@@ -2026,6 +2026,7 @@ export default class Crunchy implements ServiceClass {
                 let sBody;
                 if (subsItem.format == 'vtt') {
                   const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
+                  if (!options.originalFontSize) subsAssReq.res.body = subsAssReq.res.body.replace(/( font-size:.+?;)/g, '').replace(/(font-size:.+?;)/g, '');
                   sBody = vtt2ass(undefined, chosenFontSize, subsAssReq.res.body, '', undefined, options.fontName);
                   sxData.fonts = fontsData.assFonts(sBody) as Font[];
                 } else {
