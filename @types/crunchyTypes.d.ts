@@ -35,6 +35,7 @@ export type CrunchyDownloadOptions = {
   nocleanup: boolean,
   chapters: boolean,
   fontName: string | undefined,
+  originalFontSize: boolean,
   fontSize: number,
   dubLang: string[],
 }

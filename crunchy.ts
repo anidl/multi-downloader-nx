@@ -42,6 +42,7 @@ import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
 import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
 import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
+import vtt2ass from './modules/module.vtt2ass';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -2024,11 +2025,9 @@ export default class Crunchy implements ServiceClass {
               if(subsAssReq.ok && subsAssReq.res){
                 let sBody;
                 if (subsItem.format == 'vtt') {
-                  //TODO: look into converting downloaded vtt into ASS
-                  //sBody = vttConvert(subsAssReq.res.body, false, langItem.language, options.fontSize, options.fontName);
-                  sBody = subsAssReq.res.body;
-                  //TODO: look into parsing the fonts from the styles field in the VTT
-                  sxData.fonts = options.fontName ? [options.fontName] as Font[] : [];
+                  const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
+                  sBody = vtt2ass(undefined, options.fontSize, subsAssReq.res.body, '', undefined, options.fontName);
+                  sxData.fonts = fontsData.assFonts(sBody) as Font[];
                 } else {
                   sBody = '\ufeff' + subsAssReq.res.body;
                   const sBodySplit = sBody.split('\r\n');
