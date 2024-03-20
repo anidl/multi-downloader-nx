@@ -385,7 +385,7 @@ Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara
 
 Set the filename template. Use ${variable_name} to insert variables.
 You can also create folders by inserting a path seperator in the filename
-You may use 'title', 'episode', 'showTitle', 'season', 'width', 'height', 'service' as variables.
+You may use 'title', 'episode', 'showTitle', 'seriesTitle', 'season', 'width', 'height', 'service' as variables.
 #### `--numbers`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
