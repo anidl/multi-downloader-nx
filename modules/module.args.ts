@@ -13,12 +13,13 @@ const groups = {
   'gui': 'GUI:'
 };
 
-export type AvailableFilenameVars =  'title' | 'episode' | 'showTitle' | 'season' | 'width' | 'height' | 'service'
+export type AvailableFilenameVars =  'title' | 'episode' | 'showTitle' | 'seriesTitle' | 'season' | 'width' | 'height' | 'service'
 
 const availableFilenameVars: AvailableFilenameVars[] = [
   'title',
   'episode',
   'showTitle',
+  'seriesTitle',
   'season',
   'width',
   'height',
