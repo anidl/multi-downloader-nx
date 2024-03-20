@@ -65,6 +65,7 @@ class CrunchyHandler extends Base implements MessageHandler {
 
   public async search(data: SearchData): Promise<SearchResponse> {
     await this.crunchy.refreshToken(true);
+    if (!data['search-type']) data['search-type'] = 'series';
     console.debug(`Got search options: ${JSON.stringify(data)}`);
     const crunchySearch = await this.crunchy.doSearch(data);
     if (!crunchySearch.isOk) {
