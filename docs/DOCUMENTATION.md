@@ -1,10 +1,10 @@
 # multi-downloader-nx (4.5.2v)
 
-If you find any bugs in this documentation or in the programm itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
+If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Funimation* or *Crunchyroll*.
+This application is not endorsed by or affiliated with *Funimation*, *Hidive*, or *Crunchyroll*.
 This application enables you to download videos for offline viewing which may be forbidden by law in your country.
 The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider.
 This tool is not responsible for your actions; please make an informed decision before using this application.
