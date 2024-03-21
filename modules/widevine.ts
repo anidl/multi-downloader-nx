@@ -14,7 +14,7 @@ try {
   files.forEach(function(file) {
     file = path.join(workingDir, 'widevine', file);
     const stats = fs.statSync(file);
-    if (stats.size < 1024*8) {
+    if (stats.size < 1024*8 && stats.isFile()) {
       const fileContents = fs.readFileSync(file, {'encoding': 'utf8'});
       if (fileContents.includes('-BEGIN RSA PRIVATE KEY-')) {
         privateKey = fs.readFileSync(file);
