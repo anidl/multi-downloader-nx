@@ -2279,7 +2279,7 @@ export default class Crunchy implements ServiceClass {
     console.info('');
     console.info('-'.repeat(30));
     console.info('');
-    const selected = this.itemSelectMultiDub(episodes, data.dubLang, data.but, data.all, data.e, data.s);
+    const selected = this.itemSelectMultiDub(episodes, data.dubLang, data.but, data.all, data.e);
     for (const key of Object.keys(selected)) {
       const item = selected[key];
       console.info(`[S${item.season}E${item.episodeNumber}] - ${item.episodeTitle} [${
@@ -2294,7 +2294,7 @@ export default class Crunchy implements ServiceClass {
   public itemSelectMultiDub (eps: Record<string, {
     items: CrunchyEpisode[],
     langs: langsData.LanguageItem[]
-  }>, dubLang: string[], but?: boolean, all?: boolean, e?: string, s?: string ) {
+  }>, dubLang: string[], but?: boolean, all?: boolean, e?: string, ) {
     const doEpsFilter = parseSelect(e as string);
 
     const ret: Record<string, CrunchyEpMeta> = {};
