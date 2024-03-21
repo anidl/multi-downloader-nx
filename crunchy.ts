@@ -2166,7 +2166,7 @@ export default class Crunchy implements ServiceClass {
       merger.cleanUp();
   }
 
-  public async listSeriesID(id: string): Promise<{ list: Episode[], data: Record<string, {
+  public async listSeriesID(id: string, data: CrunchyMultiDownload): Promise<{ list: Episode[], data: Record<string, {
     items: CrunchyEpisode[];
     langs: langsData.LanguageItem[];
   }>}> {
@@ -2229,11 +2229,19 @@ export default class Crunchy implements ServiceClass {
     for (const key of Object.keys(episodes)) {
       const item = episodes[key];
       const isSpecial = !item.items[0].episode.match(/^\d+$/);
-      episodes[`${isSpecial ? 'S' : 'E'}${itemIndexes[isSpecial ? 'sp' : 'no']}`] = item;
-      if (isSpecial)
-        itemIndexes.sp++;
-      else
-        itemIndexes.no++;
+      const episodeNumber = isSpecial ? item.items[0].episode : item.items[0].episode_number;
+      const seasonIdentifier = `S${item.items[0].season_id}`;
+
+      if (!data.s) {
+        episodes[`${isSpecial ? 'S' : 'E'}${itemIndexes[isSpecial ? 'sp' : 'no']}`] = item;
+        if (isSpecial)
+          itemIndexes.sp++;
+        else
+          itemIndexes.no++;
+      } else {
+        episodes[`${isSpecial ? 'S' : 'E'}${episodeNumber}|${seasonIdentifier}`] = item;
+      }
+
       delete episodes[key];
     }
 
@@ -2274,11 +2282,11 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async downloadFromSeriesID(id: string, data: CrunchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
-    const { data: episodes } = await this.listSeriesID(id);
+    const { data: episodes } = await this.listSeriesID(id, data);
     console.info('');
     console.info('-'.repeat(30));
     console.info('');
-    const selected = this.itemSelectMultiDub(episodes, data.dubLang, data.but, data.all, data.e);
+    const selected = this.itemSelectMultiDub(episodes, data.dubLang, data.but, data.all, data.e, data.s);
     for (const key of Object.keys(selected)) {
       const item = selected[key];
       console.info(`[S${item.season}E${item.episodeNumber}] - ${item.episodeTitle} [${
@@ -2293,7 +2301,7 @@ export default class Crunchy implements ServiceClass {
   public itemSelectMultiDub (eps: Record<string, {
     items: CrunchyEpisode[],
     langs: langsData.LanguageItem[]
-  }>, dubLang: string[], but?: boolean, all?: boolean, e?: string, ) {
+  }>, dubLang: string[], but?: boolean, all?: boolean, e?: string, s?: string ) {
     const doEpsFilter = parseSelect(e as string);
 
     const ret: Record<string, CrunchyEpMeta> = {};
@@ -2301,7 +2309,7 @@ export default class Crunchy implements ServiceClass {
     for (const key of Object.keys(eps)) {
       const itemE = eps[key];
       itemE.items.forEach((item, index) => {
-        if (!dubLang.includes(itemE.langs[index]?.code))
+        if (!dubLang.includes(itemE.langs[index]?.code) || (s && item.season_id !== s))
           return;
         item.hide_season_title = true;
         if(item.season_title == '' && item.series_title != ''){
@@ -2313,7 +2321,8 @@ export default class Crunchy implements ServiceClass {
           item.season_title = 'NO_TITLE';
           item.series_title = 'NO_TITLE';
         }
-        const epNum = key.startsWith('E') ? key.slice(1) : key;
+
+        const epNum = key.startsWith('E') ? key.slice(1).split('|')[0] : key.split('|')[0];
         // set data
         const images = (item.images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
         const epMeta: CrunchyEpMeta = {
