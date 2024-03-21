@@ -2302,7 +2302,7 @@ export default class Crunchy implements ServiceClass {
     for (const key of Object.keys(eps)) {
       const itemE = eps[key];
       itemE.items.forEach((item, index) => {
-        if (!dubLang.includes(itemE.langs[index]?.code) || (s && item.season_id !== s))
+        if (!dubLang.includes(itemE.langs[index]?.code))
           return;
         item.hide_season_title = true;
         if(item.season_title == '' && item.series_title != ''){
