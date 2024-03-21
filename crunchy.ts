@@ -2183,6 +2183,7 @@ export default class Crunchy implements ServiceClass {
     for(const season of Object.keys(result) as unknown as number[]) {
       for (const key of Object.keys(result[season])) {
         const s = result[season][key];
+        if (data.s && s.id !== data.s) continue;
         (await this.getSeasonDataById(s))?.data?.forEach(episode => {
           //TODO: Make sure the below code is ok
           //Prepare the episode array
@@ -2229,19 +2230,11 @@ export default class Crunchy implements ServiceClass {
     for (const key of Object.keys(episodes)) {
       const item = episodes[key];
       const isSpecial = !item.items[0].episode.match(/^\d+$/);
-      const episodeNumber = isSpecial ? item.items[0].episode : item.items[0].episode_number;
-      const seasonIdentifier = `S${item.items[0].season_id}`;
-
-      if (!data.s) {
-        episodes[`${isSpecial ? 'S' : 'E'}${itemIndexes[isSpecial ? 'sp' : 'no']}`] = item;
-        if (isSpecial)
-          itemIndexes.sp++;
-        else
-          itemIndexes.no++;
-      } else {
-        episodes[`${isSpecial ? 'S' : 'E'}${episodeNumber}|${seasonIdentifier}`] = item;
-      }
-
+      episodes[`${isSpecial ? 'S' : 'E'}${itemIndexes[isSpecial ? 'sp' : 'no']}`] = item;
+      if (isSpecial)
+        itemIndexes.sp++;
+      else
+        itemIndexes.no++;
       delete episodes[key];
     }
 
@@ -2322,7 +2315,7 @@ export default class Crunchy implements ServiceClass {
           item.series_title = 'NO_TITLE';
         }
 
-        const epNum = key.startsWith('E') ? key.slice(1).split('|')[0] : key.split('|')[0];
+        const epNum = key.startsWith('E') ? key.slice(1) : key;
         // set data
         const images = (item.images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
         const epMeta: CrunchyEpMeta = {
