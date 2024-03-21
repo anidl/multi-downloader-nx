@@ -2166,7 +2166,7 @@ export default class Crunchy implements ServiceClass {
       merger.cleanUp();
   }
 
-  public async listSeriesID(id: string): Promise<{ list: Episode[], data: Record<string, {
+  public async listSeriesID(id: string, data?: CrunchyMultiDownload): Promise<{ list: Episode[], data: Record<string, {
     items: CrunchyEpisode[];
     langs: langsData.LanguageItem[];
   }>}> {
@@ -2183,6 +2183,7 @@ export default class Crunchy implements ServiceClass {
     for(const season of Object.keys(result) as unknown as number[]) {
       for (const key of Object.keys(result[season])) {
         const s = result[season][key];
+        if (data?.s && s.id !== data.s) continue;
         (await this.getSeasonDataById(s))?.data?.forEach(episode => {
           //TODO: Make sure the below code is ok
           //Prepare the episode array
@@ -2274,7 +2275,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async downloadFromSeriesID(id: string, data: CrunchyMultiDownload) : Promise<ResponseBase<CrunchyEpMeta[]>> {
-    const { data: episodes } = await this.listSeriesID(id);
+    const { data: episodes } = await this.listSeriesID(id, data);
     console.info('');
     console.info('-'.repeat(30));
     console.info('');
@@ -2313,6 +2314,7 @@ export default class Crunchy implements ServiceClass {
           item.season_title = 'NO_TITLE';
           item.series_title = 'NO_TITLE';
         }
+
         const epNum = key.startsWith('E') ? key.slice(1) : key;
         // set data
         const images = (item.images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
