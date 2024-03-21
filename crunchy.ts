@@ -2238,8 +2238,13 @@ export default class Crunchy implements ServiceClass {
       delete episodes[key];
     }
 
-    for (const key of Object.keys(episodes)) {
-      const item = episodes[key];
+    // Sort episodes to have specials at the end
+    const specials = Object.entries(episodes).filter(a => a[0].startsWith('S')),
+      normal = Object.entries(episodes).filter(a => a[0].startsWith('E')),
+      sortedEpisodes = Object.fromEntries([...normal, ...specials]);
+
+    for (const key of Object.keys(sortedEpisodes)) {
+      const item = sortedEpisodes[key];
       console.info(`[${key}] ${
         item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
       } - Season ${item.items[0].season_number} - ${item.items[0].title} [${
@@ -2249,13 +2254,11 @@ export default class Crunchy implements ServiceClass {
       }]`);
     }
 
-    //TODO: Sort episodes to have specials at the end
-
     if (!serieshasversions) {
       console.warn('Couldn\'t find versions on some episodes, fell back to old method.');
     }
 
-    return { data: episodes, list: Object.entries(episodes).map(([key, value]) => {
+    return { data: sortedEpisodes, list: Object.entries(sortedEpisodes).map(([key, value]) => {
       const images = (value.items[0].images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
       const seconds = Math.floor(value.items[0].duration_ms / 1000);
       return {
