@@ -2166,7 +2166,7 @@ export default class Crunchy implements ServiceClass {
       merger.cleanUp();
   }
 
-  public async listSeriesID(id: string, data: CrunchyMultiDownload): Promise<{ list: Episode[], data: Record<string, {
+  public async listSeriesID(id: string, data: CrunchyMultiDownload | undefined = undefined): Promise<{ list: Episode[], data: Record<string, {
     items: CrunchyEpisode[];
     langs: langsData.LanguageItem[];
   }>}> {
@@ -2183,7 +2183,7 @@ export default class Crunchy implements ServiceClass {
     for(const season of Object.keys(result) as unknown as number[]) {
       for (const key of Object.keys(result[season])) {
         const s = result[season][key];
-        if (data.s && s.id !== data.s) continue;
+        if (data?.s && s.id !== data.s) continue;
         (await this.getSeasonDataById(s))?.data?.forEach(episode => {
           //TODO: Make sure the below code is ok
           //Prepare the episode array
