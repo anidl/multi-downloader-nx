@@ -2166,7 +2166,7 @@ export default class Crunchy implements ServiceClass {
       merger.cleanUp();
   }
 
-  public async listSeriesID(id: string, data: CrunchyMultiDownload | undefined = undefined): Promise<{ list: Episode[], data: Record<string, {
+  public async listSeriesID(id: string, data?: CrunchyMultiDownload): Promise<{ list: Episode[], data: Record<string, {
     items: CrunchyEpisode[];
     langs: langsData.LanguageItem[];
   }>}> {
