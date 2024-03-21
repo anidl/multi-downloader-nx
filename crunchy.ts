@@ -2240,8 +2240,8 @@ export default class Crunchy implements ServiceClass {
 
     // Sort episodes to have specials at the end
     const specials = Object.entries(episodes).filter(a => a[0].startsWith('S')),
-          normal = Object.entries(episodes).filter(a => a[0].startsWith('E')),
-          sortedEpisodes = Object.fromEntries([...normal, ...specials]);
+      normal = Object.entries(episodes).filter(a => a[0].startsWith('E')),
+      sortedEpisodes = Object.fromEntries([...normal, ...specials]);
 
     for (const key of Object.keys(sortedEpisodes)) {
       const item = sortedEpisodes[key];
