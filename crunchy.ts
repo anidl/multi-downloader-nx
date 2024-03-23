@@ -1936,6 +1936,8 @@ export default class Crunchy implements ServiceClass {
             console.info('Downloading skipped!');
           }
         }
+      } else if (options.novids && options.noaudio) {
+        fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
       }
 
       if (compiledChapters.length > 0) {
