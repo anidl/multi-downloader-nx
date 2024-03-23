@@ -213,7 +213,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
      + '\nCurrently only works with mkvmerge.',
     usage: '',
     default: {
-      default: false
+      default: true
     }
   },
   {
