@@ -227,7 +227,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '',
     choices: ['android', 'web'],
     default: {
-      default: 'android'
+      default: 'web'
     }
   },
   {
@@ -290,7 +290,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Select specific stream',
     choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     default: {
-      default: 5
+      default: 1
     },
     docDescribe: true,
     service: ['crunchy'],
