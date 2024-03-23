@@ -144,14 +144,14 @@ This will speed up the download speed, if multiple languages are selected.
 #### `--chapters`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--chapters ` | `boolean` | `No`| `NaN` | `false`| `chapters: ` |
+| Crunchyroll | `--chapters ` | `boolean` | `No`| `NaN` | `true`| `chapters: ` |
 
 Will fetch the chapters and add them into the final video.
 Currently only works with mkvmerge.
 #### `--crapi`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--crapi ` | `string` | `No`| `NaN` | [`android`, `web`] | `android`| `crapi: ` |
+| Crunchyroll | `--crapi ` | `string` | `No`| `NaN` | [`android`, `web`] | `web`| `crapi: ` |
 
 If set to Android, it has lower quality, but Non-DRM streams,
 If set to Web, it has a higher quality adaptive stream, but everything is DRM.
@@ -184,7 +184,7 @@ Select the server to use
 #### `--kstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--kstream ${stream}` | `number` | `No`| `-k` | [`1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`] | `5`| `kstream: ` |
+| Crunchyroll | `--kstream ${stream}` | `number` | `No`| `-k` | [`1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`] | `1`| `kstream: ` |
 
 Select specific stream
 #### `--hslang`
