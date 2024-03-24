@@ -158,7 +158,7 @@ If set to Web, it has a higher quality adaptive stream, but everything is DRM.
 #### `--hdapi`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Hidive | `--hdapi ` | `string` | `No`| `NaN` | [`old`, `new`] | `old`| `hdapi: ` |
+| Hidive | `--hdapi ` | `string` | `No`| `NaN` | [`old`, `new`] | `new`| `hdapi: ` |
 
 If set to Old, it has lower quality, but Non-DRM streams, but some people can't use it,
 If set to New, it has a higher quality stream, but everything is DRM.
