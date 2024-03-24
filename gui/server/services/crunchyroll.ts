@@ -15,9 +15,16 @@ class CrunchyHandler extends Base implements MessageHandler {
     this.crunchy = new Crunchy();
     this.crunchy.refreshToken();
     this.initState();
+    this.getAPIVersion();
+  }
+
+  public getAPIVersion() {
+    const _default = yargs.appArgv(this.crunchy.cfg.cli, true);
+    this.crunchy.api = _default.crapi;
   }
   
   public async listEpisodes (id: string): Promise<EpisodeListResponse> {
+    this.getAPIVersion();
     await this.crunchy.refreshToken(true);
     return { isOk: true, value: (await this.crunchy.listSeriesID(id)).list };
   }
@@ -40,6 +47,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async resolveItems(data: ResolveItemsData): Promise<boolean> {
+    this.getAPIVersion();
     await this.crunchy.refreshToken(true);
     console.debug(`Got resolve options: ${JSON.stringify(data)}`);
     const res = await this.crunchy.downloadFromSeriesID(data.id, data);
@@ -64,6 +72,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async search(data: SearchData): Promise<SearchResponse> {
+    this.getAPIVersion();
     await this.crunchy.refreshToken(true);
     if (!data['search-type']) data['search-type'] = 'series';
     console.debug(`Got search options: ${JSON.stringify(data)}`);
@@ -88,6 +97,7 @@ class CrunchyHandler extends Base implements MessageHandler {
   }
 
   public async downloadItem(data: DownloadData) {
+    this.getAPIVersion();
     await this.crunchy.refreshToken(true);
     console.debug(`Got download options: ${JSON.stringify(data)}`);
     this.setDownloading(true);
