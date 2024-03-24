@@ -286,7 +286,14 @@ function convert(css: Css, vtt: Vtt[]) {
      * This checks if a subtitle should be multi-line, and if it is, pops the just inserted 
      * subtitle and the previous subtitle, and merges them into a single subtitle.
      */
-    if (previousLine?.start == x.start && previousLine.type == x.type && previousLine.style == x.style) {
+    console.debug(previousLine?.text);
+    if (
+      previousLine?.start == x.start && 
+      previousLine.type == x.type && 
+      previousLine.style == x.style && 
+      !previousLine?.text.includes('\\pos') && 
+      !x.text.includes('\\pos')
+    ) {
       events[x.type as keyof typeof events].pop();
       const previousLinePop = events[x.type as keyof typeof events].pop();
       events[x.type as keyof typeof events].push(previousLinePop + '\\N'+x.text);
