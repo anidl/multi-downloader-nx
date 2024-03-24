@@ -286,7 +286,6 @@ function convert(css: Css, vtt: Vtt[]) {
      * This checks if a subtitle should be multi-line, and if it is, pops the just inserted 
      * subtitle and the previous subtitle, and merges them into a single subtitle.
      */
-    console.debug(previousLine?.text);
     if (
       previousLine?.start == x.start && 
       previousLine.type == x.type && 

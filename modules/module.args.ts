@@ -241,7 +241,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '',
     choices: ['old', 'new'],
     default: {
-      default: 'old'
+      default: 'new'
     }
   },
   {
