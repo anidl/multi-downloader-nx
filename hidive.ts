@@ -1129,7 +1129,7 @@ export default class Hidive implements ServiceClass {
     let dlFailed = false;
     const subsMargin = 0;
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
-    let encryptionKeys: KeyContainer[] | undefined = undefined;
+    let encryptionKeys: KeyContainer[] = [];
     if (!canDecrypt) console.warn('Decryption not enabled!');
 
     if (!this.cfg.bin.ffmpeg) 
@@ -1237,6 +1237,13 @@ export default class Hidive implements ServiceClass {
     console.info(`Selected (Available) Audio Languages: ${chosenAudios.map(a => a.language.name).join(', ')}`);
     console.info('Stream URL:', chosenVideoSegments.segments[0].map.uri.split('/init.mp4')[0]);
 
+    if (chosenAudios[0].pssh || chosenVideoSegments.pssh) {
+      encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
+        'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
+        'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ==',
+      });
+    }
+          
     if (!options.novids) {
       //Download Video
       const totalParts = chosenVideoSegments.segments.length;
@@ -1277,10 +1284,6 @@ export default class Hidive implements ServiceClass {
       } else {
         if (chosenVideoSegments.pssh) {
           console.info('Decryption Needed, attempting to decrypt');
-          encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
-            'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
-            'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ==',
-          });
           if (encryptionKeys.length == 0) {
             console.error('Failed to get encryption keys');
             return undefined;
@@ -1359,11 +1362,9 @@ export default class Hidive implements ServiceClass {
         }
         if (chosenAudioSegments.pssh) {
           console.info('Decryption Needed, attempting to decrypt');
-          if (!encryptionKeys) {
-            encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
-              'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
-              'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ==',
-            });
+          if (encryptionKeys.length == 0) {
+            console.error('Failed to get encryption keys');
+            return undefined;
           }
           if (this.cfg.bin.mp4decrypt) {
             const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
