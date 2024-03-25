@@ -1052,10 +1052,19 @@ export default class Hidive implements ServiceClass {
       return { isOk: false, reason: new Error('You do not have access to this') };
     }
 
-    const seasonData = await this.getSeason(episodeData.episodeInformation.season);
-    if (!seasonData.isOk || !seasonData.value) { 
-      console.error('Failed to get season data');
-      return { isOk: false, reason: new Error('Failed to get season data') };
+    let seasonData: Awaited<ReturnType<typeof this.getSeason>> | undefined = undefined;
+    if (episodeData.episodeInformation) { 
+      seasonData = await this.getSeason(episodeData.episodeInformation.season);
+      if (!seasonData.isOk || !seasonData.value) { 
+        console.error('Failed to get season data');
+        return { isOk: false, reason: new Error('Failed to get season data') };
+      }
+    } else {
+      episodeData.episodeInformation = {
+        season: 0,
+        seasonNumber: 0,
+        episodeNumber: 0,
+      };
     }
 
     //Get Playback data
@@ -1078,8 +1087,8 @@ export default class Hidive implements ServiceClass {
       ...episodeData,
       nameLong: episodeData.title,
       titleId: episodeData.id,
-      seasonTitle: seasonData.value.title,
-      seriesTitle: seasonData.value.series.title,
+      seasonTitle: seasonData?.value.title ?? episodeData.title,
+      seriesTitle: seasonData?.value.series.title ?? episodeData.title,
       isSelected: true
     };
     
