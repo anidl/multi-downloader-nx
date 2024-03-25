@@ -1217,6 +1217,10 @@ export default class Hidive implements ServiceClass {
         chosenAudios.push(audioByLanguage[dubLang][chosenAudioQuality]);
       }
     }
+    if (chosenAudios.length == 0) {
+      console.error(`Chosen audio language(s) does not exist for episode ${selectedEpisode.episodeInformation.episodeNumber}`);
+      return undefined;
+    }
 
     const fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
 
