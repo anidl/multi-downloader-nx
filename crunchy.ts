@@ -1382,7 +1382,7 @@ export default class Crunchy implements ServiceClass {
 
       variables.push(...([
         ['title', medias.episodeTitle, true],
-        ['episode', isNaN(parseInt(medias.episodeNumber)) ? medias.episodeNumber : parseInt(medias.episodeNumber), false],
+        ['episode', isNaN(parseFloat(medias.episodeNumber)) ? medias.episodeNumber : parseFloat(medias.episodeNumber), false],
         ['service', 'CR', false],
         ['seriesTitle', medias.seriesTitle, true],
         ['showTitle', medias.seasonTitle, true],

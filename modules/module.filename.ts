@@ -31,7 +31,7 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
     
     if (use.type === 'number') {
       const len = use.replaceWith.toFixed(0).length;
-      const replaceStr = len < numbers ? '0'.repeat(numbers - len) + use.replaceWith : use.replaceWith.toFixed(0);
+      const replaceStr = len < numbers ? '0'.repeat(numbers - len) + use.replaceWith : use.replaceWith+'';
       input = input.replace(type, replaceStr); 
     } else {
       if (use.sanitize) 
