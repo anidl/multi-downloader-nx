@@ -299,14 +299,18 @@ function convert(css: Css, vtt: Vtt[]) {
         events[x.type as keyof typeof events].pop();
         const previousLinePop = events[x.type as keyof typeof events].pop();
         events[x.type as keyof typeof events].push(previousLinePop + '\\N'+x.text);
-      } else if ((currentStart - previousStart) <= 3) {
+      }/* else if ((currentStart - previousStart) <= 3) {
         const currentLinePop = events[x.type as keyof typeof events].pop();
         const previousLinePop = events[previousLine.type as keyof typeof events].pop();
         events[x.type as keyof typeof events].push(currentLinePop as string, previousLinePop as string);
-      }
+      }*/
     }
     previousLine = x;
   }
+  events.subtitle.reverse();
+  events.caption.reverse();
+  events.capt_pos.reverse();
+  events.song_cap.reverse();
   if (events.subtitle.length > 0) {
     ass = ass.concat(
       //`Comment: 0,0:00:00.00,0:00:00.00,${defaultStyleName},,0,0,0,,** Subtitles **`,
