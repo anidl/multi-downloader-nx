@@ -82,8 +82,8 @@ function parseStyle(stylegroup: string, line: string, style: any) {
   for (const s of line.split(';')) {
     if (s == '') continue;
     const st = s.trim().split(':');
-    st[0] = st[0].trim();
-    st[1] = st[1].trim();
+    if (st[0]) st[0] = st[0].trim();
+    if (st[1]) st[1] = st[1].trim();
     let cl, arr, transformed_str;
     switch (st[0]) {
     case 'font-family':
