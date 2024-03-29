@@ -228,6 +228,17 @@ function loadVTT(vttStr: string): Vtt[] {
   return data;
 }
 
+function timestampToCentiseconds(timestamp: string) {
+  const timestamp_split = timestamp.split(':');
+  const timestamp_sec_split = timestamp_split[2].split('.');
+  const hour = parseInt(timestamp_split[0]);
+  const minute = parseInt(timestamp_split[1]);
+  const second = parseInt(timestamp_sec_split[0]);
+  const centisecond = parseInt(timestamp_sec_split[1]);
+  
+  return 360000 * hour + 6000 * minute + 100 * second + centisecond;
+}
+
 function convert(css: Css, vtt: Vtt[]) {
   const stylesMap: Record<string, string> = {};
   let ass = [
@@ -264,6 +275,7 @@ function convert(css: Css, vtt: Vtt[]) {
   };
   const linesMap: Record<string, number> = {};
   let previousLine: ReturnType<typeof convertLine> | undefined = undefined;
+  const buffer: string[] = [];
   for (const l in vtt) {
     const x = convertLine(stylesMap, vtt[l]);
     if (x.ind !== '' && linesMap[x.ind] !== undefined) {
@@ -287,8 +299,8 @@ function convert(css: Css, vtt: Vtt[]) {
      * subtitle and the previous subtitle, and merges them into a single subtitle.
      */
     if (previousLine) {
-      const previousStart = parseFloat(previousLine.start.split(':').join('').split('.').join(''));
-      const currentStart = parseFloat(x.start.split(':').join('').split('.').join(''));
+      const previousStart = timestampToCentiseconds(previousLine.start);
+      const currentStart = timestampToCentiseconds(x.start);
       if (
         (currentStart - previousStart) <= 2 &&
         previousLine.type == x.type && 
@@ -299,18 +311,18 @@ function convert(css: Css, vtt: Vtt[]) {
         events[x.type as keyof typeof events].pop();
         const previousLinePop = events[x.type as keyof typeof events].pop();
         events[x.type as keyof typeof events].push(previousLinePop + '\\N'+x.text);
-      }/* else if ((currentStart - previousStart) <= 3) {
+      } else if ((currentStart - previousStart) <= 3) {
         const currentLinePop = events[x.type as keyof typeof events].pop();
         const previousLinePop = events[previousLine.type as keyof typeof events].pop();
-        events[x.type as keyof typeof events].push(currentLinePop as string, previousLinePop as string);
-      }*/
+        buffer.push(previousLinePop as string, currentLinePop as string);
+      } else if ((currentStart - previousStart) >= 3 && buffer.length > 0) {
+        events[x.type as keyof typeof events].push(...buffer.reverse());
+        buffer.splice(0,buffer.length);
+      }
     }
     previousLine = x;
   }
-  events.subtitle.reverse();
-  events.caption.reverse();
-  events.capt_pos.reverse();
-  events.song_cap.reverse();
+
   if (events.subtitle.length > 0) {
     ass = ass.concat(
       //`Comment: 0,0:00:00.00,0:00:00.00,${defaultStyleName},,0,0,0,,** Subtitles **`,
