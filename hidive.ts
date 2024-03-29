@@ -19,6 +19,9 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import vtt2ass from './modules/module.vtt2ass';
+import getKeys, { canDecrypt } from './modules/widevine';
+import { KeyContainer } from './modules/license';
+import mp4decrypt from 'mp4decryptjs';
 
 // load req
 import { domain, api } from './modules/module.api-urls';
@@ -40,9 +43,6 @@ import { Episode, NewHidiveEpisodeExtra, NewHidiveSeason, NewHidiveSeriesExtra }
 import { NewHidiveEpisode } from './@types/newHidiveEpisode';
 import { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
 import { MPDParsed, parse } from './modules/module.transform-mpd';
-import getKeys, { canDecrypt } from './modules/widevine';
-import { exec } from './modules/sei-helper-fixes';
-import { KeyContainer } from './modules/license';
 
 export default class Hidive implements ServiceClass { 
   public cfg: yamlCfg.ConfigObject;
@@ -1130,6 +1130,7 @@ export default class Hidive implements ServiceClass {
     const subsMargin = 0;
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] = [];
+    const keys: Record<string, string> = {};
     if (!canDecrypt) console.warn('Decryption not enabled!');
 
     if (!this.cfg.bin.ffmpeg) 
@@ -1237,10 +1238,13 @@ export default class Hidive implements ServiceClass {
     console.info(`Selected (Available) Audio Languages: ${chosenAudios.map(a => a.language.name).join(', ')}`);
     console.info('Stream URL:', chosenVideoSegments.segments[0].map.uri.split('/init.mp4')[0]);
 
-    if (chosenAudios[0].pssh || chosenVideoSegments.pssh) {
+    if ((chosenAudios[0].pssh || chosenVideoSegments.pssh) && canDecrypt) {
       encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
         'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
         'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ==',
+      });
+      encryptionKeys.forEach(function(key) {
+        keys[key.kid] = key.key;
       });
     }
           
@@ -1288,30 +1292,22 @@ export default class Hidive implements ServiceClass {
             console.error('Failed to get encryption keys');
             return undefined;
           }
-          if (this.cfg.bin.mp4decrypt) {
-            const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-            const commandVideo = commandBase+`"${tsFile}.video.enc.ts" "${tsFile}.video.ts"`;
-
-            console.info('Started decrypting video');
-            const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
-            if (!decryptVideo.isOk) {
-              console.error(decryptVideo.err);
-              console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
-              return undefined;
-            } else {
-              console.info('Decryption done for video');
-              if (!options.nocleanup) {
-                fs.removeSync(`${tsFile}.video.enc.ts`);
-              }
-              files.push({
-                type: 'Video',
-                path: `${tsFile}.video.ts`,
-                lang: chosenAudios[0].language,
-                isPrimary: true
-              });
-            }
+          console.info('Started decrypting video');
+          const decryptVideo = await mp4decrypt(`${tsFile}.video.enc.ts`, `${tsFile}.video.ts`, keys);
+          if (!decryptVideo) {
+            console.error('Decryption of video failed');
+            return undefined;
           } else {
-            console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
+            console.info('Decryption done for video');
+            if (!options.nocleanup) {
+              fs.removeSync(`${tsFile}.video.enc.ts`);
+            }
+            files.push({
+              type: 'Video',
+              path: `${tsFile}.video.ts`,
+              lang: chosenAudios[0].language,
+              isPrimary: true
+            });
           }
         }
       }
@@ -1366,30 +1362,22 @@ export default class Hidive implements ServiceClass {
             console.error('Failed to get encryption keys');
             return undefined;
           }
-          if (this.cfg.bin.mp4decrypt) {
-            const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-            const commandAudio = commandBase+`"${tsFile}.audio.enc.ts" "${tsFile}.audio.ts"`;
-
-            console.info('Started decrypting audio');
-            const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
-            if (!decryptAudio.isOk) {
-              console.error(decryptAudio.err);
-              console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
-              return undefined;
-            } else {
-              if (!options.nocleanup) {
-                fs.removeSync(`${tsFile}.audio.enc.ts`);
-              }
-              files.push({
-                type: 'Audio',
-                path: `${tsFile}.audio.ts`,
-                lang: chosenAudioSegments.language,
-                isPrimary: chosenAudioSegments.default
-              });
-              console.info('Decryption done for audio');
-            }
+          console.info('Started decrypting audio');
+          const decryptAudio = await mp4decrypt(`${tsFile}.audio.enc.ts`, `${tsFile}.audio.ts`, keys);
+          if (!decryptAudio) {
+            console.error('Decryption of audio failed');
+            return undefined;
           } else {
-            console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
+            if (!options.nocleanup) {
+              fs.removeSync(`${tsFile}.audio.enc.ts`);
+            }
+            files.push({
+              type: 'Audio',
+              path: `${tsFile}.audio.ts`,
+              lang: chosenAudioSegments.language,
+              isPrimary: chosenAudioSegments.default
+            });
+            console.info('Decryption done for audio');
           }
         }
       }

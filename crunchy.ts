@@ -10,7 +10,6 @@ import { console } from './modules/log';
 import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
 import streamdl, { M3U8Json } from './modules/hls-download';
-import { exec } from './modules/sei-helper-fixes';
 
 // custom modules
 import * as fontsData from './modules/module.fontsData';
@@ -19,6 +18,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import getKeys, { canDecrypt } from './modules/widevine';
+import mp4decrypt from 'mp4decryptjs';
 //import vttConvert from './modules/module.vttconvert';
 
 // args
@@ -1408,7 +1408,7 @@ export default class Crunchy implements ServiceClass {
         if (
           (s.match(/hls/) || s.match(/dash/)) 
           && !(s.match(/hls/) && s.match(/drm/)) 
-          && !((!canDecrypt || !this.cfg.bin.mp4decrypt) && s.match(/drm/))
+          //&& !((!canDecrypt || !this.cfg.bin.mp4decrypt) && s.match(/drm/))
           && !s.match(/trailer/)
         ) {
           const pb = Object.values(pbStreams[s]).map(v => {
@@ -1681,7 +1681,7 @@ export default class Crunchy implements ServiceClass {
             }
 
             //Handle Decryption if needed
-            if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded)) {
+            if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded) && canDecrypt) {
               const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
               const assetId = assetIdRegex ? assetIdRegex[1] : null;
               const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
@@ -1709,61 +1709,55 @@ export default class Crunchy implements ServiceClass {
                 console.error('Failed to get encryption keys');
                 return undefined;
               }
-              /*const keys = {} as Record<string, string>;
+              const keys = {} as Record<string, string>;
               encryptionKeys.forEach(function(key) {
                 keys[key.kid] = key.key;
-              });*/
+              });
 
-              if (this.cfg.bin.mp4decrypt) {
-                const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-                const commandVideo = commandBase+`"${tsFile}.video.enc.ts" "${tsFile}.video.ts"`;
-                const commandAudio = commandBase+`"${tsFile}.audio.enc.ts" "${tsFile}.audio.ts"`;
-
-                if (videoDownloaded) {
-                  console.info('Started decrypting video');
-                  const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
-                  if (!decryptVideo.isOk) {
-                    console.error(decryptVideo.err);
-                    console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
-                    return undefined;
-                  } else {
-                    console.info('Decryption done for video');
-                    if (!options.nocleanup) {
-                      fs.removeSync(`${tsFile}.video.enc.ts`);
-                    }
-                    files.push({
-                      type: 'Video',
-                      path: `${tsFile}.video.ts`,
-                      lang: lang,
-                      isPrimary: isPrimary
-                    });
+              if (videoDownloaded) {
+                console.info('Started decrypting video');
+                const decryptVideo = await mp4decrypt(`${tsFile}.video.enc.ts`, `${tsFile}.video.ts`, keys);
+                if (!decryptVideo) {
+                  console.error('Decryption of video failed');
+                  return undefined;
+                } else {
+                  console.info('Decryption done for video');
+                  if (!options.nocleanup) {
+                    fs.removeSync(`${tsFile}.video.enc.ts`);
                   }
+                  files.push({
+                    type: 'Video',
+                    path: `${tsFile}.video.ts`,
+                    lang: lang,
+                    isPrimary: isPrimary
+                  });
                 }
+              }
 
-                if (audioDownloaded) {
-                  console.info('Started decrypting audio');
-                  const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
-                  if (!decryptAudio.isOk) {
-                    console.error(decryptAudio.err);
-                    console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
-                    return undefined;
-                  } else {
-                    if (!options.nocleanup) {
-                      fs.removeSync(`${tsFile}.audio.enc.ts`);
-                    }
-                    files.push({
-                      type: 'Audio',
-                      path: `${tsFile}.audio.ts`,
-                      lang: lang,
-                      isPrimary: isPrimary
-                    });
-                    console.info('Decryption done for audio');
+              if (audioDownloaded) {
+                console.info('Started decrypting audio');
+                const decryptAudio = await mp4decrypt(`${tsFile}.audio.enc.ts`, `${tsFile}.audio.ts`, keys);
+                if (!decryptAudio) {
+                  console.error('Decryption of audio failed');
+                  return undefined;
+                } else {
+                  if (!options.nocleanup) {
+                    fs.removeSync(`${tsFile}.audio.enc.ts`);
                   }
+                  files.push({
+                    type: 'Audio',
+                    path: `${tsFile}.audio.ts`,
+                    lang: lang,
+                    isPrimary: isPrimary
+                  });
+                  console.info('Decryption done for audio');
                 }
-              } else {
-                console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
               }
             } else {
+              if (!canDecrypt) {
+                console.error('CDM Missing, unable to decrypt.');
+                return undefined;
+              }
               files.push({
                 type: 'Video',
                 path: `${tsFile}.video.enc.ts`,

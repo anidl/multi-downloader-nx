@@ -20,7 +20,6 @@ By default this application uses the following paths to programs (main executabl
 * `ffmpeg.exe` (From PATH)
 * `ffprobe.exe` (From PATH)
 * `mkvmerge.exe` (From PATH)
-* `mp4decrypt.exe` (From PATH)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
@@ -63,10 +62,11 @@ Dependencies that are only required for running from code. These are not require
 * NodeJS >= 14.6.0 (https://nodejs.org/)
 * NPM >= 6.9.0 (https://www.npmjs.org/)
 * PNPM >= 7.0.0 (https://pnpm.io/)
+* CMake >= ??? (https://cmake.org/)
 
 ### Build Instructions
 
-Please note that NodeJS, NPM, and PNPM must be installed on your system. For instructions on how to install pnpm, check (https://pnpm.io/installation)
+Please note that NodeJS, NPM, PNPM, and CMake must be installed on your system. For instructions on how to install pnpm, check (https://pnpm.io/installation)
 
 First clone this repo `git clone https://github.com/anidl/multi-downloader-nx.git`.
 
@@ -79,10 +79,10 @@ If you want to package the application, run pnpm run build-`{platform}`-`{type}`
 
 ## DRM Decryption
 
-### Decryption Requirements
-
-* mp4decrypt >= Any (http://www.bento4.com/) - Only required for decrypting
-
 ### Instructions
 
-In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (`device_client_id_blob` and `device_private_key`) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.
+In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (blob file and pem file) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.
+
+### Disclaimer
+
+We do not support nor condone piracy
