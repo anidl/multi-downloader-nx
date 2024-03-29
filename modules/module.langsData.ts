@@ -18,7 +18,7 @@ const languages: LanguageItem[] = [
   { cr_locale: 'en-IN', locale: 'en-IN', code: 'eng', name: 'English (India)', },
   { cr_locale: 'es-LA', new_hd_locale: 'es-MX', hd_locale: 'Spanish LatAm', funi_name: 'Spanish (LAS)', funi_name_lagacy: 'Spanish (Latin Am)', funi_locale: 'esLA', locale: 'es-419', code: 'spa', name: 'Spanish', language: 'Latin American Spanish' },
   { cr_locale: 'es-419',hd_locale: 'Spanish', locale: 'es-419', code: 'spa-419', name: 'Spanish', language: 'Latin American Spanish' },
-  { cr_locale: 'es-ES', hd_locale: 'Spanish Europe', locale: 'es-ES', code: 'spa-ES', name: 'Castilian', language: 'European Spanish' },
+  { cr_locale: 'es-ES', new_hd_locale: 'es-ES', hd_locale: 'Spanish Europe', locale: 'es-ES', code: 'spa-ES', name: 'Castilian', language: 'European Spanish' },
   { cr_locale: 'pt-BR', new_hd_locale: 'pt-BR', hd_locale: 'Portuguese', funi_name: 'Portuguese (Brazil)', funi_locale: 'ptBR', locale: 'pt-BR', code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese' },
   { cr_locale: 'pt-PT', locale: 'pt-PT', code: 'por', name: 'Portuguese (Portugal)', language: 'Portugues (Portugal)' },
   { cr_locale: 'fr-FR', hd_locale: 'French', locale: 'fr', code: 'fra', name: 'French' },
