@@ -1710,9 +1710,11 @@ export default class Crunchy implements ServiceClass {
                 return undefined;
               }
               const keys = {} as Record<string, string>;
-              encryptionKeys.forEach(function(key) {
+              /*encryptionKeys.forEach(function(key) {
                 keys[key.kid] = key.key;
-              });
+              });*/
+              //Only use second key, if first key is used too, occasionally it can fail?
+              keys[encryptionKeys[1].kid] = encryptionKeys[1].key;
 
               if (videoDownloaded) {
                 console.info('Started decrypting video');
