@@ -63,8 +63,8 @@ dependencies:
     specifier: ^1.3.0
     version: 1.3.0
   mp4decryptjs:
-    specifier: ^1.0.1
-    version: 1.0.1
+    specifier: ^1.0.2
+    version: 1.0.2
   mpd-parser:
     specifier: ^1.3.0
     version: 1.3.0
@@ -4682,8 +4682,8 @@ packages:
     hasBin: true
     dev: false
 
-  /mp4decryptjs@1.0.1:
-    resolution: {integrity: sha512-KFkiJGaROybi+ceTPsxTDZWR6umgnL6DjtNviBODUOq3cglHkGlDepbD2dSRp9a5R43ePmKSOH6VzvGz/1SfXA==}
+  /mp4decryptjs@1.0.2:
+    resolution: {integrity: sha512-U/Uo+2jOQpUg9RprwrmtGdzNQAh9Tdc0ARGTvlqO12PvD8HFxiP+u76f4f1Km8xgINiKeaMdw50rrNnE0S1IDg==}
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
