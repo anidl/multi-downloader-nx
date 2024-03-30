@@ -103,13 +103,13 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${page}'
   },
   {
-    name: 'search-locale',
-    describe: 'Set the search locale',
-    docDescribe: 'Set the search local that will be used for searching for items.',
+    name: 'locale',
+    describe: 'Set the service locale',
+    docDescribe: 'Set the local that will be used for the API.',
     group: 'search',
     choices: (searchLocales.filter(a => a !== undefined) as string[]),
     default: {
-      default: ''
+      default: 'en-US'
     },
     type: 'string',
     service: ['crunchy'],

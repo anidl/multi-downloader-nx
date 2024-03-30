@@ -55,6 +55,7 @@ export type sxItem = {
 export default class Crunchy implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;
   public api: 'android' | 'web';
+  public locale: string;
   private token: Record<string, any>;
   private req: reqModule.Req;
   private cmsToken: {
@@ -68,6 +69,7 @@ export default class Crunchy implements ServiceClass {
     this.token = yamlCfg.loadCRToken();
     this.req = new reqModule.Req(domain, debug, false, 'cr');
     this.api = 'android';
+    this.locale = 'en-US';
   }
 
   public checkToken(): boolean {
@@ -78,6 +80,7 @@ export default class Crunchy implements ServiceClass {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
     this.api = argv.crapi;
+    this.locale = argv.locale;
     if (argv.debug)
       this.debug = true;
 
@@ -394,7 +397,9 @@ export default class Crunchy implements ServiceClass {
       this.cmsToken.cms.bucket,
       '/index?',
       new URLSearchParams({
+        'force_locale': '',
         'preferred_audio_language': 'ja-JP',
+        'locale': this.locale,
         'Policy': this.cmsToken.cms.policy,
         'Signature': this.cmsToken.cms.signature,
         'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
@@ -425,7 +430,7 @@ export default class Crunchy implements ServiceClass {
       n: '5',
       start: data.page ? `${(data.page-1)*5}` : '0',
       type: data['search-type'] ?? getDefault('search-type', this.cfg.cli),
-      locale: data['search-locale'] ?? getDefault('search-locale', this.cfg.cli),
+      locale: this.locale,
     }).toString();
     const searchReq = await this.req.getData(`${api.search}?${searchParams}`, searchReqOpts);
     if(!searchReq.ok || ! searchReq.res){
@@ -688,7 +693,7 @@ export default class Crunchy implements ServiceClass {
     };
     // reqs
     if(!hideSeriesTitle){
-      const seriesReq = await this.req.getData(`${api.cms}/series/${id}?preferred_audio_language=ja-JP`, AuthHeaders);
+      const seriesReq = await this.req.getData(`${api.cms}/series/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
       if(!seriesReq.ok || !seriesReq.res){
         console.error('Series Request FAILED!');
         return;
@@ -697,7 +702,7 @@ export default class Crunchy implements ServiceClass {
       await this.logObject(seriesData.data[0], pad, false);
     }
     // seasons list
-    const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?preferred_audio_language=ja-JP`, AuthHeaders);
+    const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
       console.error('Series Request FAILED!');
       return;
@@ -729,7 +734,7 @@ export default class Crunchy implements ServiceClass {
     };
 
     //Movie Listing
-    const movieListingReq = await this.req.getData(`${api.cms}/movie_listings/${id}?preferred_audio_language=ja-JP`, AuthHeaders);
+    const movieListingReq = await this.req.getData(`${api.cms}/movie_listings/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!movieListingReq.ok || !movieListingReq.res){
       console.error('Movie Listing Request FAILED!');
       return;
@@ -744,7 +749,7 @@ export default class Crunchy implements ServiceClass {
     }
 
     //Movies
-    const moviesListReq = await this.req.getData(`${api.cms}/movie_listings/${id}/movies?preferred_audio_language=ja-JP`, AuthHeaders);
+    const moviesListReq = await this.req.getData(`${api.cms}/movie_listings/${id}/movies?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!moviesListReq.ok || !moviesListReq.res){
       console.error('Movies List Request FAILED!');
       return;
@@ -803,7 +808,7 @@ export default class Crunchy implements ServiceClass {
 
 
     //get show info
-    const showInfoReq = await this.req.getData(`${api.cms}/seasons/${id}?preferred_audio_language=ja-JP`, AuthHeaders);
+    const showInfoReq = await this.req.getData(`${api.cms}/seasons/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!showInfoReq.ok || !showInfoReq.res){
       console.error('Show Request FAILED!');
       return { isOk: false, reason: new Error('Show request failed. No more information provided.') };
@@ -819,7 +824,9 @@ export default class Crunchy implements ServiceClass {
         this.cmsToken.cms.bucket,
         '/episodes?',
         new URLSearchParams({
+          'force_locale': '',
           'preferred_audio_language': 'ja-JP',
+          'locale': this.locale,
           'season_id': id,
           'Policy': this.cmsToken.cms.policy,
           'Signature': this.cmsToken.cms.signature,
@@ -839,7 +846,7 @@ export default class Crunchy implements ServiceClass {
         meta: {}
       };
     } else {
-      const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
+      const reqEpsList = await this.req.getData(`${api.cms}/seasons/${id}/episodes?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
       if(!reqEpsList.ok || !reqEpsList.res){
         console.error('Episode List Request FAILED!');
         return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
@@ -987,7 +994,9 @@ export default class Crunchy implements ServiceClass {
           '/channels/crunchyroll/objects',
           '?',
           new URLSearchParams({
+            'force_locale': '',
             'preferred_audio_language': 'ja-JP',
+            'locale': this.locale,
             'external_id': ob,
             'Policy': this.cmsToken.cms.policy,
             'Signature': this.cmsToken.cms.signature,
@@ -1039,7 +1048,9 @@ export default class Crunchy implements ServiceClass {
         doEpsFilter.values.join(','),
         '?',
         new URLSearchParams({
+          'force_locale': '',
           'preferred_audio_language': 'ja-JP',
+          'locale': this.locale,
           'Policy': this.cmsToken.cms.policy,
           'Signature': this.cmsToken.cms.signature,
           'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
@@ -1063,7 +1074,7 @@ export default class Crunchy implements ServiceClass {
         meta: {}
       };
     } else {
-      const objectReq = await this.req.getData(`${api.cms}/objects/${doEpsFilter.values.join(',')}?preferred_audio_language=ja-JP`, AuthHeaders);
+      const objectReq = await this.req.getData(`${api.cms}/objects/${doEpsFilter.values.join(',')}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
       if(!objectReq.ok || !objectReq.res){
         console.error('Objects Request FAILED!');
         if(objectReq.error && objectReq.error.res && objectReq.error.res.body){
@@ -1325,7 +1336,9 @@ export default class Crunchy implements ServiceClass {
           `${this.cmsToken.cms.bucket}/videos/${mediaId}/streams`,
           '?',
           new URLSearchParams({
+            'force_locale': '',
             'preferred_audio_language': 'ja-JP',
+            'locale': this.locale,
             'Policy': this.cmsToken.cms.policy,
             'Signature': this.cmsToken.cms.signature,
             'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
@@ -1341,7 +1354,9 @@ export default class Crunchy implements ServiceClass {
             mMeta.playback,
             '?',
             new URLSearchParams({
+              'force_locale': '',
               'preferred_audio_language': 'ja-JP',
+              'locale': this.locale,
               'Policy': this.cmsToken.cms.policy,
               'Signature': this.cmsToken.cms.signature,
               'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
@@ -2418,7 +2433,7 @@ export default class Crunchy implements ServiceClass {
     };
 
     // seasons list
-    const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?preferred_audio_language=ja-JP`, AuthHeaders);
+    const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
       console.error('Series Request FAILED!');
       return;
@@ -2446,7 +2461,7 @@ export default class Crunchy implements ServiceClass {
     };
 
     //get show info
-    const showInfoReq = await this.req.getData(`${api.cms}/seasons/${item.id}?preferred_audio_language=ja-JP`, AuthHeaders);
+    const showInfoReq = await this.req.getData(`${api.cms}/seasons/${item.id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!showInfoReq.ok || !showInfoReq.res){
       console.error('Show Request FAILED!');
       return;
@@ -2463,7 +2478,9 @@ export default class Crunchy implements ServiceClass {
         this.cmsToken.cms.bucket,
         '/episodes?',
         new URLSearchParams({
+          'force_locale': '',
           'preferred_audio_language': 'ja-JP',
+          'locale': this.locale,
           'season_id': item.id,
           'Policy': this.cmsToken.cms.policy,
           'Signature': this.cmsToken.cms.signature,
@@ -2483,7 +2500,7 @@ export default class Crunchy implements ServiceClass {
         meta: {}
       };
     } else {
-      const reqEpsList = await this.req.getData(`${api.cms}/seasons/${item.id}/episodes?preferred_audio_language=ja-JP`, AuthHeaders);
+      const reqEpsList = await this.req.getData(`${api.cms}/seasons/${item.id}/episodes?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
       if(!reqEpsList.ok || !reqEpsList.res){
         console.error('Episode List Request FAILED!');
         return;
