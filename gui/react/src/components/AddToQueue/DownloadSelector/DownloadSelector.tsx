@@ -18,6 +18,8 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
   const [availableSubs, setAvailableSubs ] = React.useState<string[]>([]);
   const [ loading, setLoading ] = React.useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
 
   React.useEffect(() => {
     (async () => {
@@ -237,6 +239,14 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
           <FormControl fullWidth>
             <InputLabel id='hsLabel'>Hardsub Language</InputLabel>
           <Select
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                width: 250
+              }
+            }
+          }}
           labelId='hsLabel'
           label='Hardsub Language'
           disabled={store.service != 'crunchy'}
