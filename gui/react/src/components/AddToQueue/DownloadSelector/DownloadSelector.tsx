@@ -271,7 +271,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
         
         <Tooltip title={
         <Typography>
-           Downloads the hardsub version of the selected subtitle.<br/>Subtitels are displayed <b>PERMANENTLY!</b><br/>You can choose only <b>1</b> subtitle per video!
+           Downloads the hardsub version of the selected subtitle.<br/>Subtitles are displayed <b>PERMANENTLY!</b><br/>You can choose only <b>1</b> subtitle per video!
            </Typography>
       } arrow placement='top'>
         <InfoOutlinedIcon sx={{
