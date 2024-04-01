@@ -33,7 +33,7 @@ const MultiSelect: React.FC<MultiSelectProps> = (props) => {
   const theme = useTheme();
 
   return <div>
-    <FormControl sx={{ m: 1, width: 300 }}>
+    <FormControl sx={{ width: 300 }}>
       <InputLabel id="multi-select-label">{props.title}</InputLabel>
       <Select
         labelId="multi-select-label"

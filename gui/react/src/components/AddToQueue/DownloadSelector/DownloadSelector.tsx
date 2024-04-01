@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Button, Divider, InputBase, Link, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material';
+import React, { ChangeEvent } from 'react';
+import { Box, Button, Divider, FormControl, InputBase, InputLabel, Link, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material';
 import useStore from '../../../hooks/useStore';
 import MultiSelect from '../../reusable/MultiSelect';
 import { messageChannelContext } from '../../../provider/MessageChannel';
@@ -18,6 +18,8 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
   const [availableSubs, setAvailableSubs ] = React.useState<string[]>([]);
   const [ loading, setLoading ] = React.useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
 
   React.useEffect(() => {
     (async () => {
@@ -123,14 +125,15 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
       <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, novids: !store.downloadOptions.novids } })} variant={store.downloadOptions.novids ? 'contained' : 'outlined'}>Skip Video</Button>
       </Box>
       <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, dlVideoOnce: !store.downloadOptions.dlVideoOnce } })} variant={store.downloadOptions.dlVideoOnce ? 'contained' : 'outlined'}>Skip Unnecessary</Button>
-      <Tooltip title={
-        <Typography>
-          Currently only supported on Hidive
-        </Typography>
-      }
-      arrow
-      placement='top'>
-      <Button sx={{ textTransform: 'none'}} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, simul: !store.downloadOptions.simul } })} variant={store.downloadOptions.simul ? 'contained' : 'outlined'}>Download Simulcast ver.</Button>
+      <Tooltip title={store.service == 'hidive' ? '' :
+      <Typography>
+      Simulcast is only supported on Hidive
+      </Typography>}
+      arrow placement='top'
+      >
+      <Box>
+      <Button sx={{ textTransform: 'none'}} disabled={store.service != 'hidive'} onClick={() => dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, simul: !store.downloadOptions.simul } })} variant={store.downloadOptions.simul ? 'contained' : 'outlined'}>Download Simulcast ver.</Button>
+      </Box>
       </Tooltip>
       </Box>
     <Box sx={{
@@ -212,11 +215,11 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
           });
         }}
       />
-      <Tooltip title={
+      <Tooltip title={store.service == 'crunchy' ? '' :
             <Typography>
-              Comming Soon™
+              Hardsubs are only supported on Crunchyroll
             </Typography>
-          }
+      }
           arrow placement='top'>
       <Box sx={{
       display: 'flex',
@@ -227,27 +230,26 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
     }}>
       
       <Box sx={{
-          borderColor: '#595959',
-          borderStyle: 'solid',
-          borderWidth: '1px',
           borderRadius: '5px',
           //backgroundColor: '#ff4567',
           width: '15rem',
           height: '3.5rem',
           display: 'flex',
-          '&:hover' : {
-            borderColor: '#ffffff',
-          },
         }}>
-          
-          <Button sx={{ textTransform: 'none' }} variant='outlined' disabled={true}>Hardsub</Button>
-          <Divider orientation='vertical'/>
-          <Select sx={{
-            flex: 1
+          <FormControl fullWidth>
+            <InputLabel id='hsLabel'>Hardsub Language</InputLabel>
+          <Select
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                width: 250
+              }
+            }
           }}
-          title='Hardsub lang.'
-          placeholder='Hardsub lang.'
-          disabled={true}
+          labelId='hsLabel'
+          label='Hardsub Language'
+          disabled={store.service != 'crunchy'}
           value={store.downloadOptions.hslang}
           onChange={(e) => {
             dispatch({
@@ -256,12 +258,20 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
             });
           }}
           >
-            <MenuItem>Deutsch</MenuItem>
+            <MenuItem value=''>No Hardsub</MenuItem>
+            {availableSubs.map((lang) => {
+              if(lang === 'all' || lang === 'none')
+                return undefined
+              return <MenuItem value={lang}>{lang}</MenuItem>
+            })}
             </Select>
-        </Box>
+            </FormControl>
+            </Box>
+            
+        
         <Tooltip title={
         <Typography>
-           Burns the selected subtitle <b>PERMANENTLY</b> onto the video<br/>You can choose only <b>1</b> subtitle per video
+           Downloads the hardsub version of the selected subtitle.<br/>Subtitles are displayed <b>PERMANENTLY!</b><br/>You can choose only <b>1</b> subtitle per video!
            </Typography>
       } arrow placement='top'>
         <InfoOutlinedIcon sx={{
