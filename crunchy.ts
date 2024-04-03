@@ -31,7 +31,7 @@ import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList'
 import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-import { PlaybackData } from './@types/playbackData';
+import { CrunchyStreams, PlaybackData } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
@@ -43,6 +43,7 @@ import { parse } from './modules/module.transform-mpd';
 import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
 import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 import vtt2ass from './modules/module.vtt2ass';
+import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -1207,6 +1208,7 @@ export default class Crunchy implements ServiceClass {
       const AuthHeaders = {
         headers: {
           Authorization: `Bearer ${this.token.access_token}`,
+          'X-Cr-Disable-Drm': 'true'
         },
         useProxy: true
       };
@@ -1395,6 +1397,28 @@ export default class Crunchy implements ServiceClass {
         pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
       }
 
+      const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${mMeta.mediaId}/console/switch/play`, AuthHeaders);
+      if(!playbackReq.ok || !playbackReq.res){
+        console.error('Non-DRM Request Stream URLs FAILED!');
+      } else {
+        const playStream = JSON.parse(playbackReq.res.body) as CrunchyPlayStream;
+        const derivedPlaystreams = {} as CrunchyStreams;
+        for (const hardsub in playStream.hardSubs) {
+          const stream = playStream.hardSubs[hardsub];
+          derivedPlaystreams[hardsub] = {
+            url: stream.url,
+            'hardsub_locale': stream.hlang
+          };
+        }
+        derivedPlaystreams[''] = {
+          url: playStream.url,
+          hardsub_locale: ''
+        };
+        pbData.data[0]['adaptive_switch_dash'] = {
+          ...derivedPlaystreams
+        };
+      }
+
       variables.push(...([
         ['title', medias.episodeTitle, true],
         ['episode', isNaN(parseFloat(medias.episodeNumber)) ? medias.episodeNumber : parseFloat(medias.episodeNumber), false],
@@ -1520,7 +1544,7 @@ export default class Crunchy implements ServiceClass {
       let tsFile = undefined;
 
       if(!dlFailed && curStream !== undefined && !(options.novids && options.noaudio)){
-        const streamPlaylistsReq = await this.req.getData(curStream.url);
+        const streamPlaylistsReq = await this.req.getData(curStream.url, AuthHeaders);
         if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
           console.error('CAN\'T FETCH VIDEO PLAYLISTS!');
           dlFailed = true;

@@ -6,24 +6,24 @@ export interface PlaybackData {
 }
 
 export interface StreamList {
-  download_hls:                   Streams;
-  drm_adaptive_hls:               Streams;
-  multitrack_adaptive_hls_v2:     Streams;
-  vo_adaptive_hls:                Streams;
-  vo_drm_adaptive_hls:            Streams;
-  adaptive_hls:                   Streams;
-  drm_download_dash:              Streams;
-  drm_download_hls:               Streams;
-  drm_multitrack_adaptive_hls_v2: Streams;
-  vo_drm_adaptive_dash:           Streams;
-  adaptive_dash:                  Streams;
-  urls:                           Streams;
-  vo_adaptive_dash:               Streams;
-  download_dash:                  Streams;
-  drm_adaptive_dash:              Streams;
+  download_hls:                   CrunchyStreams;
+  drm_adaptive_hls:               CrunchyStreams;
+  multitrack_adaptive_hls_v2:     CrunchyStreams;
+  vo_adaptive_hls:                CrunchyStreams;
+  vo_drm_adaptive_hls:            CrunchyStreams;
+  adaptive_hls:                   CrunchyStreams;
+  drm_download_dash:              CrunchyStreams;
+  drm_download_hls:               CrunchyStreams;
+  drm_multitrack_adaptive_hls_v2: CrunchyStreams;
+  vo_drm_adaptive_dash:           CrunchyStreams;
+  adaptive_dash:                  CrunchyStreams;
+  urls:                           CrunchyStreams;
+  vo_adaptive_dash:               CrunchyStreams;
+  download_dash:                  CrunchyStreams;
+  drm_adaptive_dash:              CrunchyStreams;
 }
 
-export interface Streams {
+export interface CrunchyStreams {
   '':        StreamDetails;
   'en-US'?:  StreamDetails;
   'es-LA'?:  StreamDetails;
@@ -41,10 +41,12 @@ export interface Streams {
   'zh-CN'?:  StreamDetails;
   'ko-KR'?:  StreamDetails;
   'ja-JP'?:  StreamDetails;
+  [string: string]: StreamDetails;
 }
 
 export interface StreamDetails {
-  hardsub_locale: Locale;
+  //hardsub_locale: Locale;
+  hardsub_locale: string;
   url:            string;
   hardsub_lang?:  string;
   audio_lang?:    string;
