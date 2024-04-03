@@ -48,6 +48,7 @@ let argvC: {
   dubLang: string[]; 
   all: boolean; 
   fontSize: number; 
+  combineLines: boolean;
   allDubs: boolean; 
   timeout: number; 
   waittime: number;

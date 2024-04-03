@@ -392,6 +392,15 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${fontSize}'
   },
   {
+    name: 'combineLines',
+    describe: 'Merge adjacent lines with same style and text',
+    docDescribe: 'If selected, will prevent a line from shifting downwards',
+    group: 'dl',
+    service: ['hidive'],
+    type: 'boolean',
+    usage: ''
+  },
+  {
     name: 'allDubs',
     describe: 'If selected, all available dubs will get downloaded',
     docDescribe: true,
