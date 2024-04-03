@@ -35,6 +35,10 @@ function assFonts(ass: string){
       styles.push(addStyle[1]);
     }
   }
+  const fontMatches = ass.matchAll(/\\fn(.*?)(?:\\|})/g);
+  for (const match of fontMatches) {
+    styles.push(match[1]);
+  }
   return [...new Set(styles)];
 }
 
