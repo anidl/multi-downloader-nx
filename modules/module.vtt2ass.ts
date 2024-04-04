@@ -13,6 +13,7 @@ let relGroup = '';
 let fontSize = 0;
 let tmMrg = 0;
 let rFont = '';
+let doCombineLines = false;
 
 type Css = Record<string, {
   params: string;
@@ -239,6 +240,45 @@ function timestampToCentiseconds(timestamp: string) {
   return 360000 * hour + 6000 * minute + 100 * second + centisecond;
 }
 
+function combineLines(events: string[]): string[] {
+  if (!doCombineLines) {
+    return events;
+  }
+  // This function is for combining adjacent lines with same information
+  const newLines: string[] = [];
+  for (const currentLine of events) {
+    let hasCombined: boolean = false;
+    // Check previous 7 elements, arbritary lookback amount 
+    for (let j = 1; j < 8 && j < newLines.length; j++) {
+      const checkLine = newLines[newLines.length - j];
+      const checkLineSplit = checkLine.split(',');
+      const currentLineSplit = currentLine.split(',');
+      // 1 = start, 2 = end, 3 = style, 9+ = text
+      if (checkLineSplit.slice(9).join(',') == currentLineSplit.slice(9).join(',') &&
+          checkLineSplit[3] == currentLineSplit[3] &&
+          checkLineSplit[2] == currentLineSplit[1]
+      ) {
+        checkLineSplit[2] = currentLineSplit[2];
+        newLines[newLines.length - j] = checkLineSplit.join(',');
+        hasCombined = true;
+        break;
+      } 
+    }
+    if (!hasCombined) {
+      newLines.push(currentLine);
+    }
+  }
+  return newLines;
+}
+
+function pushBuffer(buffer: ReturnType<typeof convertLine>[], events: string[]) {
+  buffer.reverse();
+  const bufferStrings: string[] = buffer.map(line => 
+    `Dialogue: 1,${line.start},${line.end},${line.style},,0,0,0,,${line.text}`);
+  events.push(...bufferStrings);
+  buffer.splice(0,buffer.length);
+}
+
 function convert(css: Css, vtt: Vtt[]) {
   const stylesMap: Record<string, string> = {};
   let ass = [
@@ -274,8 +314,8 @@ function convert(css: Css, vtt: Vtt[]) {
     song_cap: [],
   };
   const linesMap: Record<string, number> = {};
-  let previousLine: ReturnType<typeof convertLine> | undefined = undefined;
-  const buffer: string[] = [];
+  const buffer: ReturnType<typeof convertLine>[] = [];
+  const captionsBuffer: string[] = [];
   for (const l in vtt) {
     const x = convertLine(stylesMap, vtt[l]);
     if (x.ind !== '' && linesMap[x.ind] !== undefined) {
@@ -295,33 +335,39 @@ function convert(css: Css, vtt: Vtt[]) {
     }
     /**
      * What cursed code have I brought upon this land?
-     * This checks if a subtitle should be multi-line, and if it is, pops the just inserted 
-     * subtitle and the previous subtitle, and merges them into a single subtitle.
+     * This handles making lines multi-line when neccesary and reverses
+     * order of subtitles so that they display correctly
      */
-    if (previousLine) {
-      const previousStart = timestampToCentiseconds(previousLine.start);
+    if (x.type != 'subtitle') {
+      // Do nothing
+    } else if (x.text.includes('\\pos')) {
+      events['subtitle'].pop();
+      captionsBuffer.push(x.res);
+    } else if (buffer.length > 0) {
+      const previousBufferLine = buffer[buffer.length - 1];
+      const previousStart = timestampToCentiseconds(previousBufferLine.start);
       const currentStart = timestampToCentiseconds(x.start);
-      if (
-        (currentStart - previousStart) <= 2 &&
-        previousLine.type == x.type && 
-        previousLine.style == x.style && 
-        !previousLine.text.includes('\\pos') && 
-        !x.text.includes('\\pos')
-      ) {
-        events[x.type as keyof typeof events].pop();
-        const previousLinePop = events[x.type as keyof typeof events].pop();
-        events[x.type as keyof typeof events].push(previousLinePop + '\\N'+x.text);
-      } else if ((currentStart - previousStart) <= 3) {
-        const currentLinePop = events[x.type as keyof typeof events].pop();
-        const previousLinePop = events[previousLine.type as keyof typeof events].pop();
-        buffer.push(previousLinePop as string, currentLinePop as string);
-      } else if ((currentStart - previousStart) >= 3 && buffer.length > 0) {
-        events[x.type as keyof typeof events].push(...buffer.reverse());
-        buffer.splice(0,buffer.length);
+      events['subtitle'].pop();
+      if ((currentStart - previousStart) <= 2) {
+        x.start = previousBufferLine.start;
+        if (previousBufferLine.style == x.style) {
+          buffer.pop();
+          x.text = previousBufferLine.text + '\\N' + x.text;
+        }
+      } else {
+        pushBuffer(buffer, events['subtitle']);
       }
+      buffer.push(x);
     }
-    previousLine = x;
+    else {
+      events['subtitle'].pop();
+      buffer.push(x);
+    }
   }
+
+  pushBuffer(buffer, events['subtitle']);
+  events['subtitle'].push(...captionsBuffer);
+  events['subtitle'] = combineLines(events['subtitle']);
 
   if (events.subtitle.length > 0) {
     ass = ass.concat(
@@ -438,11 +484,12 @@ function toSubTime(str: string) {
   return n.slice(0, 3).join(':') + '.' + n[3];
 }
 
-export default function vtt2ass(group: string | undefined, xFontSize: number | undefined, vttStr: string, cssStr: string, timeMargin?: number, replaceFont?: string) {
+export default function vtt2ass(group: string | undefined, xFontSize: number | undefined, vttStr: string, cssStr: string, timeMargin?: number, replaceFont?: string, combineLines?: boolean) {
   relGroup = group ?? '';
   fontSize = xFontSize && xFontSize > 0 ? xFontSize : 34; // 1em to pix
   tmMrg = timeMargin ? timeMargin : 0; //
   rFont = replaceFont ? replaceFont : rFont;
+  doCombineLines = combineLines ? combineLines : doCombineLines;
   if (vttStr.match(/::cue(?:.(.+)\) *)?{([^}]+)}/g)) {
     const cssLines = [];
     let defaultCss = '';

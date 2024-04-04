@@ -1424,7 +1424,7 @@ export default class Hidive implements ServiceClass {
             if (getVttContent.ok && getVttContent.res) {
               console.info(`Subtitle Downloaded: ${sub.url}`);
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-              const sBody = vtt2ass(undefined, chosenFontSize, getVttContent.res.body, '', subsMargin, options.fontName);
+              const sBody = vtt2ass(undefined, chosenFontSize, getVttContent.res.body, '', subsMargin, options.fontName, options.combineLines);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);
@@ -1678,7 +1678,7 @@ export default class Hidive implements ServiceClass {
             if (getCssContent.ok && getVttContent.ok && getCssContent.res && getVttContent.res) {
               console.info(`Subtitle Downloaded: ${await this.genSubsUrl('vtt', subsXUrl)}`);
               //vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-              const sBody = vtt2ass(undefined, chosenFontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName);
+              const sBody = vtt2ass(undefined, chosenFontSize, getVttContent.res.body, getCssContent.res.body, subsMargin, options.fontName, options.combineLines);
               sxData.title = `${subLang.language} / ${sxData.title}`;
               sxData.fonts = fontsData.assFonts(sBody) as Font[];
               fs.writeFileSync(sxData.path, sBody);
