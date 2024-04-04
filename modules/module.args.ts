@@ -385,7 +385,8 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     default: {
       default: 55
     },
-    docDescribe: true,
+    docDescribe: 'When converting the subtitles to ass, this will change the font size'
+    + '\nIn most cases, requires "--originaFontSize false" to take effect',
     group: 'dl',
     service: ['all'],
     type: 'number',
