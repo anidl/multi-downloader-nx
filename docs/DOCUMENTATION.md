@@ -1,4 +1,4 @@
-# multi-downloader-nx (4.6.1v)
+# multi-downloader-nx (4.6.2v)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -238,7 +238,8 @@ Used to download all episodes from the show
 | --- | --- | --- | --- | --- | --- | ---| 
 | All | `--fontSize ${fontSize}` | `number` | `No`| `NaN` | `55`| `fontSize: ` |
 
-Used to set the fontsize of the subtitles
+When converting the subtitles to ass, this will change the font size
+In most cases, requires "--originaFontSize false" to take effect
 #### `--combineLines`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
