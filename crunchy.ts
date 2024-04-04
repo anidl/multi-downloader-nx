@@ -1803,18 +1803,22 @@ export default class Crunchy implements ServiceClass {
                 console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
               }
             } else {
-              files.push({
-                type: 'Video',
-                path: `${tsFile}.video.enc.ts`,
-                lang: lang,
-                isPrimary: isPrimary
-              });
-              files.push({
-                type: 'Audio',
-                path: `${tsFile}.audio.enc.ts`,
-                lang: lang,
-                isPrimary: isPrimary
-              });
+              if (videoDownloaded) {
+                files.push({
+                  type: 'Video',
+                  path: `${tsFile}.video.enc.ts`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
+              }
+              if (audioDownloaded) {
+                files.push({
+                  type: 'Audio',
+                  path: `${tsFile}.audio.enc.ts`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
+              }
             }
           } else if (!options.novids) {
             const streamPlaylists = m3u8(streamPlaylistsReq.res.body);
