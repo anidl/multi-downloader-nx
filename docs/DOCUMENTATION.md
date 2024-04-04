@@ -239,6 +239,12 @@ Used to download all episodes from the show
 | All | `--fontSize ${fontSize}` | `number` | `No`| `NaN` | `55`| `fontSize: ` |
 
 Used to set the fontsize of the subtitles
+#### `--combineLines`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Hidive | `--combineLines ` | `boolean` | `No`| `NaN` | `NaN` |
+
+If selected, will prevent a line from shifting downwards
 #### `--allDubs`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
