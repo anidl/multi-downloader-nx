@@ -1397,7 +1397,7 @@ export default class Crunchy implements ServiceClass {
         pbData = JSON.parse(playbackReq.res.body) as PlaybackData;
       }
 
-      const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion?.guid}/console/switch/play`, AuthHeaders);
+      const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : mMeta.mediaId}/console/switch/play`, AuthHeaders);
       if(!playbackReq.ok || !playbackReq.res){
         console.error('Non-DRM Request Stream URLs FAILED!');
       } else {
