@@ -20,7 +20,7 @@ jobs:
         node-version: 18
         check-latest: true
     - run: pnpm i 
-    - run: pnpx eslint .
+    - run: npx eslint .
   test: 
     needs: eslint
     runs-on: ubuntu-latest
