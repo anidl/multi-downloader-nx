@@ -11,7 +11,7 @@ import Store from './provider/Store';
 import ErrorHandler from './provider/ErrorHandler';
 import QueueProvider from './provider/QueueProvider';
 
-document.body.style.backgroundColor = "rgb(0, 30, 60)";
+document.body.style.backgroundColor = 'rgb(0, 30, 60)';
 document.body.style.display = 'flex';
 document.body.style.justifyContent = 'center';
 

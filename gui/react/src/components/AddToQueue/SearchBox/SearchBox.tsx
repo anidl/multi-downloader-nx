@@ -100,9 +100,9 @@ const SearchBox: React.FC = () => {
                         await navigator.clipboard.writeText(a.desc!);
                         enqueueSnackbar('Copied summary to clipboard', {
                           variant: 'info'
-                        })
+                        });
                       },
-                      text: "Copy summary to clipboard"
+                      text: 'Copy summary to clipboard'
                     }
                   ]} popupItem={summaryRef} />
                 }

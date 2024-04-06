@@ -113,8 +113,8 @@
     "build-macos-gui": "pnpm run prebuild-gui && cd lib && node modules/build macos-x64 true",
     "build-alpine-gui": "pnpm run prebuild-gui && cd lib && node modules/build alpine-x64 true",
     "build-android-gui": "pnpm run prebuild-gui && cd lib && node modules/build linuxstatic-armv7 true",
-    "eslint": "npx eslint *.ts modules",
-    "eslint-fix": "npx eslint *.ts modules --fix",
+    "eslint": "npx eslint .",
+    "eslint-fix": "npx eslint . --fix",
     "pretest": "pnpm run tsc",
     "test": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build linuxstatic-x64 && node modules/build macos-x64"
   }

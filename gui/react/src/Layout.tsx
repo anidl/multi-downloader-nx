@@ -23,11 +23,11 @@ const Layout: React.FC = () => {
       maxWidth: '93rem',
       maxHeight: '3rem'
       //backgroundColor: '#ffffff',
-      }}>
+    }}>
       <LogoutButton />
       <AuthButton />
-        <Button variant="contained" startIcon={<Folder />} onClick={() => messageHandler?.openFolder('content')} sx={{ height: '37px' }}>Open Output Directory</Button>
-        <Button variant="contained" startIcon={<ClearAll />} onClick={() => messageHandler?.clearQueue() } sx={{ height: '37px' }}>Clear Queue</Button>
+      <Button variant="contained" startIcon={<Folder />} onClick={() => messageHandler?.openFolder('content')} sx={{ height: '37px' }}>Open Output Directory</Button>
+      <Button variant="contained" startIcon={<ClearAll />} onClick={() => messageHandler?.clearQueue() } sx={{ height: '37px' }}>Clear Queue</Button>
       <AddToQueue />
       <StartQueueButton />
     </Box>

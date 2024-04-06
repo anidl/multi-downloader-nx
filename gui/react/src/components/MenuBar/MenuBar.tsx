@@ -2,7 +2,7 @@ import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
 import React from 'react';
 import { messageChannelContext } from '../../provider/MessageChannel';
 import useStore from '../../hooks/useStore';
-import { StoreState } from '../../provider/Store'
+import { StoreState } from '../../provider/Store';
 
 const MenuBar: React.FC = () => {
   const [ openMenu, setMenuOpen ] = React.useState<'settings'|'help'|undefined>(); 
@@ -15,20 +15,20 @@ const MenuBar: React.FC = () => {
       type: 'version',
       payload: await messageChannel?.version()
     });  
-  }
+  };
 
   getVersion();
   
   const transformService = (service: StoreState['service']) => {
     switch(service) {
-      case 'crunchy': 
-        return "Crunchyroll"
-      case 'funi':
-        return "Funimation"
-      case "hidive":
-        return "Hidive"
+    case 'crunchy': 
+      return 'Crunchyroll';
+    case 'funi':
+      return 'Funimation';
+    case 'hidive':
+      return 'Hidive';
     }
-  }
+  };
 
   const msg = React.useContext(messageChannelContext);
 
@@ -46,12 +46,12 @@ const MenuBar: React.FC = () => {
 
   return <Box sx={{ display: 'flex', marginBottom: '1rem', width: '100%', alignItems: 'center' }}>
     <Box sx={{ position: 'relative', left: '0%', width: '50%'}}>
-    <Button onClick={(e) => handleClick(e, 'settings')}>
+      <Button onClick={(e) => handleClick(e, 'settings')}>
       Settings
-    </Button>
-    <Button onClick={(e) => handleClick(e, 'help')}>
+      </Button>
+      <Button onClick={(e) => handleClick(e, 'help')}>
       Help
-    </Button>
+      </Button>
     </Box>
     <Menu open={openMenu === 'settings'} anchorEl={anchorEl} onClose={handleClose}>
       <MenuItem onClick={() => {

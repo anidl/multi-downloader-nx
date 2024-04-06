@@ -1,5 +1,0 @@
-lib
-/videos/*.ts
-build
-dev.js
-tsc.ts

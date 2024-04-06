@@ -15,11 +15,11 @@ export class RandomEventHandler {
   private handler: {
     [eventName in keyof RandomEvents]: Handler<eventName>[]
   } = {
-    progress: [],
-    finish: [],
-    queueChange: [],
-    current: []
-  };
+      progress: [],
+      finish: [],
+      queueChange: [],
+      current: []
+    };
 
   public on<T extends keyof RandomEvents>(name: T, listener: Handler<T>) {
     if (Object.prototype.hasOwnProperty.call(this.handler, name)) {
@@ -212,7 +212,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
   }
 
   const messageHandler: FrontEndMessages = {
-    name: "default",
+    name: 'default',
     auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,
     version: async () => (await messageAndResponse(socket, { name: 'version', data: undefined })).data,
     checkToken: async () =>  (await messageAndResponse(socket, { name: 'checkToken', data: undefined })).data,

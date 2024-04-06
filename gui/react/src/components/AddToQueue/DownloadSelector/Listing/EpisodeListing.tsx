@@ -75,21 +75,21 @@ const EpisodeListing: React.FC = () => {
       </ListItem>
       {store.episodeListing.filter((a) => season === 'all' ? true : a.season === season).map((item, index, { length }) => {
         const e = isNaN(parseInt(item.e)) ? item.e : parseInt(item.e);
-        const idStr = `S${item.season}E${e}`
+        const idStr = `S${item.season}E${e}`;
         const isSelected = selected.includes(e.toString());
         const imageRef = React.createRef<HTMLImageElement>();
         const summaryRef = React.createRef<HTMLParagraphElement>();
         return <Box {...{ mouseData: isSelected }} key={`Episode_List_Item_${index}`}>
           <ListItem sx={{backdropFilter: isSelected ? 'brightness(1.5)' : '', '&:hover': {backdropFilter: 'brightness(1.5)'}, display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }} 
-          onClick={() => {
-            let arr: string[] = [];
-            if (isSelected) {
-              arr = [...selected.filter(a => a !== e.toString())];
-            } else {
-              arr = [...selected, e.toString()];
-            }
-            setSelected(arr.filter(a => a.length > 0));
-          }}>
+            onClick={() => {
+              let arr: string[] = [];
+              if (isSelected) {
+                arr = [...selected.filter(a => a !== e.toString())];
+              } else {
+                arr = [...selected, e.toString()];
+              }
+              setSelected(arr.filter(a => a.length > 0));
+            }}>
             { isSelected ? <CheckBox /> : <CheckBoxOutlineBlank /> }
             <Typography color='text.primary' sx={{ textAlign: 'center' }}>
               {idStr}
@@ -133,9 +133,9 @@ const EpisodeListing: React.FC = () => {
                 await navigator.clipboard.writeText(item.description!);
                 enqueueSnackbar('Copied summary to clipboard', {
                   variant: 'info'
-                })
+                });
               },
-              text: "Copy summary to clipboard"
+              text: 'Copy summary to clipboard'
             }
           ]} popupItem={summaryRef} />
           {index < length - 1 && <Divider />}

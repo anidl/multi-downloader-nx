@@ -8,15 +8,6 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: [
-      'lib',
-      '/videos/*.ts',
-      'build',
-      'dev.js',
-      'tsc.ts'
-    ]
-  },
-  {
     rules: {
       'no-console': 2,
       'react/prop-types': 0,
@@ -53,6 +44,21 @@ export default tseslint.config(
         sourceType: 'module'
       },
       parser: tseslint.parser
+    }
+  },
+  {
+    ignores: [
+      '**/lib',
+      '**/videos/*.ts',
+      '**/build',
+      'dev.js',
+      'tsc.ts'
+    ]
+  },
+  {
+    files: ['gui/react/**/*'],
+    rules: {
+      'no-console': 0
     }
   }
 );
