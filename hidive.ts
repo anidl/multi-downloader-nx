@@ -1261,7 +1261,7 @@ export default class Hidive implements ServiceClass {
         segments: chosenVideoSegments.segments
       };
       const videoDownload = await new streamdl({
-        output: `${tsFile}.video.enc.ts`,
+        output: `${tsFile}.video.enc.m4s`,
         timeout: options.timeout,
         m3u8json: videoJson,
         // baseurl: chunkPlaylist.baseUrl,
@@ -1290,7 +1290,7 @@ export default class Hidive implements ServiceClass {
           }
           if (this.cfg.bin.mp4decrypt) {
             const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-            const commandVideo = commandBase+`"${tsFile}.video.enc.ts" "${tsFile}.video.ts"`;
+            const commandVideo = commandBase+`"${tsFile}.video.enc.m4s" "${tsFile}.video.m4s"`;
 
             console.info('Started decrypting video');
             const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
@@ -1301,11 +1301,11 @@ export default class Hidive implements ServiceClass {
             } else {
               console.info('Decryption done for video');
               if (!options.nocleanup) {
-                fs.removeSync(`${tsFile}.video.enc.ts`);
+                fs.removeSync(`${tsFile}.video.enc.m4s`);
               }
               files.push({
                 type: 'Video',
-                path: `${tsFile}.video.ts`,
+                path: `${tsFile}.video.m4s`,
                 lang: chosenAudios[0].language,
                 isPrimary: true
               });
@@ -1339,7 +1339,7 @@ export default class Hidive implements ServiceClass {
           segments: chosenAudioSegments.segments
         };
         const audioDownload = await new streamdl({
-          output: `${tsFile}.audio.enc.ts`,
+          output: `${tsFile}.audio.enc.m4s`,
           timeout: options.timeout,
           m3u8json: audioJson,
           // baseurl: chunkPlaylist.baseUrl,
@@ -1368,7 +1368,7 @@ export default class Hidive implements ServiceClass {
           }
           if (this.cfg.bin.mp4decrypt) {
             const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-            const commandAudio = commandBase+`"${tsFile}.audio.enc.ts" "${tsFile}.audio.ts"`;
+            const commandAudio = commandBase+`"${tsFile}.audio.enc.m4s" "${tsFile}.audio.m4s"`;
 
             console.info('Started decrypting audio');
             const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
@@ -1378,11 +1378,11 @@ export default class Hidive implements ServiceClass {
               return undefined;
             } else {
               if (!options.nocleanup) {
-                fs.removeSync(`${tsFile}.audio.enc.ts`);
+                fs.removeSync(`${tsFile}.audio.enc.m4s`);
               }
               files.push({
                 type: 'Audio',
-                path: `${tsFile}.audio.ts`,
+                path: `${tsFile}.audio.m4s`,
                 lang: chosenAudioSegments.language,
                 isPrimary: chosenAudioSegments.default
               });

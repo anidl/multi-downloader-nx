@@ -1651,7 +1651,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenVideoSegments.segments
               };
               const videoDownload = await new streamdl({
-                output: `${tsFile}.video.enc.ts`,
+                output: chosenVideoSegments.pssh ? `${tsFile}.video.enc.m4s` : `${tsFile}.video.m4s`,
                 timeout: options.timeout,
                 m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1693,7 +1693,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenAudioSegments.segments
               };
               const audioDownload = await new streamdl({
-                output: `${tsFile}.audio.enc.ts`,
+                output: chosenAudioSegments.pssh ? `${tsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`,
                 timeout: options.timeout,
                 m3u8json: audioJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1755,8 +1755,8 @@ export default class Crunchy implements ServiceClass {
 
               if (this.cfg.bin.mp4decrypt) {
                 const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-                const commandVideo = commandBase+`"${tsFile}.video.enc.ts" "${tsFile}.video.ts"`;
-                const commandAudio = commandBase+`"${tsFile}.audio.enc.ts" "${tsFile}.audio.ts"`;
+                const commandVideo = commandBase+`"${tsFile}.video.enc.m4s" "${tsFile}.video.m4s"`;
+                const commandAudio = commandBase+`"${tsFile}.audio.enc.m4s" "${tsFile}.audio.m4s"`;
 
                 if (videoDownloaded) {
                   console.info('Started decrypting video');
@@ -1768,11 +1768,11 @@ export default class Crunchy implements ServiceClass {
                   } else {
                     console.info('Decryption done for video');
                     if (!options.nocleanup) {
-                      fs.removeSync(`${tsFile}.video.enc.ts`);
+                      fs.removeSync(`${tsFile}.video.enc.m4s`);
                     }
                     files.push({
                       type: 'Video',
-                      path: `${tsFile}.video.ts`,
+                      path: `${tsFile}.video.m4s`,
                       lang: lang,
                       isPrimary: isPrimary
                     });
@@ -1788,11 +1788,11 @@ export default class Crunchy implements ServiceClass {
                     return undefined;
                   } else {
                     if (!options.nocleanup) {
-                      fs.removeSync(`${tsFile}.audio.enc.ts`);
+                      fs.removeSync(`${tsFile}.audio.enc.m4s`);
                     }
                     files.push({
                       type: 'Audio',
-                      path: `${tsFile}.audio.ts`,
+                      path: `${tsFile}.audio.m4s`,
                       lang: lang,
                       isPrimary: isPrimary
                     });
@@ -1806,7 +1806,7 @@ export default class Crunchy implements ServiceClass {
               if (videoDownloaded) {
                 files.push({
                   type: 'Video',
-                  path: `${tsFile}.video.enc.ts`,
+                  path: `${tsFile}.video.m4s`,
                   lang: lang,
                   isPrimary: isPrimary
                 });
@@ -1814,7 +1814,7 @@ export default class Crunchy implements ServiceClass {
               if (audioDownloaded) {
                 files.push({
                   type: 'Audio',
-                  path: `${tsFile}.audio.enc.ts`,
+                  path: `${tsFile}.audio.m4s`,
                   lang: lang,
                   isPrimary: isPrimary
                 });
