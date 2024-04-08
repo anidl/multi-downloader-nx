@@ -29,7 +29,7 @@ const availableFilenameVars: AvailableFilenameVars[] = [
 export type AvailableMuxer = 'ffmpeg' | 'mkvmerge'
 export const muxer: AvailableMuxer[] = [ 'ffmpeg', 'mkvmerge' ];
 
-type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
+export type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
   name: string,
   group: keyof typeof groups,
   type: 'boolean'|'string'|'number'|'array',
@@ -881,7 +881,6 @@ const buildDefault = () => {
 };
 
 export {
-  TAppArg,
   getDefault,
   buildDefault,
   args,
