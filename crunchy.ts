@@ -1290,6 +1290,14 @@ export default class Crunchy implements ServiceClass {
 
           if (chapters.length > 0) {
             chapters.sort((a, b) => a.start - b.start);
+            //Check if chapters has an intro
+            if (!(chapters.find(c => c.type === 'intro') || chapters.find(c => c.type === 'recap'))) {
+              compiledChapters.push(
+                `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+              );
+            }
+
             //Loop through all the chapters
             for (const chapter of chapters) {
               if (typeof chapter.start == 'undefined' || typeof chapter.end == 'undefined') continue;
