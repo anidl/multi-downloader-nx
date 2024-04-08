@@ -1,5 +1,24 @@
+# Set the quality of the stream, 0 is highest available.
 q: 0
-nServer: 1
-mp4mux: false
-noCleanUp: false
+# Set which stream to use
+kstream: 1
+# Set which server to use
+server: 1
+# How many parts to download at once. Increasing may improve download speed.
+partsize: 10
+# Set whether to mux into an mp4 or not. Not recommended.
+mp4: false
+# Whether to delete any created files or not
+nocleanup: false
+# Whether to only download the relevant video once
 dlVideoOnce: false
+# Whether to keep all downloaded videos or only a single copy
+keepAllVideos: false
+# What to use as the file name template
+fileName: "[${service}] ${showTitle} - S${season}E${episode} [${height}p]"
+# What Audio languages to download
+dubLang: ["jpn"]
+# What Subtitle languages to download
+dlsubs: ["all"]
+# What language Audio to set as default
+defaultAudio: "jpn"
