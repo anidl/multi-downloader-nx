@@ -69,6 +69,7 @@
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^18.15.11",
     "@types/ws": "^8.5.10",
+    "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",
     "@yao-pkg/pkg": "^5.11.1",
