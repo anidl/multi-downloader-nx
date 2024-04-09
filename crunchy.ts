@@ -1201,6 +1201,9 @@ export default class Crunchy implements ServiceClass {
     for (const mMeta of medias.data) {
       console.info(`Requesting: [${mMeta.mediaId}] ${mediaName}`);
 
+      // Make sure we have a media id without a : in it
+      const currentMediaId = (mMeta.mediaId.includes(':') ? mMeta.mediaId.split(':')[1] : mMeta.mediaId);
+
       //Make sure token is up to date
       await this.refreshToken(true, true);
       let currentVersion;
@@ -1239,11 +1242,11 @@ export default class Crunchy implements ServiceClass {
       const compiledChapters: string[] = [];
       if (options.chapters) {
         //Make Chapter Request
-        const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${mMeta.mediaId}.json`);
+        const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${currentMediaId}.json`);
         if(!chapterRequest.ok || !chapterRequest.res){
         //Old Chapter Request Fallback
           console.warn('Chapter request failed, attempting old API');
-          const oldChapterRequest = await this.req.getData(`https://static.crunchyroll.com/datalab-intro-v2/${mMeta.mediaId}.json`);
+          const oldChapterRequest = await this.req.getData(`https://static.crunchyroll.com/datalab-intro-v2/${currentMediaId}.json`);
           if(!oldChapterRequest.ok || !oldChapterRequest.res) {
             console.warn('Old Chapter API request failed');
           } else {
@@ -1405,7 +1408,7 @@ export default class Crunchy implements ServiceClass {
         pbData = await playbackReq.res.json() as PlaybackData;
       }
 
-      const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : mMeta.mediaId}/console/switch/play`, AuthHeaders);
+      const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/console/switch/play`, AuthHeaders);
       if(!playbackReq.ok || !playbackReq.res){
         console.error('Non-DRM Request Stream URLs FAILED!');
       } else {
@@ -1635,7 +1638,7 @@ export default class Crunchy implements ServiceClass {
             // TODO check filename
             fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
             const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
-            const tempFile = parseFileName(`temp-${currentVersion ? currentVersion.guid : mMeta.mediaId}`, variables, options.numbers, options.override).join(path.sep);
+            const tempFile = parseFileName(`temp-${currentVersion ? currentVersion.guid : currentMediaId}`, variables, options.numbers, options.override).join(path.sep);
             const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
 
             let [audioDownloaded, videoDownloaded] = [false, false];
