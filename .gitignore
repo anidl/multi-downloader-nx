@@ -4,6 +4,8 @@
 **/node_modules/
 /videos/*.json
 /videos/*.ts
+/videos/*.m4s
+/videos/*.txt
 .DS_Store
 ffmpeg
 mkvmerge
