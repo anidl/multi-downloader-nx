@@ -78,8 +78,8 @@ You can run the code from native TypeScript, this requires ts-node which you can
 
 Afterwords, you can run the application like this:
 
-* CLI: `ts-node ./index.ts --help`
-* GUI: `ts-node ./gui.ts`
+* CLI: `ts-node -T ./index.ts --help`
+* GUI: `ts-node -T ./gui.ts`
 
 ### Run as JavaScript
 
