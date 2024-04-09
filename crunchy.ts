@@ -1635,6 +1635,8 @@ export default class Crunchy implements ServiceClass {
             // TODO check filename
             fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
             const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
+            const tempFile = parseFileName(`temp-${currentVersion ? currentVersion.guid : mMeta.mediaId}`, variables, options.numbers, options.override).join(path.sep);
+            const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
 
             let [audioDownloaded, videoDownloaded] = [false, false];
 
@@ -1660,7 +1662,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenVideoSegments.segments
               };
               const videoDownload = await new streamdl({
-                output: chosenVideoSegments.pssh ? `${tsFile}.video.enc.m4s` : `${tsFile}.video.m4s`,
+                output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.m4s` : `${tsFile}.video.m4s`,
                 timeout: options.timeout,
                 m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1702,7 +1704,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenAudioSegments.segments
               };
               const audioDownload = await new streamdl({
-                output: chosenAudioSegments.pssh ? `${tsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`,
+                output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`,
                 timeout: options.timeout,
                 m3u8json: audioJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1764,8 +1766,8 @@ export default class Crunchy implements ServiceClass {
 
               if (this.cfg.bin.mp4decrypt) {
                 const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-                const commandVideo = commandBase+`"${tsFile}.video.enc.m4s" "${tsFile}.video.m4s"`;
-                const commandAudio = commandBase+`"${tsFile}.audio.enc.m4s" "${tsFile}.audio.m4s"`;
+                const commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
+                const commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
                 if (videoDownloaded) {
                   console.info('Started decrypting video');
@@ -1773,12 +1775,14 @@ export default class Crunchy implements ServiceClass {
                   if (!decryptVideo.isOk) {
                     console.error(decryptVideo.err);
                     console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
+                    fs.renameSync(`${tempTsFile}.video.enc.m4s`, `${tsFile}.video.enc.m4s`);
                     return undefined;
                   } else {
                     console.info('Decryption done for video');
                     if (!options.nocleanup) {
-                      fs.removeSync(`${tsFile}.video.enc.m4s`);
+                      fs.removeSync(`${tempTsFile}.video.enc.m4s`);
                     }
+                    fs.renameSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
                     files.push({
                       type: 'Video',
                       path: `${tsFile}.video.m4s`,
@@ -1794,11 +1798,13 @@ export default class Crunchy implements ServiceClass {
                   if (!decryptAudio.isOk) {
                     console.error(decryptAudio.err);
                     console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
+                    fs.renameSync(`${tempTsFile}.audio.enc.m4s`, `${tsFile}.audio.enc.m4s`);
                     return undefined;
                   } else {
                     if (!options.nocleanup) {
-                      fs.removeSync(`${tsFile}.audio.enc.m4s`);
+                      fs.removeSync(`${tempTsFile}.audio.enc.m4s`);
                     }
+                    fs.renameSync(`${tempTsFile}.audio.m4s`, `${tsFile}.audio.m4s`);
                     files.push({
                       type: 'Audio',
                       path: `${tsFile}.audio.m4s`,
