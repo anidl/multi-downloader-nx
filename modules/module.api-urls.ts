@@ -1,5 +1,3 @@
-import { Headers } from 'got/dist/source';
-
 // api domains
 const domain = {
   www:      'https://www.crunchyroll.com',
@@ -34,8 +32,8 @@ export type APIType = {
   cms: string
   beta_browse: string
   beta_cms: string,
-  beta_authHeader: Headers,
-  beta_authHeaderMob: Headers,
+  beta_authHeader: Record<string, string>,
+  beta_authHeaderMob: Record<string, string>,
   hd_apikey: string,
   hd_devName: string,
   hd_appId: string,
