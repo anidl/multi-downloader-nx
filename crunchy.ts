@@ -1563,7 +1563,7 @@ export default class Crunchy implements ServiceClass {
           const streamPlaylistBody = await streamPlaylistsReq.res.text();
           if (streamPlaylistBody.match('MPD')) {
             //Parse MPD Playlists
-            const streamPlaylists = parse(streamPlaylistBody, langsData.findLang(langsData.fixLanguageTag(pbData.meta.audio_locale as string) || ''), curStream.url.match(/.*\.urlset\//)[0]);
+            const streamPlaylists = await parse(streamPlaylistBody, langsData.findLang(langsData.fixLanguageTag(pbData.meta.audio_locale as string) || ''), curStream.url.match(/.*\.urlset\//)[0]);
 
             //Get name of CDNs/Servers
             const streamServers = Object.keys(streamPlaylists);

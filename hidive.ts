@@ -1014,7 +1014,7 @@ export default class Hidive implements ServiceClass {
     console.info('\tSubs  : ' + availableSubs.map(a => langsData.languages.find(b => b.new_hd_locale == a.language)?.name).join('\n\t\t'));
     console.info(`[INFO] Selected dub(s): ${options.dubLang.join(', ')}`);
     const baseUrl = playbackData.dash[0].url.split('master')[0];
-    const parsedmpd = parse(mpd, undefined, baseUrl);
+    const parsedmpd = await parse(mpd, undefined, baseUrl);
     const res = await this.downloadMPD(parsedmpd, availableSubs, selectedEpisode, options);
     if (res === undefined || res.error) {
       console.error('Failed to download media list');
@@ -1103,7 +1103,7 @@ export default class Hidive implements ServiceClass {
     console.info('\tSubs  : ' + availableSubs.map(a => langsData.languages.find(b => b.new_hd_locale == a.language)?.name).join('\n\t\t'));
     console.info(`[INFO] Selected dub(s): ${options.dubLang.join(', ')}`);
     const baseUrl = playbackData.dash[0].url.split('master')[0];
-    const parsedmpd = parse(mpd, undefined, baseUrl);
+    const parsedmpd = await parse(mpd, undefined, baseUrl);
     const res = await this.downloadMPD(parsedmpd, availableSubs, selectedEpisode, options);
     if (res === undefined || res.error) {
       console.error('Failed to download media list');
