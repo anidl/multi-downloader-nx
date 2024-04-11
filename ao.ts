@@ -443,6 +443,11 @@ export default class AnimeOnegai implements ServiceClass {
       }
       let tsFile = undefined;
 
+      if (!streamData.dash) {
+        console.error('You don\'t have access to download this content');
+        continue;
+      }
+
       console.info('Playlists URL: %s', streamData.dash);
 
       if(!dlFailed && !(options.novids && options.noaudio)){
