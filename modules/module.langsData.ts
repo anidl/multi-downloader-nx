@@ -73,6 +73,10 @@ const searchLocales = (() => {
   return ['', ...new Set(languages.map(l => { return l.cr_locale; }).slice(0, -1))];
 })();
 
+export const aoSearchLocales = (() => {
+  return ['', ...new Set(languages.map(l => { return l.ao_locale; }).slice(0, -1))];
+})();
+
 // convert
 const fixLanguageTag = (tag: string) => {
   tag = typeof tag == 'string' ? tag : 'und'; 

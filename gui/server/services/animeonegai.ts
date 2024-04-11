@@ -14,6 +14,12 @@ class AnimeOnegaiHandler extends Base implements MessageHandler {
     super(ws);
     this.ao = new AnimeOnegai();
     this.initState();
+    this.getDefaults();
+  }
+
+  public getDefaults() {
+    const _default = yargs.appArgv(this.ao.cfg.cli, true);
+    this.ao.locale = _default.locale;
   }
 
   public async auth(data: AuthData) {

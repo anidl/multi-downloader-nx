@@ -56,6 +56,7 @@ export default class AnimeOnegai implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;
   private token: Record<string, any>;
   private req: reqModule.Req;
+  public locale: string;
   public jpnStrings: string[] = [
     'Japonés con Subtítulos en Español', 
     'Japonés con Subtítulos en Portugués',
@@ -75,11 +76,13 @@ export default class AnimeOnegai implements ServiceClass {
     this.cfg = yamlCfg.loadCfg();
     this.token = yamlCfg.loadAOToken();
     this.req = new reqModule.Req(domain, debug, false, 'ao');
+    this.locale = 'es';
   }
 
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
+    this.locale = argv.locale;
     if (argv.debug)
       this.debug = true;
 
@@ -118,7 +121,7 @@ export default class AnimeOnegai implements ServiceClass {
   }
 
   public async doSearch(data: SearchData): Promise<SearchResponse> {
-    const searchReq = await this.req.getData(`https://api.animeonegai.com/v1/search/algolia/${encodeURIComponent(data.search)}`);
+    const searchReq = await this.req.getData(`https://api.animeonegai.com/v1/search/algolia/${encodeURIComponent(data.search)}?lang=${this.locale}`);
     if (!searchReq.ok || !searchReq.res) {
       console.error('Search FAILED!');
       return { isOk: false, reason: new Error('Search failed. No more information provided') };
@@ -157,14 +160,14 @@ export default class AnimeOnegai implements ServiceClass {
   }
 
   public async getShow(id: number) {
-    const getSeriesData = await this.req.getData(`https://api.animeonegai.com/v1/asset/${id}`);
+    const getSeriesData = await this.req.getData(`https://api.animeonegai.com/v1/asset/${id}?lang=${this.locale}`);
     if (!getSeriesData.ok || !getSeriesData.res) { 
       console.error('Failed to get Show Data');
       return { isOk: false };
     }
     const seriesData = await getSeriesData.res.json() as AnimeOnegaiSeries;
 
-    const getSeasonData = await this.req.getData(`https://api.animeonegai.com/v1/asset/content/${id}`);
+    const getSeasonData = await this.req.getData(`https://api.animeonegai.com/v1/asset/content/${id}?lang=${this.locale}`);
     if (!getSeasonData.ok || !getSeasonData.res) {
       console.error('Failed to get Show Data');
       return { isOk: false };
@@ -409,7 +412,7 @@ export default class AnimeOnegai implements ServiceClass {
         }
       };
 
-      const playbackReq = await this.req.getData(`https://api.animeonegai.com/v1/media/${media.videoId}`, AuthHeaders);
+      const playbackReq = await this.req.getData(`https://api.animeonegai.com/v1/media/${media.videoId}?lang=${this.locale}`, AuthHeaders);
       if(!playbackReq.ok || !playbackReq.res){
         console.error('Request Stream URLs FAILED!');
         return undefined;
