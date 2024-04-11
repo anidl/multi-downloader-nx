@@ -27,6 +27,8 @@ const MenuBar: React.FC = () => {
       return 'Funimation';
     case 'hidive':
       return 'Hidive';
+    case 'ao':
+      return 'AnimeOnegai';
     }
   };
 

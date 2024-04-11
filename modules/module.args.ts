@@ -41,7 +41,7 @@ export type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
     default: T|undefined,
     name?: string    
   },
-  service: Array<'funi'|'crunchy'|'hidive'|'all'>,
+  service: Array<'funi'|'crunchy'|'hidive'|'ao'|'all'>,
   usage: string // -(-)${name} will be added for each command,
   demandOption?: true,
   transformer?: (value: T) => K
@@ -572,7 +572,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'util',
     service: ['all'],
     type: 'string',
-    choices: ['funi', 'crunchy', 'hidive'],
+    choices: ['funi', 'crunchy', 'hidive', 'ao'],
     usage: '${service}',
     default: {
       default: ''
@@ -689,7 +689,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)',
     docDescribe: true,
     group: 'auth',
-    service: ['crunchy'],
+    service: ['crunchy', 'ao'],
     type: 'string',
     usage: '${token}',
     default: {

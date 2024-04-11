@@ -1,6 +1,8 @@
 import yargs, { Choices } from 'yargs';
 import { args, AvailableMuxer, groups } from './module.args';
 import { LanguageItem } from './module.langsData';
+import { DownloadInfo } from '../@types/messageHandler';
+import { HLSCallback } from './hls-download';
 
 let argvC: { 
   [x: string]: unknown; 
@@ -61,7 +63,7 @@ let argvC: {
   debug: boolean | undefined; 
   nocleanup: boolean; 
   help: boolean | undefined; 
-  service: 'funi' | 'crunchy' | 'hidive'; 
+  service: 'funi' | 'crunchy' | 'hidive' | 'ao'; 
   update: boolean; 
   fontName: string | undefined; 
   _: (string | number)[]; 
@@ -74,6 +76,7 @@ let argvC: {
   originalFontSize: boolean;
   keepAllVideos: boolean;
   syncTiming: boolean;
+  callbackMaker?: (data: DownloadInfo) => HLSCallback,
 };
     
 export type ArgvType = typeof argvC;  

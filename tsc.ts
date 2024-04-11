@@ -34,6 +34,7 @@ const ignore = [
   './config/updates.json$',
   './config/cr_token.yml$',
   './config/funi_token.yml$',
+  './config/ao_token.yml$',
   './config/new_hd_token.yml$',
   './config/hd_token.yml$',
   './config/hd_sess.yml$',
