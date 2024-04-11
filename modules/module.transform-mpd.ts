@@ -61,7 +61,7 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
         ret[host] = { audio: [], video: [] };
 
 
-      if (playlist.sidx) {
+      if (playlist.sidx && playlist.segments.length == 0) {
         const item = await fetch(playlist.sidx.uri, {
           'method': 'head'
         });
@@ -130,7 +130,7 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
     if (!Object.prototype.hasOwnProperty.call(ret, host))
       ret[host] = { audio: [], video: [] };
 
-    if (playlist.sidx) {
+    if (playlist.sidx && playlist.segments.length == 0) {
       const item = await fetch(playlist.sidx.uri, {
         'method': 'head'
       });
