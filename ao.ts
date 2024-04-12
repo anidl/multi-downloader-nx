@@ -395,9 +395,9 @@ export default class AnimeOnegai implements ServiceClass {
 
     const files: DownloadedMedia[] = [];
 
+    let subIndex = 0;
     let dlFailed = false;
     let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
-
 
     for (const media of medias.data) {
       console.info(`Requesting: [E.${media.episode.ID}] ${mediaName}`);
@@ -726,7 +726,6 @@ export default class AnimeOnegai implements ServiceClass {
 
       if (!options.skipsubs && options.dlsubs.indexOf('none') == -1) {
         if(streamData.subtitles.length > 0) {
-          let subIndex = 0;
           for(const sub of streamData.subtitles) {
             const subLang = langsData.languages.find(a => a.ao_locale === sub.lang);
             if (!subLang) {
