@@ -41,7 +41,7 @@ export type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
     default: T|undefined,
     name?: string    
   },
-  service: Array<'funi'|'crunchy'|'hidive'|'all'>,
+  service: Array<'funi'|'crunchy'|'hidive'|'adn'|'all'>,
   usage: string // -(-)${name} will be added for each command,
   demandOption?: true,
   transformer?: (value: T) => K
@@ -112,7 +112,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
       default: 'en-US'
     },
     type: 'string',
-    service: ['crunchy'],
+    service: ['crunchy', 'adn'],
     usage: '${locale}'
   },
   {
@@ -572,7 +572,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'util',
     service: ['all'],
     type: 'string',
-    choices: ['funi', 'crunchy', 'hidive'],
+    choices: ['funi', 'crunchy', 'hidive', 'adn'],
     usage: '${service}',
     default: {
       default: ''
@@ -593,7 +593,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'fonts',
     describe: 'Set the font to use in subtiles',
     docDescribe: true,
-    service: ['funi', 'hidive'],
+    service: ['funi', 'hidive', 'adn'],
     type: 'string',
     usage: '${fontName}',
   },

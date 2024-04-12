@@ -66,6 +66,9 @@ import update from './modules/module.updater';
       case 'hidive':
         service = new (await import('./hidive')).default;
         break;
+      case 'adn':
+        service = new (await import('./adn')).default;
+        break;
       default: 
         service = new (await import(`./${argv.service}`)).default;
         break;
@@ -83,6 +86,9 @@ import update from './modules/module.updater';
       break;
     case 'hidive':
       service = new (await import('./hidive')).default;
+      break;
+    case 'adn':
+      service = new (await import('./adn')).default;
       break;
     default: 
       service = new (await import(`./${argv.service}`)).default;

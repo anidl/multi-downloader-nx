@@ -13,7 +13,7 @@ export type Params = {
 // req
 export class Req {
   private sessCfg: string;
-  private service: 'cr'|'funi'|'hd';
+  private service: 'cr'|'funi'|'hd'|'adn';
   private session: Record<string, {
     value: string;
     expires: Date;
@@ -25,7 +25,7 @@ export class Req {
   private cfgDir = yamlCfg.cfgDir;
   private curl: boolean|string = false;
   
-  constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false, private type: 'cr'|'funi'|'hd') {
+  constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false, private type: 'cr'|'funi'|'hd'|'adn') {
     this.sessCfg = yamlCfg.sessCfgFile[type];
     this.service = type;
   }

@@ -20,12 +20,14 @@ const hdPflCfgFile = path.join(workingDir, 'config', 'hd_profile');
 const sessCfgFile  = {
   funi: path.join(workingDir, 'config', 'funi_sess'),
   cr:   path.join(workingDir, 'config', 'cr_sess'),
+  adn:   path.join(workingDir, 'config', 'adn_sess'),
   hd:   path.join(workingDir, 'config', 'hd_sess')
 };
 const stateFile    = path.join(workingDir, 'config', 'guistate');
 const tokenFile    = {
   funi: path.join(workingDir, 'config', 'funi_token'),
   cr:   path.join(workingDir, 'config', 'cr_token'),
+  adn:   path.join(workingDir, 'config', 'adn_token'),
   hd:   path.join(workingDir, 'config', 'hd_token'),
   hdNew:   path.join(workingDir, 'config', 'hd_new_token')
 };
@@ -216,6 +218,24 @@ const saveCRToken = (data: Record<string, unknown>) => {
   }
 };
 
+const loadADNToken = () => {
+  let token = loadYamlCfgFile(tokenFile.adn, true);
+  if(typeof token !== 'object' || token === null || Array.isArray(token)){
+    token = {};
+  }
+  return token;
+};
+
+const saveADNToken = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(tokenFile.adn);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${tokenFile.adn}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.error('Can\'t save token file to disk!');
+  }
+};
 
 const loadHDSession = () => {
   let session = loadYamlCfgFile(sessCfgFile.hd, true);
@@ -379,6 +399,8 @@ export {
   loadCRSession,
   saveCRToken,
   loadCRToken,
+  saveADNToken,
+  loadADNToken,
   saveHDSession,
   loadHDSession,
   saveHDToken,

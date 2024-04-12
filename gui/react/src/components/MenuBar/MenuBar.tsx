@@ -25,6 +25,8 @@ const MenuBar: React.FC = () => {
       return 'Crunchyroll';
     case 'funi':
       return 'Funimation';
+    case 'adn':
+      return 'AnimationDigitalNetwork';
     case 'hidive':
       return 'Hidive';
     }
