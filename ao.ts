@@ -226,7 +226,7 @@ export default class AnimeOnegai implements ServiceClass {
     // build selected episodes
     const selEpsArr: parsedMultiDubDownload[] = [];
     const episodes = getShowData.value;
-    const seasonNumberTitleParse = getShowData.series.data.title.match(/\d+$/);
+    const seasonNumberTitleParse = getShowData.series.data.title.match(/\d+/);
     const seasonNumber = seasonNumberTitleParse ? parseInt(seasonNumberTitleParse[0]) : 1;
     for (const episodeKey in getShowData.value) {
       const episode = episodes[episodeKey][0];
