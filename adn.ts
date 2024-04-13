@@ -771,17 +771,17 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           sxData.language = subLang;
           if(options.dlsubs.includes('all') || options.dlsubs.includes(subLang.locale)) {
             let subBody = '[Script Info]'
-          + '\nScriptType:V4.00'
+          + '\nScriptType:V4.00+'
           + '\nWrapStyle: 0'
           + '\nPlayResX: 1280'
           + '\nPlayResY: 720'
           + '\nScaledBorderAndShadow: yes'
           + ''
-          + '\n[V4 Styles]'
-          + '\nFormat: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding'
+          + '\n[V4+ Styles]'
+          + '\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding'
           + `\nStyle: Default,${options.fontName ?? 'Arial'},${options.fontSize ?? 50},&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1.95,0,2,0,0,70,0`
           + '\n[Events]'
-          + '\nFormat: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text';
+          + '\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text';
 
             for (const sub of subtitles[subName]) {
               const [start, end, text, lineAlign, positionAlign] = 
