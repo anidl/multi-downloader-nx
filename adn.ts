@@ -553,162 +553,158 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           dlFailed = true;
         } else {
           const streamPlaylistBody = await streamPlaylistsReq.res.text();
-          if (!options.novids) {
-            const streamPlaylists = m3u8(streamPlaylistBody);
-            const plServerList: string[] = [],
-              plStreams: Record<string, Record<string, string>> = {},
-              plQuality: {
-                        str: string,
-                        dim: string,
-                        CODECS: string,
-                        RESOLUTION: {
-                          width: number,
-                          height: number
-                        }
-                      }[] = [];
-            for(const pl of streamPlaylists.playlists){
-              // set quality
-              const plResolution     = pl.attributes.RESOLUTION;
-              const plResolutionText = `${plResolution.width}x${plResolution.height}`;
-              // set codecs
-              const plCodecs     = pl.attributes.CODECS;
-              // parse uri
-              const plUri = new URL(pl.uri);
-              let plServer = plUri.hostname;
-              // set server list
-              if (plUri.searchParams.get('cdn')){
-                plServer += ` (${plUri.searchParams.get('cdn')})`;
+          const streamPlaylists = m3u8(streamPlaylistBody);
+          const plServerList: string[] = [],
+            plStreams: Record<string, Record<string, string>> = {},
+            plQuality: {
+              str: string,
+              dim: string,
+              CODECS: string,
+              RESOLUTION: {
+                width: number,
+                height: number
               }
-              if (!plServerList.includes(plServer)){
-                plServerList.push(plServer);
-              }
-              // add to server
-              if (!Object.keys(plStreams).includes(plServer)){
-                plStreams[plServer] = {};
-              }
-              if(
-                plStreams[plServer][plResolutionText]
-                          && plStreams[plServer][plResolutionText] != pl.uri
-                          && typeof plStreams[plServer][plResolutionText] != 'undefined'
-              ) {
-                console.error(`Non duplicate url for ${plServer} detected, please report to developer!`);
-              } else{
-                plStreams[plServer][plResolutionText] = pl.uri;
-              }
-              // set plQualityStr
-              const plBandwidth  = Math.round(pl.attributes.BANDWIDTH/1024);
-              const qualityStrAdd   = `${plResolutionText} (${plBandwidth}KiB/s)`;
-              const qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
-              const qualityStrMatch = !plQuality.map(a => a.str).join('\r\n').match(qualityStrRegx);
-              if(qualityStrMatch){
-                plQuality.push({
-                  str: qualityStrAdd,
-                  dim: plResolutionText,
-                  CODECS: plCodecs,
-                  RESOLUTION: plResolution
-                });
-              }
+            }[] = [];
+          for(const pl of streamPlaylists.playlists){
+            // set quality
+            const plResolution     = pl.attributes.RESOLUTION;
+            const plResolutionText = `${plResolution.width}x${plResolution.height}`;
+            // set codecs
+            const plCodecs     = pl.attributes.CODECS;
+            // parse uri
+            const plUri = new URL(pl.uri);
+            let plServer = plUri.hostname;
+            // set server list
+            if (plUri.searchParams.get('cdn')){
+              plServer += ` (${plUri.searchParams.get('cdn')})`;
             }
-
-            options.x = options.x > plServerList.length ? 1 : options.x;
-
-            const plSelectedServer = plServerList[options.x - 1];
-            const plSelectedList   = plStreams[plSelectedServer];
-            plQuality.sort((a, b) => {
-              const aMatch: RegExpMatchArray | never[] = a.dim.match(/[0-9]+/) || [];
-              const bMatch: RegExpMatchArray | never[] = b.dim.match(/[0-9]+/) || [];
-              return parseInt(aMatch[0]) - parseInt(bMatch[0]);
-            });
-            let quality = options.q === 0 ? plQuality.length : options.q;
-            if(quality > plQuality.length) {
-              console.warn(`The requested quality of ${options.q} is greater than the maximum ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
-              quality = plQuality.length;
+            if (!plServerList.includes(plServer)){
+              plServerList.push(plServer);
             }
-            // When best selected video quality is already downloaded
-            if(dlVideoOnce && options.dlVideoOnce) {
-              // Select the lowest resolution with the same codecs
-              while(quality !=1 && plQuality[quality - 1].CODECS == plQuality[quality - 2].CODECS) {
-                quality--;
-              }
+            // add to server
+            if (!Object.keys(plStreams).includes(plServer)){
+              plStreams[plServer] = {};
             }
-            const selPlUrl = plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
-            console.info(`Servers available:\n\t${plServerList.join('\n\t')}`);
-            console.info(`Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
-
-            if(selPlUrl != ''){
-              variables.push({
-                name: 'height',
-                type: 'number',
-                replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
-              }, {
-                name: 'width',
-                type: 'number',
-                replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
-              });
-
-              console.info(`Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
-              console.info('Stream URL:', selPlUrl);
-              // TODO check filename
-              fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
-              const outFile = parseFileName(options.fileName + '.' + audDub.name, variables, options.numbers, options.override).join(path.sep);
-              console.info(`Output filename: ${outFile}`);
-              const chunkPage = await this.req.getData(selPlUrl);
-              if(!chunkPage.ok || !chunkPage.res){
-                console.error('CAN\'T FETCH VIDEO PLAYLIST!');
-                dlFailed = true;
-              } else {
-                const chunkPageBody = await chunkPage.res.text();
-                const chunkPlaylist = m3u8(chunkPageBody);
-                const totalParts = chunkPlaylist.segments.length;
-                const mathParts  = Math.ceil(totalParts / options.partsize);
-                const mathMsg    = `(${mathParts}*${options.partsize})`;
-                console.info('Total parts in stream:', totalParts, mathMsg);
-                tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-                const split = outFile.split(path.sep).slice(0, -1);
-                split.forEach((val, ind, arr) => {
-                  const isAbsolut = path.isAbsolute(outFile as string);
-                  if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-                    fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-                });
-                const dlStreamByPl = await new streamdl({
-                  output: `${tsFile}.ts`,
-                  timeout: options.timeout,
-                  m3u8json: chunkPlaylist,
-                  baseurl: selPlUrl.replace('playlist.m3u8',''),
-                  threads: options.partsize,
-                  fsRetryTime: options.fsRetryTime * 1000,
-                  override: options.force,
-                  callback: options.callbackMaker ? options.callbackMaker({
-                    fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                    image: data.image,
-                    parent: {
-                      title: data.show.title
-                    },
-                    title: data.title,
-                    language: audDub
-                  }) : undefined
-                }).download();
-                if (!dlStreamByPl.ok) {
-                  console.error(`DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
-                  dlFailed = true;
-                }
-                files.push({
-                  type: 'Video',
-                  path: `${tsFile}.ts`,
-                  lang: audDub
-                });
-                dlVideoOnce = true;
-              }
+            if(
+              plStreams[plServer][plResolutionText]
+              && plStreams[plServer][plResolutionText] != pl.uri
+              && typeof plStreams[plServer][plResolutionText] != 'undefined'
+            ) {
+              console.error(`Non duplicate url for ${plServer} detected, please report to developer!`);
             } else{
-              console.error('Quality not selected!\n');
-              dlFailed = true;
+              plStreams[plServer][plResolutionText] = pl.uri;
             }
-          } else if (options.novids) {
+            // set plQualityStr
+            const plBandwidth  = Math.round(pl.attributes.BANDWIDTH/1024);
+            const qualityStrAdd   = `${plResolutionText} (${plBandwidth}KiB/s)`;
+            const qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
+            const qualityStrMatch = !plQuality.map(a => a.str).join('\r\n').match(qualityStrRegx);
+            if(qualityStrMatch){
+              plQuality.push({
+                str: qualityStrAdd,
+                dim: plResolutionText,
+                CODECS: plCodecs,
+                RESOLUTION: plResolution
+              });
+            }
+          }
+
+          options.x = options.x > plServerList.length ? 1 : options.x;
+
+          const plSelectedServer = plServerList[options.x - 1];
+          const plSelectedList   = plStreams[plSelectedServer];
+          plQuality.sort((a, b) => {
+            const aMatch: RegExpMatchArray | never[] = a.dim.match(/[0-9]+/) || [];
+            const bMatch: RegExpMatchArray | never[] = b.dim.match(/[0-9]+/) || [];
+            return parseInt(aMatch[0]) - parseInt(bMatch[0]);
+          });
+          let quality = options.q === 0 ? plQuality.length : options.q;
+          if(quality > plQuality.length) {
+            console.warn(`The requested quality of ${options.q} is greater than the maximum ${plQuality.length}.\n[WARN] Therefor the maximum will be capped at ${plQuality.length}.`);
+            quality = plQuality.length;
+          }
+          // When best selected video quality is already downloaded
+          if(dlVideoOnce && options.dlVideoOnce) {
+            // Select the lowest resolution with the same codecs
+            while(quality !=1 && plQuality[quality - 1].CODECS == plQuality[quality - 2].CODECS) {
+              quality--;
+            }
+          }
+          const selPlUrl = plSelectedList[plQuality.map(a => a.dim)[quality - 1]] ? plSelectedList[plQuality.map(a => a.dim)[quality - 1]] : '';
+          console.info(`Servers available:\n\t${plServerList.join('\n\t')}`);
+          console.info(`Available qualities:\n\t${plQuality.map((a, ind) => `[${ind+1}] ${a.str}`).join('\n\t')}`);
+
+          if(selPlUrl != ''){
+            variables.push({
+              name: 'height',
+              type: 'number',
+              replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.height as number : plQuality[quality - 1].RESOLUTION.height
+            }, {
+              name: 'width',
+              type: 'number',
+              replaceWith: quality === 0 ? plQuality[plQuality.length - 1].RESOLUTION.width as number : plQuality[quality - 1].RESOLUTION.width
+            });
+
+            console.info(`Selected quality: ${Object.keys(plSelectedList).find(a => plSelectedList[a] === selPlUrl)} @ ${plSelectedServer}`);
+            console.info('Stream URL:', selPlUrl);
+            // TODO check filename
             fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
-            console.info('Downloading skipped!');
+            const outFile = parseFileName(options.fileName + '.' + audDub.name, variables, options.numbers, options.override).join(path.sep);
+            console.info(`Output filename: ${outFile}`);
+            const chunkPage = await this.req.getData(selPlUrl);
+            if(!chunkPage.ok || !chunkPage.res){
+              console.error('CAN\'T FETCH VIDEO PLAYLIST!');
+              dlFailed = true;
+            } else {
+              const chunkPageBody = await chunkPage.res.text();
+              const chunkPlaylist = m3u8(chunkPageBody);
+              const totalParts = chunkPlaylist.segments.length;
+              const mathParts  = Math.ceil(totalParts / options.partsize);
+              const mathMsg    = `(${mathParts}*${options.partsize})`;
+              console.info('Total parts in stream:', totalParts, mathMsg);
+              tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+              const split = outFile.split(path.sep).slice(0, -1);
+              split.forEach((val, ind, arr) => {
+                const isAbsolut = path.isAbsolute(outFile as string);
+                if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+                  fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
+              });
+              const dlStreamByPl = await new streamdl({
+                output: `${tsFile}.ts`,
+                timeout: options.timeout,
+                m3u8json: chunkPlaylist,
+                baseurl: selPlUrl.replace('playlist.m3u8',''),
+                threads: options.partsize,
+                fsRetryTime: options.fsRetryTime * 1000,
+                override: options.force,
+                callback: options.callbackMaker ? options.callbackMaker({
+                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                  image: data.image,
+                  parent: {
+                    title: data.show.title
+                  },
+                  title: data.title,
+                  language: audDub
+                }) : undefined
+              }).download();
+              if (!dlStreamByPl.ok) {
+                console.error(`DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
+                dlFailed = true;
+              }
+              files.push({
+                type: 'Video',
+                path: `${tsFile}.ts`,
+                lang: audDub
+              });
+              dlVideoOnce = true;
+            }
+          } else{
+            console.error('Quality not selected!\n');
+            dlFailed = true;
           }
         }
-      } else if (options.novids && options.noaudio) {
+      } else if (options.novids) {
+        console.info('Downloading skipped!');
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
       }
       await this.sleep(options.waittime);
