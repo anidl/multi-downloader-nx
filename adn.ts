@@ -787,7 +787,24 @@ export default class AnimationDigitalNetwork implements ServiceClass {
               const [start, end, text, lineAlign, positionAlign] = 
                     [sub.startTime, sub.endTime, sub.text, sub.lineAlign, sub.positionAlign];
               const alignment = (this.posAlignMap[positionAlign] || 2) + (this.lineAlignMap[lineAlign] || 0);
-              subBody += `\nDialogue: 0,${this.convertToSSATimestamp(start)},${this.convertToSSATimestamp(end)},Default,,0,0,0,,${(alignment !== 2 ? `{\\a${alignment}}` : '')}${text.replace('\n', '\\N').replace('<i>', '{\\i1}').replace('</i>', '{\\i0}')}`;
+              const xtext = text
+                .replace(/ \\N$/g, '\\N')
+                .replace(/\\N$/, '')
+                .replace(/\r/g, '')
+                .replace(/\n/g, '\\N')
+                .replace(/\\N +/g, '\\N')
+                .replace(/ +\\N/g, '\\N')
+                .replace(/(\\N)+/g, '\\N')
+                .replace(/<b[^>]*>([^<]*)<\/b>/g, '{\\b1}$1{\\b0}')
+                .replace(/<i[^>]*>([^<]*)<\/i>/g, '{\\i1}$1{\\i0}')
+                .replace(/<u[^>]*>([^<]*)<\/u>/g, '{\\u1}$1{\\u0}')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/<[^>]>/g, '')
+                .replace(/\\N$/, '')
+                .replace(/ +$/, '');
+              subBody += `\nDialogue: 0,${this.convertToSSATimestamp(start)},${this.convertToSSATimestamp(end)},Default,,0,0,0,,${(alignment !== 2 ? `{\\a${alignment}}` : '')}${xtext}`;
             }
             sxData.title = `${subLang.language}`;
             sxData.fonts = fontsData.assFonts(subBody) as Font[];
