@@ -422,7 +422,7 @@ export default class AnimeOnegai implements ServiceClass {
 
       variables.push(...([
         ['title', medias.episodeTitle, true],
-        ['episode', isNaN(medias.episodeNumber) ? medias.episodeNumber : medias.episodeNumber, false],
+        ['episode', medias.episodeNumber, false],
         ['service', 'AO', false],
         ['seriesTitle', medias.seriesTitle, true],
         ['showTitle', medias.seasonTitle, true],
