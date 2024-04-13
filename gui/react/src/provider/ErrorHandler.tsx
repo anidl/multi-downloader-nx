@@ -27,7 +27,7 @@ export default class ErrorHandler extends React.Component<{
         <Typography variant='body1' color='red'>
           {`${this.state.error.er.name}: ${this.state.error.er.message}`}
           <br/>
-          {this.state.error.stack.componentStack.split('\n').map(a => {
+          {this.state.error.stack.componentStack?.split('\n').map(a => {
             return <>
               {a}
               <br/>

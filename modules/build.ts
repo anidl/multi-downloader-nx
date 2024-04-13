@@ -47,6 +47,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
     gui ? 'gui.js' : 'index.js',
     '--target', nodeVer + buildType,
     '--output', `${buildDir}/${pkg.short_name}`,
+    '--compress', 'GZip'
   ];
   console.info(`[Build] Build configuration: ${buildFull}`);
   try {

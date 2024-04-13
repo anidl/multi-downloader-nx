@@ -69,7 +69,6 @@ let argvC: {
   dlVideoOnce: boolean; 
   chapters: boolean;
   crapi: 'android' | 'web';
-  hdapi: 'old' | 'new';
   removeBumpers: boolean;
   originalFontSize: boolean;
   keepAllVideos: boolean;

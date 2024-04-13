@@ -60,20 +60,40 @@ AniDL --service {ServiceName} -s {SeasonID} -e {EpisodeNumber}
 
 Dependencies that are only required for running from code. These are not required if you are using the prebuilt binaries.
 
-* NodeJS >= 14.6.0 (https://nodejs.org/)
+* NodeJS >= 18.0.0 (https://nodejs.org/)
 * NPM >= 6.9.0 (https://www.npmjs.org/)
 * PNPM >= 7.0.0 (https://pnpm.io/)
 
-### Build Instructions
+### Build Setup
 
 Please note that NodeJS, NPM, and PNPM must be installed on your system. For instructions on how to install pnpm, check (https://pnpm.io/installation)
 
 First clone this repo `git clone https://github.com/anidl/multi-downloader-nx.git`.
 
-`cd` into the cloned directory and run `pnpm i`.
-Afterwards run `pnpm run tsc false [true if you want gui, false otherwise]`.
+`cd` into the cloned directory and run `pnpm i`. Next, decide if you want to package the application, build the code, or run from typescript.
 
-If you want the `js` files you are done. Just `cd` into the `lib` folder, and run `node index.js --help` to get started with the CLI, or run `node gui.js` to run the GUI
+### Run from TypeScript
+
+You can run the code from native TypeScript, this requires ts-node which you can install with pnpm with the following command: `pnpm -g i ts-node`
+
+Afterwords, you can run the application like this:
+
+* CLI: `ts-node -T ./index.ts --help`
+* GUI: `ts-node -T ./gui.ts`
+
+### Run as JavaScript
+
+If you want to build the application into JavaScript code to run, you can do that as well like this:
+
+* CLI: `pnpm run prebuild-cli`
+* GUI: `pnpm run prebuild-gui`
+
+Then you can cd into the `lib` folder and you will be able to run the CLI or GUI as follows:
+
+* CLI: `node ./index.js --help`
+* GUI: `node ./gui.js`
+
+### Build the application into an executable
 
 If you want to package the application, run pnpm run build-`{platform}`-`{type}` where `{platform}` is the operating system (currently the choices are windows, linux, macos, alpine, android, and arm) and `{type}` is cli or gui.
 
