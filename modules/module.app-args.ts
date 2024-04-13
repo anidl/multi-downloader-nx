@@ -63,7 +63,7 @@ let argvC: {
   debug: boolean | undefined; 
   nocleanup: boolean; 
   help: boolean | undefined; 
-  service: 'crunchy' | 'hidive' | 'ao'; 
+  service: 'crunchy' | 'hidive' | 'ao' | 'adn'; 
   update: boolean; 
   fontName: string | undefined; 
   _: (string | number)[]; 
@@ -75,7 +75,7 @@ let argvC: {
   originalFontSize: boolean;
   keepAllVideos: boolean;
   syncTiming: boolean;
-  callbackMaker?: (data: DownloadInfo) => HLSCallback,
+  callbackMaker?: (data: DownloadInfo) => HLSCallback;
 };
     
 export type ArgvType = typeof argvC;  

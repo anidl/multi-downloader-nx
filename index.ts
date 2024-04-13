@@ -67,6 +67,9 @@ import update from './modules/module.updater';
       case 'ao':
         service = new (await import('./ao')).default;
         break;
+      case 'adn':
+        service = new (await import('./adn')).default;
+        break;
       default: 
         service = new (await import(`./${argv.service}`)).default;
         break;
@@ -84,6 +87,9 @@ import update from './modules/module.updater';
       break;
     case 'ao':
       service = new (await import('./ao')).default;
+      break;
+    case 'adn':
+      service = new (await import('./adn')).default;
       break;
     default: 
       service = new (await import(`./${argv.service}`)).default;
