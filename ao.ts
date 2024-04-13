@@ -82,7 +82,8 @@ export default class AnimeOnegai implements ServiceClass {
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
-    this.locale = argv.locale;
+    if (argv.locale !== 'en-US')
+      this.locale = argv.locale;
     if (argv.debug)
       this.debug = true;
 
