@@ -253,6 +253,10 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       console.error('Failed to list show data: Failed to get show');
       return { isOk: false };
     }
+    if (show.value.videos.length == 0) {
+      console.error('No episodes found!');
+      return { isOk: false };
+    }
     const showData = show.value.videos[0].show;
     console.info(`[S.${showData.id}] ${showData.title}`);
     const specials: ADNVideo[] = [];
