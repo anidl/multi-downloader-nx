@@ -61,7 +61,7 @@ let argvC: {
   debug: boolean | undefined; 
   nocleanup: boolean; 
   help: boolean | undefined; 
-  service: 'funi' | 'crunchy' | 'hidive'; 
+  service: 'crunchy' | 'hidive'; 
   update: boolean; 
   fontName: string | undefined; 
   _: (string | number)[]; 
