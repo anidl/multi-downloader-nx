@@ -518,11 +518,11 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 
       variables.push(...([
         ['title', data.title, true],
-        ['episode', data.shortNumber, false],
+        ['episode', isNaN(parseFloat(data.shortNumber)) ? data.shortNumber : parseFloat(data.shortNumber), false],
         ['service', 'ADN', false],
         ['seriesTitle', data.show.shortTitle, true],
         ['showTitle', data.show.title, true],
-        ['season', data.season, false]
+        ['season', isNaN(parseFloat(data.season)) ? data.season : parseFloat(data.season), false]
       ] as [AvailableFilenameVars, string|number, boolean][]).map((a): Variable => {
         return {
           name: a[0],
