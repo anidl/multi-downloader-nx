@@ -1,4 +1,4 @@
-import { dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
+import { aoSearchLocales, dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
 
 const groups = {
   'auth': 'Authentication:',
@@ -41,7 +41,7 @@ export type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
     default: T|undefined,
     name?: string    
   },
-  service: Array<'crunchy'|'hidive'|'all'>,
+  service: Array<'crunchy'|'hidive'|'ao'|'all'>,
   usage: string // -(-)${name} will be added for each command,
   demandOption?: true,
   transformer?: (value: T) => K
@@ -107,12 +107,12 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Set the service locale',
     docDescribe: 'Set the local that will be used for the API.',
     group: 'search',
-    choices: (searchLocales.filter(a => a !== undefined) as string[]),
+    choices: ([...searchLocales.filter(a => a !== undefined), ...aoSearchLocales.filter(a => a !== undefined)] as string[]),
     default: {
       default: 'en-US'
     },
     type: 'string',
-    service: ['crunchy'],
+    service: ['crunchy', 'ao'],
     usage: '${locale}'
   },
   {
@@ -556,7 +556,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'util',
     service: ['all'],
     type: 'string',
-    choices: ['crunchy', 'hidive'],
+    choices: ['crunchy', 'hidive', 'ao'],
     usage: '${service}',
     default: {
       default: ''
@@ -673,7 +673,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)',
     docDescribe: true,
     group: 'auth',
-    service: ['crunchy'],
+    service: ['crunchy', 'ao'],
     type: 'string',
     usage: '${token}',
     default: {

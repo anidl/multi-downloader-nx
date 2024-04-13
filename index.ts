@@ -37,6 +37,15 @@ import update from './modules/module.updater';
         type: 's'
       }, (argv.s === undefined ? argv.series : argv.s) as string);
       console.info('Added %s to the downloadArchive list', (argv.s === undefined ? argv.series : argv.s));
+    } else if (argv.service === 'ao') {
+      if (argv.s === undefined)
+        return console.error('`-s` not found');
+      addToArchive({
+        service: 'hidive',
+        //type: argv.s === undefined ? 'srz' : 's'
+        type: 's'
+      }, (argv.s === undefined ? argv.series : argv.s) as string);
+      console.info('Added %s to the downloadArchive list', (argv.s === undefined ? argv.series : argv.s));
     }
   } else if (argv.downloadArchive) {
     const ids = makeCommand(argv.service);
@@ -44,7 +53,7 @@ import update from './modules/module.updater';
       overrideArguments(cfg.cli, id);
       /* Reimport module to override appArgv */
       Object.keys(require.cache).forEach(key => {
-        if (key.endsWith('crunchy.js') || key.endsWith('hidive.js'))
+        if (key.endsWith('crunchy.js') || key.endsWith('hidive.js') || key.endsWith('ao.js'))
           delete require.cache[key];
       });
       let service: ServiceClass;
@@ -54,6 +63,9 @@ import update from './modules/module.updater';
         break;
       case 'hidive':
         service = new (await import('./hidive')).default;
+        break;
+      case 'ao':
+        service = new (await import('./ao')).default;
         break;
       default: 
         service = new (await import(`./${argv.service}`)).default;
@@ -69,6 +81,9 @@ import update from './modules/module.updater';
       break;
     case 'hidive':
       service = new (await import('./hidive')).default;
+      break;
+    case 'ao':
+      service = new (await import('./ao')).default;
       break;
     default: 
       service = new (await import(`./${argv.service}`)).default;
