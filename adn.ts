@@ -745,7 +745,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           console.warn('No subtitles found.');
         }
         for (const subName in subtitles) {
-          console.debug(subName);
           let subLang: langsData.LanguageItem;
           if (this.deuSubStrings.includes(subName)) {
             subLang = langsData.languages.find(a=>a.code == 'deu') as langsData.LanguageItem;
@@ -777,17 +776,18 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           + '\nPlayResX: 1280'
           + '\nPlayResY: 720'
           + '\nScaledBorderAndShadow: yes'
+          + ''
           + '\n[V4 Styles]'
-          + '\nFormat: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,TertiaryColour,BackColour,Bold,Italic,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,AlphaLevel,Encoding'
-          + `\nStyle: Default,${options.fontName ?? 'Arial'},${options.fontSize ?? 50},16777215,16777215,16777215,0,-1,0,1,1,0,2,20,20,20,0,0`
+          + '\nFormat: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding'
+          + `\nStyle: Default,${options.fontName ?? 'Arial'},${options.fontSize ?? 50},&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1.95,0,2,0,0,70,0`
           + '\n[Events]'
-          + '\nFormat: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text';
+          + '\nFormat: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text';
 
             for (const sub of subtitles[subName]) {
               const [start, end, text, lineAlign, positionAlign] = 
                     [sub.startTime, sub.endTime, sub.text, sub.lineAlign, sub.positionAlign];
               const alignment = (this.posAlignMap[positionAlign] || 2) + (this.lineAlignMap[lineAlign] || 0);
-              subBody += `\nDialogue: Marked=0,${this.convertToSSATimestamp(start)},${this.convertToSSATimestamp(end)},Default,,0,0,0,,${(alignment !== 2 ? `{\\a${alignment}}` : '')}${text.replace('\n', '\\N').replace('<i>', '{\\i1}').replace('</i>', '{\\i0}')}`;
+              subBody += `\nDialogue: 0,${this.convertToSSATimestamp(start)},${this.convertToSSATimestamp(end)},Default,,0,0,0,,${(alignment !== 2 ? `{\\a${alignment}}` : '')}${text.replace('\n', '\\N').replace('<i>', '{\\i1}').replace('</i>', '{\\i0}')}`;
             }
             sxData.title = `${subLang.language}`;
             sxData.fonts = fontsData.assFonts(subBody) as Font[];
