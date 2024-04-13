@@ -262,7 +262,10 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     const specials: ADNVideo[] = [];
     let episodeIndex = 0, specialIndex = 0;
     for (const episode of show.value.videos) {
+      const seasonNumberTitleParse = episode.season.match(/\d+/);
+      const seasonNumber = seasonNumberTitleParse ? parseInt(seasonNumberTitleParse[0]) : 1;
       const episodeNumber = parseInt(episode.shortNumber);
+      episode.season = seasonNumber.toString();
       if (!episodeNumber) {
         specialIndex++;
         const special = show.value.videos.splice(episodeIndex, 1);
@@ -299,8 +302,9 @@ export default class AnimationDigitalNetwork implements ServiceClass {
         !but && doEpsFilter.isSelected([episode.shortNumber, episode.id+''])
       ) {
         selEpsArr.push({ isSelected: true, ...episode });
-        console.info('%s[%s] %s',
+        console.info('%s[S%sE%s] %s',
           '✓ ',
+          episode.season,
           episode.shortNumber,
           episode.name,
         );
