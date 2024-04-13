@@ -483,7 +483,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     //TODO: Add chapter support
     const streamsRequest = await this.req.getData(linksUrl+'?freeWithAds=true&adaptive=true&withMetadata=true&source=Web', {
       'headers': {
-        'X-Player-Token': authorization
+        'X-Player-Token': authorization,
+        'X-Target-Distribution': this.locale
       }
     });
     if(!streamsRequest.ok || !streamsRequest.res){
@@ -743,6 +744,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           console.warn('No subtitles found.');
         }
         for (const subName in subtitles) {
+          console.debug(subName);
           let subLang: langsData.LanguageItem;
           if (this.deuSubStrings.includes(subName)) {
             subLang = langsData.languages.find(a=>a.code == 'deu') as langsData.LanguageItem;
