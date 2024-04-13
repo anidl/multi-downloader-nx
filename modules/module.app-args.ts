@@ -1,8 +1,8 @@
 import yargs, { Choices } from 'yargs';
 import { args, AvailableMuxer, groups } from './module.args';
 import { LanguageItem } from './module.langsData';
-import { HLSCallback } from './hls-download';
 import { DownloadInfo } from '../@types/messageHandler';
+import { HLSCallback } from './hls-download';
 
 let argvC: { 
   [x: string]: unknown; 
@@ -63,7 +63,7 @@ let argvC: {
   debug: boolean | undefined; 
   nocleanup: boolean; 
   help: boolean | undefined; 
-  service: 'funi' | 'crunchy' | 'hidive' | 'adn'; 
+  service: 'crunchy' | 'hidive' | 'ao' | 'adn'; 
   update: boolean; 
   fontName: string | undefined; 
   _: (string | number)[]; 
@@ -71,7 +71,6 @@ let argvC: {
   dlVideoOnce: boolean; 
   chapters: boolean;
   crapi: 'android' | 'web';
-  hdapi: 'old' | 'new';
   removeBumpers: boolean;
   originalFontSize: boolean;
   keepAllVideos: boolean;

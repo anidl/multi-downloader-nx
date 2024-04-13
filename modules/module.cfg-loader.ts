@@ -18,18 +18,18 @@ const guiCfgFile   = path.join(workingDir, 'config', 'gui');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
 const hdPflCfgFile = path.join(workingDir, 'config', 'hd_profile');
 const sessCfgFile  = {
-  funi: path.join(workingDir, 'config', 'funi_sess'),
   cr:   path.join(workingDir, 'config', 'cr_sess'),
-  adn:   path.join(workingDir, 'config', 'adn_sess'),
-  hd:   path.join(workingDir, 'config', 'hd_sess')
+  hd:   path.join(workingDir, 'config', 'hd_sess'),
+  ao:   path.join(workingDir, 'config', 'ao_sess'),
+  adn:  path.join(workingDir, 'config', 'adn_sess')
 };
 const stateFile    = path.join(workingDir, 'config', 'guistate');
 const tokenFile    = {
-  funi: path.join(workingDir, 'config', 'funi_token'),
   cr:   path.join(workingDir, 'config', 'cr_token'),
-  adn:   path.join(workingDir, 'config', 'adn_token'),
   hd:   path.join(workingDir, 'config', 'hd_token'),
-  hdNew:   path.join(workingDir, 'config', 'hd_new_token')
+  hdNew:path.join(workingDir, 'config', 'hd_new_token'),
+  ao:   path.join(workingDir, 'config', 'ao_token'),
+  adn:  path.join(workingDir, 'config', 'adn_token')
 };
 
 export const ensureConfig = () => {
@@ -217,7 +217,7 @@ const saveCRToken = (data: Record<string, unknown>) => {
     console.error('Can\'t save token file to disk!');
   }
 };
-
+  
 const loadADNToken = () => {
   let token = loadYamlCfgFile(tokenFile.adn, true);
   if(typeof token !== 'object' || token === null || Array.isArray(token)){
@@ -231,6 +231,25 @@ const saveADNToken = (data: Record<string, unknown>) => {
   try{
     fs.ensureDirSync(cfgFolder);
     fs.writeFileSync(`${tokenFile.adn}.yml`, yaml.stringify(data));
+  }
+  catch(e){
+    console.error('Can\'t save token file to disk!');
+  }
+};
+  
+const loadAOToken = () => {
+  let token = loadYamlCfgFile(tokenFile.ao, true);
+  if(typeof token !== 'object' || token === null || Array.isArray(token)){
+    token = {};
+  }
+  return token;
+};
+
+const saveAOToken = (data: Record<string, unknown>) => {
+  const cfgFolder = path.dirname(tokenFile.ao);
+  try{
+    fs.ensureDirSync(cfgFolder);
+    fs.writeFileSync(`${tokenFile.ao}.yml`, yaml.stringify(data));
   }
   catch(e){
     console.error('Can\'t save token file to disk!');
@@ -332,33 +351,6 @@ const saveNewHDToken = (data: Record<string, unknown>) => {
   }
 };
 
-const loadFuniToken = () => {
-  const loadedToken = loadYamlCfgFile<{
-    token?: string
-  }>(tokenFile.funi, true);
-  let token: false|string = false;
-  if (loadedToken && loadedToken.token)
-    token = loadedToken.token;
-  // info if token not set
-  if(!token){
-    console.info('[INFO] Token not set!\n');
-  }
-  return token;
-};
-
-const saveFuniToken = (data: {
-  token?: string
-}) => {
-  const cfgFolder = path.dirname(tokenFile.funi);
-  try{
-    fs.ensureDirSync(cfgFolder);
-    fs.writeFileSync(`${tokenFile.funi}.yml`, yaml.stringify(data));
-  }
-  catch(e){
-    console.error('Can\'t save token file to disk!');
-  }
-};
-
 const cfgDir = path.join(workingDir, 'config');
 
 const getState = (): GuiState => {
@@ -393,8 +385,6 @@ const setState = (state: GuiState) => {
 export {
   loadBinCfg,
   loadCfg,
-  loadFuniToken,
-  saveFuniToken,
   saveCRSession,
   loadCRSession,
   saveCRToken,
@@ -409,6 +399,8 @@ export {
   loadNewHDToken,
   saveHDProfile,
   loadHDProfile,
+  saveAOToken,
+  loadAOToken,
   getState,
   setState,
   writeYamlCfgFile,

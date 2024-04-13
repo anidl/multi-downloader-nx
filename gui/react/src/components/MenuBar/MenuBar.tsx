@@ -23,12 +23,12 @@ const MenuBar: React.FC = () => {
     switch(service) {
     case 'crunchy': 
       return 'Crunchyroll';
-    case 'funi':
-      return 'Funimation';
-    case 'adn':
-      return 'AnimationDigitalNetwork';
     case 'hidive':
       return 'Hidive';
+    case 'ao':
+      return 'AnimeOnegai';
+    case 'adn':
+      return 'AnimationDigitalNetwork';
     }
   };
 
