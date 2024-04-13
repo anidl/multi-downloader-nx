@@ -18,15 +18,7 @@ import update from './modules/module.updater';
   }
 
   if (argv.addArchive) {
-    if (argv.service === 'funi') {
-      if (argv.s === undefined)
-        return console.error('`-s` not found');
-      addToArchive({
-        service: 'funi',
-        type: 's'
-      }, argv.s);
-      console.info('Added %s to the downloadArchive list', argv.s);
-    } else if (argv.service === 'crunchy') {
+    if (argv.service === 'crunchy') {
       if (argv.s === undefined && argv.series === undefined)
         return console.error('`-s` or `--srz` not found');
       if (argv.s && argv.series)
@@ -61,14 +53,11 @@ import update from './modules/module.updater';
       overrideArguments(cfg.cli, id);
       /* Reimport module to override appArgv */
       Object.keys(require.cache).forEach(key => {
-        if (key.endsWith('crunchy.js') || key.endsWith('funi.js') || key.endsWith('hidive.js') || key.endsWith('ao.js'))
+        if (key.endsWith('crunchy.js') || key.endsWith('hidive.js') || key.endsWith('ao.js'))
           delete require.cache[key];
       });
       let service: ServiceClass;
       switch(argv.service) {
-      case 'funi':
-        service = new (await import('./funi')).default;
-        break;
       case 'crunchy':
         service = new (await import('./crunchy')).default;
         break;
@@ -87,9 +76,6 @@ import update from './modules/module.updater';
   } else {
     let service: ServiceClass;
     switch(argv.service) {
-    case 'funi':
-      service = new (await import('./funi')).default;
-      break;
     case 'crunchy':
       service = new (await import('./crunchy')).default;
       break;

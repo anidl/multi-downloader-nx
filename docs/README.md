@@ -2,11 +2,11 @@
 
 [![Discord Shield](https://discord.com/api/guilds/884479461997805568/widget.png?style=banner2)](https://discord.gg/qEpbWen5vq)
 
-This downloader can download anime from different sites. Currently supported are *Funimation*, *Crunchyroll*, *Hidive*, and *AnimeOnegai*.
+This downloader can download anime from different sites. Currently supported are *Crunchyroll*, *Hidive*, and *AnimeOnegai*.
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Funimation*, *Crunchyroll*, *Hidive*, or *AnimeOnegai*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
+This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive*, or *AnimeOnegai*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
 
 ## Dependencies
 

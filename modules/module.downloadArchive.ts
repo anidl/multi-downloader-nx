@@ -11,9 +11,6 @@ export type ItemType = {
 }[]
 
 export type DataType = {
-  funi: {
-    s: ItemType
-  },
   hidive: {
     s: ItemType
   },
@@ -27,9 +24,6 @@ export type DataType = {
 }
 
 const addToArchive = (kind: {
-  service: 'funi',
-  type: 's'
-} | {
   service: 'crunchy',
   type: 's'|'srz'
 } | {
@@ -51,16 +45,7 @@ const addToArchive = (kind: {
     });
     (data as any)[kind.service][kind.type] = items;
   } else {
-    if (kind.service === 'funi') {
-      data['funi'] = {
-        s: [
-          {
-            id: ID,
-            already: []
-          }
-        ]
-      };
-    } else if (kind.service === 'ao') {
+    if (kind.service === 'ao') {
       data['ao'] = {
         s: [
           {
@@ -95,9 +80,6 @@ const addToArchive = (kind: {
 };
 
 const downloaded = (kind: {
-  service: 'funi',
-  type: 's'
-} | {
   service: 'crunchy',
   type: 's'|'srz'
 } | {
@@ -123,7 +105,7 @@ const downloaded = (kind: {
   fs.writeFileSync(archiveFile, JSON.stringify(data, null, 4));
 };
 
-const makeCommand = (service: 'funi'|'crunchy'|'hidive'|'ao') : Partial<ArgvType>[] => {
+const makeCommand = (service: 'crunchy'|'hidive'|'ao') : Partial<ArgvType>[] => {
   const data = loadData();
   const ret: Partial<ArgvType>[] = [];
   const kind = data[service];

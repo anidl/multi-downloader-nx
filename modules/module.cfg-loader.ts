@@ -18,14 +18,12 @@ const guiCfgFile   = path.join(workingDir, 'config', 'gui');
 const cliCfgFile   = path.join(workingDir, 'config', 'cli-defaults');
 const hdPflCfgFile = path.join(workingDir, 'config', 'hd_profile');
 const sessCfgFile  = {
-  funi: path.join(workingDir, 'config', 'funi_sess'),
   cr:   path.join(workingDir, 'config', 'cr_sess'),
   hd:   path.join(workingDir, 'config', 'hd_sess'),
   ao:   path.join(workingDir, 'config', 'ao_sess')
 };
 const stateFile    = path.join(workingDir, 'config', 'guistate');
 const tokenFile    = {
-  funi: path.join(workingDir, 'config', 'funi_token'),
   cr:   path.join(workingDir, 'config', 'cr_token'),
   hd:   path.join(workingDir, 'config', 'hd_token'),
   ao:   path.join(workingDir, 'config', 'ao_token'),
@@ -333,33 +331,6 @@ const saveNewHDToken = (data: Record<string, unknown>) => {
   }
 };
 
-const loadFuniToken = () => {
-  const loadedToken = loadYamlCfgFile<{
-    token?: string
-  }>(tokenFile.funi, true);
-  let token: false|string = false;
-  if (loadedToken && loadedToken.token)
-    token = loadedToken.token;
-  // info if token not set
-  if(!token){
-    console.info('[INFO] Token not set!\n');
-  }
-  return token;
-};
-
-const saveFuniToken = (data: {
-  token?: string
-}) => {
-  const cfgFolder = path.dirname(tokenFile.funi);
-  try{
-    fs.ensureDirSync(cfgFolder);
-    fs.writeFileSync(`${tokenFile.funi}.yml`, yaml.stringify(data));
-  }
-  catch(e){
-    console.error('Can\'t save token file to disk!');
-  }
-};
-
 const cfgDir = path.join(workingDir, 'config');
 
 const getState = (): GuiState => {
@@ -394,8 +365,6 @@ const setState = (state: GuiState) => {
 export {
   loadBinCfg,
   loadCfg,
-  loadFuniToken,
-  saveFuniToken,
   saveCRSession,
   loadCRSession,
   saveCRToken,

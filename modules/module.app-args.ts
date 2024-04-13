@@ -63,7 +63,7 @@ let argvC: {
   debug: boolean | undefined; 
   nocleanup: boolean; 
   help: boolean | undefined; 
-  service: 'funi' | 'crunchy' | 'hidive' | 'ao'; 
+  service: 'crunchy' | 'hidive' | 'ao'; 
   update: boolean; 
   fontName: string | undefined; 
   _: (string | number)[]; 
@@ -71,7 +71,6 @@ let argvC: {
   dlVideoOnce: boolean; 
   chapters: boolean;
   crapi: 'android' | 'web';
-  hdapi: 'old' | 'new';
   removeBumpers: boolean;
   originalFontSize: boolean;
   keepAllVideos: boolean;
