@@ -262,10 +262,17 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     const specials: ADNVideo[] = [];
     let episodeIndex = 0, specialIndex = 0;
     for (const episode of show.value.videos) {
+      episode.season = episode.season+'';
       const seasonNumberTitleParse = episode.season.match(/\d+/);
-      const seasonNumber = seasonNumberTitleParse ? parseInt(seasonNumberTitleParse[0]) : 1;
+      const seriesNumberTitleParse = episode.show.title.match(/\d+/);
       const episodeNumber = parseInt(episode.shortNumber);
-      episode.season = seasonNumber.toString();
+      if (seasonNumberTitleParse && !isNaN(parseInt(seasonNumberTitleParse[0]))) {
+        episode.season = seasonNumberTitleParse[0];
+      } else if (seriesNumberTitleParse && !isNaN(parseInt(seriesNumberTitleParse[0]))) {
+        episode.season = seriesNumberTitleParse[0];
+      } else {
+        episode.season = '1';
+      }
       if (!episodeNumber) {
         specialIndex++;
         const special = show.value.videos.splice(episodeIndex, 1);
