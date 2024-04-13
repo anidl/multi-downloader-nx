@@ -4,6 +4,8 @@
 **/node_modules/
 /videos/*.json
 /videos/*.ts
+/videos/*.m4s
+/videos/*.txt
 .DS_Store
 ffmpeg
 mkvmerge
@@ -19,12 +21,9 @@ token.yml
 lib
 test.*
 updates.json
-funi_token.yml
-cr_token.yml
-hd_profile.yml
-hd_sess.yml
-hd_token.yml
-hd_new_token.yml
+*_token.yml
+*_profile.yml
+*_sess.yml
 archive.json
 guistate.json
 fonts

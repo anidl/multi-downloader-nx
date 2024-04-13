@@ -75,7 +75,7 @@ class Merger {
       for (const [vnaIndex, vna] of vnas.entries()) {
         const streamInfo = await ffprobe(vna.path, { path: bin.ffprobe as string });
         const videoInfo = streamInfo.streams.filter(stream => stream.codec_type == 'video');
-        vnas[vnaIndex].duration = videoInfo[0].duration;
+        vnas[vnaIndex].duration = parseInt(videoInfo[0].duration as string);
       }
       //Sort videoAndAudio streams by duration (shortest first)
       vnas.sort((a,b) => {

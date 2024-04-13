@@ -538,7 +538,7 @@ export default class Hidive implements ServiceClass {
     console.info('\tSubs  : ' + availableSubs.map(a => langsData.languages.find(b => b.new_hd_locale == a.language)?.name).join('\n\t\t'));
     console.info(`[INFO] Selected dub(s): ${options.dubLang.join(', ')}`);
     const baseUrl = playbackData.dash[0].url.split('master')[0];
-    const parsedmpd = parse(mpd, undefined, baseUrl);
+    const parsedmpd = await parse(mpd, undefined, baseUrl);
     const res = await this.downloadMPD(parsedmpd, availableSubs, selectedEpisode, options);
     if (res === undefined || res.error) {
       console.error('Failed to download media list');
@@ -627,7 +627,7 @@ export default class Hidive implements ServiceClass {
     console.info('\tSubs  : ' + availableSubs.map(a => langsData.languages.find(b => b.new_hd_locale == a.language)?.name).join('\n\t\t'));
     console.info(`[INFO] Selected dub(s): ${options.dubLang.join(', ')}`);
     const baseUrl = playbackData.dash[0].url.split('master')[0];
-    const parsedmpd = parse(mpd, undefined, baseUrl);
+    const parsedmpd = await parse(mpd, undefined, baseUrl);
     const res = await this.downloadMPD(parsedmpd, availableSubs, selectedEpisode, options);
     if (res === undefined || res.error) {
       console.error('Failed to download media list');
@@ -775,6 +775,8 @@ export default class Hidive implements ServiceClass {
       const mathMsg    = `(${mathParts}*${options.partsize})`;
       console.info('Total parts in video stream:', totalParts, mathMsg);
       const tsFile = path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName);
+      const tempFile = parseFileName(`temp-${selectedEpisode.id}`, variables, options.numbers, options.override).join(path.sep);
+      const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
       const split = fileName.split(path.sep).slice(0, -1);
       split.forEach((val, ind, arr) => {
         const isAbsolut = path.isAbsolute(fileName);
@@ -785,7 +787,7 @@ export default class Hidive implements ServiceClass {
         segments: chosenVideoSegments.segments
       };
       const videoDownload = await new streamdl({
-        output: `${tsFile}.video.enc.m4s`,
+        output: `${tempTsFile}.video.enc.m4s`,
         timeout: options.timeout,
         m3u8json: videoJson,
         // baseurl: chunkPlaylist.baseUrl,
@@ -814,19 +816,21 @@ export default class Hidive implements ServiceClass {
           }
           if (this.cfg.bin.mp4decrypt) {
             const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-            const commandVideo = commandBase+`"${tsFile}.video.enc.m4s" "${tsFile}.video.m4s"`;
+            const commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
 
             console.info('Started decrypting video');
             const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
             if (!decryptVideo.isOk) {
               console.error(decryptVideo.err);
               console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
+              fs.renameSync(`${tempTsFile}.video.enc.m4s`, `${tsFile}.video.enc.m4s`);
               return undefined;
             } else {
               console.info('Decryption done for video');
               if (!options.nocleanup) {
-                fs.removeSync(`${tsFile}.video.enc.m4s`);
+                fs.removeSync(`${tempTsFile}.video.enc.m4s`);
               }
+              fs.renameSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
               files.push({
                 type: 'Video',
                 path: `${tsFile}.video.m4s`,
@@ -851,6 +855,8 @@ export default class Hidive implements ServiceClass {
         const mathParts  = Math.ceil(totalParts / options.partsize);
         const mathMsg    = `(${mathParts}*${options.partsize})`;
         console.info('Total parts in audio stream:', totalParts, mathMsg);
+        const tempFile = parseFileName(`temp-${selectedEpisode.id}.${chosenAudioSegments.language.name}`, variables, options.numbers, options.override).join(path.sep);
+        const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
         const outFile = parseFileName(options.fileName + '.' + (chosenAudioSegments.language.name), variables, options.numbers, options.override).join(path.sep);
         const tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
         const split = outFile.split(path.sep).slice(0, -1);
@@ -863,7 +869,7 @@ export default class Hidive implements ServiceClass {
           segments: chosenAudioSegments.segments
         };
         const audioDownload = await new streamdl({
-          output: `${tsFile}.audio.enc.m4s`,
+          output: `${tempTsFile}.audio.enc.m4s`,
           timeout: options.timeout,
           m3u8json: audioJson,
           // baseurl: chunkPlaylist.baseUrl,
@@ -892,18 +898,20 @@ export default class Hidive implements ServiceClass {
           }
           if (this.cfg.bin.mp4decrypt) {
             const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-            const commandAudio = commandBase+`"${tsFile}.audio.enc.m4s" "${tsFile}.audio.m4s"`;
+            const commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
             console.info('Started decrypting audio');
             const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
             if (!decryptAudio.isOk) {
               console.error(decryptAudio.err);
               console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
+              fs.renameSync(`${tempTsFile}.audio.enc.m4s`, `${tsFile}.audio.enc.m4s`);
               return undefined;
             } else {
               if (!options.nocleanup) {
-                fs.removeSync(`${tsFile}.audio.enc.m4s`);
+                fs.removeSync(`${tempTsFile}.audio.enc.m4s`);
               }
+              fs.renameSync(`${tempTsFile}.audio.m4s`, `${tsFile}.audio.m4s`);
               files.push({
                 type: 'Audio',
                 path: `${tsFile}.audio.m4s`,

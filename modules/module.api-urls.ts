@@ -1,5 +1,3 @@
-import { Headers } from 'got/dist/source';
-
 // api domains
 const domain = {
   www:      'https://www.crunchyroll.com',
@@ -34,8 +32,8 @@ export type APIType = {
   cms: string
   beta_browse: string
   beta_cms: string,
-  beta_authHeader: Headers,
-  beta_authHeaderMob: Headers,
+  beta_authHeader: Record<string, string>,
+  beta_authHeaderMob: Record<string, string>,
   hd_apikey: string,
   hd_devName: string,
   hd_appId: string,
@@ -65,7 +63,7 @@ const api: APIType = {
   // beta api
   beta_auth:         `${domain.api_beta}/auth/v1/token`,
   beta_authBasic:    'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
-  beta_authBasicMob: 'Basic b2VkYXJteHN0bGgxanZhd2ltbnE6OWxFaHZIWkpEMzJqdVY1ZFc5Vk9TNTdkb3BkSnBnbzE=',
+  beta_authBasicMob: 'Basic bm12anNoZmtueW14eGtnN2ZiaDk6WllJVnJCV1VQYmNYRHRiRDIyVlNMYTZiNFdRb3Mzelg=',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
   search:            `${domain.api_beta}/content/v2/discover/search`,

@@ -7,9 +7,17 @@ type Segment = {
   duration: number;
   map: {
     uri: string;
+    byterange?: {
+      length: number,
+      offset: number
+    };
   };
-  number: number;
-  presentationTime: number;
+  byterange?: {
+    length: number,
+    offset: number
+  };
+  number?: number;
+  presentationTime?: number;
 }
 
 export type PlaylistItem = {
@@ -38,18 +46,48 @@ export type MPDParsed = {
   }
 }
 
-export function parse(manifest: string, language?: LanguageItem, url?: string) {
+export async function parse(manifest: string, language?: LanguageItem, url?: string) {
   if (!manifest.includes('BaseURL') && url) {
     manifest = manifest.replace(/(<MPD*\b[^>]*>)/gm, `$1<BaseURL>${url}</BaseURL>`);
   }
   const parsed = mpdParse(manifest);
   const ret: MPDParsed = {};
 
+  // Audio Loop
   for (const item of Object.values(parsed.mediaGroups.AUDIO.audio)){
     for (const playlist of item.playlists) {
       const host = new URL(playlist.resolvedUri).hostname;
       if (!Object.prototype.hasOwnProperty.call(ret, host))
         ret[host] = { audio: [], video: [] };
+
+
+      if (playlist.sidx && playlist.segments.length == 0) {
+        const item = await fetch(playlist.sidx.uri, {
+          'method': 'head'
+        });
+        const byteLength = parseInt(item.headers.get('content-length') as string);
+        let currentByte = playlist.sidx.map.byterange.length;
+        while (currentByte <= byteLength) {
+          playlist.segments.push({
+            'duration': 0,
+            'map': {
+              'uri': playlist.resolvedUri,
+              'resolvedUri': playlist.resolvedUri,
+              'byterange': playlist.sidx.map.byterange
+            },
+            'uri': playlist.resolvedUri,
+            'resolvedUri': playlist.resolvedUri,
+            'byterange': {
+              'length': 500000,
+              'offset': currentByte
+            },
+            timeline: 0,
+            number: 0,
+            presentationTime: 0
+          });
+          currentByte = currentByte + 500000;
+        }
+      }
 
       //Find and add audio language if it is found in the MPD
       let audiolang: LanguageItem;
@@ -68,10 +106,11 @@ export function parse(manifest: string, language?: LanguageItem, url?: string) {
           const map_uri = segment.map.resolvedUri;
           return {
             duration: segment.duration,
-            map: { uri: map_uri },
+            map: { uri: map_uri, byterange: segment.map.byterange },
             number: segment.number,
             presentationTime: segment.presentationTime,
             timeline: segment.timeline,
+            byterange: segment.byterange,
             uri
           };
         })
@@ -85,10 +124,39 @@ export function parse(manifest: string, language?: LanguageItem, url?: string) {
     }
   }
 
+  // Video Loop
   for (const playlist of parsed.playlists) {
     const host = new URL(playlist.resolvedUri).hostname;
     if (!Object.prototype.hasOwnProperty.call(ret, host))
       ret[host] = { audio: [], video: [] };
+
+    if (playlist.sidx && playlist.segments.length == 0) {
+      const item = await fetch(playlist.sidx.uri, {
+        'method': 'head'
+      });
+      const byteLength = parseInt(item.headers.get('content-length') as string);
+      let currentByte = playlist.sidx.map.byterange.length;
+      while (currentByte <= byteLength) {
+        playlist.segments.push({
+          'duration': 0,
+          'map': {
+            'uri': playlist.resolvedUri,
+            'resolvedUri': playlist.resolvedUri,
+            'byterange': playlist.sidx.map.byterange
+          },
+          'uri': playlist.resolvedUri,
+          'resolvedUri': playlist.resolvedUri,
+          'byterange': {
+            'length': 2000000,
+            'offset': currentByte
+          },
+          timeline: 0,
+          number: 0,
+          presentationTime: 0
+        });
+        currentByte = currentByte + 2000000;
+      }
+    }
 
     const pItem: VideoPlayList = {
       bandwidth: playlist.attributes.BANDWIDTH,
@@ -98,10 +166,11 @@ export function parse(manifest: string, language?: LanguageItem, url?: string) {
         const map_uri = segment.map.resolvedUri;
         return {
           duration: segment.duration,
-          map: { uri: map_uri },
+          map: { uri: map_uri, byterange: segment.map.byterange },
           number: segment.number,
           presentationTime: segment.presentationTime,
           timeline: segment.timeline,
+          byterange: segment.byterange,
           uri
         };
       })

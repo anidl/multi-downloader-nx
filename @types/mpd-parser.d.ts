@@ -7,9 +7,38 @@ declare module 'mpd-parser' {
     map: {
       uri: string,
       resolvedUri: string,
+      byterange?: {
+        length: number,
+        offset: number
+      }
+    },
+    byterange?: {
+      length: number,
+      offset: number
     },
     number: number,
     presentationTime: number
+  }
+
+  export type Sidx = {
+    uri: string,
+    resolvedUri: string,
+    byterange: {
+      length: number,
+      offset: number
+    },
+    map: {
+      uri: string,
+      resolvedUri: string,
+      byterange: {
+        length: number,
+        offset: number
+      }
+    },
+    duration: number,
+    timeline: number,
+    presentationTime: number,
+    number: number
   }
 
   export type Playlist = {
@@ -45,6 +74,7 @@ declare module 'mpd-parser' {
       }
     }
     segments: Segment[]
+    sidx?: Sidx
   }
 
   export type Manifest = {
