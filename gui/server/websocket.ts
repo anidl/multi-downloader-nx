@@ -21,12 +21,12 @@ export default class WebSocketHandler {
   public events: ExternalEvent = new ExternalEvent();
 
   constructor(server: Server) {
-    this.wsServer = new ws.WebSocketServer({ noServer: true, path: '/ws' });
+    this.wsServer = new ws.WebSocketServer({ noServer: true, path: '/private' });
 
     this.wsServer.on('connection', (socket, req) => {
       console.info(`[WS] Connection from '${req.socket.remoteAddress}'`);
       socket.on('error', (er) => console.error(`[WS] ${er}`));
-      socket.on('message', (data) => {       
+      socket.on('message', (data) => {
         const json = JSON.parse(data.toString()) as UnknownWSMessage;
         this.events.emit(json.name, json as any, (data) => {
           this.wsServer.clients.forEach(client => {
@@ -88,7 +88,7 @@ export class PublicWebSocket {
     this.wsServer.on('connection', (socket, req) => {
       console.info(`[WS] Connection to public ws from '${req.socket.remoteAddress}'`);
       socket.on('error', (er) => console.error(`[WS] ${er}`));
-      socket.on('message', (msg) => {       
+      socket.on('message', (msg) => {
         const data = JSON.parse(msg.toString()) as UnknownWSMessage;
         switch (data.name) {
         case 'isSetup':

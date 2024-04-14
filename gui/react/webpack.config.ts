@@ -1,8 +1,18 @@
-import webpack from 'webpack';
+import type { Configuration } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
+import type { Configuration as DevServerConfig } from 'webpack-dev-server';
 
-const config: webpack.Configuration = {
+const config: Configuration & DevServerConfig = {
+  devServer: {
+    proxy: [
+      {
+        target: 'http://localhost:3000',
+        context: ['/public', '/private'],
+        ws: true
+      }
+    ],
+  },
   entry: './src/index.tsx',
   mode: 'production',
   output: {
@@ -13,11 +23,12 @@ const config: webpack.Configuration = {
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
   },
+  performance: false,
   module: {
     rules: [
       {
-        test: /\.(ts|tsx)$/, 
-        exclude: /node_modules/, 
+        test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
         use: {
           'loader': 'babel-loader',
           options: {
@@ -29,7 +40,7 @@ const config: webpack.Configuration = {
               }]
             ]
           }
-        }, 
+        },
       },
       {
         test: /\.css$/i,

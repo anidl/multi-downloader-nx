@@ -36,7 +36,8 @@
   },
   "proxy": "http://localhost:3000",
   "scripts": {
-    "build": "npx tsc && npx webpack"
+    "build": "npx tsc && npx webpack",
+    "start": "npx webpack serve"
   },
   "browserslist": {
     "production": [
