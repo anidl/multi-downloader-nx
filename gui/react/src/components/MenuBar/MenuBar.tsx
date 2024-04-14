@@ -18,9 +18,9 @@ const MenuBar: React.FC = () => {
       dispatch({
         type: 'version',
         payload: await messageChannel.version()
-      })
+      });
     })();
-  }, [messageChannel])
+  }, [messageChannel]);
 
   const transformService = (service: StoreState['service']) => {
     switch(service) {

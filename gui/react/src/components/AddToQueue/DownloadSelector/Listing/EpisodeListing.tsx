@@ -43,8 +43,8 @@ const EpisodeListing: React.FC = () => {
   };
 
   const getEpisodesForSeason = (season: string|'all') => {
-    return store.episodeListing.filter((a) => season === 'all' ? true : a.season === season)
-  }
+    return store.episodeListing.filter((a) => season === 'all' ? true : a.season === season);
+  };
 
   return <Dialog open={store.episodeListing.length > 0} onClose={close} scroll='paper' maxWidth='xl' sx={{ p: 2 }}>
     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 200px 20px' }}>
