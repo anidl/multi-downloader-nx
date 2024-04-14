@@ -133,6 +133,12 @@ function parseStyle(stylegroup: string, line: string, style: any) {
         console.warn(`vtt2ass: Unknown text-decoration value: ${st[1]}`);
       }
       break;
+    case 'right':
+      style[17] = 3;
+      break;
+    case 'left':
+      style[17] = 1;
+      break;
     case 'font-style':
       if (st[1] === 'italic') {
         style[7] = -1;
