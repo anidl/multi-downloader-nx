@@ -797,6 +797,18 @@ export default class AnimationDigitalNetwork implements ServiceClass {
             for (const sub of subtitles[subName]) {
               const [start, end, text, lineAlign, positionAlign] = 
                     [sub.startTime, sub.endTime, sub.text, sub.lineAlign, sub.positionAlign];
+              for (const subProp in sub) {
+                switch (subProp) {
+                case 'startTime':
+                case 'endTime':
+                case 'text':
+                case 'lineAlign':
+                case 'positionAlign':
+                  break;
+                default: 
+                  console.warn(`json2ass: Unknown style: ${subProp}`);
+                }
+              }
               const alignment = (this.posAlignMap[positionAlign] || 2) + (this.lineAlignMap[lineAlign] || 0);
               const xtext = text
                 .replace(/ \\N$/g, '\\N')
