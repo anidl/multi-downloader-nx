@@ -5,23 +5,26 @@ import useStore from '../../hooks/useStore';
 import { StoreState } from '../../provider/Store';
 
 const MenuBar: React.FC = () => {
-  const [ openMenu, setMenuOpen ] = React.useState<'settings'|'help'|undefined>(); 
+  const [ openMenu, setMenuOpen ] = React.useState<'settings'|'help'|undefined>();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [store, dispatch] = useStore();
 
   const messageChannel = React.useContext(messageChannelContext);
-  const getVersion = async() => {
-    dispatch({
-      type: 'version',
-      payload: await messageChannel?.version()
-    });  
-  };
 
-  getVersion();
-  
+  React.useEffect(() => {
+    (async () => {
+      if (!messageChannel || store.version !== '')
+        return;
+      dispatch({
+        type: 'version',
+        payload: await messageChannel.version()
+      })
+    })();
+  }, [messageChannel])
+
   const transformService = (service: StoreState['service']) => {
     switch(service) {
-    case 'crunchy': 
+    case 'crunchy':
       return 'Crunchyroll';
     case 'hidive':
       return 'Hidive';
@@ -86,7 +89,7 @@ const MenuBar: React.FC = () => {
         msg.openURL('https://github.com/anidl/multi-downloader-nx');
         handleClose();
       }}>
-        GitHub 
+        GitHub
       </MenuItem>
       <MenuItem onClick={() => {
         msg.openURL('https://github.com/anidl/multi-downloader-nx/issues/new?assignees=AnimeDL,AnidlSupport&labels=bug&template=bug.yml&title=BUG');
