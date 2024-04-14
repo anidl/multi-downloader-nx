@@ -460,256 +460,251 @@ export default class AnimeOnegai implements ServiceClass {
           console.error('CAN\'T FETCH VIDEO PLAYLISTS!');
           dlFailed = true;
         } else {
-          if (!options.novids) {
-            const streamPlaylistBody = (await streamPlaylistsReq.res.text()).replace(/<BaseURL>(.*?)<\/BaseURL>/g, `<BaseURL>${streamData.dash.split('/dash/')[0]}/dash/$1</BaseURL>`);
-            fs.writeFileSync('test.mpd', streamPlaylistBody);
-            //Parse MPD Playlists
-            const streamPlaylists = await parse(streamPlaylistBody, lang as langsData.LanguageItem, streamData.dash.split('/dash/')[0]+'/dash/');
+          const streamPlaylistBody = (await streamPlaylistsReq.res.text()).replace(/<BaseURL>(.*?)<\/BaseURL>/g, `<BaseURL>${streamData.dash.split('/dash/')[0]}/dash/$1</BaseURL>`);
+          fs.writeFileSync('test.mpd', streamPlaylistBody);
+          //Parse MPD Playlists
+          const streamPlaylists = await parse(streamPlaylistBody, lang as langsData.LanguageItem, streamData.dash.split('/dash/')[0]+'/dash/');
 
-            //Get name of CDNs/Servers
-            const streamServers = Object.keys(streamPlaylists);
+          //Get name of CDNs/Servers
+          const streamServers = Object.keys(streamPlaylists);
 
-            options.x = options.x > streamServers.length ? 1 : options.x;
+          options.x = options.x > streamServers.length ? 1 : options.x;
 
-            const selectedServer = streamServers[options.x - 1];
-            const selectedList = streamPlaylists[selectedServer];
+          const selectedServer = streamServers[options.x - 1];
+          const selectedList = streamPlaylists[selectedServer];
 
-            //set Video Qualities
-            const videos = selectedList.video.map(item => {
-              return {
-                ...item,
-                resolutionText: `${item.quality.width}x${item.quality.height} (${Math.round(item.bandwidth/1024)}KiB/s)`
-              };
+          //set Video Qualities
+          const videos = selectedList.video.map(item => {
+            return {
+              ...item,
+              resolutionText: `${item.quality.width}x${item.quality.height} (${Math.round(item.bandwidth/1024)}KiB/s)`
+            };
+          });
+
+          const audios = selectedList.audio.map(item => {
+            return {
+              ...item,
+              resolutionText: `${Math.round(item.bandwidth/1000)}kB/s`
+            };
+          });
+
+          videos.sort((a, b) => {
+            return a.quality.width - b.quality.width;
+          });
+
+          audios.sort((a, b) => {
+            return a.bandwidth - b.bandwidth;
+          });
+
+          let chosenVideoQuality = options.q === 0 ? videos.length : options.q;
+          if(chosenVideoQuality > videos.length) {
+            console.warn(`The requested quality of ${options.q} is greater than the maximum ${videos.length}.\n[WARN] Therefor the maximum will be capped at ${videos.length}.`);
+            chosenVideoQuality = videos.length;
+          }
+          chosenVideoQuality--;
+
+          let chosenAudioQuality = options.q === 0 ? audios.length : options.q;
+          if(chosenAudioQuality > audios.length) {
+            chosenAudioQuality = audios.length;
+          }
+          chosenAudioQuality--;
+
+          const chosenVideoSegments = videos[chosenVideoQuality];
+          const chosenAudioSegments = audios[chosenAudioQuality];
+
+          console.info(`Servers available:\n\t${streamServers.join('\n\t')}`);
+          console.info(`Available Video Qualities:\n\t${videos.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
+          console.info(`Available Audio Qualities:\n\t${audios.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
+
+          variables.push({
+            name: 'height',
+            type: 'number',
+            replaceWith: chosenVideoSegments.quality.height
+          }, {
+            name: 'width',
+            type: 'number',
+            replaceWith: chosenVideoSegments.quality.width
+          });
+
+          console.info(`Selected quality: \n\tVideo: ${chosenVideoSegments.resolutionText}\n\tAudio: ${chosenAudioSegments.resolutionText}\n\tServer: ${selectedServer}`);
+          //console.info('Stream URL:', chosenVideoSegments.segments[0].uri);
+          // TODO check filename
+          fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+          const outFile = parseFileName(options.fileName + '.' + lang.name, variables, options.numbers, options.override).join(path.sep);
+          const tempFile = parseFileName(`temp-${media.videoId}`, variables, options.numbers, options.override).join(path.sep);
+          const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
+
+          let [audioDownloaded, videoDownloaded] = [false, false];
+
+          // When best selected video quality is already downloaded
+          if(dlVideoOnce && options.dlVideoOnce) {
+            console.info('Already downloaded video, skipping video download...');
+          } else if (options.novids) {
+            console.info('Skipping video download...');
+          } else {
+            //Download Video
+            const totalParts = chosenVideoSegments.segments.length;
+            const mathParts  = Math.ceil(totalParts / options.partsize);
+            const mathMsg    = `(${mathParts}*${options.partsize})`;
+            console.info('Total parts in video stream:', totalParts, mathMsg);
+            tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+            const split = outFile.split(path.sep).slice(0, -1);
+            split.forEach((val, ind, arr) => {
+              const isAbsolut = path.isAbsolute(outFile as string);
+              if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+                fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
             });
-
-            const audios = selectedList.audio.map(item => {
-              return {
-                ...item,
-                resolutionText: `${Math.round(item.bandwidth/1000)}kB/s`
-              };
-            });
-
-            videos.sort((a, b) => {
-              return a.quality.width - b.quality.width;
-            });
-
-            audios.sort((a, b) => {
-              return a.bandwidth - b.bandwidth;
-            });
-
-            let chosenVideoQuality = options.q === 0 ? videos.length : options.q;
-            if(chosenVideoQuality > videos.length) {
-              console.warn(`The requested quality of ${options.q} is greater than the maximum ${videos.length}.\n[WARN] Therefor the maximum will be capped at ${videos.length}.`);
-              chosenVideoQuality = videos.length;
+            const videoJson: M3U8Json = {
+              segments: chosenVideoSegments.segments
+            };
+            const videoDownload = await new streamdl({
+              output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.mp4` : `${tsFile}.video.mp4`,
+              timeout: options.timeout,
+              m3u8json: videoJson,
+              // baseurl: chunkPlaylist.baseUrl,
+              threads: options.partsize,
+              fsRetryTime: options.fsRetryTime * 1000,
+              override: options.force,
+              callback: options.callbackMaker ? options.callbackMaker({
+                fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                image: medias.image,
+                parent: {
+                  title: medias.seasonTitle
+                },
+                title: medias.episodeTitle,
+                language: lang
+              }) : undefined
+            }).download();
+            if(!videoDownload.ok){
+              console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
+              dlFailed = true;
             }
-            chosenVideoQuality--;
+            dlVideoOnce = true;
+            videoDownloaded = true;
+          }
 
-            let chosenAudioQuality = options.q === 0 ? audios.length : options.q;
-            if(chosenAudioQuality > audios.length) {
-              chosenAudioQuality = audios.length;
-            }
-            chosenAudioQuality--;
-
-            const chosenVideoSegments = videos[chosenVideoQuality];
-            const chosenAudioSegments = audios[chosenAudioQuality];
-
-            console.info(`Servers available:\n\t${streamServers.join('\n\t')}`);
-            console.info(`Available Video Qualities:\n\t${videos.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
-            console.info(`Available Audio Qualities:\n\t${audios.map((a, ind) => `[${ind+1}] ${a.resolutionText}`).join('\n\t')}`);
-
-            variables.push({
-              name: 'height',
-              type: 'number',
-              replaceWith: chosenVideoSegments.quality.height
-            }, {
-              name: 'width',
-              type: 'number',
-              replaceWith: chosenVideoSegments.quality.width
+          if (chosenAudioSegments && !options.noaudio) {
+            //Download Audio (if available)
+            const totalParts = chosenAudioSegments.segments.length;
+            const mathParts  = Math.ceil(totalParts / options.partsize);
+            const mathMsg    = `(${mathParts}*${options.partsize})`;
+            console.info('Total parts in audio stream:', totalParts, mathMsg);
+            tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+            const split = outFile.split(path.sep).slice(0, -1);
+            split.forEach((val, ind, arr) => {
+              const isAbsolut = path.isAbsolute(outFile as string);
+              if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+                fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
             });
-
-            console.info(`Selected quality: \n\tVideo: ${chosenVideoSegments.resolutionText}\n\tAudio: ${chosenAudioSegments.resolutionText}\n\tServer: ${selectedServer}`);
-            //console.info('Stream URL:', chosenVideoSegments.segments[0].uri);
-            // TODO check filename
-            fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
-            const outFile = parseFileName(options.fileName + '.' + lang.name, variables, options.numbers, options.override).join(path.sep);
-            const tempFile = parseFileName(`temp-${media.videoId}`, variables, options.numbers, options.override).join(path.sep);
-            const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
-
-            let [audioDownloaded, videoDownloaded] = [false, false];
-
-            // When best selected video quality is already downloaded
-            if(dlVideoOnce && options.dlVideoOnce) {
-              console.info('Already downloaded video, skipping video download...');
-            } else if (options.novids) {
-              console.info('Skipping video download...');
-            } else {
-              //Download Video
-              const totalParts = chosenVideoSegments.segments.length;
-              const mathParts  = Math.ceil(totalParts / options.partsize);
-              const mathMsg    = `(${mathParts}*${options.partsize})`;
-              console.info('Total parts in video stream:', totalParts, mathMsg);
-              tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-              const split = outFile.split(path.sep).slice(0, -1);
-              split.forEach((val, ind, arr) => {
-                const isAbsolut = path.isAbsolute(outFile as string);
-                if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-                  fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-              });
-              const videoJson: M3U8Json = {
-                segments: chosenVideoSegments.segments
-              };
-              const videoDownload = await new streamdl({
-                output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.mp4` : `${tsFile}.video.mp4`,
-                timeout: options.timeout,
-                m3u8json: videoJson,
-                // baseurl: chunkPlaylist.baseUrl,
-                threads: options.partsize,
-                fsRetryTime: options.fsRetryTime * 1000,
-                override: options.force,
-                callback: options.callbackMaker ? options.callbackMaker({
-                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                  image: medias.image,
-                  parent: {
-                    title: medias.seasonTitle
-                  },
-                  title: medias.episodeTitle,
-                  language: lang
-                }) : undefined
-              }).download();
-              if(!videoDownload.ok){
-                console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
-                dlFailed = true;
-              }
-              dlVideoOnce = true;
-              videoDownloaded = true;
+            const audioJson: M3U8Json = {
+              segments: chosenAudioSegments.segments
+            };
+            const audioDownload = await new streamdl({
+              output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.mp4` : `${tsFile}.audio.mp4`,
+              timeout: options.timeout,
+              m3u8json: audioJson,
+              // baseurl: chunkPlaylist.baseUrl,
+              threads: options.partsize,
+              fsRetryTime: options.fsRetryTime * 1000,
+              override: options.force,
+              callback: options.callbackMaker ? options.callbackMaker({
+                fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                image: medias.image,
+                parent: {
+                  title: medias.seasonTitle
+                },
+                title: medias.episodeTitle,
+                language: lang
+              }) : undefined
+            }).download();
+            if(!audioDownload.ok){
+              console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
+              dlFailed = true;
             }
+            audioDownloaded = true;
+          } else if (options.noaudio) {
+            console.info('Skipping audio download...');
+          }
 
-            if (chosenAudioSegments && !options.noaudio) {
-              //Download Audio (if available)
-              const totalParts = chosenAudioSegments.segments.length;
-              const mathParts  = Math.ceil(totalParts / options.partsize);
-              const mathMsg    = `(${mathParts}*${options.partsize})`;
-              console.info('Total parts in audio stream:', totalParts, mathMsg);
-              tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-              const split = outFile.split(path.sep).slice(0, -1);
-              split.forEach((val, ind, arr) => {
-                const isAbsolut = path.isAbsolute(outFile as string);
-                if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-                  fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-              });
-              const audioJson: M3U8Json = {
-                segments: chosenAudioSegments.segments
-              };
-              const audioDownload = await new streamdl({
-                output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.mp4` : `${tsFile}.audio.mp4`,
-                timeout: options.timeout,
-                m3u8json: audioJson,
-                // baseurl: chunkPlaylist.baseUrl,
-                threads: options.partsize,
-                fsRetryTime: options.fsRetryTime * 1000,
-                override: options.force,
-                callback: options.callbackMaker ? options.callbackMaker({
-                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                  image: medias.image,
-                  parent: {
-                    title: medias.seasonTitle
-                  },
-                  title: medias.episodeTitle,
-                  language: lang
-                }) : undefined
-              }).download();
-              if(!audioDownload.ok){
-                console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
-                dlFailed = true;
-              }
-              audioDownloaded = true;
-            } else if (options.noaudio) {
-              console.info('Skipping audio download...');
+          //Handle Decryption if needed
+          if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded)) {
+            console.info('Decryption Needed, attempting to decrypt');
+            const encryptionKeys = await getKeys(chosenVideoSegments.pssh, streamData.widevine_proxy, {});
+            if (encryptionKeys.length == 0) {
+              console.error('Failed to get encryption keys');
+              return undefined;
             }
-
-            //Handle Decryption if needed
-            if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded)) {
-              console.info('Decryption Needed, attempting to decrypt');
-              const encryptionKeys = await getKeys(chosenVideoSegments.pssh, streamData.widevine_proxy, {});
-              if (encryptionKeys.length == 0) {
-                console.error('Failed to get encryption keys');
-                return undefined;
-              }
-              /*const keys = {} as Record<string, string>;
+            /*const keys = {} as Record<string, string>;
               encryptionKeys.forEach(function(key) {
                 keys[key.kid] = key.key;
               });*/
 
-              if (this.cfg.bin.mp4decrypt) {
-                const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
-                const commandVideo = commandBase+`"${tempTsFile}.video.enc.mp4" "${tempTsFile}.video.mp4"`;
-                const commandAudio = commandBase+`"${tempTsFile}.audio.enc.mp4" "${tempTsFile}.audio.mp4"`;
+            if (this.cfg.bin.mp4decrypt) {
+              const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+              const commandVideo = commandBase+`"${tempTsFile}.video.enc.mp4" "${tempTsFile}.video.mp4"`;
+              const commandAudio = commandBase+`"${tempTsFile}.audio.enc.mp4" "${tempTsFile}.audio.mp4"`;
 
-                if (videoDownloaded) {
-                  console.info('Started decrypting video');
-                  const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
-                  if (!decryptVideo.isOk) {
-                    console.error(decryptVideo.err);
-                    console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
-                    fs.renameSync(`${tempTsFile}.video.enc.mp4`, `${tsFile}.video.enc.mp4`);
-                    return undefined;
-                  } else {
-                    console.info('Decryption done for video');
-                    if (!options.nocleanup) {
-                      fs.removeSync(`${tempTsFile}.video.enc.mp4`);
-                    }
-                    fs.renameSync(`${tempTsFile}.video.mp4`, `${tsFile}.video.mp4`);
-                    files.push({
-                      type: 'Video',
-                      path: `${tsFile}.video.mp4`,
-                      lang: lang
-                    });
+              if (videoDownloaded) {
+                console.info('Started decrypting video');
+                const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+                if (!decryptVideo.isOk) {
+                  console.error(decryptVideo.err);
+                  console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
+                  fs.renameSync(`${tempTsFile}.video.enc.mp4`, `${tsFile}.video.enc.mp4`);
+                  return undefined;
+                } else {
+                  console.info('Decryption done for video');
+                  if (!options.nocleanup) {
+                    fs.removeSync(`${tempTsFile}.video.enc.mp4`);
                   }
+                  fs.renameSync(`${tempTsFile}.video.mp4`, `${tsFile}.video.mp4`);
+                  files.push({
+                    type: 'Video',
+                    path: `${tsFile}.video.mp4`,
+                    lang: lang
+                  });
                 }
+              }
 
-                if (audioDownloaded) {
-                  console.info('Started decrypting audio');
-                  const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
-                  if (!decryptAudio.isOk) {
-                    console.error(decryptAudio.err);
-                    console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
-                    fs.renameSync(`${tempTsFile}.audio.enc.mp4`, `${tsFile}.audio.enc.mp4`);
-                    return undefined;
-                  } else {
-                    if (!options.nocleanup) {
-                      fs.removeSync(`${tempTsFile}.audio.enc.mp4`);
-                    }
-                    fs.renameSync(`${tempTsFile}.audio.mp4`, `${tsFile}.audio.mp4`);
-                    files.push({
-                      type: 'Audio',
-                      path: `${tsFile}.audio.mp4`,
-                      lang: lang
-                    });
-                    console.info('Decryption done for audio');
+              if (audioDownloaded) {
+                console.info('Started decrypting audio');
+                const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                if (!decryptAudio.isOk) {
+                  console.error(decryptAudio.err);
+                  console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
+                  fs.renameSync(`${tempTsFile}.audio.enc.mp4`, `${tsFile}.audio.enc.mp4`);
+                  return undefined;
+                } else {
+                  if (!options.nocleanup) {
+                    fs.removeSync(`${tempTsFile}.audio.enc.mp4`);
                   }
+                  fs.renameSync(`${tempTsFile}.audio.mp4`, `${tsFile}.audio.mp4`);
+                  files.push({
+                    type: 'Audio',
+                    path: `${tsFile}.audio.mp4`,
+                    lang: lang
+                  });
+                  console.info('Decryption done for audio');
                 }
-              } else {
-                console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
               }
             } else {
-              if (videoDownloaded) {
-                files.push({
-                  type: 'Video',
-                  path: `${tsFile}.video.mp4`,
-                  lang: lang
-                });
-              }
-              if (audioDownloaded) {
-                files.push({
-                  type: 'Audio',
-                  path: `${tsFile}.audio.mp4`,
-                  lang: lang
-                });
-              }
+              console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
             }
           } else {
-            fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
-            console.info('Downloading skipped!');
+            if (videoDownloaded) {
+              files.push({
+                type: 'Video',
+                path: `${tsFile}.video.mp4`,
+                lang: lang
+              });
+            }
+            if (audioDownloaded) {
+              files.push({
+                type: 'Audio',
+                path: `${tsFile}.audio.mp4`,
+                lang: lang
+              });
+            }
           }
         }
       } else if (options.novids && options.noaudio) {
