@@ -208,7 +208,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Will fetch the chapters and add them into the final video',
     type: 'boolean',
     group: 'dl',
-    service: ['crunchy'],
+    service: ['crunchy', 'adn'],
     docDescribe: 'Will fetch the chapters and add them into the final video.' 
      + '\nCurrently only works with mkvmerge.',
     usage: '',

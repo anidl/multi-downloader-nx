@@ -42,10 +42,10 @@ export interface Video {
   duration:       number;
   url:            string;
   image:          string;
-  tcEpisodeStart: string;
-  tcEpisodeEnd:   string;
-  tcIntroStart:   string;
-  tcIntroEnd:     string;
-  tcEndingStart:  string;
-  tcEndingEnd:    string;
+  tcEpisodeStart?:string;
+  tcEpisodeEnd?:  string;
+  tcIntroStart?:  string;
+  tcIntroEnd?:    string;
+  tcEndingStart?: string;
+  tcEndingEnd?:   string;
 }

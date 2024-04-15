@@ -374,6 +374,12 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           path: a.path,
         };
       }),
+      chapters: data.filter(a => a.type === 'Chapters').map((a) : MergerInput => {
+        return {
+          path: a.path,
+          lang: a.lang
+        };
+      }),
       videoTitle: options.videoTitle,
       options: {
         ffmpeg: options.ffmpegOptions,
@@ -719,6 +725,64 @@ export default class AnimationDigitalNetwork implements ServiceClass {
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
       }
       await this.sleep(options.waittime);
+    }
+
+    const compiledChapters: string[] = [];
+    if (options.chapters) {
+      if (streams.video.tcIntroStart) {
+        if (streams.video.tcIntroStart != '00:00:00') {
+          compiledChapters.push(
+            `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+            `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+          );
+        }
+        compiledChapters.push(
+          `CHAPTER${(compiledChapters.length/2)+1}=${streams.video.tcIntroStart+'.00'}`,
+          `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+        );
+        compiledChapters.push(
+          `CHAPTER${(compiledChapters.length/2)+1}=${streams.video.tcIntroEnd+'.00'}`,
+          `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+        );
+      } else {
+        compiledChapters.push(
+          `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
+          `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+        );
+      }
+
+      if (streams.video.tcEndingStart) {
+        compiledChapters.push(
+          `CHAPTER${(compiledChapters.length/2)+1}=${streams.video.tcEndingStart+'.00'}`,
+          `CHAPTER${(compiledChapters.length/2)+1}NAME=Ending Start`
+        );
+        compiledChapters.push(
+          `CHAPTER${(compiledChapters.length/2)+1}=${streams.video.tcEndingEnd+'.00'}`,
+          `CHAPTER${(compiledChapters.length/2)+1}NAME=Ending End`
+        );
+      }
+
+      if (compiledChapters.length > 0) {
+        try {
+          fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+          const outFile = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+          const tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+          const split = outFile.split(path.sep).slice(0, -1);
+          split.forEach((val, ind, arr) => {
+            const isAbsolut = path.isAbsolute(outFile as string);
+            if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
+              fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
+          });
+          fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
+          files.push({
+            path: `${tsFile}.txt`,
+            lang: langsData.languages.find(a=>a.code=='jpn'),
+            type: 'Chapters'
+          });
+        } catch {
+          console.error('Failed to write chapter file');
+        }
+      }
     }
 
     if(options.dlsubs.indexOf('all') > -1){
