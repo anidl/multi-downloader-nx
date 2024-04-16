@@ -84,6 +84,7 @@
   "scripts": {
     "prestart": "pnpm run tsc test",
     "start": "pnpm prestart && cd lib && node gui.js",
+    "gui": "cd ./gui/react/ && pnpm start",
     "docs": "ts-node modules/build-docs.ts",
     "tsc": "ts-node tsc.ts",
     "proto:compile": "protoc --plugin=protoc-gen-ts_proto=.\\node_modules\\.bin\\protoc-gen-ts_proto.cmd --ts_proto_opt=\"esModuleInterop=true\" --ts_proto_opt=\"forceLong=long\" --ts_proto_opt=\"env=node\" --ts_proto_out=. modules/*.proto",
