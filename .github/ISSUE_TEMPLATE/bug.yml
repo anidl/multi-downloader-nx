@@ -49,6 +49,8 @@ body:
       options:
         - Crunchyroll
         - Hidive
+        - AnimationDigitalNetwork
+        - AnimeOnegai
         - All
         - Irrelevant
     validations:
