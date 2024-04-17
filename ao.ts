@@ -516,7 +516,7 @@ export default class AnimeOnegai implements ServiceClass {
           const audios = selectedList.audio.map(item => {
             return {
               ...item,
-              resolutionText: `${Math.round(item.bandwidth/1000)}kB/s`
+              resolutionText: `${Math.round(item.bandwidth/1024)}kB/s`
             };
           });
 
