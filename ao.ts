@@ -494,7 +494,6 @@ export default class AnimeOnegai implements ServiceClass {
           dlFailed = true;
         } else {
           const streamPlaylistBody = (await streamPlaylistsReq.res.text()).replace(/<BaseURL>(.*?)<\/BaseURL>/g, `<BaseURL>${streamData.dash.split('/dash/')[0]}/dash/$1</BaseURL>`);
-          fs.writeFileSync('test.mpd', streamPlaylistBody);
           //Parse MPD Playlists
           const streamPlaylists = await parse(streamPlaylistBody, lang as langsData.LanguageItem, streamData.dash.split('/dash/')[0]+'/dash/');
 
