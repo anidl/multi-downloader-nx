@@ -187,11 +187,11 @@ export default class AnimeOnegai implements ServiceClass {
       return { isOk: false };
     }
     console.info(`[S.${series.data.ID}] ${series.data.title} (${series.seasons.length} Seasons)`);
-    if (series.seasons.length === 0) {
+    if (series.seasons.length === 0 && series.data.asset_type !== 1) {
       console.info('  No Seasons found!');
       return { isOk: false };
     }
-    const episodes: { [key: number]: (Episode & { lang?: string })[] } = {};
+    const episodes: { [key: string]: (Episode & { lang?: string })[] } = {};
     for (const season of series.seasons) {
       let lang: string | undefined = undefined;
       if (this.jpnStrings.includes(season.name)) lang = 'ja';
@@ -204,6 +204,36 @@ export default class AnimeOnegai implements ServiceClass {
         }
         /*if (!episodes[episode.number].find(a=>a.lang == lang))*/ episodes[episode.number].push({...episode, lang});
       }
+    }
+    //Item is movie, lets define it manually
+    if (series.data.asset_type === 1 && series.seasons.length === 0) {
+      let lang: string | undefined = undefined;
+      if (this.jpnStrings.some(str => series.data.title.includes(str))) lang = 'ja';
+      else if (this.porStrings.some(str => series.data.title.includes(str))) lang = 'pt';
+      else if (this.spaStrings.some(str => series.data.title.includes(str))) lang = 'es';
+      else {lang = 'unknown';console.error('Language could not be parsed from movie title, please report this!');}
+      episodes[1] = [{
+        'video_entry': series.data.video_entry,
+        'number': 1,
+        'season_id': 1,
+        'name': series.data.title,
+        'ID': series.data.ID,
+        'CreatedAt': series.data.CreatedAt,
+        'DeletedAt': series.data.DeletedAt,
+        'UpdatedAt': series.data.UpdatedAt,
+        'active': series.data.active,
+        'description': series.data.description,
+        'age_restriction': series.data.age_restriction,
+        'asset_id': series.data.ID,
+        'ending': null,
+        'entry': series.data.entry,
+        'stream_url': series.data.stream_url,
+        'skip_intro': null,
+        'thumbnail': series.data.bg,
+        'open_free': false,
+        lang
+      }]; // as unknown as (Episode & { lang?: string })[];
+      // The above needs to be uncommented if the episode number should be M1 instead of 1
     }
     //Enable to output episodes seperate from selection
     if (outputEpisode) {

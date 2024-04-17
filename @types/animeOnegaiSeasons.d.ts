@@ -32,5 +32,5 @@ export interface Episode {
   ending:          null;
   open_free:       boolean;
   asset_id:        number;
-  age_restriction: null;
+  age_restriction: boolean;
 }
