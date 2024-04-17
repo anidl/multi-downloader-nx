@@ -1,5 +1,6 @@
 import { parse as mpdParse } from 'mpd-parser';
 import { LanguageItem, findLang, languages } from './module.langsData';
+import { console } from './log';
 
 type Segment = {
   uri: string;
@@ -65,6 +66,7 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
         const item = await fetch(playlist.sidx.uri, {
           'method': 'head'
         });
+        if (!item.ok) console.warn(`Unable to fetch byteLength for audio stream ${Math.round(playlist.attributes.BANDWIDTH/1024)}KiB/s`);
         const byteLength = parseInt(item.headers.get('content-length') as string);
         let currentByte = playlist.sidx.map.byterange.length;
         while (currentByte <= byteLength) {
@@ -134,6 +136,7 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
       const item = await fetch(playlist.sidx.uri, {
         'method': 'head'
       });
+      if (!item.ok) console.warn(`Unable to fetch byteLength for video stream ${playlist.attributes.RESOLUTION?.height}x${playlist.attributes.RESOLUTION?.width}@${Math.round(playlist.attributes.BANDWIDTH/1024)}KiB/s`);
       const byteLength = parseInt(item.headers.get('content-length') as string);
       let currentByte = playlist.sidx.map.byterange.length;
       while (currentByte <= byteLength) {
