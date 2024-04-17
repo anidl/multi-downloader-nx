@@ -78,7 +78,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
   public async cli() {
     console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
     const argv = yargs.appArgv(this.cfg.cli);
-    if (argv.locale !== 'en-US')
+    if (['fr', 'de'].includes(argv.locale))
       this.locale = argv.locale;
     if (argv.debug)
       this.debug = true;

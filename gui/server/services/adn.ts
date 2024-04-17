@@ -19,7 +19,8 @@ class ADNHandler extends Base implements MessageHandler {
 
   public getDefaults() {
     const _default = yargs.appArgv(this.adn.cfg.cli, true);
-    this.adn.locale = _default.locale;
+    if (['fr', 'de'].includes(_default.locale))
+      this.adn.locale = _default.locale;
   }
 
   public async auth(data: AuthData) {
