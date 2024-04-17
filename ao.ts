@@ -589,30 +589,36 @@ export default class AnimeOnegai implements ServiceClass {
             const videoJson: M3U8Json = {
               segments: chosenVideoSegments.segments
             };
-            const videoDownload = await new streamdl({
-              output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.mp4` : `${tsFile}.video.mp4`,
-              timeout: options.timeout,
-              m3u8json: videoJson,
-              // baseurl: chunkPlaylist.baseUrl,
-              threads: options.partsize,
-              fsRetryTime: options.fsRetryTime * 1000,
-              override: options.force,
-              callback: options.callbackMaker ? options.callbackMaker({
-                fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                image: medias.image,
-                parent: {
-                  title: medias.seasonTitle
-                },
-                title: medias.episodeTitle,
-                language: lang
-              }) : undefined
-            }).download();
-            if(!videoDownload.ok){
-              console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
+            try {
+              const videoDownload = await new streamdl({
+                output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.mp4` : `${tsFile}.video.mp4`,
+                timeout: options.timeout,
+                m3u8json: videoJson,
+                // baseurl: chunkPlaylist.baseUrl,
+                threads: options.partsize,
+                fsRetryTime: options.fsRetryTime * 1000,
+                override: options.force,
+                callback: options.callbackMaker ? options.callbackMaker({
+                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                  image: medias.image,
+                  parent: {
+                    title: medias.seasonTitle
+                  },
+                  title: medias.episodeTitle,
+                  language: lang
+                }) : undefined
+              }).download();
+              if(!videoDownload.ok){
+                console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
+                dlFailed = true;
+              } else {
+                dlVideoOnce = true;
+                videoDownloaded = true;
+              }
+            } catch (e) {
+              console.error(e);
               dlFailed = true;
             }
-            dlVideoOnce = true;
-            videoDownloaded = true;
           }
 
           if (chosenAudioSegments && !options.noaudio) {
@@ -631,29 +637,35 @@ export default class AnimeOnegai implements ServiceClass {
             const audioJson: M3U8Json = {
               segments: chosenAudioSegments.segments
             };
-            const audioDownload = await new streamdl({
-              output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.mp4` : `${tsFile}.audio.mp4`,
-              timeout: options.timeout,
-              m3u8json: audioJson,
-              // baseurl: chunkPlaylist.baseUrl,
-              threads: options.partsize,
-              fsRetryTime: options.fsRetryTime * 1000,
-              override: options.force,
-              callback: options.callbackMaker ? options.callbackMaker({
-                fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                image: medias.image,
-                parent: {
-                  title: medias.seasonTitle
-                },
-                title: medias.episodeTitle,
-                language: lang
-              }) : undefined
-            }).download();
-            if(!audioDownload.ok){
-              console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
+            try {
+              const audioDownload = await new streamdl({
+                output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.mp4` : `${tsFile}.audio.mp4`,
+                timeout: options.timeout,
+                m3u8json: audioJson,
+                // baseurl: chunkPlaylist.baseUrl,
+                threads: options.partsize,
+                fsRetryTime: options.fsRetryTime * 1000,
+                override: options.force,
+                callback: options.callbackMaker ? options.callbackMaker({
+                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
+                  image: medias.image,
+                  parent: {
+                    title: medias.seasonTitle
+                  },
+                  title: medias.episodeTitle,
+                  language: lang
+                }) : undefined
+              }).download();
+              if(!audioDownload.ok){
+                console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
+                dlFailed = true;
+              } else {
+                audioDownloaded = true;
+              }
+            } catch (e) {
+              console.error(e);
               dlFailed = true;
             }
-            audioDownloaded = true;
           } else if (options.noaudio) {
             console.info('Skipping audio download...');
           }
