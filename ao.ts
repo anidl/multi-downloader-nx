@@ -61,11 +61,13 @@ export default class AnimeOnegai implements ServiceClass {
     'Japonés con Subtítulos en Español', 
     'Japonés con Subtítulos en Portugués',
     'Japonês com legendas em espanhol',
-    'Japonês com legendas em português'
+    'Japonês com legendas em português',
+    'Japonés'
   ];
   public spaStrings: string[] = [
     'Doblaje en Español',
-    'Dublagem em espanhol'
+    'Dublagem em espanhol',
+    'Español',
   ];
   public porStrings: string[] = [
     'Doblaje en Portugués',
@@ -193,8 +195,9 @@ export default class AnimeOnegai implements ServiceClass {
     for (const season of series.seasons) {
       let lang: string | undefined = undefined;
       if (this.jpnStrings.includes(season.name)) lang = 'ja';
-      if (this.porStrings.includes(season.name)) lang = 'pt';
-      if (this.spaStrings.includes(season.name)) lang = 'es';
+      else if (this.porStrings.includes(season.name)) lang = 'pt';
+      else if (this.spaStrings.includes(season.name)) lang = 'es';
+      else {lang = 'unknown';console.error(`Language ${season.name} not known, please report this!`);}
       for (const episode of season.list) {
         if (!episodes[episode.number]) {
           episodes[episode.number] = [];
