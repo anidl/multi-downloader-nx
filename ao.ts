@@ -194,10 +194,10 @@ export default class AnimeOnegai implements ServiceClass {
     const episodes: { [key: string]: (Episode & { lang?: string })[] } = {};
     for (const season of series.seasons) {
       let lang: string | undefined = undefined;
-      if (this.jpnStrings.includes(season.name)) lang = 'ja';
-      else if (this.porStrings.includes(season.name)) lang = 'pt';
-      else if (this.spaStrings.includes(season.name)) lang = 'es';
-      else {lang = 'unknown';console.error(`Language ${season.name} not known, please report this!`);}
+      if (this.jpnStrings.includes(season.name.trim())) lang = 'ja';
+      else if (this.porStrings.includes(season.name.trim())) lang = 'pt';
+      else if (this.spaStrings.includes(season.name.trim())) lang = 'es';
+      else {lang = 'unknown';console.error(`Language (${season.name.trim()}) not known, please report this!`);}
       for (const episode of season.list) {
         if (!episodes[episode.number]) {
           episodes[episode.number] = [];
