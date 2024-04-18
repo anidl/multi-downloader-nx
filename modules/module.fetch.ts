@@ -30,7 +30,7 @@ export class Req {
     this.service = type;
   }
 
-  async getData(durl: string, params?: Params) {
+  async getData(durl: string, params?: RequestInit) {
     params = params || {};
     // options
     const options: RequestInit = {
@@ -62,8 +62,8 @@ export class Req {
     if(params.body){
       options.body = params.body;
     }
-    if(typeof params.followRedirect == 'string'){
-      options.redirect = params.followRedirect;
+    if(typeof params.redirect == 'string'){
+      options.redirect = params.redirect;
     }
     // debug
     if(this.debug){
