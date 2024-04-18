@@ -421,6 +421,12 @@ const extFn = {
           if ((options.url.hostname as string).match('hidive')) {
             options.headers['referrer'] = 'https://www.hidive.com/';
             options.headers['origin'] = 'https://www.hidive.com';
+          } else if ((options.url.hostname as string).includes('animecdn')) {
+            options.headers = {
+              origin: 'https://www.animeonegai.com',
+              referer: 'https://www.animeonegai.com/',
+              range: options.headers['range']
+            };
           }
           // console.log(' - Req:', options.url.pathname);
         }

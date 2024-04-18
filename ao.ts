@@ -73,6 +73,12 @@ export default class AnimeOnegai implements ServiceClass {
     'Doblaje en Portugués',
     'Dublagem em português'
   ];
+  private defaultOptions: RequestInit = {
+    'headers': {
+      'origin': 'https://www.animeonegai.com',
+      'referer': 'https://www.animeonegai.com/',
+    }
+  };
 
   constructor(private debug = false) {
     this.cfg = yamlCfg.loadCfg();
@@ -124,7 +130,7 @@ export default class AnimeOnegai implements ServiceClass {
   }
 
   public async doSearch(data: SearchData): Promise<SearchResponse> {
-    const searchReq = await this.req.getData(`https://api.animeonegai.com/v1/search/algolia/${encodeURIComponent(data.search)}?lang=${this.locale}`);
+    const searchReq = await this.req.getData(`https://api.animeonegai.com/v1/search/algolia/${encodeURIComponent(data.search)}?lang=${this.locale}`, this.defaultOptions);
     if (!searchReq.ok || !searchReq.res) {
       console.error('Search FAILED!');
       return { isOk: false, reason: new Error('Search failed. No more information provided') };
@@ -163,14 +169,14 @@ export default class AnimeOnegai implements ServiceClass {
   }
 
   public async getShow(id: number) {
-    const getSeriesData = await this.req.getData(`https://api.animeonegai.com/v1/asset/${id}?lang=${this.locale}`);
+    const getSeriesData = await this.req.getData(`https://api.animeonegai.com/v1/asset/${id}?lang=${this.locale}`, this.defaultOptions);
     if (!getSeriesData.ok || !getSeriesData.res) { 
       console.error('Failed to get Show Data');
       return { isOk: false };
     }
     const seriesData = await getSeriesData.res.json() as AnimeOnegaiSeries;
 
-    const getSeasonData = await this.req.getData(`https://api.animeonegai.com/v1/asset/content/${id}?lang=${this.locale}`);
+    const getSeasonData = await this.req.getData(`https://api.animeonegai.com/v1/asset/content/${id}?lang=${this.locale}`, this.defaultOptions);
     if (!getSeasonData.ok || !getSeasonData.res) {
       console.error('Failed to get Show Data');
       return { isOk: false };
@@ -777,7 +783,7 @@ export default class AnimeOnegai implements ServiceClass {
             sxData.path = path.join(this.cfg.dir.content, sxData.file);
             sxData.language = subLang;
             if((options.dlsubs.includes('all') || options.dlsubs.includes(subLang.locale)) && sub.url.includes('.ass')) {
-              const getSubtitle = await this.req.getData(sub.url);
+              const getSubtitle = await this.req.getData(sub.url, AuthHeaders);
               if (getSubtitle.ok && getSubtitle.res) {
                 console.info(`Subtitle Downloaded: ${sub.url}`);
                 const sBody = await getSubtitle.res.text();
