@@ -232,7 +232,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.beta_authHeaderMob,
+      headers: api.crunchyAuthHeaderSwitch,
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -255,12 +255,12 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.beta_authHeaderMob,
+      headers: api.crunchyAuthHeaderSwitch,
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
     if(!authReq.ok || !authReq.res){
-      console.error('Authentication failed!');
+      console.error('Anonymous Authentication failed!');
       return;
     }
     this.token = await authReq.res.json();
@@ -305,12 +305,15 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.beta_authHeaderMob,
+      headers: api.crunchyAuthHeaderSwitch,
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
     if(!authReq.ok || !authReq.res){
       console.error('Token Authentication failed!');
+      if (authReq.res?.status == 400) {
+        console.warn('Token is likely wrong (Or invalid for given API), please login again!');
+      }
       return;
     }
     this.token = await authReq.res.json();
@@ -339,12 +342,15 @@ export default class Crunchy implements ServiceClass {
       }).toString();
       const authReqOpts: reqModule.Params = {
         method: 'POST',
-        headers: api.beta_authHeaderMob,
+        headers: api.crunchyAuthHeaderSwitch,
         body: authData
       };
       const authReq = await this.req.getData(api.beta_auth, authReqOpts);
       if(!authReq.ok || !authReq.res){
-        console.error('Authentication failed!');
+        console.error('Token Refresh Failed!');
+        if (authReq.res?.status == 400) {
+          console.warn('Token is likely wrong, please login again!');
+        }
         return;
       }
       this.token = await authReq.res.json();

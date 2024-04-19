@@ -24,16 +24,27 @@ export type APIType = {
   collections: string
   // beta api
   beta_auth: string
-  beta_authBasic: string
-  beta_authBasicMob: string
+  authBasic: string
+  authBasicMob: string
+  authBasicSwitch: string,
   beta_profile: string
   beta_cmsToken: string
   search: string
   cms: string
   beta_browse: string
   beta_cms: string,
-  beta_authHeader: Record<string, string>,
-  beta_authHeaderMob: Record<string, string>,
+  /**
+   * Web Header
+   */
+  crunchyAuthHeader: Record<string, string>,
+  /**
+   * Mobile Header
+   */
+  cruncyhAuthHeaderMob: Record<string, string>,
+  /**
+   * Switch Header
+   */
+  crunchyAuthHeaderSwitch: Record<string, string>,
   hd_apikey: string,
   hd_devName: string,
   hd_appId: string,
@@ -62,16 +73,18 @@ const api: APIType = {
   collections:       `${domain.api}/list_collections.0.json`,
   // beta api
   beta_auth:         `${domain.api_beta}/auth/v1/token`,
-  beta_authBasic:    'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
-  beta_authBasicMob: 'Basic bm12anNoZmtueW14eGtnN2ZiaDk6WllJVnJCV1VQYmNYRHRiRDIyVlNMYTZiNFdRb3Mzelg=',
+  authBasic:         'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
+  authBasicMob:      'Basic bm12anNoZmtueW14eGtnN2ZiaDk6WllJVnJCV1VQYmNYRHRiRDIyVlNMYTZiNFdRb3Mzelg=',
+  authBasicSwitch:   'Basic dC1rZGdwMmg4YzNqdWI4Zm4wZnE6eWZMRGZNZnJZdktYaDRKWFMxTEVJMmNDcXUxdjVXYW4=',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
   search:            `${domain.api_beta}/content/v2/discover/search`,
   cms:               `${domain.api_beta}/content/v2/cms`,
   beta_browse:       `${domain.api_beta}/content/v1/browse`,
   beta_cms:          `${domain.api_beta}/cms/v2`,
-  beta_authHeader: {},
-  beta_authHeaderMob: {},
+  crunchyAuthHeader: {},
+  cruncyhAuthHeaderMob: {},
+  crunchyAuthHeaderSwitch: {},
   //hidive API
   hd_apikey:        '508efd7b42d546e19cc24f4d0b414e57e351ca73',
   hd_devName:       'Android',
@@ -86,11 +99,14 @@ const api: APIType = {
 };
 
 // set header
-api.beta_authHeader = { 
-  Authorization: api.beta_authBasic,
+api.crunchyAuthHeader = { 
+  Authorization: api.authBasic,
 };
-api.beta_authHeaderMob = { 
-  Authorization: api.beta_authBasicMob,
+api.cruncyhAuthHeaderMob = { 
+  Authorization: api.authBasicMob,
+};
+api.crunchyAuthHeaderSwitch = { 
+  Authorization: api.authBasicSwitch,
 };
 
 export {
