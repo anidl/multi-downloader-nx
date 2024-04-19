@@ -1,8 +1,8 @@
 {
   "name": "multi-downloader-nx",
   "short_name": "aniDL",
-  "version": "5.0.0rc1",
-  "description": "Downloader for Crunchyroll and Hidive with CLI and GUI",
+  "version": "5.0.0",
+  "description": "Downloader for Crunchyroll, Hidive, AnimeOnegai, and AnimationDigitalNetwork with CLI and GUI",
   "keywords": [
     "download",
     "downloader",
