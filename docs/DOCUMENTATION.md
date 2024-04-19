@@ -1,10 +1,10 @@
-# multi-downloader-nx (4.7.2v)
+# multi-downloader-nx (5.0.0v)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Funimation*, *Hidive*, or *Crunchyroll*.
+This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive*, *AnimeOnegai*, or *AnimationDigitalNetwork*.
 This application enables you to download videos for offline viewing which may be forbidden by law in your country.
 The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider.
 This tool is not responsible for your actions; please make an informed decision before using this application.
@@ -38,13 +38,13 @@ Set the password to use for the authentication. If not provided, you will be pro
 #### `--silentAuth`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Funimation, Crunchyroll | `--silentAuth ` | `boolean` | `No`| `NaN` | `false`| `silentAuth: ` |
+| Crunchyroll | `--silentAuth ` | `boolean` | `No`| `NaN` | `false`| `silentAuth: ` |
 
 Authenticate every time the script runs. Use at your own risk.
 #### `--token`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
+| Crunchyroll, AnimeOnegai | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
 
 Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)
 ### Fonts
@@ -58,7 +58,7 @@ Use this command to download all the fonts and add them to the muxed **mkv** fil
 #### `--fontName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
-| Funimation, Hidive | `--fontName ${fontName}` | `string` | `No`| `NaN` | `NaN` |
+| Hidive, AnimationDigitalNetwork | `--fontName ${fontName}` | `string` | `No`| `NaN` | `NaN` |
 
 Set the font to use in subtiles
 ### Search
@@ -83,7 +83,7 @@ The output is organized in pages. Use this command to output the items for the g
 #### `--locale`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`] | `en-US`| `locale: ` |
+| Crunchyroll, AnimeOnegai, AnimationDigitalNetwork | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `fr`, `de`, `''`, `es`, `pt`] | `en-US`| `locale: ` |
 
 Set the local that will be used for the API.
 #### `--new`
@@ -135,7 +135,7 @@ Set the quality level. Use 0 to use the maximum quality.
 #### `--dlVideoOnce`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `false`| `dlVideoOnce: ` |
+| Crunchyroll, AnimeOnegai | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `false`| `dlVideoOnce: ` |
 
 If selected, the best selected quality will be downloaded only for the first language,
 then the worst video quality with the same audio quality will be downloaded for every other language.
@@ -144,7 +144,7 @@ This will speed up the download speed, if multiple languages are selected.
 #### `--chapters`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--chapters ` | `boolean` | `No`| `NaN` | `true`| `chapters: ` |
+| Crunchyroll, AnimationDigitalNetwork | `--chapters ` | `boolean` | `No`| `NaN` | `true`| `chapters: ` |
 
 Will fetch the chapters and add them into the final video.
 Currently only works with mkvmerge.
@@ -155,13 +155,6 @@ Currently only works with mkvmerge.
 
 If set to Android, it has lower quality, but Non-DRM streams,
 If set to Web, it has a higher quality adaptive stream, but everything is DRM.
-#### `--hdapi`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
-| --- | --- | --- | --- | --- | --- | --- | ---| 
-| Hidive | `--hdapi ` | `string` | `No`| `NaN` | [`old`, `new`] | `new`| `hdapi: ` |
-
-If set to Old, it has lower quality, but Non-DRM streams, but some people can't use it,
-If set to New, it has a higher quality stream, but everything is DRM.
 #### `--removeBumpers`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -178,7 +171,7 @@ If selected, it will prefer to keep the original Font Size defined by the servic
 #### `-x`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, Funimation | `-x ${server}` | `number` | `No`| `--server` | [`1`, `2`, `3`, `4`] | `1`| `x: ` |
+| Crunchyroll | `-x ${server}` | `number` | `No`| `--server` | [`1`, `2`, `3`, `4`] | `1`| `x: ` |
 
 Select the server to use
 #### `--kstream`
@@ -199,8 +192,7 @@ Download video with specific hardsubs
 | All | `--dlsubs ${sub1} ${sub2}` | `array` | `No`| `NaN` | [`all`, `none`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `zh-TW`, `ko`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `ja`] | `all`| `dlsubs: ` |
 
 Download subtitles by language tag (space-separated)
-Funi Only: zh
-Crunchy Only: en-IN, es-419, es-ES, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, zh-TW, ko, ca-ES, pl-PL, th-TH, ta-IN, ms-MY, vi-VN, id-ID, te-IN
+Crunchy Only: en, en-IN, es-419, es-419, es-ES, pt-BR, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, zh-TW, ko, ca-ES, pl-PL, th-TH, ta-IN, ms-MY, vi-VN, id-ID, te-IN, ja
 #### `--novids`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -210,7 +202,7 @@ Skip downloading videos
 #### `--noaudio`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
-| Funimation | `--noaudio ` | `boolean` | `No`| `NaN` | `NaN` |
+| Crunchyroll, Hidive | `--noaudio ` | `boolean` | `No`| `NaN` | `NaN` |
 
 Skip downloading audio
 #### `--nosubs`
@@ -225,8 +217,7 @@ Skip downloading subtitles
 | All | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa`, `spa-419`, `spa-ES`, `por`, `fra`, `deu`, `ara-ME`, `ara`, `ita`, `rus`, `tur`, `hin`, `cmn`, `zho`, `chi`, `kor`, `cat`, `pol`, `tha`, `tam`, `may`, `vie`, `ind`, `tel`, `jpn`] | `jpn`| `dubLang: ` |
 
 Set the language to download: 
-Funi Only: cmn
-Crunchy Only: eng, spa-419, spa-ES, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, zho, chi, kor, cat, pol, tha, tam, may, vie, ind, tel
+Crunchy Only: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, zho, chi, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
 #### `--all`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -267,7 +258,7 @@ Set the time the program waits between downloads. Set in millisecods
 #### `--simul`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Funimation, Hidive | `--simul ` | `boolean` | `No`| `NaN` | `false`| `simul: ` |
+| Hidive | `--simul ` | `boolean` | `No`| `NaN` | `false`| `simul: ` |
 
 Force downloading simulcast version instead of uncut version (if available).
 #### `--but`
@@ -431,7 +422,7 @@ Debug mode (tokens may be revealed in the console output)
 #### `--service`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--service ${service}` | `string` | `Yes`| `NaN` | [`funi`, `crunchy`, `hidive`] | ``| `service: ` |
+| All | `--service ${service}` | `string` | `Yes`| `NaN` | [`crunchy`, `hidive`, `ao`, `adn`] | ``| `service: ` |
 
 Set the service you want to use
 #### `--update`
