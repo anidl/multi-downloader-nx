@@ -1,6 +1,10 @@
 import yargs, { Choices } from 'yargs';
 import { args, AvailableMuxer, groups } from './module.args';
 import { LanguageItem } from './module.langsData';
+import { DownloadInfo } from '../@types/messageHandler';
+import { HLSCallback } from './hls-download';
+import leven from 'leven';
+import { console } from './log';
 
 let argvC: { 
   [x: string]: unknown; 
@@ -61,7 +65,7 @@ let argvC: {
   debug: boolean | undefined; 
   nocleanup: boolean; 
   help: boolean | undefined; 
-  service: 'funi' | 'crunchy' | 'hidive'; 
+  service: 'crunchy' | 'hidive' | 'ao' | 'adn'; 
   update: boolean; 
   fontName: string | undefined; 
   _: (string | number)[]; 
@@ -69,11 +73,11 @@ let argvC: {
   dlVideoOnce: boolean; 
   chapters: boolean;
   crapi: 'android' | 'web';
-  hdapi: 'old' | 'new';
   removeBumpers: boolean;
   originalFontSize: boolean;
   keepAllVideos: boolean;
   syncTiming: boolean;
+  callbackMaker?: (data: DownloadInfo) => HLSCallback;
 };
     
 export type ArgvType = typeof argvC;  
@@ -111,15 +115,15 @@ const getArgv = (cfg: { [key:string]: unknown }, isGUI: boolean) => {
       return cfg[key] as T;
     } else
       return _default;
-  };
-      
+  };  
   const argv = yargs.parserConfiguration({
     'duplicate-arguments-array': false,
     'camel-case-expansion': false,
   })
     .wrap(yargs.terminalWidth())
     .usage('Usage: $0 [options]')
-    .help(true).version(false);
+    .help(true);
+    //.strictOptions()
   const data = args.map(a => {
     return {
       ...a,
@@ -141,7 +145,31 @@ const getArgv = (cfg: { [key:string]: unknown }, isGUI: boolean) => {
       },
       choices: item.name === 'service' && isGUI ? undefined : item.choices as unknown as Choices
     });
+
+  // Custom logic for suggesting corrections for misspelled options
+  argv.middleware((argv: Record<string, any>) => {
+    // List of valid options
+    const validOptions = [
+      ...args.map(a => a.name),
+      ...args.map(a => a.alias).filter(alias => alias !== undefined) as string[]
+    ];
+    const unknownOptions = Object.keys(argv).filter(key => !validOptions.includes(key) && key !== '_'  && key !== '$0'); // Filter out known options
+  
+    const suggestedOptions: Record<string, boolean> = {};
+    unknownOptions.forEach(actualOption => {
+      const closestOption = validOptions.find(option => {
+        const levenVal = leven(option, actualOption);
+        return levenVal <= 2 && levenVal > 0;
+      });
+      
+      if (closestOption && !suggestedOptions[closestOption]) {
+        suggestedOptions[closestOption] = true;
+        console.info(`Unknown option ${actualOption}, did you mean ${closestOption}?`);
+      } else if (!suggestedOptions[actualOption]) {
+        suggestedOptions[actualOption] = true;
+        console.info(`Unknown option ${actualOption}`);
+      }
+    });
+  });
   return argv as unknown as yargs.Argv<typeof argvC>;
 };
-      
-      

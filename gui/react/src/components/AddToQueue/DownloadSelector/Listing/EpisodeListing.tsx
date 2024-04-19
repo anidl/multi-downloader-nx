@@ -42,6 +42,10 @@ const EpisodeListing: React.FC = () => {
     });
   };
 
+  const getEpisodesForSeason = (season: string|'all') => {
+    return store.episodeListing.filter((a) => season === 'all' ? true : a.season === season);
+  };
+
   return <Dialog open={store.episodeListing.length > 0} onClose={close} scroll='paper' maxWidth='xl' sx={{ p: 2 }}>
     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 200px 20px' }}>
       <Typography color='text.primary' variant="h5" sx={{ textAlign: 'center', alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
@@ -68,19 +72,19 @@ const EpisodeListing: React.FC = () => {
             if (selected.length > 0) {
               setSelected([]);
             } else {
-              setSelected(store.episodeListing.map(a => a.e));
+              setSelected(getEpisodesForSeason(season).map(a => a.e));
             }
           }}
         />
       </ListItem>
-      {store.episodeListing.filter((a) => season === 'all' ? true : a.season === season).map((item, index, { length }) => {
+      {getEpisodesForSeason(season).map((item, index, { length }) => {
         const e = isNaN(parseInt(item.e)) ? item.e : parseInt(item.e);
         const idStr = `S${item.season}E${e}`;
         const isSelected = selected.includes(e.toString());
         const imageRef = React.createRef<HTMLImageElement>();
         const summaryRef = React.createRef<HTMLParagraphElement>();
         return <Box {...{ mouseData: isSelected }} key={`Episode_List_Item_${index}`}>
-          <ListItem sx={{backdropFilter: isSelected ? 'brightness(1.5)' : '', '&:hover': {backdropFilter: 'brightness(1.5)'}, display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }} 
+          <ListItem sx={{backdropFilter: isSelected ? 'brightness(1.5)' : '', '&:hover': {backdropFilter: 'brightness(1.5)'}, display: 'grid', gridTemplateColumns: '25px 50px 1fr 5fr' }}
             onClick={() => {
               let arr: string[] = [];
               if (isSelected) {

@@ -50,14 +50,14 @@ async function messageAndResponse<T extends keyof MessageTypes>(socket: WebSocke
         resolve(parsed);
       }
     };
-    socket.addEventListener('message', handler); 
+    socket.addEventListener('message', handler);
   });
   const toSend = msg as WSMessageWithID<T>;
   toSend.id = id;
 
   socket.send(JSON.stringify(toSend));
   return ret;
-} 
+}
 
 const MessageChannelProvider: FCWithChildren = ({ children }) => {
 
@@ -103,7 +103,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       });
     }
 
-    const wws = new WebSocket(`ws://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/ws?${search}`, );
+    const wws = new WebSocket(`ws://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/private?${search}`, );
     wws.addEventListener('open', () => {
       console.log('[INFO] [WS] Connected');
       setSocket(wws);
@@ -146,7 +146,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       const currentService = await messageAndResponse(socket, { name: 'type', data: undefined });
       if (currentService.data !== undefined)
         return dispatch({ type: 'service', payload: currentService.data });
-      if (store.service !== currentService.data) 
+      if (store.service !== currentService.data)
         messageAndResponse(socket, { name: 'setup', data: store.service });
     })();
   }, [store.service, dispatch, socket]);

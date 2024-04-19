@@ -11,10 +11,13 @@ export type ItemType = {
 }[]
 
 export type DataType = {
-  funi: {
+  hidive: {
     s: ItemType
   },
-  hidive: {
+  ao: {
+    s: ItemType
+  },
+  adn: {
     s: ItemType
   },
   crunchy: {
@@ -24,13 +27,16 @@ export type DataType = {
 }
 
 const addToArchive = (kind: {
-  service: 'funi',
-  type: 's'
-} | {
   service: 'crunchy',
   type: 's'|'srz'
 } | {
   service: 'hidive',
+  type: 's'
+} | {
+  service: 'ao',
+  type: 's'
+} | {
+  service: 'adn',
   type: 's'
 }, ID: string) => {
   const data = loadData();
@@ -45,8 +51,8 @@ const addToArchive = (kind: {
     });
     (data as any)[kind.service][kind.type] = items;
   } else {
-    if (kind.service === 'funi') {
-      data['funi'] = {
+    if (kind.service === 'ao') {
+      data['ao'] = {
         s: [
           {
             id: ID,
@@ -65,6 +71,15 @@ const addToArchive = (kind: {
           already: [] as string[]
         } : []),
       };
+    } else if (kind.service === 'adn') {
+      data['adn'] = {
+        s: [
+          {
+            id: ID,
+            already: []
+          }
+        ]
+      };
     } else {
       data['hidive'] = {
         s: [
@@ -80,13 +95,16 @@ const addToArchive = (kind: {
 };
 
 const downloaded = (kind: {
-  service: 'funi',
-  type: 's'
-} | {
   service: 'crunchy',
   type: 's'|'srz'
 } | {
   service: 'hidive',
+  type: 's'
+} | {
+  service: 'ao',
+  type: 's'
+} | {
+  service: 'adn',
   type: 's'
 }, ID: string, episode: string[]) => {
   let data = loadData();
@@ -105,7 +123,7 @@ const downloaded = (kind: {
   fs.writeFileSync(archiveFile, JSON.stringify(data, null, 4));
 };
 
-const makeCommand = (service: 'funi'|'crunchy'|'hidive') : Partial<ArgvType>[] => {
+const makeCommand = (service: 'crunchy'|'hidive'|'ao'|'adn') : Partial<ArgvType>[] => {
   const data = loadData();
   const ret: Partial<ArgvType>[] = [];
   const kind = data[service];

@@ -1,5 +1,6 @@
 import { parse as mpdParse } from 'mpd-parser';
 import { LanguageItem, findLang, languages } from './module.langsData';
+import { console } from './log';
 
 type Segment = {
   uri: string;
@@ -62,9 +63,15 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
 
 
       if (playlist.sidx && playlist.segments.length == 0) {
-        const item = await fetch(playlist.sidx.uri, {
-          'method': 'head'
-        });
+        const options: RequestInit = {
+          method: 'head'
+        };
+        if (playlist.sidx.uri.includes('animecdn')) options.headers = {
+          'origin': 'https://www.animeonegai.com',
+          'referer': 'https://www.animeonegai.com/',
+        };
+        const item = await fetch(playlist.sidx.uri, options);
+        if (!item.ok) console.warn(`${item.status}: ${item.statusText}, Unable to fetch byteLength for audio stream ${Math.round(playlist.attributes.BANDWIDTH/1024)}KiB/s`);
         const byteLength = parseInt(item.headers.get('content-length') as string);
         let currentByte = playlist.sidx.map.byterange.length;
         while (currentByte <= byteLength) {
@@ -131,9 +138,15 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
       ret[host] = { audio: [], video: [] };
 
     if (playlist.sidx && playlist.segments.length == 0) {
-      const item = await fetch(playlist.sidx.uri, {
-        'method': 'head'
-      });
+      const options: RequestInit = {
+        method: 'head'
+      };
+      if (playlist.sidx.uri.includes('animecdn')) options.headers = {
+        'origin': 'https://www.animeonegai.com',
+        'referer': 'https://www.animeonegai.com/',
+      };
+      const item = await fetch(playlist.sidx.uri, options);
+      if (!item.ok) console.warn(`${item.status}: ${item.statusText}, Unable to fetch byteLength for video stream ${playlist.attributes.RESOLUTION?.height}x${playlist.attributes.RESOLUTION?.width}@${Math.round(playlist.attributes.BANDWIDTH/1024)}KiB/s`);
       const byteLength = parseInt(item.headers.get('content-length') as string);
       let currentByte = playlist.sidx.map.byterange.length;
       while (currentByte <= byteLength) {

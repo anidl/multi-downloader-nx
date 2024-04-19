@@ -36,7 +36,8 @@ crunchyendpoints
 .vscode
 /logs
 /tmp/*/
-/videos/*/
+!videos/.gitkeep
+/videos/*
 /tmp/*.*
 bin
 widevine/*

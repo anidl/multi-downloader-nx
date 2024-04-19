@@ -1,4 +1,4 @@
-import { dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
+import { aoSearchLocales, dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
 
 const groups = {
   'auth': 'Authentication:',
@@ -41,7 +41,7 @@ export type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
     default: T|undefined,
     name?: string    
   },
-  service: Array<'funi'|'crunchy'|'hidive'|'all'>,
+  service: Array<'crunchy'|'hidive'|'ao'|'adn'|'all'>,
   usage: string // -(-)${name} will be added for each command,
   demandOption?: true,
   transformer?: (value: T) => K
@@ -107,12 +107,12 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Set the service locale',
     docDescribe: 'Set the local that will be used for the API.',
     group: 'search',
-    choices: (searchLocales.filter(a => a !== undefined) as string[]),
+    choices: ([...searchLocales.filter(a => a !== undefined), ...aoSearchLocales.filter(a => a !== undefined)] as string[]),
     default: {
       default: 'en-US'
     },
     type: 'string',
-    service: ['crunchy'],
+    service: ['crunchy', 'ao', 'adn'],
     usage: '${locale}'
   },
   {
@@ -193,7 +193,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Download only once the video with the best selected quality',
     type: 'boolean',
     group: 'dl',
-    service: ['crunchy'],
+    service: ['crunchy', 'ao'],
     docDescribe: 'If selected, the best selected quality will be downloaded only for the first language,'
       + '\nthen the worst video quality with the same audio quality will be downloaded for every other language.'
       + '\nBy the later merge of the videos, no quality difference will be present.'
@@ -208,7 +208,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Will fetch the chapters and add them into the final video',
     type: 'boolean',
     group: 'dl',
-    service: ['crunchy'],
+    service: ['crunchy', 'adn'],
     docDescribe: 'Will fetch the chapters and add them into the final video.' 
      + '\nCurrently only works with mkvmerge.',
     usage: '',
@@ -228,20 +228,6 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     choices: ['android', 'web'],
     default: {
       default: 'web'
-    }
-  },
-  {
-    name: 'hdapi',
-    describe: 'Selects the API type for Hidive',
-    type: 'string',
-    group: 'dl',
-    service: ['hidive'],
-    docDescribe: 'If set to Old, it has lower quality, but Non-DRM streams, but some people can\'t use it,'
-      + '\nIf set to New, it has a higher quality stream, but everything is DRM.',
-    usage: '',
-    choices: ['old', 'new'],
-    default: {
-      default: 'new'
     }
   },
   {
@@ -280,7 +266,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     type: 'number',
     alias: 'server',
     docDescribe: true,
-    service: ['crunchy','funi'],
+    service: ['crunchy'],
     usage: '${server}'
   },
   {
@@ -314,8 +300,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     name: 'dlsubs',
     group: 'dl',
     describe: 'Download subtitles by language tag (space-separated)' 
-    + `\nFuni Only: ${languages.filter(a => a.funi_locale && !a.cr_locale).map(a => a.locale).join(', ')}`
-    + `\nCrunchy Only: ${languages.filter(a => a.cr_locale && !a.funi_locale).map(a => a.locale).join(', ')}`,
+    + `\nCrunchy Only: ${languages.filter(a => a.cr_locale).map(a => a.locale).join(', ')}`,
     docDescribe: true,
     service: ['all'],
     type: 'array',
@@ -339,7 +324,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'dl',
     describe: 'Skip downloading audio',
     docDescribe: true,
-    service: ['funi'],
+    service: ['crunchy', 'hidive'],
     type: 'boolean',
     usage: ''
   },
@@ -355,8 +340,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
   {
     name: 'dubLang',
     describe: 'Set the language to download: ' 
-        + `\nFuni Only: ${languages.filter(a => a.funi_locale && !a.cr_locale).map(a => a.code).join(', ')}`
-        + `\nCrunchy Only: ${languages.filter(a => a.cr_locale && !a.funi_locale).map(a => a.code).join(', ')}`,
+        + `\nCrunchy Only: ${languages.filter(a => a.cr_locale).map(a => a.code).join(', ')}`,
     docDescribe: true,
     group: 'dl',
     choices: dubLanguageCodes,
@@ -439,7 +423,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'dl',
     describe: 'Force downloading simulcast version instead of uncut version (if available).',
     docDescribe: true,
-    service: ['funi', 'hidive'],
+    service: ['hidive'],
     type: 'boolean',
     usage: '',
     default: {
@@ -572,7 +556,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'util',
     service: ['all'],
     type: 'string',
-    choices: ['funi', 'crunchy', 'hidive'],
+    choices: ['crunchy', 'hidive', 'ao', 'adn'],
     usage: '${service}',
     default: {
       default: ''
@@ -593,7 +577,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     group: 'fonts',
     describe: 'Set the font to use in subtiles',
     docDescribe: true,
-    service: ['funi', 'hidive'],
+    service: ['hidive', 'adn'],
     type: 'string',
     usage: '${fontName}',
   },
@@ -677,7 +661,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Authenticate every time the script runs. Use at your own risk.',
     docDescribe: true,
     group: 'auth',
-    service: ['funi','crunchy'],
+    service: ['crunchy'],
     type: 'boolean',
     usage: '',
     default: {
@@ -689,7 +673,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)',
     docDescribe: true,
     group: 'auth',
-    service: ['crunchy'],
+    service: ['crunchy', 'ao'],
     type: 'string',
     usage: '${token}',
     default: {

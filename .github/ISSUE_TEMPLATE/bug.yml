@@ -47,9 +47,10 @@ body:
       label: Service
       description: "Please tell us what service the bug occured in."
       options:
-        - Funimation
         - Crunchyroll
         - Hidive
+        - AnimationDigitalNetwork
+        - AnimeOnegai
         - All
         - Irrelevant
     validations:

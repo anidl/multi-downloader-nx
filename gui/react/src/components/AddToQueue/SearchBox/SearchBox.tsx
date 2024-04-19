@@ -40,7 +40,7 @@ const SearchBox: React.FC = () => {
           s.value = s.value.slice(0, 10);
         setSearchResult(s);
       }
-    }, 1000);
+    }, 500);
     return () => clearTimeout(timeOutId);
   }, [search]);
 

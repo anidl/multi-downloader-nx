@@ -13,7 +13,7 @@ export type Params = {
 // req
 export class Req {
   private sessCfg: string;
-  private service: 'cr'|'funi'|'hd';
+  private service: 'cr'|'hd'|'ao'|'adn';
   private session: Record<string, {
     value: string;
     expires: Date;
@@ -25,12 +25,12 @@ export class Req {
   private cfgDir = yamlCfg.cfgDir;
   private curl: boolean|string = false;
   
-  constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false, private type: 'cr'|'funi'|'hd') {
+  constructor(private domain: Record<string, unknown>, private debug: boolean, private nosess = false, private type: 'cr'|'hd'|'ao'|'adn') {
     this.sessCfg = yamlCfg.sessCfgFile[type];
     this.service = type;
   }
 
-  async getData(durl: string, params?: Params) {
+  async getData(durl: string, params?: RequestInit) {
     params = params || {};
     // options
     const options: RequestInit = {
@@ -62,8 +62,8 @@ export class Req {
     if(params.body){
       options.body = params.body;
     }
-    if(typeof params.followRedirect == 'string'){
-      options.redirect = params.followRedirect;
+    if(typeof params.redirect == 'string'){
+      options.redirect = params.redirect;
     }
     // debug
     if(this.debug){
@@ -72,13 +72,15 @@ export class Req {
     }
     // try do request
     try {
-      const res = await fetch(durl.toString(), options);
+      const res = await fetch(durl, options);
       if (!res.ok) {
         console.error(`${res.status}: ${res.statusText}`);
         const body = await res.text();
         const docTitle = body.match(/<title>(.*)<\/title>/);
         if(body && docTitle){
           console.error(docTitle[1]);
+        } else {
+          console.error(body);
         }
       }
       return {

@@ -21,7 +21,7 @@ export type DownloadOptions = {
 export type StoreState = {
   episodeListing: Episode[];
   downloadOptions: DownloadOptions,
-  service: 'crunchy'|'funi'|'hidive'|undefined,
+  service: 'crunchy'|'hidive'|'ao'|'adn'|undefined,
   version: string,
 }
 

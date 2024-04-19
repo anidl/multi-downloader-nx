@@ -3,18 +3,21 @@ import fs from 'fs';
 import path from 'path';
 import { args, groups } from './module.args';
 
-const transformService = (str: Array<'funi'|'crunchy'|'hidive'|'all'>) => {
+const transformService = (str: Array<'crunchy'|'hidive'|'ao'|'adn'|'all'>) => {
   const services: string[] = [];
   str.forEach(function(part) {
     switch(part) {
-    case 'funi':
-      services.push('Funimation');
-      break;
     case 'crunchy':
       services.push('Crunchyroll');
       break;
     case 'hidive':
       services.push('Hidive');
+      break;
+    case 'ao':
+      services.push('AnimeOnegai');
+      break;
+    case 'adn':
+      services.push('AnimationDigitalNetwork');
       break;
     case 'all':
       services.push('All');
@@ -30,7 +33,7 @@ If you find any bugs in this documentation or in the program itself please repor
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Funimation*, *Hidive*, or *Crunchyroll*.
+This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive*, *AnimeOnegai*, or *AnimationDigitalNetwork*.
 This application enables you to download videos for offline viewing which may be forbidden by law in your country.
 The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider.
 This tool is not responsible for your actions; please make an informed decision before using this application.
