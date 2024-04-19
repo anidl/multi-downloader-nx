@@ -79,6 +79,8 @@ export class Req {
         const docTitle = body.match(/<title>(.*)<\/title>/);
         if(body && docTitle){
           console.error(docTitle[1]);
+        } else {
+          console.error(body);
         }
       }
       return {
