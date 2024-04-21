@@ -280,12 +280,12 @@ export default class AnimationDigitalNetwork implements ServiceClass {
         specials.push(...special);
         episodeIndex--;
       } else {
-        console.info(`  [E${episode.shortNumber}] ${episode.number} - ${episode.name}`);
+        console.info(`  (${episode.id}) [E${episode.shortNumber}] ${episode.number} - ${episode.name}`);
       }
       episodeIndex++;
     }
     for (const special of specials) {
-      console.info(`  [${special.shortNumber}] ${special.number} - ${special.name}`);
+      console.info(`  (${special.id}) [${special.shortNumber}] ${special.number} - ${special.name}`);
     }
     show.value.videos.push(...specials);
     return { isOk: true, value: show.value };
