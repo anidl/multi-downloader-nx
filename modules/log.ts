@@ -28,10 +28,10 @@ const makeLogger = () => {
       console: {
         type: 'console', layout: {
           type: 'pattern',
-          pattern: process.env.isGUI === 'true' ? '%[%x{info}%m%]' : '%x{info}%m',
+          pattern: process.env.isGUI === 'true' ? '\r%[%x{info}%m%]' : '\r%x{info}%m',
           tokens: {
             info: (ev) => {
-              return ev.level.levelStr === 'INFO' ? '' : `[${ev.level.levelStr}] `;
+              return ev.level.levelStr === 'INFO' ? '\r' : `\r[${ev.level.levelStr}] `;
             }
           }
         }
