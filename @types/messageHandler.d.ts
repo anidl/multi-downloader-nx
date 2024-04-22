@@ -107,7 +107,7 @@ export type FuniStreamData = { force?: 'Y'|'y'|'N'|'n'|'C'|'c', callbackMaker?: 
   ffmpegOptions: string[], mkvmergeOptions: string[], defaultAudio: LanguageItem, defaultSub: LanguageItem, ccTag: string }
 export type FuniSubsData = { nosubs?: boolean, sub: boolean, dlsubs: string[], ccTag: string }
 export type DownloadData = {
-  hslang?: string; id: string, e: string, dubLang: string[], dlsubs: string[], fileName: string, q: number, novids: boolean, noaudio: boolean, dlVideoOnce: boolean 
+  hslang?: string; id: string, e: string, dubLang: string[], dlsubs: string[], fileName: string, q: number, novids: boolean, noaudio: boolean, dlVideoOnce: boolean
 }
 
 export type AuthResponse = ResponseBase<undefined>;
@@ -136,7 +136,7 @@ export type ProgressData = {
 
 export type PossibleMessages = keyof ServiceHandler;
 
-export type DownloadInfo = { 
+export type DownloadInfo = {
   image: string,
   parent: {
     title: string

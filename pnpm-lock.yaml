@@ -11,6 +11,9 @@ dependencies:
   '@yao-pkg/pkg':
     specifier: ^5.11.1
     version: 5.11.1
+  cli-progress:
+    specifier: ^3.12.0
+    version: 3.12.0
   cors:
     specifier: ^2.8.5
     version: 2.8.5
@@ -67,6 +70,9 @@ dependencies:
     version: 17.7.2
 
 devDependencies:
+  '@types/cli-progress':
+    specifier: ^3.11.5
+    version: 3.11.5
   '@types/cors':
     specifier: ^2.8.17
     version: 2.8.17
@@ -1851,6 +1857,12 @@ packages:
       '@types/responselike': 1.0.0
     dev: false
 
+  /@types/cli-progress@3.11.5:
+    resolution: {integrity: sha512-D4PbNRbviKyppS5ivBGyFO29POlySLmA2HyUFE4p5QGazAMM3CwkKWcvTl8gvElSuxRh6FPKL8XmidX873ou4g==}
+    dependencies:
+      '@types/node': 18.15.11
+    dev: true
+
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
@@ -2828,6 +2840,13 @@ packages:
 
   /chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
+    dev: false
+
+  /cli-progress@3.12.0:
+    resolution: {integrity: sha512-tRkV3HJ1ASwm19THiiLIXLO7Im7wlTuKnvkYaTkyoAPefqjNg7W7DHKUlGRxy9vxDvbyCYQkQozvptuMkGCg8A==}
+    engines: {node: '>=4'}
+    dependencies:
+      string-width: 4.2.3
     dev: false
 
   /cliui@7.0.4:

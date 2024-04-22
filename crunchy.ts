@@ -44,6 +44,7 @@ import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
 import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 import vtt2ass from './modules/module.vtt2ass';
 import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
+import buildCLIHandler from './modules/downloadProgress';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -1183,7 +1184,7 @@ export default class Crunchy implements ServiceClass {
       return;
     }
 
-    if (!this.cfg.bin.ffmpeg) 
+    if (!this.cfg.bin.ffmpeg)
       this.cfg.bin = await yamlCfg.loadBinCfg();
 
     let mediaName = '...';
@@ -1267,7 +1268,7 @@ export default class Crunchy implements ServiceClass {
             const startMS = startTimeMS ? startTimeMS : '00', endMS = endTimeMS ? endTimeMS : '00';
             const startFormatted = startTime.toISOString().substring(11, 19)+'.'+startMS;
             const endFormatted = endTime.toISOString().substring(11, 19)+'.'+endMS;
-           
+
             //Push Generated Chapters
             if (chapterData.startTime > 1) {
               compiledChapters.push(
@@ -1316,7 +1317,7 @@ export default class Crunchy implements ServiceClass {
               endTime.setSeconds(chapter.end);
               const startFormatted = startTime.toISOString().substring(11, 19)+'.00';
               const endFormatted = endTime.toISOString().substring(11, 19)+'.00';
-            
+
               //Push generated chapters
               if (chapter.type == 'intro') {
                 if (chapter.start > 0) {
@@ -1462,8 +1463,8 @@ export default class Crunchy implements ServiceClass {
 
       for(const s of Object.keys(pbStreams)){
         if (
-          (s.match(/hls/) || s.match(/dash/)) 
-          && !(s.match(/hls/) && s.match(/drm/)) 
+          (s.match(/hls/) || s.match(/dash/))
+          && !(s.match(/hls/) && s.match(/drm/))
           && !((!canDecrypt || !this.cfg.bin.mp4decrypt) && s.match(/drm/))
           && !s.match(/trailer/)
         ) {
@@ -1559,6 +1560,7 @@ export default class Crunchy implements ServiceClass {
       }
 
       let tsFile = undefined;
+      const downloadStreams = [];
 
       if(!dlFailed && curStream !== undefined && !(options.novids && options.noaudio)){
         const streamPlaylistsReq = await this.req.getData(curStream.url, AuthHeaders);
@@ -1670,28 +1672,17 @@ export default class Crunchy implements ServiceClass {
               const videoJson: M3U8Json = {
                 segments: chosenVideoSegments.segments
               };
-              const videoDownload = await new streamdl({
-                output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.m4s` : `${tsFile}.video.m4s`,
+              const output = chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.m4s` : `${tsFile}.video.m4s`;
+              downloadStreams.push(new streamdl({
+                output,
                 timeout: options.timeout,
                 m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
                 threads: options.partsize,
                 fsRetryTime: options.fsRetryTime * 1000,
                 override: options.force,
-                callback: options.callbackMaker ? options.callbackMaker({
-                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                  image: medias.image,
-                  parent: {
-                    title: medias.seasonTitle
-                  },
-                  title: medias.episodeTitle,
-                  language: lang
-                }) : undefined
-              }).download();
-              if(!videoDownload.ok){
-                console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
-                dlFailed = true;
-              }
+                identifier: output
+              }).download());
               dlVideoOnce = true;
               videoDownloaded = true;
             }
@@ -1712,28 +1703,17 @@ export default class Crunchy implements ServiceClass {
               const audioJson: M3U8Json = {
                 segments: chosenAudioSegments.segments
               };
-              const audioDownload = await new streamdl({
-                output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`,
+              const output = chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`;
+              downloadStreams.push(new streamdl({
+                output,
                 timeout: options.timeout,
                 m3u8json: audioJson,
                 // baseurl: chunkPlaylist.baseUrl,
                 threads: options.partsize,
                 fsRetryTime: options.fsRetryTime * 1000,
                 override: options.force,
-                callback: options.callbackMaker ? options.callbackMaker({
-                  fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                  image: medias.image,
-                  parent: {
-                    title: medias.seasonTitle
-                  },
-                  title: medias.episodeTitle,
-                  language: lang
-                }) : undefined
-              }).download();
-              if(!audioDownload.ok){
-                console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
-                dlFailed = true;
-              }
+                identifier: output
+              }).download());
               audioDownloaded = true;
             } else if (options.noaudio) {
               console.info('Skipping audio download...');
@@ -1965,28 +1945,17 @@ export default class Crunchy implements ServiceClass {
                   if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
                     fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
                 });
-                const dlStreamByPl = await new streamdl({
-                  output: `${tsFile}.ts`,
+                const output = `${tsFile}.ts`;
+                downloadStreams.push(new streamdl({
+                  output,
                   timeout: options.timeout,
                   m3u8json: chunkPlaylist,
                   // baseurl: chunkPlaylist.baseUrl,
                   threads: options.partsize,
                   fsRetryTime: options.fsRetryTime * 1000,
                   override: options.force,
-                  callback: options.callbackMaker ? options.callbackMaker({
-                    fileName: `${path.isAbsolute(outFile) ? outFile.slice(this.cfg.dir.content.length) : outFile}`,
-                    image: medias.image,
-                    parent: {
-                      title: medias.seasonTitle
-                    },
-                    title: medias.episodeTitle,
-                    language: lang
-                  }) : undefined
-                }).download();
-                if (!dlStreamByPl.ok) {
-                  console.error(`DL Stats: ${JSON.stringify(dlStreamByPl.parts)}\n`);
-                  dlFailed = true;
-                }
+                  identifier: output
+                }).download());
                 files.push({
                   type: 'Video',
                   path: `${tsFile}.ts`,
@@ -2006,6 +1975,14 @@ export default class Crunchy implements ServiceClass {
         }
       } else if (options.novids && options.noaudio) {
         fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
+      }
+
+      const downloads = await Promise.all(downloadStreams);
+      for (const download of downloads) {
+        if (!download.ok) {
+          console.error('Download failed, download stats: ', download.parts);
+          dlFailed = true;
+        }
       }
 
       if (compiledChapters.length > 0) {

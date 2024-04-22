@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { workingDir } from './module.cfg-loader';
 import log4js from 'log4js';
-
 const logFolder = path.join(workingDir, 'logs');
 const latest = path.join(logFolder, 'latest.log');
 
@@ -16,17 +15,17 @@ const makeLogFolder = () => {
 };
 
 const makeLogger = () => {
-  global.console.log = 
+  global.console.log =
   global.console.info =
-  global.console.warn = 
-  global.console.error = 
+  global.console.warn =
+  global.console.error =
   global.console.debug = (...data: any[]) => {
     console.info((data.length >= 1 ? data.shift() : ''), ...data);
   };
   makeLogFolder();
   log4js.configure({
     appenders: {
-      console: { 
+      console: {
         type: 'console', layout: {
           type: 'pattern',
           pattern: process.env.isGUI === 'true' ? '%[%x{info}%m%]' : '%x{info}%m',
@@ -35,7 +34,7 @@ const makeLogger = () => {
               return ev.level.levelStr === 'INFO' ? '' : `[${ev.level.levelStr}] `;
             }
           }
-        } 
+        }
       },
       file: {
         type: 'file',

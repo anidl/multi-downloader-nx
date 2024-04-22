@@ -7,15 +7,17 @@ import url from 'url';
 import shlp from 'sei-helper';
 import got, { Response } from 'got';
 
-import { console } from './log';
 import { ProgressData } from '../@types/messageHandler';
+import HLSEvents from './hlsEventEmitter';
+import { levels } from 'log4js';
+const console = undefined;
 
 // The following function should fix an issue with downloading. For more information see https://github.com/sindresorhus/got/issues/1489
 const fixMiddleWare = (res: Response) => {
   const isResponseOk = (response: Response) => {
     const {statusCode} = response;
     const limitStatusCode = response.request.options.followRedirect ? 299 : 399;
-    
+
     return (statusCode >= 200 && statusCode <= limitStatusCode) || statusCode === 304;
   };
   if (isResponseOk(res)) {
@@ -47,6 +49,7 @@ type Key = {
 
 export type HLSOptions = {
   m3u8json: M3U8Json,
+  identifier: string,
   output?: string,
   threads?: number,
   retries?: number,
@@ -56,10 +59,10 @@ export type HLSOptions = {
   timeout?: number,
   fsRetryTime?: number,
   override?: 'Y'|'y'|'N'|'n'|'C'|'c'
-  callback?: HLSCallback
 }
 
 type Data = {
+  identifier: string,
   parts: {
     first: number,
     total: number,
@@ -80,7 +83,6 @@ type Data = {
   isResume: boolean,
   bytesDownloaded: number,
   waitTime: number,
-  callback?: HLSCallback,
   override?: string,
   dateStart: number
 }
@@ -92,8 +94,8 @@ class hlsDownload {
     // check playlist
     if(
       !options
-      || !options.m3u8json 
-      || !options.m3u8json.segments 
+      || !options.m3u8json
+      || !options.m3u8json.segments
       || options.m3u8json.segments.length === 0
     ){
       throw new Error('Playlist is empty!');
@@ -118,7 +120,7 @@ class hlsDownload {
       isResume: options.offset ? options.offset > 0 : false,
       bytesDownloaded: 0,
       waitTime: options.fsRetryTime ?? 1000 * 5,
-      callback: options.callback,
+      identifier: options.identifier,
       override: options.override,
       dateStart: 0
     };
@@ -129,28 +131,23 @@ class hlsDownload {
     // try load resume file
     if(fs.existsSync(fn) && fs.existsSync(`${fn}.resume`) && this.data.offset < 1){
       try{
-        console.info('Resume data found! Trying to resume...');
+        HLSEvents.emit('message', { identifier: this.data.identifier, msg: 'Resume data found! Trying to resume...', severity: levels.INFO });
         const resumeData = JSON.parse(fs.readFileSync(`${fn}.resume`, 'utf-8'));
         if(
           resumeData.total == this.data.m3u8json.segments.length
             && resumeData.completed != resumeData.total
             && !isNaN(resumeData.completed)
         ){
-          console.info('Resume data is ok!');
+          HLSEvents.emit('message', { identifier: this.data.identifier, msg: 'Resume data is ok!', severity: levels.INFO });
           this.data.offset = resumeData.completed;
           this.data.isResume = true;
         }
         else{
-          console.warn(' Resume data is wrong!');
-          console.warn({
-            resume: { total: resumeData.total, dled: resumeData.completed },
-            current: { total: this.data.m3u8json.segments.length },
-          });
+          HLSEvents.emit('message', { identifier: this.data.identifier, msg: 'Resume data is wrong!', severity: levels.WARN });
         }
       }
       catch(e){
-        console.error('Resume failed, downloading will be not resumed!');
-        console.error(e);
+        HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Resume failed, downloading will be not resumed!\n${e}`, severity: levels.ERROR });
       }
     }
     // ask before rewrite file
@@ -158,54 +155,55 @@ class hlsDownload {
       let rwts = this.data.override ?? await shlp.question(`[Q] File «${fn}» already exists! Rewrite? ([y]es/[N]o/[c]ontinue)`);
       rwts = rwts || 'N';
       if (['Y', 'y'].includes(rwts[0])) {
-        console.info(`Deleting «${fn}»...`);
         fs.unlinkSync(fn);
       }
       else if (['C', 'c'].includes(rwts[0])) {
+        HLSEvents.emit('end', { identifier: this.data.identifier });
         return { ok: true, parts: this.data.parts };
       }
       else {
+        HLSEvents.emit('end', { identifier: this.data.identifier });
         return { ok: false, parts: this.data.parts };
       }
     }
     // show output filename
     if (fs.existsSync(fn) && this.data.isResume) {
-      console.info(`Adding content to «${fn}»...`);
+      HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Adding content to «${fn}»...`, severity: levels.INFO });
     }
     else{
-      console.info(`Saving stream to «${fn}»...`);
+      HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Saving stream to «${fn}»...`, severity: levels.INFO });
     }
     // start time
     this.data.dateStart = Date.now();
     let segments = this.data.m3u8json.segments;
     // download init part
     if (segments[0].map && this.data.offset === 0 && !this.data.skipInit) {
-      console.info('Download and save init part...');
+      HLSEvents.emit('message', { identifier: this.data.identifier, msg: 'Download and save init part...', severity: levels.INFO });
       const initSeg = segments[0].map as Segment;
       if(segments[0].key){
         initSeg.key = segments[0].key as Key;
       }
       try{
-        const initDl = await this.downloadPart(initSeg, 0, 0);
+        const initDl = await this.downloadPart(initSeg, 0, 0, this.data.identifier);
         fs.writeFileSync(fn, initDl.dec, { flag: 'a' });
         fs.writeFileSync(`${fn}.resume`, JSON.stringify({
           completed: 0,
           total: this.data.m3u8json.segments.length
         }));
-        console.info('Init part downloaded.');
       }
       catch(e: any){
-        console.error(`Part init download error:\n\t${e.message}`);
+        HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Part init download error:\n\t${e.message}`, severity: levels.ERROR });
+        HLSEvents.emit('end', { identifier: this.data.identifier });
         return { ok: false, parts: this.data.parts };
       }
     }
     else if(segments[0].map && this.data.offset === 0 && this.data.skipInit){
-      console.warn('Skipping init part can lead to broken video!');
+      HLSEvents.emit('message', { identifier: this.data.identifier, msg: 'Skipping init part can lead to broken video!', severity: levels.WARN });
     }
     // resuming ...
     if(this.data.offset > 0){
       segments = segments.slice(this.data.offset);
-      console.info(`Resuming download from part ${this.data.offset+1}...`);
+      HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Resuming download from part ${this.data.offset+1}...`, severity: levels.INFO });
       this.data.parts.completed = this.data.offset;
     }
     // dl process
@@ -221,18 +219,19 @@ class hlsDownload {
         const curp = segments[px];
         const key = curp.key as Key;
         if(key && !krq.has(key.uri) && !this.data.keys[key.uri as string]){
-          krq.set(key.uri, this.downloadKey(key, px, this.data.offset));
+          krq.set(key.uri, this.downloadKey(key, px, this.data.offset, this.data.identifier));
         }
       }
       try {
         await Promise.all(krq.values());
       } catch (er: any) {
-        console.error(`Key ${er.p + 1} download error:\n\t${er.message}`);
+        HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Key ${er.p + 1} download error:\n\t${er.message}`, severity: levels.ERROR });
+        HLSEvents.emit('end', { identifier: this.data.identifier });
         return { ok: false, parts: this.data.parts };
       }
       for (let px = offset; px < dlOffset && px < segments.length; px++){
         const curp = segments[px] as Segment;
-        prq.set(px, this.downloadPart(curp, px, this.data.offset));
+        prq.set(px, this.downloadPart(curp, px, this.data.offset, this.data.identifier));
       }
       for (let i = prq.size; i--;) {
         try {
@@ -241,15 +240,15 @@ class hlsDownload {
           res[r.p - offset] = r.dec;
         }
         catch (error: any) {
-          console.error('Part %s download error:\n\t%s',
-            error.p + 1 + this.data.offset, error.message);
+          HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Part ${error.p + 1 + this.data.offset} download error:\n\t${error.message}`, severity: levels.ERROR });
           prq.delete(error.p);
           errcnt++;
         }
       }
       // catch error
       if (errcnt > 0) {
-        console.error(`${errcnt} parts not downloaded`);
+        HLSEvents.emit('message', { identifier: this.data.identifier, msg:`${errcnt} parts not downloaded`, severity: levels.ERROR });
+        HLSEvents.emit('end', { identifier: this.data.identifier });
         return { ok: false, parts: this.data.parts };
       }
       // write downloaded
@@ -260,15 +259,15 @@ class hlsDownload {
             fs.writeFileSync(fn, r, { flag: 'a' });
             break;
           } catch (err) {
-            console.error(err);
-            console.error(`Unable to write to file '${fn}' (Attempt ${error+1}/3)`);
-            console.info(`Waiting ${Math.round(this.data.waitTime / 1000)}s before retrying`);
+            HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Unable to write to file '${fn}' (Attempt ${error+1}/3)\n\t${err}`, severity: levels.ERROR });
+            HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Waiting ${Math.round(this.data.waitTime / 1000)}s before retrying`, severity: levels.INFO });
             await new Promise<void>((resolve) => setTimeout(() => resolve(), this.data.waitTime));
           }
           error++;
         }
         if (error === 3) {
-          console.error(`Unable to write content to '${fn}'.`);
+          HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Unable to write content to '${fn}'.`, severity: levels.ERROR });
+          HLSEvents.emit('end', { identifier: this.data.identifier });
           return { ok: false, parts: this.data.parts };
         }
       }
@@ -284,21 +283,29 @@ class hlsDownload {
         completed: this.data.parts.completed,
         total: totalSeg
       }));
-      console.info(`${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${shlp.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(data.downloadSpeed / 1000000).toPrecision(2)}Mb/s)`);
-      if (this.data.callback)
-        this.data.callback({ total: this.data.parts.total, cur: this.data.parts.completed, bytes: this.data.bytesDownloaded, percent: data.percent, time: data.time, downloadSpeed: data.downloadSpeed });
+      //console.info(`${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${shlp.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(data.downloadSpeed / 1000000).toPrecision(2)}Mb/s)`);
+      HLSEvents.emit('progress', {
+        identifier: this.data.identifier,
+        total: this.data.parts.total,
+        cur: this.data.parts.completed,
+        bytes: this.data.bytesDownloaded,
+        percent: data.percent,
+        time: data.time,
+        downloadSpeed: data.downloadSpeed
+      });
     }
     // return result
     fs.unlinkSync(`${fn}.resume`);
+    HLSEvents.emit('end', { identifier: this.data.identifier });
     return { ok: true, parts: this.data.parts };
   }
-  async downloadPart(seg: Segment, segIndex: number, segOffset: number){
+  async downloadPart(seg: Segment, segIndex: number, segOffset: number, identifier: string){
     const sURI = extFn.getURI(seg.uri, this.data.baseurl);
     let decipher, part, dec;
     const p = segIndex;
     try {
       if (seg.key != undefined) {
-        decipher = await this.getKey(seg.key, p, segOffset);
+        decipher = await this.getKey(seg.key, p, segOffset, identifier);
       }
       part = await extFn.getData(p, sURI, {
         ...(seg.byterange ? {
@@ -314,10 +321,10 @@ class hlsDownload {
           }
           return res;
         }
-      ]);
+      ], identifier);
       if(this.data.checkPartLength && !(part as any).headers['content-length']){
         this.data.checkPartLength = false;
-        console.warn(`Part ${segIndex+segOffset+1}: can't check parts size!`);
+        HLSEvents.emit('message', { identifier: this.data.identifier, msg: `Part ${segIndex+segOffset+1}: can't check parts size!`, severity: levels.WARN });
       }
       if (decipher == undefined) {
         this.data.bytesDownloaded += (part.body as Buffer).byteLength;
@@ -333,7 +340,7 @@ class hlsDownload {
     }
     return { dec, p };
   }
-  async downloadKey(key: Key, segIndex: number, segOffset: number){
+  async downloadKey(key: Key, segIndex: number, segOffset: number, identifier: string){
     const kURI = extFn.getURI(key.uri, this.data.baseurl);
     if (!this.data.keys[kURI]) {
       try {
@@ -349,7 +356,7 @@ class hlsDownload {
             }
             return res;
           }
-        ]);
+        ], identifier);
         return rkey;
       }
       catch (error: any) {
@@ -358,12 +365,12 @@ class hlsDownload {
       }
     }
   }
-  async getKey(key: Key, segIndex: number, segOffset: number){
+  async getKey(key: Key, segIndex: number, segOffset: number, identifier: string){
     const kURI = extFn.getURI(key.uri, this.data.baseurl);
     const p = segIndex;
     if (!this.data.keys[kURI]) {
       try{
-        const rkey = await this.downloadKey(key, segIndex, segOffset);
+        const rkey = await this.downloadKey(key, segIndex, segOffset, identifier);
         if (!rkey)
           throw new Error();
         this.data.keys[kURI] = rkey.body;
@@ -382,7 +389,7 @@ class hlsDownload {
     return crypto.createDecipheriv('aes-128-cbc', this.data.keys[kURI], iv);
   }
 }
-      
+
 const extFn = {
   getURI: (uri: string, baseurl?: string) => {
     const httpURI = /^https{0,1}:/.test(uri);
@@ -402,7 +409,7 @@ const extFn = {
     const downloadSpeed = downloadedBytes / (dateElapsed / 1000); //Bytes per second
     return { percent, time: revParts, downloadSpeed };
   },
-  getData: (partIndex: number, uri: string, headers: Record<string, string>, segOffset: number, isKey: boolean, timeout: number, retry: number, afterResponse: ((res: Response, retryWithMergedOptions: () => Response) => Response)[]) => {
+  getData: (partIndex: number, uri: string, headers: Record<string, string>, segOffset: number, isKey: boolean, timeout: number, retry: number, afterResponse: ((res: Response, retryWithMergedOptions: () => Response) => Response)[], identifier: string) => {
     // get file if uri is local
     if (uri.startsWith('file://')) {
       return {
@@ -437,8 +444,7 @@ const extFn = {
           if(error){
             const partType = isKey ? 'Key': 'Part';
             const partIndx = partIndex + 1 + segOffset;
-            console.warn('%s %s: %d attempt to retrieve data', partType, partIndx, retryCount + 1);
-            console.error(`\t${error.message}`);
+            HLSEvents.emit('message', { identifier: identifier, msg: `${partType} ${partIndx}: ${retryCount + 1} attempt to retrieve data\n\t${error.message}`, severity: levels.WARN });
           }
         }
       ]
@@ -449,5 +455,5 @@ const extFn = {
     return got(uri, options);
   }
 };
-    
+
 export default hlsDownload;

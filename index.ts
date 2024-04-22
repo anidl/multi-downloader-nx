@@ -3,7 +3,7 @@ import { ServiceClass } from './@types/serviceClassInterface';
 import { appArgv, overrideArguments } from './modules/module.app-args';
 import * as yamlCfg from './modules/module.cfg-loader';
 import { makeCommand, addToArchive } from './modules/module.downloadArchive';
-
+import buildCLIHandler from './modules/downloadProgress';
 import update from './modules/module.updater';
 
 (async () => {
@@ -70,13 +70,14 @@ import update from './modules/module.updater';
       case 'adn':
         service = new (await import('./adn')).default;
         break;
-      default: 
+      default:
         service = new (await import(`./${argv.service}`)).default;
         break;
       }
       await service.cli();
     }
   } else {
+    buildCLIHandler();
     let service: ServiceClass;
     switch(argv.service) {
     case 'crunchy':
@@ -91,7 +92,7 @@ import update from './modules/module.updater';
     case 'adn':
       service = new (await import('./adn')).default;
       break;
-    default: 
+    default:
       service = new (await import(`./${argv.service}`)).default;
       break;
     }
