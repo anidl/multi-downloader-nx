@@ -566,7 +566,7 @@ export default class Hidive implements ServiceClass {
     }
     const episodeData = JSON.parse(episodeDataReq.res.body) as NewHidiveEpisode;
 
-    if (episodeData.title.includes(' - ')) {
+    if (episodeData.title.includes(' - ') && episodeData.episodeInformation) {
       episodeData.episodeInformation.episodeNumber = parseFloat(episodeData.title.split(' - ')[0].replace('E', ''));
       episodeData.title = episodeData.title.split(' - ')[1];
     }
