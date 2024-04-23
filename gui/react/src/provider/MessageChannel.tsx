@@ -70,7 +70,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    const wss = new WebSocket(`ws://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/public`);
+    const wss = new WebSocket(`${location.protocol == 'https:' ? 'wss' : 'ws'}://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/public`);
     wss.addEventListener('open', () => {
       setPublicWS(wss);
     });
@@ -103,7 +103,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
       });
     }
 
-    const wws = new WebSocket(`ws://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/private?${search}`, );
+    const wws = new WebSocket(`${location.protocol == 'https:' ? 'wss' : 'ws'}://${process.env.NODE_ENV === 'development' ? 'localhost:3000' :  window.location.host}/private?${search}`, );
     wws.addEventListener('open', () => {
       console.log('[INFO] [WS] Connected');
       setSocket(wws);
