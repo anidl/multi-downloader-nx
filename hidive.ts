@@ -369,6 +369,10 @@ export default class Hidive implements ServiceClass {
         season.value.paging.moreDataAvailable = seasonPage.value.paging.moreDataAvailable;
       }
       for (const episode of season.value.episodes) {
+        const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
+        if (datePattern.test(episode.title)) {
+          continue;
+        }
         if (episode.title.includes(' - ')) {
           episode.episodeInformation.episodeNumber = parseFloat(episode.title.split(' - ')[0].replace('E', ''));
           episode.title = episode.title.split(' - ')[1];
@@ -397,6 +401,10 @@ export default class Hidive implements ServiceClass {
     }
     const episodes: Episode[] = [];
     for (const episode of season.value.episodes) {
+      const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
+      if (datePattern.test(episode.title)) {
+        continue;
+      }
       if (episode.title.includes(' - ')) {
         episode.episodeInformation.episodeNumber = parseFloat(episode.title.split(' - ')[0].replace('E', ''));
         episode.title = episode.title.split(' - ')[1];
