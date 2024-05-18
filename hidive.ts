@@ -370,7 +370,7 @@ export default class Hidive implements ServiceClass {
       }
       for (const episode of season.value.episodes) {
         const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
-        if (datePattern.test(episode.title)) {
+        if (datePattern.test(episode.title) && episode.duration === 10) {
           continue;
         }
         if (episode.title.includes(' - ')) {
@@ -402,7 +402,7 @@ export default class Hidive implements ServiceClass {
     const episodes: Episode[] = [];
     for (const episode of season.value.episodes) {
       const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
-      if (datePattern.test(episode.title)) {
+      if (datePattern.test(episode.title) && episode.duration === 10) {
         continue;
       }
       if (episode.title.includes(' - ')) {
