@@ -369,12 +369,15 @@ export default class Hidive implements ServiceClass {
         season.value.paging.moreDataAvailable = seasonPage.value.paging.moreDataAvailable;
       }
       for (const episode of season.value.episodes) {
+        const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
         if (episode.title.includes(' - ')) {
           episode.episodeInformation.episodeNumber = parseFloat(episode.title.split(' - ')[0].replace('E', ''));
           episode.title = episode.title.split(' - ')[1];
         }
         //S${episode.episodeInformation.seasonNumber}E${episode.episodeInformation.episodeNumber} - 
-        episodes.push(episode);
+        if (!datePattern.test(episode.title) && episode.duration !== 10) {
+          episodes.push(episode);
+        }
         console.info(`    [E.${episode.id}] ${episode.title}`);
       }
     }
@@ -397,12 +400,15 @@ export default class Hidive implements ServiceClass {
     }
     const episodes: Episode[] = [];
     for (const episode of season.value.episodes) {
+      const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
       if (episode.title.includes(' - ')) {
         episode.episodeInformation.episodeNumber = parseFloat(episode.title.split(' - ')[0].replace('E', ''));
         episode.title = episode.title.split(' - ')[1];
       }
       //S${episode.episodeInformation.seasonNumber}E${episode.episodeInformation.episodeNumber} - 
-      episodes.push(episode);
+      if (!datePattern.test(episode.title) && episode.duration !== 10) {
+        episodes.push(episode);
+      }
       console.info(`    [E.${episode.id}] ${episode.title}`);
     }
     const series: NewHidiveSeriesExtra = {...season.value.series, season: season.value};
