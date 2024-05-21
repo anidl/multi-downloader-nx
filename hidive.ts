@@ -375,7 +375,7 @@ export default class Hidive implements ServiceClass {
           episode.title = episode.title.split(' - ')[1];
         }
         //S${episode.episodeInformation.seasonNumber}E${episode.episodeInformation.episodeNumber} - 
-        if (!datePattern.test(episode.title) && !episode.duration === 10) {
+        if (!datePattern.test(episode.title) && episode.duration !== 10) {
           episodes.push(episode);
         }
         console.info(`    [E.${episode.id}] ${episode.title}`);
@@ -406,7 +406,7 @@ export default class Hidive implements ServiceClass {
         episode.title = episode.title.split(' - ')[1];
       }
       //S${episode.episodeInformation.seasonNumber}E${episode.episodeInformation.episodeNumber} - 
-      if (!datePattern.test(episode.title) && !episode.duration === 10) {
+      if (!datePattern.test(episode.title) && episode.duration !== 10) {
         episodes.push(episode);
       }
       console.info(`    [E.${episode.id}] ${episode.title}`);
