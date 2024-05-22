@@ -1214,12 +1214,12 @@ export default class Crunchy implements ServiceClass {
       await this.refreshToken(true, true);
       let currentVersion;
       let isPrimary = mMeta.isSubbed;
-      const AuthHeaders = {
+      const AuthHeaders: RequestInit = {
         headers: {
           Authorization: `Bearer ${this.token.access_token}`,
-          'X-Cr-Disable-Drm': 'true'
-        },
-        useProxy: true
+          'X-Cr-Disable-Drm': 'true',
+          'User-Agent': 'Crunchyroll/1.8.0 Nintendo Switch/12.3.12.0 UE4/4.27'
+        }
       };
 
       //Get Media GUID
