@@ -2132,6 +2132,7 @@ export default class Crunchy implements ServiceClass {
       }
 
       if (switchStream) {
+        await this.refreshToken(true, true);
         await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${switchStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
       }
 
