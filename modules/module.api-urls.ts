@@ -33,6 +33,7 @@ export type APIType = {
   cms: string
   beta_browse: string
   beta_cms: string,
+  drm: string;
   /**
    * Web Header
    */
@@ -82,6 +83,7 @@ const api: APIType = {
   cms:               `${domain.api_beta}/content/v2/cms`,
   beta_browse:       `${domain.api_beta}/content/v1/browse`,
   beta_cms:          `${domain.api_beta}/cms/v2`,
+  drm:               `${domain.api_beta}/drm/v1/auth`,
   crunchyAuthHeader: {},
   cruncyhAuthHeaderMob: {},
   crunchyAuthHeaderSwitch: {},

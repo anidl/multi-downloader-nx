@@ -1746,7 +1746,7 @@ export default class Crunchy implements ServiceClass {
               const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
               console.info('Decryption Needed, attempting to decrypt');
 
-              const decReq = await this.req.getData('https://pl.crunchyroll.com/drm/v1/auth', {
+              const decReq = await this.req.getData(`${api.drm}`, {
                 'method': 'POST',
                 'body': JSON.stringify({
                   'accounting_id': 'crunchyroll',
