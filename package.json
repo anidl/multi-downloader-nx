@@ -41,7 +41,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/xmldom": "^0.1.34",
-    "@yao-pkg/pkg": "^5.11.1",
+    "@yao-pkg/pkg": "^5.12.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "ffprobe": "^1.1.2",
@@ -71,7 +71,7 @@
     "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",
-    "@yao-pkg/pkg": "^5.11.1",
+    "@yao-pkg/pkg": "^5.12.0",
     "eslint": "^8.57.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-react": "7.34.1",
