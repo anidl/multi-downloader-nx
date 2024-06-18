@@ -14,7 +14,7 @@
     "react-dom": "^18.2.0",
     "typescript": "^5.4.4",
     "uuid": "^9.0.1",
-    "ws": "^8.16.0"
+    "ws": "^8.17.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.1",
