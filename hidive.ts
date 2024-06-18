@@ -435,7 +435,7 @@ export default class Hidive implements ServiceClass {
     for (let i = 0; i < showData.length; i++) {
       const titleId = showData[i].id;
       const seriesTitle = getShowData.series.title;
-      const seasonTitle = getShowData.series.seasons[showData[i].episodeInformation.seasonNumber-1]?.title;
+      const seasonTitle = getShowData.series.seasons[showData[i].episodeInformation.seasonNumber-1]?.title ?? seriesTitle;
       let nameLong = showData[i].title;
       if (nameLong.match(/OVA/i)) {
         nameLong = 'ova' + (('0' + ovaSeq).slice(-2)); ovaSeq++;

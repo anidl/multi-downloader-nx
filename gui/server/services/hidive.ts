@@ -97,7 +97,7 @@ class HidiveHandler extends Base implements MessageHandler {
         lang: [],
         name: item.title,
         season: item.episodeInformation.seasonNumber+'',
-        seasonTitle: request.series.seasons[item.episodeInformation.seasonNumber-1].title,
+        seasonTitle: request.series.seasons[item.episodeInformation.seasonNumber-1]?.title ?? request.series.title,
         episode: item.episodeInformation.episodeNumber+'',
         id: item.id+'',
         img: item.thumbnailUrl,
