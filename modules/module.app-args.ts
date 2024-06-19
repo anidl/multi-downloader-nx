@@ -5,6 +5,7 @@ import { DownloadInfo } from '../@types/messageHandler';
 import { HLSCallback } from './hls-download';
 import leven from 'leven';
 import { console } from './log';
+import { CrunchyPlayStreams } from '../@types/enums';
 
 let argvC: { 
   [x: string]: unknown; 
@@ -42,7 +43,8 @@ let argvC: {
   extid: string | undefined; 
   q: number; 
   x: number; 
-  kstream: number; 
+  kstream: number;
+  cpstream: keyof typeof CrunchyPlayStreams | 'none';
   partsize: number; 
   hslang: string; 
   dlsubs: string[]; 

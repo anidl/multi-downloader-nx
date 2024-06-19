@@ -1,4 +1,5 @@
 import { aoSearchLocales, dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
+import { CrunchyPlayStreams } from '../@types/enums';
 
 const groups = {
   'auth': 'Authentication:',
@@ -282,6 +283,20 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     service: ['crunchy'],
     type: 'number',
     usage: '${stream}'
+  },
+  {
+    name: 'cpstream',
+    group: 'dl',
+    alias: 'cps',
+    service: ['crunchy'],
+    type: 'string',
+    describe: 'Select specific crunchy play stream by device, or disable stream with "none"',
+    choices: [...Object.keys(CrunchyPlayStreams), 'none'],
+    default: {
+      default: 'chrome'
+    },
+    docDescribe: true,
+    usage: '${device}'
   },
   {
     name: 'hslang',

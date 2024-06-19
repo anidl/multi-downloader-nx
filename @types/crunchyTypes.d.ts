@@ -2,10 +2,12 @@ import { HLSCallback } from 'hls-download';
 import { sxItem } from '../crunchy';
 import { LanguageItem } from '../modules/module.langsData';
 import { DownloadInfo } from './messageHandler';
+import { CrunchyPlayStreams } from './enums';
 
 export type CrunchyDownloadOptions = {
   hslang: string,
   kstream: number,
+  cpstream: keyof typeof CrunchyPlayStreams | 'none',
   novids?: boolean,
   noaudio?: boolean,
   x: number,

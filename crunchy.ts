@@ -44,6 +44,7 @@ import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
 import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 import vtt2ass from './modules/module.vtt2ass';
 import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
+import { CrunchyPlayStreams } from './@types/enums';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -1414,27 +1415,30 @@ export default class Crunchy implements ServiceClass {
         pbData = await playbackReq.res.json() as PlaybackData;
       }
 
-      let switchStream: CrunchyPlayStream | null = null;
-      const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/console/switch/play`, AuthHeaders);
-      if(!playbackReq.ok || !playbackReq.res) {
-        console.error('Non-DRM Request Stream URLs FAILED!');
-      } else {
-        switchStream = await playbackReq.res.json() as CrunchyPlayStream;
-        const derivedPlaystreams = {} as CrunchyStreams;
-        for (const hardsub in switchStream.hardSubs) {
-          const stream = switchStream.hardSubs[hardsub];
-          derivedPlaystreams[hardsub] = {
-            url: stream.url,
-            'hardsub_locale': stream.hlang
+
+      let playStream: CrunchyPlayStream | null = null;
+      if (options.cpstream !== 'none') {
+        const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cpstream]}/play`, AuthHeaders);
+        if (!playbackReq.ok || !playbackReq.res) {
+          console.error('Non-DRM Request Stream URLs FAILED!');
+        } else {
+          playStream = await playbackReq.res.json() as CrunchyPlayStream;
+          const derivedPlaystreams = {} as CrunchyStreams;
+          for (const hardsub in playStream.hardSubs) {
+            const stream = playStream.hardSubs[hardsub];
+            derivedPlaystreams[hardsub] = {
+              url: stream.url,
+              'hardsub_locale': stream.hlang
+            };
+          }
+          derivedPlaystreams[''] = {
+            url: playStream.url,
+            hardsub_locale: ''
+          };
+          pbData.data[0][`adaptive_${options.cpstream}_${playStream.url.includes('m3u8') ? 'hls' : 'dash'}_drm`] = {
+            ...derivedPlaystreams
           };
         }
-        derivedPlaystreams[''] = {
-          url: switchStream.url,
-          hardsub_locale: ''
-        };
-        pbData.data[0]['adaptive_switch_dash'] = {
-          ...derivedPlaystreams
-        };
       }
 
       variables.push(...([
@@ -2131,9 +2135,9 @@ export default class Crunchy implements ServiceClass {
         console.info('Subtitles downloading skipped!');
       }
 
-      if (switchStream) {
+      if (playStream) {
         await this.refreshToken(true, true);
-        await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${switchStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+        await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
       }
 
       await this.sleep(options.waittime);
