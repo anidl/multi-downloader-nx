@@ -614,8 +614,8 @@ export default class Crunchy implements ServiceClass {
     if(item.hide_metadata){
       iMetadata.hide_metadata = item.hide_metadata;
     }
-    const showObjectMetadata = oMetadata.length > 0 && !iMetadata.hide_metadata ? true : false;
-    const showObjectBooleans = oBooleans.length > 0 && !iMetadata.hide_metadata ? true : false;
+    const showObjectMetadata = oMetadata.length > 0 && !iMetadata.hide_metadata;
+    const showObjectBooleans = oBooleans.length > 0 && !iMetadata.hide_metadata;
     // make obj ids
     const objects_ids: string[] = [];
     objects_ids.push(oTypes[item.type as keyof typeof oTypes] + ':' + item.id);
@@ -670,7 +670,7 @@ export default class Crunchy implements ServiceClass {
       console.info(
         '%s- Availability notes: %s',
         ''.padStart(pad + 2, ' '),
-        item.availability_notes.replace(/\[[^\]]*\]?/gm, '')
+        item.availability_notes.replace(/\[[^\]]*]?/gm, '')
       );
     }
     if(item.type == 'series' && getSeries){
@@ -753,7 +753,7 @@ export default class Crunchy implements ServiceClass {
       return;
     }
     for(const item of movieListing.data){
-      this.logObject(item, pad, false, false);
+      await this.logObject(item, pad, false, false);
     }
 
     //Movies
@@ -764,7 +764,7 @@ export default class Crunchy implements ServiceClass {
     }
     const moviesList = await moviesListReq.res.json();
     for(const item of moviesList.data){
-      this.logObject(item, pad+2);
+      await this.logObject(item, pad + 2);
     }
   }
 
@@ -822,7 +822,7 @@ export default class Crunchy implements ServiceClass {
       return { isOk: false, reason: new Error('Show request failed. No more information provided.') };
     }
     const showInfo = await showInfoReq.res.json();
-    this.logObject(showInfo.data[0], 0);
+    await this.logObject(showInfo.data[0], 0);
 
     let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info
@@ -1211,7 +1211,7 @@ export default class Crunchy implements ServiceClass {
       // Make sure we have a media id without a : in it
       const currentMediaId = (mMeta.mediaId.includes(':') ? mMeta.mediaId.split(':')[1] : mMeta.mediaId);
 
-      //Make sure token is up to date
+      //Make sure token is up-to-date
       await this.refreshToken(true, true);
       let currentVersion;
       let isPrimary = mMeta.isSubbed;
@@ -1418,7 +1418,7 @@ export default class Crunchy implements ServiceClass {
 
       let playStream: CrunchyPlayStream | null = null;
       if (options.cstream !== 'none') {
-        const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cstream]}/play`, AuthHeaders);
+        const playbackReq = await this.req.getData(`https://cr-play-service.stg.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cstream]}/play`, AuthHeaders);
         if (!playbackReq.ok || !playbackReq.res) {
           console.error('Non-DRM Request Stream URLs FAILED!');
         } else {
@@ -1517,7 +1517,7 @@ export default class Crunchy implements ServiceClass {
             if(s.hardsub_lang == '-'){
               return false;
             }
-            return s.hardsub_lang == options.hslang ? true : false;
+            return s.hardsub_lang == options.hslang;
           });
         }
         else{
@@ -1529,10 +1529,7 @@ export default class Crunchy implements ServiceClass {
         }
       } else {
         streams = streams.filter((s) => {
-          if(s.hardsub_lang != '-'){
-            return false;
-          }
-          return true;
+          return s.hardsub_lang == '-';
         });
         if(streams.length < 1){
           console.warn('Raw streams not available!');
@@ -1893,7 +1890,7 @@ export default class Crunchy implements ServiceClass {
               // set plQualityStr
               const plBandwidth  = Math.round(pl.attributes.BANDWIDTH/1024);
               const qualityStrAdd   = `${plResolutionText} (${plBandwidth}KiB/s)`;
-              const qualityStrRegx  = new RegExp(qualityStrAdd.replace(/(:|\(|\)|\/)/g, '\\$1'), 'm');
+              const qualityStrRegx  = new RegExp(qualityStrAdd.replace(/([:()/])/g, '\\$1'), 'm');
               const qualityStrMatch = !plQuality.map(a => a.str).join('\r\n').match(qualityStrRegx);
               if(qualityStrMatch){
                 plQuality.push({
@@ -2530,7 +2527,7 @@ export default class Crunchy implements ServiceClass {
     }
     const showInfo = await showInfoReq.res.json();
     if (log)
-      this.logObject(showInfo, 0);
+      await this.logObject(showInfo, 0);
 
     let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info

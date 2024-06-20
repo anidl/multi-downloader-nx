@@ -213,7 +213,7 @@ export default class AnimeOnegai implements ServiceClass {
     }
     //Item is movie, lets define it manually
     if (series.data.asset_type === 1 && series.seasons.length === 0) {
-      let lang: string | undefined = undefined;
+      let lang: string | undefined;
       if (this.jpnStrings.some(str => series.data.title.includes(str))) lang = 'ja';
       else if (this.porStrings.some(str => series.data.title.includes(str))) lang = 'pt';
       else if (this.spaStrings.some(str => series.data.title.includes(str))) lang = 'es';
