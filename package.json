@@ -72,7 +72,6 @@
     "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
-    "@yao-pkg/pkg": "^5.11.1",
     "eslint": "^8.57.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-react": "7.34.3",
@@ -80,7 +79,7 @@
     "removeNPMAbsolutePaths": "^3.0.1",
     "ts-node": "^10.9.2",
     "ts-proto": "^1.180.0",
-    "typescript": "5.4.5",
+    "typescript": "5.5.2",
     "typescript-eslint": "7.13.1"
   },
   "scripts": {
