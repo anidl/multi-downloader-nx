@@ -5,6 +5,8 @@ import modulesCleanup from 'removeNPMAbsolutePaths';
 import { exec } from '@yao-pkg/pkg';
 import { execSync } from 'child_process';
 import { console } from './log';
+import esbuild from 'esbuild';
+import path from 'path';
 
 const buildsDir = './_builds';
 const nodeVer = 'node18-';
@@ -43,8 +45,32 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
     fs.removeSync(buildDir);
   }
   fs.mkdirSync(buildDir);
+  console.info('Running esbuild');
+
+  const build = await esbuild.build({
+    entryPoints: [
+      gui ? 'gui.js' : 'index.js',
+    ],
+    sourceRoot: './',
+    bundle: true,
+    platform: 'node',
+    format: 'cjs',
+    treeShaking: true,
+    // External source map for debugging
+    sourcemap: true,
+    // Minify and keep the original names
+    minify: true,
+    keepNames: true,
+    outfile: path.join(buildsDir, 'index.cjs'),
+    metafile: true,
+    external: ['cheerio']
+  });
+
+  if (build.errors?.length > 0) console.error(build.errors);
+  if (build.warnings?.length > 0) console.warn(build.warnings);
+
   const buildConfig = [
-    gui ? 'gui.js' : 'index.js',
+    `${buildsDir}/index.cjs`,
     '--target', nodeVer + buildType,
     '--output', `${buildDir}/${pkg.short_name}`,
     '--compress', 'GZip'
