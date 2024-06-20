@@ -1,4 +1,4 @@
-# multi-downloader-nx (5.0.4b1v)
+# multi-downloader-nx (5.0.4b3v)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -180,6 +180,12 @@ Select the server to use
 | Crunchyroll | `--kstream ${stream}` | `number` | `No`| `-k` | [`1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`] | `1`| `kstream: ` |
 
 Select specific stream
+#### `--cpstream`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--cpstream ${device}` | `string` | `No`| `--cps` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `samsungtv`, `lgtv`, `rokutv`, `android`, `iphone`, `ipad`, `none`] | `chrome`| `cpstream: ` |
+
+Select specific crunchy play stream by device, or disable stream with "none"
 #### `--hslang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
