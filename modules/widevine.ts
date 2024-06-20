@@ -16,7 +16,7 @@ try {
     const stats = fs.statSync(file);
     if (stats.size < 1024*8 && stats.isFile()) {
       const fileContents = fs.readFileSync(file, {'encoding': 'utf8'});
-      if (fileContents.includes('-BEGIN RSA PRIVATE KEY-')) {
+      if (fileContents.includes('-BEGIN PRIVATE KEY-') || fileContents.includes('-BEGIN RSA PRIVATE KEY-')) {
         privateKey = fs.readFileSync(file);
       }
       if (fileContents.includes('widevine_cdm_version')) {
