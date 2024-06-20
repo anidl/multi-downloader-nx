@@ -31,6 +31,7 @@ const languages: LanguageItem[] = [
   { locale: 'zh', code: 'cmn', name: 'Chinese (Mandarin, PRC)' },
   { cr_locale: 'zh-CN', locale: 'zh-CN', code: 'zho', name: 'Chinese (Mainland China)' },
   { cr_locale: 'zh-TW', locale: 'zh-TW', code: 'chi', name: 'Chinese (Taiwan)' },
+  { cr_locale: 'zh-HK', locale: 'zh-HK', code: 'zh-HK', name: 'Chinese (Hong-Kong)', language: '中文 (粵語)' },
   { cr_locale: 'ko-KR', hd_locale: 'Korean', locale: 'ko', code: 'kor', name: 'Korean' },
   { cr_locale: 'ca-ES', locale: 'ca-ES', code: 'cat', name: 'Catalan' },
   { cr_locale: 'pl-PL', locale: 'pl-PL', code: 'pol', name: 'Polish' },
