@@ -44,7 +44,7 @@ let argvC: {
   q: number; 
   x: number; 
   kstream: number;
-  cpstream: keyof typeof CrunchyPlayStreams | 'none';
+  cstream: keyof typeof CrunchyPlayStreams | 'none';
   partsize: number; 
   hslang: string; 
   dlsubs: string[]; 

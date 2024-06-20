@@ -285,9 +285,9 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${stream}'
   },
   {
-    name: 'cpstream',
+    name: 'cstream',
     group: 'dl',
-    alias: 'cps',
+    alias: 'cs',
     service: ['crunchy'],
     type: 'string',
     describe: 'Select specific crunchy play stream by device, or disable stream with "none"',

@@ -1417,8 +1417,8 @@ export default class Crunchy implements ServiceClass {
 
 
       let playStream: CrunchyPlayStream | null = null;
-      if (options.cpstream !== 'none') {
-        const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cpstream]}/play`, AuthHeaders);
+      if (options.cstream !== 'none') {
+        const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cstream]}/play`, AuthHeaders);
         if (!playbackReq.ok || !playbackReq.res) {
           console.error('Non-DRM Request Stream URLs FAILED!');
         } else {
@@ -1435,7 +1435,7 @@ export default class Crunchy implements ServiceClass {
             url: playStream.url,
             hardsub_locale: ''
           };
-          pbData.data[0][`adaptive_${options.cpstream}_${playStream.url.includes('m3u8') ? 'hls' : 'dash'}_drm`] = {
+          pbData.data[0][`adaptive_${options.cstream}_${playStream.url.includes('m3u8') ? 'hls' : 'dash'}_drm`] = {
             ...derivedPlaystreams
           };
         }

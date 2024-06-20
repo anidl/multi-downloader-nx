@@ -7,7 +7,7 @@ import { CrunchyPlayStreams } from './enums';
 export type CrunchyDownloadOptions = {
   hslang: string,
   kstream: number,
-  cpstream: keyof typeof CrunchyPlayStreams | 'none',
+  cstream: keyof typeof CrunchyPlayStreams | 'none',
   novids?: boolean,
   noaudio?: boolean,
   x: number,
