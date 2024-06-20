@@ -180,10 +180,10 @@ Select the server to use
 | Crunchyroll | `--kstream ${stream}` | `number` | `No`| `-k` | [`1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`] | `1`| `kstream: ` |
 
 Select specific stream
-#### `--cpstream`
+#### `--cstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--cpstream ${device}` | `string` | `No`| `--cps` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `samsungtv`, `lgtv`, `rokutv`, `android`, `iphone`, `ipad`, `none`] | `chrome`| `cpstream: ` |
+| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `samsungtv`, `lgtv`, `rokutv`, `android`, `iphone`, `ipad`, `none`] | `chrome`| `cstream: ` |
 
 Select specific crunchy play stream by device, or disable stream with "none"
 #### `--hslang`
