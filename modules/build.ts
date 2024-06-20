@@ -9,7 +9,7 @@ import esbuild from 'esbuild';
 import path from 'path';
 
 const buildsDir = './_builds';
-const nodeVer = 'node18-';
+const nodeVer = 'node20-';
 
 type BuildTypes = `${'windows'|'macos'|'linux'|'linuxstatic'|'alpine'}-${'x64'|'arm64'}`|'linuxstatic-armv7'
 

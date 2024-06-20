@@ -17,7 +17,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: 20
         check-latest: true
     - run: pnpm i 
     - run: npx eslint .
@@ -32,7 +32,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: 20
         check-latest: true
     - run: pnpm i 
     - run: pnpm run test
