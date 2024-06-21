@@ -41,7 +41,7 @@ export type APIType = {
   /**
    * Mobile Header
    */
-  cruncyhAuthHeaderMob: Record<string, string>,
+  crunchyAuthHeaderMob: Record<string, string>,
   /**
    * Switch Header
    */
@@ -85,7 +85,7 @@ const api: APIType = {
   beta_cms:          `${domain.api_beta}/cms/v2`,
   drm:               `${domain.api_beta}/drm/v1/auth`,
   crunchyAuthHeader: {},
-  cruncyhAuthHeaderMob: {},
+  crunchyAuthHeaderMob: {},
   crunchyAuthHeaderSwitch: {},
   //hidive API
   hd_apikey:        '508efd7b42d546e19cc24f4d0b414e57e351ca73',
@@ -104,9 +104,11 @@ const api: APIType = {
 api.crunchyAuthHeader = { 
   Authorization: api.authBasic,
 };
-api.cruncyhAuthHeaderMob = { 
+
+api.crunchyAuthHeaderMob = {
   Authorization: api.authBasicMob,
 };
+
 api.crunchyAuthHeaderSwitch = { 
   Authorization: api.authBasicSwitch,
 };
