@@ -233,7 +233,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.crunchyAuthHeaderSwitch,
+      headers: api.crunchyAuthHeader,
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -256,7 +256,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.crunchyAuthHeaderSwitch,
+      headers: api.crunchyAuthHeader,
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -300,13 +300,12 @@ export default class Crunchy implements ServiceClass {
 
   public async loginWithToken(refreshToken: string) {
     const authData = new URLSearchParams({
-      'refresh_token': refreshToken,
-      'grant_type': 'refresh_token',
+      'grant_type': 'etp_rt_cookie',
       'scope': 'offline_access'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.crunchyAuthHeaderSwitch,
+      headers: {...api.crunchyAuthHeader, Cookie: `etp_rt=${refreshToken}`},
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -337,13 +336,12 @@ export default class Crunchy implements ServiceClass {
         //console.info('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
       }
       const authData = new URLSearchParams({
-        'refresh_token': this.token.refresh_token,
-        'grant_type': 'refresh_token',
+        'grant_type': 'etp_rt_cookie',
         'scope': 'offline_access'
       }).toString();
       const authReqOpts: reqModule.Params = {
         method: 'POST',
-        headers: api.crunchyAuthHeaderSwitch,
+        headers: {...api.crunchyAuthHeader, Cookie: `etp_rt=${this.token.refresh_token}`},
         body: authData
       };
       const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -1219,7 +1217,8 @@ export default class Crunchy implements ServiceClass {
         headers: {
           Authorization: `Bearer ${this.token.access_token}`,
           'X-Cr-Disable-Drm': 'true',
-          'User-Agent': 'Crunchyroll/1.8.0 Nintendo Switch/12.3.12.0 UE4/4.27'
+          //'X-Cr-Segment-CDN': 'prod',
+          //'User-Agent': 'Crunchyroll/1.8.0 Nintendo Switch/12.3.12.0 UE4/4.27'
         }
       };
 
