@@ -1217,7 +1217,9 @@ export default class Crunchy implements ServiceClass {
         headers: {
           Authorization: `Bearer ${this.token.access_token}`,
           'X-Cr-Disable-Drm': 'true',
-          //'X-Cr-Segment-CDN': 'prod',
+          'X-Cr-Enable-Drm': 'false',
+          'X-Cr-Stream-Limits': 'false',
+          //'X-Cr-Segment-CDN': 'all',
           //'User-Agent': 'Crunchyroll/1.8.0 Nintendo Switch/12.3.12.0 UE4/4.27'
         }
       };
