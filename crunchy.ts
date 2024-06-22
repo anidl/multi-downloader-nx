@@ -1350,7 +1350,7 @@ export default class Crunchy implements ServiceClass {
         }
       }
 
-      let pbData = { total: 0, data: {}, meta: {} } as PlaybackData;
+      let pbData = { total: 0, data: [{}], meta: {} } as PlaybackData;
       if (this.api == 'android') {
         const videoStreamsReq = [
           api.beta_cms,
@@ -1392,7 +1392,7 @@ export default class Crunchy implements ServiceClass {
         const pbDataAndroid = await playbackReq.res.json() as CrunchyAndroidStreams;
         pbData = {
           total: 0,
-          data: [pbDataAndroid.streams],
+          data: [{}/*pbDataAndroid.streams*/],
           meta: {
             audio_locale: pbDataAndroid.audio_locale,
             bifs: pbDataAndroid.bifs,
@@ -1414,6 +1414,7 @@ export default class Crunchy implements ServiceClass {
           }
         }
         pbData = await playbackReq.res.json() as PlaybackData;
+        pbData.data = [{}];
       }
 
 
