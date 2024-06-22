@@ -1568,6 +1568,12 @@ export default class Crunchy implements ServiceClass {
         } else {
           const streamPlaylistBody = await streamPlaylistsReq.res.text();
           if (streamPlaylistBody.match('MPD')) {
+            //We have the stream, so go ahead and delete the active stream
+            if (playStream) {
+              await this.refreshToken(true, true);
+              await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+            }
+
             //Parse MPD Playlists
             const streamPlaylists = await parse(streamPlaylistBody, langsData.findLang(langsData.fixLanguageTag(pbData.meta.audio_locale as string) || ''), curStream.url.match(/.*\.urlset\//)[0]);
 
@@ -1952,6 +1958,12 @@ export default class Crunchy implements ServiceClass {
                 console.error('CAN\'T FETCH VIDEO PLAYLIST!');
                 dlFailed = true;
               } else {
+                // We have the stream, so go ahead and delete the active stream
+                if (playStream) {
+                  await this.refreshToken(true, true);
+                  await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+                }
+
                 const chunkPageBody = await chunkPage.res.text();
                 const chunkPlaylist = m3u8(chunkPageBody);
                 const totalParts = chunkPlaylist.segments.length;
@@ -2129,11 +2141,6 @@ export default class Crunchy implements ServiceClass {
         }
       } else{
         console.info('Subtitles downloading skipped!');
-      }
-
-      if (playStream) {
-        await this.refreshToken(true, true);
-        await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
       }
 
       await this.sleep(options.waittime);
