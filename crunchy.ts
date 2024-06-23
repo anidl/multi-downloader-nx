@@ -2165,8 +2165,6 @@ export default class Crunchy implements ServiceClass {
     }
     const merger = new Merger({
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -2174,8 +2172,6 @@ export default class Crunchy implements ServiceClass {
       }) : [],
       skipSubMux: options.skipSubMux,
       onlyAudio: hasAudioStreams ? data.filter(a => a.type === 'Audio').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -2183,12 +2179,6 @@ export default class Crunchy implements ServiceClass {
       }) : [],
       output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
-        if (a.type === 'Video')
-          throw new Error('Never');
-        if (a.type === 'Audio')
-          throw new Error('Never');
-        if (a.type === 'Chapters')
-          throw new Error('Never');
         return {
           file: a.path,
           language: a.language,
@@ -2200,20 +2190,12 @@ export default class Crunchy implements ServiceClass {
       keepAllVideos: options.keepAllVideos,
       fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
       videoAndAudio: hasAudioStreams ? [] : data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
         };
       }),
       chapters: data.filter(a => a.type === 'Chapters').map((a) : MergerInput => {
-        if (a.type === 'Video')
-          throw new Error('Never');
-        if (a.type === 'Audio')
-          throw new Error('Never');
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           path: a.path,
           lang: a.lang
