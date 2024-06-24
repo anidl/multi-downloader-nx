@@ -233,7 +233,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.crunchyAuthHeader,
+      headers: api.crunchyAuthHeaderMob,
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -256,7 +256,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.crunchyAuthHeader,
+      headers: api.crunchyAuthHeaderMob,
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -300,12 +300,14 @@ export default class Crunchy implements ServiceClass {
 
   public async loginWithToken(refreshToken: string) {
     const authData = new URLSearchParams({
-      'grant_type': 'etp_rt_cookie',
+      'refresh_token': this.token.refresh_token,
+      'grant_type': 'refresh_token',
+      //'grant_type': 'etp_rt_cookie',
       'scope': 'offline_access'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: {...api.crunchyAuthHeader, Cookie: `etp_rt=${refreshToken}`},
+      headers: {...api.crunchyAuthHeaderMob, Cookie: `etp_rt=${refreshToken}`},
       body: authData
     };
     const authReq = await this.req.getData(api.beta_auth, authReqOpts);
@@ -336,12 +338,14 @@ export default class Crunchy implements ServiceClass {
         //console.info('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
       }
       const authData = new URLSearchParams({
-        'grant_type': 'etp_rt_cookie',
+        'refresh_token': this.token.refresh_token,
+        'grant_type': 'refresh_token',
+        //'grant_type': 'etp_rt_cookie',
         'scope': 'offline_access'
       }).toString();
       const authReqOpts: reqModule.Params = {
         method: 'POST',
-        headers: {...api.crunchyAuthHeader, Cookie: `etp_rt=${this.token.refresh_token}`},
+        headers: {...api.crunchyAuthHeaderMob, Cookie: `etp_rt=${this.token.refresh_token}`},
         body: authData
       };
       const authReq = await this.req.getData(api.beta_auth, authReqOpts);
