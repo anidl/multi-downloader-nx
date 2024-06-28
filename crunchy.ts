@@ -256,6 +256,8 @@ export default class Crunchy implements ServiceClass {
     const authData = new URLSearchParams({
       'grant_type': 'client_id',
       'scope': 'offline_access',
+      'device_id': randomUUID(),
+      'device_type': 'Chrome on Windows'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
@@ -306,7 +308,9 @@ export default class Crunchy implements ServiceClass {
       'refresh_token': this.token.refresh_token,
       'grant_type': 'refresh_token',
       //'grant_type': 'etp_rt_cookie',
-      'scope': 'offline_access'
+      'scope': 'offline_access',
+      'device_id': randomUUID(),
+      'device_type': 'Chrome on Windows'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
@@ -344,7 +348,9 @@ export default class Crunchy implements ServiceClass {
         'refresh_token': this.token.refresh_token,
         'grant_type': 'refresh_token',
         //'grant_type': 'etp_rt_cookie',
-        'scope': 'offline_access'
+        'scope': 'offline_access',
+        'device_id': randomUUID(),
+        'device_type': 'Chrome on Windows'
       }).toString();
       const authReqOpts: reqModule.Params = {
         method: 'POST',
