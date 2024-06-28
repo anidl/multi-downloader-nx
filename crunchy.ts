@@ -226,12 +226,13 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async doAuth(data: AuthData): Promise<AuthResponse> {
+    const uuid = randomUUID();
     const authData = new URLSearchParams({
       'username': data.username,
       'password': data.password,
       'grant_type': 'password',
       'scope': 'offline_access',
-      'device_id': randomUUID(),
+      'device_id': uuid,
       'device_type': 'Chrome on Windows'
     }).toString();
     const authReqOpts: reqModule.Params = {
@@ -245,6 +246,7 @@ export default class Crunchy implements ServiceClass {
       return { isOk: false, reason: new Error('Authentication failed') };
     }
     this.token = await authReq.res.json();
+    this.token.device_id = uuid;
     this.token.expires = new Date(Date.now() + this.token.expires_in);
     yamlCfg.saveCRToken(this.token);
     await this.getProfile();
@@ -253,10 +255,11 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async doAnonymousAuth(){
+    const uuid = randomUUID();
     const authData = new URLSearchParams({
       'grant_type': 'client_id',
       'scope': 'offline_access',
-      'device_id': randomUUID(),
+      'device_id': uuid,
       'device_type': 'Chrome on Windows'
     }).toString();
     const authReqOpts: reqModule.Params = {
@@ -270,6 +273,7 @@ export default class Crunchy implements ServiceClass {
       return;
     }
     this.token = await authReq.res.json();
+    this.token.device_id = uuid;
     this.token.expires = new Date(Date.now() + this.token.expires_in);
     yamlCfg.saveCRToken(this.token);
   }
@@ -304,12 +308,13 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async loginWithToken(refreshToken: string) {
+    const uuid = randomUUID();
     const authData = new URLSearchParams({
       'refresh_token': this.token.refresh_token,
       'grant_type': 'refresh_token',
       //'grant_type': 'etp_rt_cookie',
       'scope': 'offline_access',
-      'device_id': randomUUID(),
+      'device_id': uuid,
       'device_type': 'Chrome on Windows'
     }).toString();
     const authReqOpts: reqModule.Params = {
@@ -326,6 +331,7 @@ export default class Crunchy implements ServiceClass {
       return;
     }
     this.token = await authReq.res.json();
+    this.token.device_id = uuid;
     this.token.expires = new Date(Date.now() + this.token.expires_in);
     yamlCfg.saveCRToken(this.token);
     await this.getProfile(false);
@@ -344,12 +350,13 @@ export default class Crunchy implements ServiceClass {
       } else {
         //console.info('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');
       }
+      const uuid = this.token.device_id || randomUUID();
       const authData = new URLSearchParams({
         'refresh_token': this.token.refresh_token,
         'grant_type': 'refresh_token',
         //'grant_type': 'etp_rt_cookie',
         'scope': 'offline_access',
-        'device_id': randomUUID(),
+        'device_id': uuid,
         'device_type': 'Chrome on Windows'
       }).toString();
       const authReqOpts: reqModule.Params = {
@@ -366,6 +373,7 @@ export default class Crunchy implements ServiceClass {
         return;
       }
       this.token = await authReq.res.json();
+      this.token.device_id = uuid;
       this.token.expires = new Date(Date.now() + this.token.expires_in);
       yamlCfg.saveCRToken(this.token);
     }
