@@ -75,7 +75,7 @@ const api: APIType = {
   // beta api
   beta_auth:         `${domain.api_beta}/auth/v1/token`,
   authBasic:         'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
-  authBasicMob:      'Basic d2piMV90YThta3Y3X2t4aHF6djc6MnlSWlg0Y0psX28yMzRqa2FNaXRTbXNLUVlGaUpQXzU=',
+  authBasicMob:      'Basic dXU4aG0wb2g4dHFpOWV0eXl2aGo6SDA2VnVjRnZUaDJ1dEYxM0FBS3lLNE85UTRhX3BlX1o=',
   authBasicSwitch:   'Basic dC1rZGdwMmg4YzNqdWI4Zm4wZnE6eWZMRGZNZnJZdktYaDRKWFMxTEVJMmNDcXUxdjVXYW4=',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
@@ -107,6 +107,7 @@ api.crunchyAuthHeader = {
 
 api.crunchyAuthHeaderMob = {
   Authorization: api.authBasicMob,
+  'user-agent': 'Crunchyroll/3.60.0 Android/9 okhttp/4.12.0'
 };
 
 api.crunchyAuthHeaderSwitch = { 

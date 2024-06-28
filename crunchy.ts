@@ -45,6 +45,7 @@ import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/cru
 import vtt2ass from './modules/module.vtt2ass';
 import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
 import { CrunchyPlayStreams } from './@types/enums';
+import { randomUUID } from 'node:crypto';
 
 export type sxItem = {
   language: langsData.LanguageItem,
@@ -229,7 +230,9 @@ export default class Crunchy implements ServiceClass {
       'username': data.username,
       'password': data.password,
       'grant_type': 'password',
-      'scope': 'offline_access'
+      'scope': 'offline_access',
+      'device_id': randomUUID(),
+      'device_type': 'Chrome on Windows'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
