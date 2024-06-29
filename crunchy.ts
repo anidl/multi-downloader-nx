@@ -1584,6 +1584,14 @@ export default class Crunchy implements ServiceClass {
 
       let tsFile = undefined;
 
+      // Delete the stream if it's not needed
+      if (options.novids && options.noaudio) {
+        if (playStream) {
+          await this.refreshToken(true, true);
+          await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+        }
+      }
+
       if(!dlFailed && curStream !== undefined && !(options.novids && options.noaudio)){
         const streamPlaylistsReq = await this.req.getData(curStream.url, AuthHeaders);
         if(!streamPlaylistsReq.ok || !streamPlaylistsReq.res){
