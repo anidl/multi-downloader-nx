@@ -31,7 +31,7 @@ import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList'
 import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-import { CrunchyStreams, PlaybackData } from './@types/playbackData';
+import { CrunchyStreams, PlaybackData, Subtitles } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
@@ -1371,73 +1371,7 @@ export default class Crunchy implements ServiceClass {
         }
       }
 
-      let pbData = { total: 0, data: [{}], meta: {} } as PlaybackData;
-      if (this.api == 'android') {
-        const videoStreamsReq = [
-          api.beta_cms,
-          `${this.cmsToken.cms.bucket}/videos/${mediaId}/streams`,
-          '?',
-          new URLSearchParams({
-            'force_locale': '',
-            'preferred_audio_language': 'ja-JP',
-            'locale': this.locale,
-            'Policy': this.cmsToken.cms.policy,
-            'Signature': this.cmsToken.cms.signature,
-            'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
-          }),
-        ].join('');
-
-        let playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
-        if(!playbackReq.ok || !playbackReq.res){
-          console.error('Request Stream URLs FAILED! Attempting fallback');
-
-          const videoStreamsReq = [
-            domain.api_beta,
-            mMeta.playback,
-            '?',
-            new URLSearchParams({
-              'force_locale': '',
-              'preferred_audio_language': 'ja-JP',
-              'locale': this.locale,
-              'Policy': this.cmsToken.cms.policy,
-              'Signature': this.cmsToken.cms.signature,
-              'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
-            }),
-          ].join('');
-          playbackReq = await this.req.getData(videoStreamsReq as string, AuthHeaders);
-          if(!playbackReq.ok || !playbackReq.res){
-            console.error('Fallback Request Stream URLs FAILED!');
-            return undefined;
-          }
-        }
-        const pbDataAndroid = await playbackReq.res.json() as CrunchyAndroidStreams;
-        pbData = {
-          total: 0,
-          data: [{}/*pbDataAndroid.streams*/],
-          meta: {
-            audio_locale: pbDataAndroid.audio_locale,
-            bifs: pbDataAndroid.bifs,
-            captions: pbDataAndroid.captions,
-            closed_captions: pbDataAndroid.closed_captions,
-            media_id: pbDataAndroid.media_id,
-            subtitles: pbDataAndroid.subtitles,
-            versions: pbDataAndroid.versions
-          }
-        };
-      } else {
-        let playbackReq = await this.req.getData(`${api.cms}/videos/${mediaId}/streams`, AuthHeaders);
-        if(!playbackReq.ok || !playbackReq.res){
-          console.error('Request Stream URLs FAILED! Attempting fallback');
-          playbackReq = await this.req.getData(`${domain.api_beta}${mMeta.playback}`, AuthHeaders);
-          if(!playbackReq.ok || !playbackReq.res){
-            console.error('Fallback Request Stream URLs FAILED!');
-            return undefined;
-          }
-        }
-        pbData = await playbackReq.res.json() as PlaybackData;
-        pbData.data = [{}];
-      }
-
+      const pbData = { total: 0, data: [{}], meta: {} } as PlaybackData;
 
       let playStream: CrunchyPlayStream | null = null;
       if (options.cstream !== 'none') {
@@ -1457,6 +1391,15 @@ export default class Crunchy implements ServiceClass {
           derivedPlaystreams[''] = {
             url: playStream.url,
             hardsub_locale: ''
+          };
+          pbData.meta = {
+            audio_locale: playStream.audioLocale,
+            bifs: [playStream.bifs],
+            captions: playStream.captions,
+            closed_captions: playStream.captions,
+            media_id: playStream.assetId,
+            subtitles: playStream.subtitles,
+            versions: playStream.versions
           };
           pbData.data[0][`adaptive_${options.cstream}_${playStream.url.includes('m3u8') ? 'hls' : 'dash'}_drm`] = {
             ...derivedPlaystreams
@@ -2098,7 +2041,7 @@ export default class Crunchy implements ServiceClass {
           const subsData = Object.values(pbData.meta.subtitles);
           const capsData = Object.values(pbData.meta.closed_captions);
           const subsDataMapped = subsData.map((s) => {
-            const subLang = langsData.fixAndFindCrLC(s.locale);
+            const subLang = langsData.fixAndFindCrLC(s.language);
             return {
               ...s,
               isCC: false,
@@ -2107,7 +2050,7 @@ export default class Crunchy implements ServiceClass {
             };
           }).concat(
             capsData.map((s) => {
-              const subLang = langsData.fixAndFindCrLC(s.locale);
+              const subLang = langsData.fixAndFindCrLC(s.language);
               return {
                 ...s,
                 isCC: true,

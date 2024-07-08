@@ -1,6 +1,8 @@
+import { Locale } from './playbackData';
+
 export interface CrunchyPlayStream {
   assetId:        string;
-  audioLocale:    string;
+  audioLocale:    Locale;
   bifs:           string;
   burnedInLocale: string;
   captions:       { [key: string]: Caption };

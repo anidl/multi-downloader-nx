@@ -59,11 +59,11 @@ export interface Meta {
   versions:        Version[];
   audio_locale:    Locale;
   closed_captions: Subtitles;
-  captions:        Record<unknown>;
+  captions:        Subtitles;
 }
 
 export interface Subtitles {
-  '':        SubtitleInfo;
+  ''?:       SubtitleInfo;
   'en-US'?:  SubtitleInfo;
   'es-LA'?:  SubtitleInfo;
   'es-419'?: SubtitleInfo;
