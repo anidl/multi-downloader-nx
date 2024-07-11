@@ -57,6 +57,9 @@ const parseSelect = (selectString: string, but = false) : {
       } else if (part.match(/[A-Z]{3}\.[0-9]*/)) {
         select.push(part);
         return;
+      } else if (part.match(/E?\d+\s\(NC\)/)) {
+        select.push(part);
+        return;
       }
       const match = part.match(/[A-Za-z]+/);
       if (match && match.length > 0) {
@@ -85,6 +88,9 @@ const parseSelect = (selectString: string, but = false) : {
       return st.some(st => {
         const match = st.match(/[A-Za-z]+/);
         if (st.match(/[0-9A-Z]{9}/)) {
+          const included = select.includes(st);
+          return but ? !included : included;
+        } else if (st.match(/E?\d+\s\(NC\)/)) {
           const included = select.includes(st);
           return but ? !included : included;
         } else if (match && match.length > 0) {
