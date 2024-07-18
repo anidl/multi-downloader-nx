@@ -67,7 +67,7 @@ export class Req {
     }
     // debug
     if(this.debug){
-      console.debug('[DEBUG] GOT OPTIONS:');
+      console.debug('[DEBUG] FETCH OPTIONS:');
       console.debug(options);
     }
     // try do request
