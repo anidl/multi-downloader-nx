@@ -216,19 +216,16 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       method: 'POST',  
       headers: {
         Authorization: `Bearer ${this.token.accessToken}`,
-        'Cookie': `adnrt=${this.token.refreshToken}`,
-        'X-Access-Token': this.token.accessToken
+        'X-Access-Token': this.token.accessToken,
+        'content-type': 'application/json'
       },
-      body: '{}'
+      body: JSON.stringify({refreshToken: this.token.refreshToken})
     });
     if(!authReq.ok || !authReq.res){
       console.error('Token refresh failed!');
       return { isOk: false, reason: new Error('Token refresh failed') };
     }
     this.token = await authReq.res.json();
-    const cookies = this.parseCookies(authReq.res.headers.get('Set-Cookie'));
-    //this.token.refreshtoken = this.token.refreshToken;
-    this.token.refreshToken = cookies.adnrt;
     yamlCfg.saveADNToken(this.token);
     return { isOk: true, value: undefined };
   }
