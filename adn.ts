@@ -204,8 +204,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       return { isOk: false, reason: new Error('Authentication failed') };
     }
     this.token = await authReq.res.json();
-    const cookies = this.parseCookies(authReq.res.headers.get('Set-Cookie'));
-    this.token.refreshToken = cookies.adnrt;
     yamlCfg.saveADNToken(this.token);
     console.info('Authentication Success');
     return { isOk: true, value: undefined };
