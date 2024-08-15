@@ -61,6 +61,6 @@ jobs:
         github-token: ${{ github.token }}
         push: true
         tags: |
-          "izuco/multi-downloader-nx:${{ github.event.release.tag_name }}"
+          "multidl/multi-downloader-nx:${{ github.event.release.tag_name }}"
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
