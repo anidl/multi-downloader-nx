@@ -458,7 +458,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 
     const configReq = await this.req.getData(`https://gw.api.animationdigitalnetwork.fr/player/video/${data.id}/configuration`, {
       headers: {
-        Authorization: `Bearer ${this.token.accessToken}`
+        Authorization: `Bearer ${this.token.accessToken}`,
+        'X-Target-Distribution': this.locale
       }
     });
     if(!configReq.ok || !configReq.res){
