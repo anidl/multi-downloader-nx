@@ -27,6 +27,6 @@ jobs:
         github-token: ${{ github.token }}
         push: ${{ github.ref == 'refs/heads/master' }}
         tags: |
-          "izuco/multi-downloader-nx:latest"
+          "multidl/multi-downloader-nx:latest"
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
