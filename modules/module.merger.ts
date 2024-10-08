@@ -1,16 +1,24 @@
-import * as iso639 from 'iso-639';
-import * as yamlCfg from './module.cfg-loader';
-import { fontFamilies, fontMime } from './module.fontsData';
+// Native
 import path from 'path';
 import fs from 'fs';
-import { LanguageItem } from './module.langsData';
-import { AvailableMuxer } from './module.args';
+import { spawn } from 'child_process';
+import os from 'os';
+
+// Plugins
+import * as iso639 from 'iso-639';
 import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
-import {spawn} from 'node:child_process';
-import {OggOpusDecodedAudio, OggOpusDecoder} from 'ogg-opus-decoder';
-import SynAudio, {MultipleClipMatch, MultipleClipMatchFirst} from 'synaudio';
+import { OggOpusDecodedAudio, OggOpusDecoder } from 'ogg-opus-decoder';
+import SynAudio, { MultipleClipMatch, MultipleClipMatchFirst } from 'synaudio';
+
+// Modules
+import { LanguageItem } from './module.langsData';
+import { AvailableMuxer } from './module.args';
+import * as yamlCfg from './module.cfg-loader';
+import { fontFamilies, fontMime } from './module.fontsData';
+
+// Types 
 import { DownloadedMediaMap } from '../@types/downloaderTypes';
 
 export type MergerInput = {
@@ -95,12 +103,12 @@ class Merger {
       });
 
       ffmpegSpawn.stderr.on('data', (err) => {
-        console.debug(err.toString().trimEnd());
+        //console.debug(err.toString().trimEnd());
       });
 
       ffmpegSpawn.on('close', (code) => {
         if (code !== 0) {
-          console.error('Ffmpeg exited with code: ', code);
+          console.error('FFmpeg exited with code: ', code);
           return reject();
         }
         resolve(new Uint8Array(data));
@@ -160,7 +168,7 @@ class Merger {
             samplesDecoded: audio.duration!.samplesDecoded,
           }
         };
-      })
+      }), os.cpus().length-1
     );
 
     // Find max sampleOffset value
@@ -183,7 +191,7 @@ class Merger {
         for (const media of mediaMap.files) {
           // Check if the path matches
           if (media.path === clip.name) {
-            console.log('Matching path found:', media.path);
+            //console.debug('Matching path found:', media.path);
 
             // Re-iterate over the files array where the match was found
             mediaMap.files.forEach((file) => {
