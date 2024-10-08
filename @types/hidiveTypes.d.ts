@@ -49,13 +49,3 @@ export interface HidiveSubtitleInfo {
   cc:       boolean;
   url:      string;
 }
-
-export type DownloadedMedia = {
-  type:  'Video',
-  lang:  LanguageItem,
-  path:  string,
-  uncut: boolean
-} | ({
-  type: 'Subtitle',
-  cc: boolean
-} & sxItem )

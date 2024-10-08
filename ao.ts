@@ -27,14 +27,13 @@ import { AvailableFilenameVars } from './modules/module.args';
 import { parse } from './modules/module.transform-mpd';
 
 // Types
-import { ServiceClass } from './@types/serviceClassInterface';
-import { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
-import { AOSearchResult, AnimeOnegaiSearch } from './@types/animeOnegaiSearch';
-import { AnimeOnegaiSeries } from './@types/animeOnegaiSeries';
-import { AnimeOnegaiSeasons, Episode } from './@types/animeOnegaiSeasons';
-import { DownloadedMedia } from './@types/hidiveTypes';
-import { AnimeOnegaiStream } from './@types/animeOnegaiStream';
-import { sxItem } from './crunchy';
+import type { ServiceClass } from './@types/serviceClassInterface';
+import type { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
+import type { AOSearchResult, AnimeOnegaiSearch } from './@types/animeOnegaiSearch';
+import type { AnimeOnegaiSeries } from './@types/animeOnegaiSeries';
+import type { AnimeOnegaiSeasons, Episode } from './@types/animeOnegaiSeasons';
+import type { DownloadedMedia, sxItem } from './@types/downloaderTypes';
+import type { AnimeOnegaiStream } from './@types/animeOnegaiStream';
 
 type parsedMultiDubDownload = {
   data: {
@@ -337,8 +336,6 @@ export default class AnimeOnegai implements ServiceClass {
     }
     const merger = new Merger({
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -348,8 +345,6 @@ export default class AnimeOnegai implements ServiceClass {
       inverseTrackOrder: false,
       keepAllVideos: options.keepAllVideos,
       onlyAudio: hasAudioStreams ? data.filter(a => a.type === 'Audio').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -357,10 +352,6 @@ export default class AnimeOnegai implements ServiceClass {
       }) : [],
       output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
-        if (a.type === 'Video')
-          throw new Error('Never');
-        if (a.type === 'Audio')
-          throw new Error('Never');
         return {
           file: a.path,
           language: a.language,
@@ -368,14 +359,10 @@ export default class AnimeOnegai implements ServiceClass {
         };
       }),
       simul: data.filter(a => a.type === 'Video').map((a) : boolean => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return !a.uncut as boolean;
       })[0],
       fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
       videoAndAudio: hasAudioStreams ? [] : data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,

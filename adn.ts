@@ -26,15 +26,14 @@ import parseFileName, { Variable } from './modules/module.filename';
 import { AvailableFilenameVars } from './modules/module.args';
 
 // Types
-import { ServiceClass } from './@types/serviceClassInterface';
-import { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
-import { sxItem } from './crunchy';
-import { DownloadedMedia } from './@types/hidiveTypes';
-import { ADNSearch, ADNSearchShow } from './@types/adnSearch';
-import { ADNVideo, ADNVideos } from './@types/adnVideos';
-import { ADNPlayerConfig } from './@types/adnPlayerConfig';
-import { ADNStreams } from './@types/adnStreams';
-import { ADNSubtitles } from './@types/adnSubtitles';
+import type { ServiceClass } from './@types/serviceClassInterface';
+import type { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
+import type { DownloadedMedia, sxItem } from './@types/downloaderTypes';
+import type { ADNSearch, ADNSearchShow } from './@types/adnSearch';
+import type { ADNVideo, ADNVideos } from './@types/adnVideos';
+import type { ADNPlayerConfig } from './@types/adnPlayerConfig';
+import type { ADNStreams } from './@types/adnStreams';
+import type { ADNSubtitles } from './@types/adnSubtitles';
 
 export default class AnimationDigitalNetwork implements ServiceClass { 
   public cfg: yamlCfg.ConfigObject;
@@ -326,8 +325,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     }
     const merger = new Merger({
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -337,8 +334,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       inverseTrackOrder: false,
       keepAllVideos: options.keepAllVideos,
       onlyAudio: hasAudioStreams ? data.filter(a => a.type === 'Audio').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -346,10 +341,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       }) : [],
       output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
-        if (a.type === 'Video')
-          throw new Error('Never');
-        if (a.type === 'Audio')
-          throw new Error('Never');
         return {
           file: a.path,
           language: a.language,
@@ -357,14 +348,10 @@ export default class AnimationDigitalNetwork implements ServiceClass {
         };
       }),
       simul: data.filter(a => a.type === 'Video').map((a) : boolean => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return !a.uncut as boolean;
       })[0],
       fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
       videoAndAudio: hasAudioStreams ? [] : data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -773,7 +760,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
           files.push({
             path: `${tsFile}.txt`,
-            lang: langsData.languages.find(a=>a.code=='jpn'),
+            lang: langsData.languages.find(a=>a.code=='jpn')!,
             type: 'Chapters'
           });
         } catch {

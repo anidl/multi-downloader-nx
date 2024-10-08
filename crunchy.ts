@@ -1,18 +1,17 @@
-// build-in
+// Built In
 import path from 'path';
 import fs from 'fs-extra';
+import { randomUUID } from 'crypto';
 
-// package program
+// Package
 import packageJson from './package.json';
 
-// plugins
-import { console } from './modules/log';
+// Plugins
 import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
-import streamdl, { M3U8Json } from './modules/hls-download';
-import { exec } from './modules/sei-helper-fixes';
 
 // custom modules
+import { console } from './modules/log';
 import * as fontsData from './modules/module.fontsData';
 import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
@@ -20,40 +19,32 @@ import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import getKeys, { canDecrypt } from './modules/widevine';
 //import vttConvert from './modules/module.vttconvert';
-
-// args
-
-// load req
 import { domain, api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.fetch';
-import { CrunchySearch } from './@types/crunchySearch';
-import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
-import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
-import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-import { CrunchyStreams, PlaybackData, Subtitles } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
-import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
-import { ServiceClass } from './@types/serviceClassInterface';
-import { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
-import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
-import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
-import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 import vtt2ass from './modules/module.vtt2ass';
-import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
-import { CrunchyPlayStreams } from './@types/enums';
-import { randomUUID } from 'node:crypto';
+import streamdl, { M3U8Json } from './modules/hls-download';
+import { exec } from './modules/sei-helper-fixes';
 
-export type sxItem = {
-  language: langsData.LanguageItem,
-  path: string,
-  file: string
-  title: string,
-  fonts: Font[]
-}
+// Types
+import type { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
+import type { DownloadedMedia, sxItem } from './@types/downloaderTypes';
+import type { CrunchySearch } from './@types/crunchySearch';
+import type { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
+import type { ObjectInfo } from './@types/objectInfo';
+import type { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
+import type { ServiceClass } from './@types/serviceClassInterface';
+import type { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
+import type { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
+import type { CrunchyPlayStream } from './@types/crunchyPlayStreams';
+import type { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
+import type { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
+import type { CrunchyStreams, PlaybackData, Subtitles } from './@types/playbackData';
+import { CrunchyPlayStreams } from './@types/enums';
 
 export default class Crunchy implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;

@@ -87,26 +87,6 @@ export type CrunchyEpMeta = {
   image: string,
 }
 
-export type DownloadedMedia = {
-  type: 'Video',
-  lang: LanguageItem,
-  path: string,
-  isPrimary?: boolean
-} | {
-  type: 'Audio',
-  lang: LanguageItem,
-  path: string,
-  isPrimary?: boolean
-} | {
-  type: 'Chapters',
-  lang: LanguageItem,
-  path: string
-} | ({
-  type: 'Subtitle',
-  signs: boolean,
-  cc: boolean
-} & sxItem )
-
 export type ParseItem = {
   __class__?: string;
   isSelected?: boolean,
