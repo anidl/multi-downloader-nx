@@ -30,3 +30,8 @@ export type DownloadedMedia = {
   signs?: boolean,
   cc: boolean
 } & sxItem )
+
+export type DownloadedMediaMap = {
+  version: string;
+  files: DownloadedMedia[];
+}

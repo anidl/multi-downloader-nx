@@ -11,6 +11,7 @@ import ffprobe from 'ffprobe';
 import {spawn} from 'node:child_process';
 import {OggOpusDecodedAudio, OggOpusDecoder} from 'ogg-opus-decoder';
 import SynAudio, {MultipleClipMatch, MultipleClipMatchFirst} from 'synaudio';
+import { DownloadedMediaMap } from '../@types/downloaderTypes';
 
 export type MergerInput = {
   path: string,
@@ -38,6 +39,7 @@ export type ParsedFont = {
 }
 
 export type MergerOptions = {
+  mediaMap?: DownloadedMediaMap[],
   videoAndAudio: MergerInput[],
   onlyVid: MergerInput[],
   onlyAudio: MergerInput[],
@@ -115,6 +117,9 @@ class Merger {
 
   public async createDelays() {
     const bin = await yamlCfg.loadBinCfg();
+    const allFiles = [...this.options.onlyAudio, ...this.options.videoAndAudio, ...this.options.onlyVid, ...this.options.subtitles];
+    if (this.options.chapters)
+      allFiles.push(...this.options.chapters);
     const audios = [...this.options.onlyAudio, ...this.options.videoAndAudio];
     if (audios.length < 2)
       return;
@@ -167,9 +172,35 @@ class Merger {
       sampleOffset: maxSampleOffset - item.sampleOffset
     }));
 
+    //Iterate over found matches
     invertedArray.forEach((clip: MultipleClipMatch | MultipleClipMatchFirst) => {
       const audio = audios.find(a => a.path === clip.name)!;
       audio.delay = (clip.sampleOffset || 0 ) / audio.duration!.sampleRate;
+
+      // Iterate over each DownloadedMediaMap in the array
+      for (const mediaMap of this.options.mediaMap!) {
+        // Iterate over the files array in each DownloadedMediaMap
+        for (const media of mediaMap.files) {
+          // Check if the path matches
+          if (media.path === clip.name) {
+            console.log('Matching path found:', media.path);
+
+            // Re-iterate over the files array where the match was found
+            mediaMap.files.forEach((file) => {
+              const mergerFile = allFiles.find(a => 
+                ('path' in a ? a.path : a.file) === file.path
+              );
+              if (mergerFile)
+                mergerFile.delay = audio.delay;
+              else 
+                console.error(`File ${file.path} was not found in allFiles array, this shouldn't happen`);
+            });
+
+            // We only want the first match, so break out of the loop
+            break;
+          }
+        }
+      }
     });
   }
 

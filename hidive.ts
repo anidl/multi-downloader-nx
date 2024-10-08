@@ -36,7 +36,7 @@ import type { NewHidiveSeries } from './@types/newHidiveSeries';
 import type { Episode, NewHidiveEpisodeExtra, NewHidiveSeason, NewHidiveSeriesExtra } from './@types/newHidiveSeason';
 import type { NewHidiveEpisode } from './@types/newHidiveEpisode';
 import type { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
-import type { DownloadedMedia, sxItem } from './@types/downloaderTypes';
+import type { DownloadedMedia, DownloadedMediaMap, sxItem } from './@types/downloaderTypes';
 
 export default class Hidive implements ServiceClass { 
   public cfg: yamlCfg.ConfigObject;
@@ -546,7 +546,7 @@ export default class Hidive implements ServiceClass {
       return { isOk: false, reason: new Error('Failed to download media list') };
     } else {
       if (!options.skipmux) {
-        await this.muxStreams(res.data, { ...options, output: res.fileName }, false);
+        await this.muxStreams(res.data, res.mediaMap, { ...options, output: res.fileName }, false);
       } else {
         console.info('Skipping mux');
       }
@@ -635,7 +635,7 @@ export default class Hidive implements ServiceClass {
       return { isOk: false, reason: new Error('Failed to download media list') };
     } else {
       if (!options.skipmux) {
-        await this.muxStreams(res.data, { ...options, output: res.fileName }, false);
+        await this.muxStreams(res.data, res.mediaMap, { ...options, output: res.fileName }, false);
       } else {
         console.info('Skipping mux');
       }
@@ -650,12 +650,18 @@ export default class Hidive implements ServiceClass {
   public async downloadMPD(streamPlaylists: MPDParsed, subs: Subtitle[], selectedEpisode: NewHidiveEpisodeExtra, options: Record<any, any>) {
     //let fileName: string;
     const files: DownloadedMedia[] = [];
+    const mediaMap: DownloadedMediaMap[] = [];
     const variables: Variable[] = [];
     let dlFailed = false;
     const subsMargin = 0;
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] = [];
     if (!canDecrypt) console.warn('Decryption not enabled!');
+
+    const fileMap: DownloadedMediaMap = {
+      version: selectedEpisode.id.toString(),
+      files: []
+    };
 
     if (!this.cfg.bin.ffmpeg) 
       this.cfg.bin = await yamlCfg.loadBinCfg();
@@ -838,6 +844,12 @@ export default class Hidive implements ServiceClass {
                 lang: chosenAudios[0].language,
                 isPrimary: true
               });
+              fileMap.files.push({
+                type: 'Video',
+                path: `${tsFile}.video.m4s`,
+                lang: chosenAudios[0].language,
+                isPrimary: true
+              });
             }
           } else {
             console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
@@ -919,6 +931,12 @@ export default class Hidive implements ServiceClass {
                 lang: chosenAudioSegments.language,
                 isPrimary: chosenAudioSegments.default
               });
+              fileMap.files.push({
+                type: 'Audio',
+                path: `${tsFile}.audio.m4s`,
+                lang: chosenAudioSegments.language,
+                isPrimary: chosenAudioSegments.default
+              });
               console.info('Decryption done for audio');
             }
           } else {
@@ -967,6 +985,11 @@ export default class Hidive implements ServiceClass {
                 ...sxData as sxItem,
                 cc: false
               });
+              fileMap.files.push({
+                type: 'Subtitle',
+                ...sxData as sxItem,
+                cc: false
+              });
             } else{
               console.warn(`Failed to download subtitle: ${sxData.file}`);
             }
@@ -980,14 +1003,17 @@ export default class Hidive implements ServiceClass {
       console.info('Subtitles downloading skipped!');
     }
 
+    mediaMap.push(fileMap);
+
     return {
       error: dlFailed,
       data: files,
+      mediaMap,
       fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName)) || './unknown' : './unknown'
     };
   }
 
-  public async muxStreams(data: DownloadedMedia[], options: Record<any, any>, inverseTrackOrder: boolean = true) {
+  public async muxStreams(data: DownloadedMedia[], mediaMap: DownloadedMediaMap[], options: Record<any, any>, inverseTrackOrder: boolean = true) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
     let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
@@ -996,6 +1022,7 @@ export default class Hidive implements ServiceClass {
       hasAudioStreams = true;
     }
     const merger = new Merger({
+      mediaMap,
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         return {
           lang: a.lang,

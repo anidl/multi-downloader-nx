@@ -28,7 +28,7 @@ import { AvailableFilenameVars } from './modules/module.args';
 // Types
 import type { ServiceClass } from './@types/serviceClassInterface';
 import type { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
-import type { DownloadedMedia, sxItem } from './@types/downloaderTypes';
+import type { DownloadedMedia, DownloadedMediaMap, sxItem } from './@types/downloaderTypes';
 import type { ADNSearch, ADNSearchShow } from './@types/adnSearch';
 import type { ADNVideo, ADNVideos } from './@types/adnVideos';
 import type { ADNPlayerConfig } from './@types/adnPlayerConfig';
@@ -315,7 +315,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     return { isOk: true, value: selEpsArr };
   }
 
-  public async muxStreams(data: DownloadedMedia[], options: yargs.ArgvType) {
+  public async muxStreams(data: DownloadedMedia[], mediaMap: DownloadedMediaMap[], options: yargs.ArgvType) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
     let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
@@ -324,6 +324,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       hasAudioStreams = true;
     }
     const merger = new Merger({
+      mediaMap,
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         return {
           lang: a.lang,
@@ -404,7 +405,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       return { isOk: false, reason: new Error('Failed to download media list') };
     } else {
       if (!options.skipmux) {
-        await this.muxStreams(res.data, { ...options, output: res.fileName });
+        await this.muxStreams(res.data, res.mediaMap, { ...options, output: res.fileName });
       } else {
         console.info('Skipping mux');
       }
@@ -433,6 +434,12 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     }
 
     const files: DownloadedMedia[] = [];
+    const mediaMap: DownloadedMediaMap[] = [];
+
+    const fileMap: DownloadedMediaMap = {
+      version: data.id.toString(),
+      files: []
+    };
 
     let dlFailed = false;
     let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
@@ -697,6 +704,11 @@ export default class AnimationDigitalNetwork implements ServiceClass {
                 path: `${tsFile}.ts`,
                 lang: audDub
               });
+              fileMap.files.push({
+                type: 'Video',
+                path: `${tsFile}.ts`,
+                lang: audDub
+              });
               dlVideoOnce = true;
             }
           } else{
@@ -759,6 +771,11 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           });
           fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
           files.push({
+            path: `${tsFile}.txt`,
+            lang: langsData.languages.find(a=>a.code=='jpn')!,
+            type: 'Chapters'
+          });
+          fileMap.files.push({
             path: `${tsFile}.txt`,
             lang: langsData.languages.find(a=>a.code=='jpn')!,
             type: 'Chapters'
@@ -886,6 +903,11 @@ export default class AnimationDigitalNetwork implements ServiceClass {
               ...sxData as sxItem,
               cc: false
             });
+            fileMap.files.push({
+              type: 'Subtitle',
+              ...sxData as sxItem,
+              cc: false
+            });
           }
           subIndex++;
         }
@@ -896,9 +918,12 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       console.info('Subtitles downloading skipped!');
     }
 
+    mediaMap.push(fileMap);
+
     return {
       error: dlFailed,
       data: files,
+      mediaMap,
       fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName)) || './unknown' : './unknown'
     };
   }

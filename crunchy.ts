@@ -32,7 +32,7 @@ import { exec } from './modules/sei-helper-fixes';
 
 // Types
 import type { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
-import type { DownloadedMedia, sxItem } from './@types/downloaderTypes';
+import type { DownloadedMedia, DownloadedMediaMap, sxItem } from './@types/downloaderTypes';
 import type { CrunchySearch } from './@types/crunchySearch';
 import type { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
 import type { ObjectInfo } from './@types/objectInfo';
@@ -976,7 +976,7 @@ export default class Crunchy implements ServiceClass {
       return false;
     } else {
       if (!options.skipmux) {
-        await this.muxStreams(res.data, { ...options, output: res.fileName });
+        await this.muxStreams(res.data, res.mediaMap, { ...options, output: res.fileName });
       } else {
         console.info('Skipping mux');
       }
@@ -1186,6 +1186,7 @@ export default class Crunchy implements ServiceClass {
 
   public async downloadMediaList(medias: CrunchyEpMeta, options: CrunchyDownloadOptions) : Promise<{
     data: DownloadedMedia[],
+    mediaMap: DownloadedMediaMap[],
     fileName: string,
     error: boolean
   } | undefined> {
@@ -1205,6 +1206,7 @@ export default class Crunchy implements ServiceClass {
     }
 
     const files: DownloadedMedia[] = [];
+    const mediaMap: DownloadedMediaMap[] = [];
 
     if(medias.data.every(a => !a.playback)){
       console.warn('Video not available!');
@@ -1220,6 +1222,11 @@ export default class Crunchy implements ServiceClass {
 
       // Make sure we have a media id without a : in it
       const currentMediaId = (mMeta.mediaId.includes(':') ? mMeta.mediaId.split(':')[1] : mMeta.mediaId);
+
+      const fileMap: DownloadedMediaMap = {
+        version: currentMediaId,
+        files: []
+      };
 
       //Make sure token is up-to-date
       await this.refreshToken(true, true);
@@ -1770,6 +1777,12 @@ export default class Crunchy implements ServiceClass {
                       lang: lang,
                       isPrimary: isPrimary
                     });
+                    fileMap.files.push({
+                      type: 'Video',
+                      path: `${tsFile}.video.m4s`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
                   }
                 }
 
@@ -1792,6 +1805,12 @@ export default class Crunchy implements ServiceClass {
                       lang: lang,
                       isPrimary: isPrimary
                     });
+                    fileMap.files.push({
+                      type: 'Audio',
+                      path: `${tsFile}.audio.m4s`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
                     console.info('Decryption done for audio');
                   }
                 }
@@ -1806,9 +1825,21 @@ export default class Crunchy implements ServiceClass {
                   lang: lang,
                   isPrimary: isPrimary
                 });
+                fileMap.files.push({
+                  type: 'Video',
+                  path: `${tsFile}.video.m4s`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
               }
               if (audioDownloaded) {
                 files.push({
+                  type: 'Audio',
+                  path: `${tsFile}.audio.m4s`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
+                fileMap.files.push({
                   type: 'Audio',
                   path: `${tsFile}.audio.m4s`,
                   lang: lang,
@@ -1971,6 +2002,12 @@ export default class Crunchy implements ServiceClass {
                   lang: lang,
                   isPrimary: isPrimary
                 });
+                fileMap.files.push({
+                  type: 'Video',
+                  path: `${tsFile}.ts`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
                 dlVideoOnce = true;
               }
             } else{
@@ -2004,6 +2041,11 @@ export default class Crunchy implements ServiceClass {
           }
           fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
           files.push({
+            path: `${tsFile}.txt`,
+            lang: lang,
+            type: 'Chapters'
+          });
+          fileMap.files.push({
             path: `${tsFile}.txt`,
             lang: lang,
             type: 'Chapters'
@@ -2095,6 +2137,12 @@ export default class Crunchy implements ServiceClass {
                   cc: isCC,
                   signs: isSigns,
                 });
+                fileMap.files.push({
+                  type: 'Subtitle',
+                  ...sxData as sxItem,
+                  cc: isCC,
+                  signs: isSigns,
+                });
               }
               else{
                 console.warn(`Failed to download subtitle: ${sxData.file}`);
@@ -2109,16 +2157,19 @@ export default class Crunchy implements ServiceClass {
         console.info('Subtitles downloading skipped!');
       }
 
+      mediaMap.push(fileMap);
       await this.sleep(options.waittime);
     }
+
     return {
       error: dlFailed,
       data: files,
+      mediaMap,
       fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName)) || './unknown' : './unknown'
     };
   }
 
-  public async muxStreams(data: DownloadedMedia[], options: CrunchyMuxOptions) {
+  public async muxStreams(data: DownloadedMedia[], mediaMap: DownloadedMediaMap[], options: CrunchyMuxOptions) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
     let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
@@ -2127,6 +2178,7 @@ export default class Crunchy implements ServiceClass {
       hasAudioStreams = true;
     }
     const merger = new Merger({
+      mediaMap,
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         return {
           lang: a.lang,

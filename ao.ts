@@ -32,7 +32,7 @@ import type { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponse
 import type { AOSearchResult, AnimeOnegaiSearch } from './@types/animeOnegaiSearch';
 import type { AnimeOnegaiSeries } from './@types/animeOnegaiSeries';
 import type { AnimeOnegaiSeasons, Episode } from './@types/animeOnegaiSeasons';
-import type { DownloadedMedia, sxItem } from './@types/downloaderTypes';
+import type { DownloadedMedia, DownloadedMediaMap, sxItem } from './@types/downloaderTypes';
 import type { AnimeOnegaiStream } from './@types/animeOnegaiStream';
 
 type parsedMultiDubDownload = {
@@ -314,7 +314,7 @@ export default class AnimeOnegai implements ServiceClass {
       return false;
     } else {
       if (!options.skipmux) {
-        await this.muxStreams(res.data, { ...options, output: res.fileName });
+        await this.muxStreams(res.data, res.mediaMap, { ...options, output: res.fileName });
       } else {
         console.info('Skipping mux');
       }
@@ -326,7 +326,7 @@ export default class AnimeOnegai implements ServiceClass {
     return true;
   }
 
-  public async muxStreams(data: DownloadedMedia[], options: yargs.ArgvType) {
+  public async muxStreams(data: DownloadedMedia[], mediaMap: DownloadedMediaMap[], options: yargs.ArgvType) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
     let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
@@ -335,6 +335,7 @@ export default class AnimeOnegai implements ServiceClass {
       hasAudioStreams = true;
     }
     const merger = new Merger({
+      mediaMap,
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         return {
           lang: a.lang,
@@ -402,6 +403,7 @@ export default class AnimeOnegai implements ServiceClass {
 
   public async downloadMediaList(medias: parsedMultiDubDownload, options: yargs.ArgvType) : Promise<{
     data: DownloadedMedia[],
+    mediaMap: DownloadedMediaMap[],
     fileName: string,
     error: boolean
   } | undefined> {
@@ -421,6 +423,7 @@ export default class AnimeOnegai implements ServiceClass {
     }
 
     const files: DownloadedMedia[] = [];
+    const mediaMap: DownloadedMediaMap[] = [];
 
     let subIndex = 0;
     let dlFailed = false;
@@ -428,6 +431,11 @@ export default class AnimeOnegai implements ServiceClass {
 
     for (const media of medias.data) {
       console.info(`Requesting: [E.${media.episode.ID}] ${mediaName}`);
+      
+      const fileMap: DownloadedMediaMap = {
+        version: media.episode.ID.toString(),
+        files: []
+      };
 
       const AuthHeaders = {
         headers: {
@@ -700,6 +708,11 @@ export default class AnimeOnegai implements ServiceClass {
                     path: `${tsFile}.video.mp4`,
                     lang: lang
                   });
+                  fileMap.files.push({
+                    type: 'Video',
+                    path: `${tsFile}.video.mp4`,
+                    lang: lang
+                  });
                 }
               }
 
@@ -721,6 +734,11 @@ export default class AnimeOnegai implements ServiceClass {
                     path: `${tsFile}.audio.mp4`,
                     lang: lang
                   });
+                  fileMap.files.push({
+                    type: 'Audio',
+                    path: `${tsFile}.audio.mp4`,
+                    lang: lang
+                  });
                   console.info('Decryption done for audio');
                 }
               }
@@ -734,9 +752,19 @@ export default class AnimeOnegai implements ServiceClass {
                 path: `${tsFile}.video.mp4`,
                 lang: lang
               });
+              fileMap.files.push({
+                type: 'Video',
+                path: `${tsFile}.video.mp4`,
+                lang: lang
+              });
             }
             if (audioDownloaded) {
               files.push({
+                type: 'Audio',
+                path: `${tsFile}.audio.mp4`,
+                lang: lang
+              });
+              fileMap.files.push({
                 type: 'Audio',
                 path: `${tsFile}.audio.mp4`,
                 lang: lang
@@ -782,6 +810,11 @@ export default class AnimeOnegai implements ServiceClass {
                   ...sxData as sxItem,
                   cc: false
                 });
+                fileMap.files.push({
+                  type: 'Subtitle',
+                  ...sxData as sxItem,
+                  cc: false
+                });
               } else{
                 console.warn(`Failed to download subtitle: ${sxData.file}`);
               }
@@ -795,11 +828,13 @@ export default class AnimeOnegai implements ServiceClass {
       else{
         console.info('Subtitles downloading skipped!');
       }
+      mediaMap.push(fileMap);
       await this.sleep(options.waittime);
     }
     return {
       error: dlFailed,
       data: files,
+      mediaMap,
       fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName)) || './unknown' : './unknown'
     };
   }
