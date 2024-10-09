@@ -84,7 +84,7 @@ class Merger {
     return new Promise((resolve, reject) => {
       const options = [
         '-t',
-        '60',
+        '120',
         '-i',
         path,
         '-vn',
@@ -158,7 +158,12 @@ class Merger {
 
     audios.sort((a, b) => a.totalDuration! - b.totalDuration!);
 
-    const synAudio = new SynAudio();
+    const synAudio = new SynAudio({
+      correlationSampleSize: 50000,
+      initialGranularity: 12,
+      correlationThreshold: 0.5
+    });
+
     const audioArray = await synAudio.syncMultiple(
       audios.map((audio) => {
         return {
@@ -170,6 +175,8 @@ class Merger {
         };
       }), os.cpus().length-1
     );
+
+    //console.debug(audioArray);
 
     // Find max sampleOffset value
     const maxSampleOffset = Math.max(...audioArray[0].map(item => item.sampleOffset));
