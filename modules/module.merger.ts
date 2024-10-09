@@ -84,7 +84,7 @@ class Merger {
     return new Promise((resolve, reject) => {
       const options = [
         '-t',
-        '120',
+        '60',
         '-i',
         path,
         '-vn',
@@ -175,7 +175,8 @@ class Merger {
             samplesDecoded: audio.duration!.samplesDecoded,
           }
         };
-      }), os.cpus().length-1
+      }), 
+      os.cpus().length-1
     );
 
     //console.debug(audioArray);
