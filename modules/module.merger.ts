@@ -90,6 +90,8 @@ class Merger {
         '-vn',
         '-c:a',
         'libopus',
+        '-filter:a',
+        'loudnorm',
         '-f',
         'ogg',
         'pipe:1'
