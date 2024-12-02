@@ -35,7 +35,7 @@ import { Episode, NewHidiveEpisodeExtra, NewHidiveSeason, NewHidiveSeriesExtra }
 import { NewHidiveEpisode } from './@types/newHidiveEpisode';
 import { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
 import { MPDParsed, parse } from './modules/module.transform-mpd';
-import getKeys, { canDecrypt } from './modules/widevine';
+import { canDecrypt, getKeysWVD, cdm } from './modules/cdm';
 import { exec } from './modules/sei-helper-fixes';
 import { KeyContainer } from './modules/license';
 
@@ -657,6 +657,7 @@ export default class Hidive implements ServiceClass {
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] = [];
     if (!canDecrypt) console.warn('Decryption not enabled!');
+    if (canDecrypt && cdm === 'playready') console.warn("Hidive doesn't support Playready CDM!");
 
     if (!this.cfg.bin.ffmpeg) 
       this.cfg.bin = await yamlCfg.loadBinCfg();
@@ -764,7 +765,7 @@ export default class Hidive implements ServiceClass {
     console.info('Stream URL:', chosenVideoSegments.segments[0].map.uri.split('/init.mp4')[0]);
 
     if (chosenAudios[0].pssh || chosenVideoSegments.pssh) {
-      encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
+      encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
         'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
         'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ==',
       });

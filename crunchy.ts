@@ -18,7 +18,7 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-import getKeys, { canDecrypt } from './modules/widevine';
+import { canDecrypt, getKeysPRD, getKeysWVD, cdm } from './modules/cdm';
 //import vttConvert from './modules/module.vttconvert';
 
 // args
@@ -1741,11 +1741,24 @@ export default class Crunchy implements ServiceClass {
                 return undefined;
               }
               const authData = await decReq.res.json() as {'custom_data': string, 'token': string};
-              const encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
-                'dt-custom-data': authData.custom_data,
-                'x-dt-auth-token': authData.token
-              });
-              if (encryptionKeys.length == 0) {
+
+              var encryptionKeys;
+
+              if (cdm === 'widevine') {
+                encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
+                  'dt-custom-data': authData.custom_data,
+                  'x-dt-auth-token': authData.token
+                })
+              }
+
+              if (cdm === 'playready') {
+                encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh, 'https://lic.drmtoday.com/license-proxy-headerauth/drmtoday/RightsManager.asmx', {
+                  'dt-custom-data': authData.custom_data,
+                  'x-dt-auth-token': authData.token
+                })
+              }
+
+              if (!encryptionKeys || encryptionKeys.length == 0) {
                 console.error('Failed to get encryption keys');
                 return undefined;
               }
