@@ -764,8 +764,8 @@ export default class Hidive implements ServiceClass {
     console.info(`Selected (Available) Audio Languages: ${chosenAudios.map(a => a.language.name).join(', ')}`);
     console.info('Stream URL:', chosenVideoSegments.segments[0].map.uri.split('/init.mp4')[0]);
 
-    if (chosenAudios[0].pssh || chosenVideoSegments.pssh) {
-      encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
+    if (chosenAudios[0].pssh_wvd || chosenVideoSegments.pssh_wvd) {
+      encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, 'https://shield-drm.imggaming.com/api/v2/license', {
         'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
         'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ==',
       });
@@ -811,7 +811,7 @@ export default class Hidive implements ServiceClass {
         console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
         dlFailed = true;
       } else {
-        if (chosenVideoSegments.pssh) {
+        if (chosenVideoSegments.pssh_wvd) {
           console.info('Decryption Needed, attempting to decrypt');
           if (encryptionKeys.length == 0) {
             console.error('Failed to get encryption keys');
@@ -893,7 +893,7 @@ export default class Hidive implements ServiceClass {
           console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
           dlFailed = true;
         }
-        if (chosenAudioSegments.pssh) {
+        if (chosenAudioSegments.pssh_wvd) {
           console.info('Decryption Needed, attempting to decrypt');
           if (encryptionKeys.length == 0) {
             console.error('Failed to get encryption keys');
