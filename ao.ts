@@ -15,7 +15,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import * as reqModule from './modules/module.fetch';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-import { canDecrypt, getKeysWVD, cdm } from './modules/cdm';
+import { canDecrypt, getKeysWVD, cdm, getKeysPRD } from './modules/cdm';
 import streamdl, { M3U8Json } from './modules/hls-download';
 import { exec } from './modules/sei-helper-fixes';
 import { console } from './modules/log';
@@ -479,10 +479,6 @@ export default class AnimeOnegai implements ServiceClass {
         console.warn('Decryption not enabled!');
       }
 
-      if (canDecrypt && cdm === 'playready') {
-        console.warn("AO doesn't support Playready CDM!");
-      }
-
       const lang = langsData.languages.find(a=>a.ao_locale == media.lang) as langsData.LanguageItem;
       if (!lang) {
         console.error(`Unable to find language for code ${media.lang}`);
@@ -683,8 +679,16 @@ export default class AnimeOnegai implements ServiceClass {
           //Handle Decryption if needed
           if ((chosenVideoSegments.pssh_wvd || chosenAudioSegments.pssh_wvd) && (videoDownloaded || audioDownloaded)) {
             console.info('Decryption Needed, attempting to decrypt');
-            const encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, streamData.widevine_proxy, {});
-            if (encryptionKeys.length == 0) {
+            var encryptionKeys;
+
+            if (cdm === 'widevine') {
+              encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, streamData.widevine_proxy, {});
+            }
+            if (cdm === 'playready') {
+              encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, streamData.playready_proxy, {});
+            }
+
+            if (!encryptionKeys || encryptionKeys.length == 0) {
               console.error('Failed to get encryption keys');
               return undefined;
             }
