@@ -698,7 +698,7 @@ export default class AnimeOnegai implements ServiceClass {
               });*/
 
             if (this.cfg.bin.mp4decrypt) {
-              const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+              const commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
               const commandVideo = commandBase+`"${tempTsFile}.video.enc.mp4" "${tempTsFile}.video.mp4"`;
               const commandAudio = commandBase+`"${tempTsFile}.audio.enc.mp4" "${tempTsFile}.audio.mp4"`;
 
