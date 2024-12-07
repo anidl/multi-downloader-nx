@@ -18,7 +18,7 @@ import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-import getKeys, { canDecrypt } from './modules/widevine';
+import { canDecrypt, getKeysPRD, getKeysWVD, cdm } from './modules/cdm';
 //import vttConvert from './modules/module.vttconvert';
 
 // args
@@ -1652,7 +1652,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenVideoSegments.segments
               };
               const videoDownload = await new streamdl({
-                output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.m4s` : `${tsFile}.video.m4s`,
+                output: chosenVideoSegments.pssh_wvd || chosenVideoSegments.pssh_prd ? `${tempTsFile}.video.enc.m4s` : `${tsFile}.video.m4s`,
                 timeout: options.timeout,
                 m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1694,7 +1694,7 @@ export default class Crunchy implements ServiceClass {
                 segments: chosenAudioSegments.segments
               };
               const audioDownload = await new streamdl({
-                output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`,
+                output: chosenVideoSegments.pssh_wvd || chosenVideoSegments.pssh_prd ? `${tempTsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`,
                 timeout: options.timeout,
                 m3u8json: audioJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -1721,7 +1721,7 @@ export default class Crunchy implements ServiceClass {
             }
 
             //Handle Decryption if needed
-            if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded)) {
+            if ((chosenVideoSegments.pssh_wvd ||chosenVideoSegments.pssh_prd || chosenAudioSegments.pssh_wvd || chosenAudioSegments.pssh_prd) && (videoDownloaded || audioDownloaded)) {
               const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
               const assetId = assetIdRegex ? assetIdRegex[1] : null;
               const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
@@ -1741,11 +1741,24 @@ export default class Crunchy implements ServiceClass {
                 return undefined;
               }
               const authData = await decReq.res.json() as {'custom_data': string, 'token': string};
-              const encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
-                'dt-custom-data': authData.custom_data,
-                'x-dt-auth-token': authData.token
-              });
-              if (encryptionKeys.length == 0) {
+
+              var encryptionKeys;
+
+              if (cdm === 'widevine') {
+                encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
+                  'dt-custom-data': authData.custom_data,
+                  'x-dt-auth-token': authData.token
+                })
+              }
+
+              if (cdm === 'playready') {
+                encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://lic.drmtoday.com/license-proxy-headerauth/drmtoday/RightsManager.asmx', {
+                  'dt-custom-data': authData.custom_data,
+                  'x-dt-auth-token': authData.token
+                })
+              }
+
+              if (!encryptionKeys || encryptionKeys.length == 0) {
                 console.error('Failed to get encryption keys');
                 return undefined;
               }
@@ -1755,7 +1768,7 @@ export default class Crunchy implements ServiceClass {
               });*/
 
               if (this.cfg.bin.mp4decrypt) {
-                const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+                const commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
                 const commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
                 const commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
