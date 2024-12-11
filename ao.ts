@@ -679,7 +679,7 @@ export default class AnimeOnegai implements ServiceClass {
           //Handle Decryption if needed
           if ((chosenVideoSegments.pssh_wvd || chosenAudioSegments.pssh_wvd) && (videoDownloaded || audioDownloaded)) {
             console.info('Decryption Needed, attempting to decrypt');
-            var encryptionKeys;
+            let encryptionKeys;
 
             if (cdm === 'widevine') {
               encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, streamData.widevine_proxy, {});

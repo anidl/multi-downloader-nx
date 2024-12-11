@@ -1742,20 +1742,20 @@ export default class Crunchy implements ServiceClass {
               }
               const authData = await decReq.res.json() as {'custom_data': string, 'token': string};
 
-              var encryptionKeys;
+              let encryptionKeys;
 
               if (cdm === 'widevine') {
                 encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
                   'dt-custom-data': authData.custom_data,
                   'x-dt-auth-token': authData.token
-                })
+                });
               }
 
               if (cdm === 'playready') {
                 encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://lic.drmtoday.com/license-proxy-headerauth/drmtoday/RightsManager.asmx', {
                   'dt-custom-data': authData.custom_data,
                   'x-dt-auth-token': authData.token
-                })
+                });
               }
 
               if (!encryptionKeys || encryptionKeys.length == 0) {

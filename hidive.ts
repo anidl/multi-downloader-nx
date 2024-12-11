@@ -657,7 +657,6 @@ export default class Hidive implements ServiceClass {
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] = [];
     if (!canDecrypt) console.warn('Decryption not enabled!');
-    if (canDecrypt && cdm === 'playready') console.warn("Hidive doesn't support Playready CDM!");
 
     if (!this.cfg.bin.ffmpeg) 
       this.cfg.bin = await yamlCfg.loadBinCfg();
