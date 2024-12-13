@@ -51,10 +51,6 @@ export default class WRMHeader {
     return 'UNKNOWN';
   }
 
-  private static ensureList(element: any): any[] {
-    return Array.isArray(element) ? element : [element];
-  }
-
   to_v4_0_0_0(): string {
     const [key_ids, la_url, lui_url, ds_id] = this.readAttributes();
     if (key_ids.length === 0) throw new Error('No Key IDs available');
@@ -98,18 +94,16 @@ export default class WRMHeader {
 
   private static read_vX(data: any): ReturnStructure {
     const protectInfo = data.PROTECTINFO;
-    const signedKeyIDs: SignedKeyID[] = protectInfo?.KID
-      ? WRMHeader.ensureList(protectInfo.KID).map(
-        (kid: any) =>
-          new SignedKeyID(
-            kid['@_ALGID'] || '',
-            kid['@_VALUE'],
-            kid['@_CHECKSUM']
-          )
+
+    const signedKeyID: SignedKeyID | undefined = protectInfo.KIDS.KID
+      ? new SignedKeyID(
+        protectInfo.KIDS.KID['@_ALGID'] || '',
+        protectInfo.KIDS.KID['@_VALUE'],
+        protectInfo.KIDS.KID['@_CHECKSUM']
       )
-      : [];
+      : undefined;
     return [
-      signedKeyIDs,
+      signedKeyID ? [signedKeyID] : [],
       data.LA_URL || null,
       data.LUI_URL || null,
       data.DS_ID || null,

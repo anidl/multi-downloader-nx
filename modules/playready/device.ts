@@ -30,10 +30,19 @@ class DeviceStructs {
     .buffer('group_certificate', { length: 'group_certificate_length' })
     .buffer('encryption_key', { length: 96 })
     .buffer('signing_key', { length: 96 });
+
+  static v3 = new Parser()
+    .string('signature', { length: 3, assert: DeviceStructs.magic })
+    .uint8('version')
+    .buffer('group_key', { length: 96 })
+    .buffer('encryption_key', { length: 96 })
+    .buffer('signing_key', { length: 96 })
+    .uint32('group_certificate_length')
+    .buffer('group_certificate', { length: 'group_certificate_length' });
 }
 
 export class Device {
-  static CURRENT_STRUCT = DeviceStructs.v2;
+  static CURRENT_STRUCT = DeviceStructs.v3;
 
   group_certificate: CertificateChain;
   encryption_key: ECCKey;

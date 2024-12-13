@@ -1,4 +1,4 @@
-export enum KeyType {
+enum KeyType {
   Invalid = 0x0000,
   AES128CTR = 0x0001,
   RC4 = 0x0002,
@@ -8,7 +8,7 @@ export enum KeyType {
   UNKNOWN = 0xffff,
 }
 
-export function getKeyType(value: number): KeyType {
+function getKeyType(value: number): KeyType {
   switch (value) {
   case KeyType.Invalid:
   case KeyType.AES128CTR:
@@ -22,7 +22,7 @@ export function getKeyType(value: number): KeyType {
   }
 }
 
-export enum CipherType {
+enum CipherType {
   Invalid = 0x0000,
   RSA128 = 0x0001,
   ChainedLicense = 0x0002,
@@ -32,7 +32,7 @@ export enum CipherType {
   UNKNOWN = 0xffff,
 }
 
-export function getCipherType(value: number): CipherType {
+function getCipherType(value: number): CipherType {
   switch (value) {
   case CipherType.Invalid:
   case CipherType.RSA128:
@@ -54,17 +54,16 @@ export class Key {
   key: string;
 
   constructor(
-    key_id: Buffer | string,
+    key_id: string,
     key_type: number,
     cipher_type: number,
     key_length: number,
-    key: Buffer | string
+    key: Buffer
   ) {
-    this.key_id = Buffer.isBuffer(key_id) ? key_id.toString('hex') : key_id;
-
+    this.key_id = key_id;
     this.key_type = getKeyType(key_type);
     this.cipher_type = getCipherType(cipher_type);
     this.key_length = key_length;
-    this.key = Buffer.isBuffer(key) ? key.toString('hex') : key;
+    this.key = key.toString('hex');
   }
 }

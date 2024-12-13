@@ -111,8 +111,8 @@ export class BCertStructs {
     });
 
   static DrmBCertExtDataSignKeyInfo = new Parser()
-    .uint16be('type')
-    .uint16be('length')
+    .uint16be('key_type')
+    .uint16be('key_length')
     .uint32be('flags')
     .buffer('key', {
       length: function () {
@@ -219,7 +219,7 @@ export class Certificate {
   }
 
   // UNSTABLE
-  static new_key_cert(
+  static new_leaf_cert(
     cert_id: Buffer,
     security_level: number,
     client_id: Buffer,
@@ -232,13 +232,6 @@ export class Certificate {
     max_header: number = 15360,
     max_chain_depth: number = 2
   ): Certificate {
-    if (!cert_id) {
-      throw new Error('Certificate ID is required');
-    }
-    if (!client_id) {
-      throw new Error('Client ID is required');
-    }
-
     const basic_info = {
       cert_id: cert_id,
       security_level: security_level,
@@ -269,8 +262,8 @@ export class Certificate {
     };
 
     const feature = {
-      feature_count: 1,
-      features: [4, 13],
+      feature_count: 3,
+      features: [4, 9, 13],
     };
     const feature_attribute = {
       flags: 1,

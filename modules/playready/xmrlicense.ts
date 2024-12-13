@@ -1,270 +1,251 @@
 import { Parser } from 'binary-parser';
-import * as fs from 'fs';
 
-export class XMRLicenseStructs {
-  static PlayEnablerType = new Parser().buffer('player_enabler_type', {
-    length: 16,
-  });
+type ParsedLicense = {
+  version: number;
+  rights: string;
+  length: number;
+  license: {
+    length: number;
+    signature?: {
+      length: number;
+      type: string;
+      value: string;
+    };
+    global_container?: {
+      revocationInfo?: {
+        version: number;
+      };
+      securityLevel?: {
+        level: number;
+      };
+    };
+    keyMaterial?: {
+      contentKey?: {
+        kid: string;
+        keyType: number;
+        ciphertype: number;
+        length: number;
+        value: Buffer;
+      };
+      encryptionKey?: {
+        curve: number;
+        length: number;
+        value: string;
+      };
+      auxKeys?: {
+        count: number;
+        value: {
+          location: number;
+          value: string;
+        };
+      };
+    };
+  };
+};
 
-  static DomainRestrictionObject = new Parser()
-    .buffer('account_id', { length: 16 })
-    .uint32('revision');
+export class XMRLicenseStructsV2 {
+  static CONTENT_KEY = new Parser()
+    .buffer('kid', { length: 16 })
+    .uint16('keytype')
+    .uint16('ciphertype')
+    .uint16('length')
+    .buffer('value', {
+      length: 'length',
+    });
 
-  static IssueDateObject = new Parser().uint32('issue_date');
+  static ECC_KEY = new Parser()
+    .uint16('curve')
+    .uint16('length')
+    .buffer('value', {
+      length: 'length',
+    });
 
-  static RevInfoVersionObject = new Parser().uint32('sequence');
-
-  static SecurityLevelObject = new Parser().uint16('minimum_security_level');
-
-  static EmbeddedLicenseSettingsObject = new Parser().uint16('indicator');
-
-  static ECCKeyObject = new Parser()
-    .uint16('curve_type')
-    .uint16('key_length')
-    .buffer('key', {
+  static FTLV = new Parser()
+    .uint16('flags')
+    .uint16('type')
+    .uint32('length')
+    .buffer('value', {
       length: function () {
-        return (this as any).key_length;
+        return (this as any).length - 8;
       },
     });
 
-  static SignatureObject = new Parser()
-    .uint16('signature_type')
-    .uint16('signature_data_length')
-    .buffer('signature_data', {
-      length: function () {
-        return (this as any).signature_data_length;
-      },
-    });
-
-  static ContentKeyObject = new Parser()
-    .buffer('key_id', { length: 16 })
-    .uint16('key_type')
-    .uint16('cipher_type')
-    .uint16('key_length')
-    .buffer('encrypted_key', {
-      length: function () {
-        return (this as any).key_length;
-      },
-    });
-
-  static RightsSettingsObject = new Parser().uint16('rights');
-
-  static OutputProtectionLevelRestrictionObject = new Parser()
-    .uint16('minimum_compressed_digital_video_opl')
-    .uint16('minimum_uncompressed_digital_video_opl')
-    .uint16('minimum_analog_video_opl')
-    .uint16('minimum_digital_compressed_audio_opl')
-    .uint16('minimum_digital_uncompressed_audio_opl');
-
-  static ExpirationRestrictionObject = new Parser()
-    .uint32('begin_date')
-    .uint32('end_date');
-
-  static RemovalDateObject = new Parser().uint32('removal_date');
-
-  static UplinkKIDObject = new Parser()
-    .buffer('uplink_kid', { length: 16 })
-    .uint16('chained_checksum_type')
-    .uint16('chained_checksum_length')
-    .buffer('chained_checksum', {
-      length: function () {
-        return (this as any).chained_checksum_length;
-      },
-    });
-
-  static AnalogVideoOutputConfigurationRestriction = new Parser()
-    .buffer('video_output_protection_id', { length: 16 })
-    .buffer('binary_configuration_data', {
-      length: function () {
-        return (this as any).$parent.length - 16;
-      },
-    });
-
-  static DigitalVideoOutputRestrictionObject = new Parser()
-    .buffer('video_output_protection_id', { length: 16 })
-    .buffer('binary_configuration_data', {
-      length: function () {
-        return (this as any).$parent.length - 16;
-      },
-    });
-
-  static DigitalAudioOutputRestrictionObject = new Parser()
-    .buffer('audio_output_protection_id', { length: 16 })
-    .buffer('binary_configuration_data', {
-      length: function () {
-        return (this as any).$parent.length - 16;
-      },
-    });
-
-  static PolicyMetadataObject = new Parser()
-    .buffer('metadata_type', { length: 16 })
-    .buffer('policy_data', {
-      length: function () {
-        return (this as any).$parent.length - 16;
-      },
-    });
-
-  static SecureStopRestrictionObject = new Parser().buffer('metering_id', {
-    length: 16,
-  });
-
-  static MeteringRestrictionObject = new Parser().buffer('metering_id', {
-    length: 16,
-  });
-
-  static ExpirationAfterFirstPlayRestrictionObject = new Parser().uint32(
-    'seconds'
-  );
-
-  static GracePeriodObject = new Parser().uint32('grace_period');
-
-  static SourceIdObject = new Parser().uint32('source_id');
-
-  static AuxiliaryKey = new Parser()
+  static AUXILIARY_LOCATIONS = new Parser()
     .uint32('location')
-    .buffer('key', { length: 16 });
+    .buffer('value', { length: 16 });
 
-  static AuxiliaryKeysObject = new Parser()
+  static AUXILIARY_KEY_OBJECT = new Parser()
     .uint16('count')
-    .array('auxiliary_keys', {
+    .array('locations', {
       length: 'count',
-      type: XMRLicenseStructs.AuxiliaryKey,
+      type: XMRLicenseStructsV2.AUXILIARY_LOCATIONS,
     });
 
-  static UplinkKeyObject3 = new Parser()
-    .buffer('uplink_key_id', { length: 16 })
-    .uint16('chained_length')
-    .buffer('checksum', {
-      length: function () {
-        return (this as any).chained_length;
-      },
-    })
-    .uint16('count')
-    .array('entries', {
-      length: 'count',
-      type: new Parser().uint32('entry'),
+  static SIGNATURE = new Parser()
+    .uint16('type')
+    .uint16('siglength')
+    .buffer('signature', {
+      length: 'siglength',
     });
 
-  static CopyEnablerObject = new Parser().buffer('copy_enabler_type', {
-    length: 16,
-  });
-
-  static CopyCountRestrictionObject = new Parser().uint32('count');
-
-  static MoveObject = new Parser().uint32('minimum_move_protection_level');
-
-  static XMRObject = (): Parser =>
-    new Parser()
-      .namely('self')
-      .int16('flags')
-      .int16('type')
-      .int32('length')
-      .choice('data', {
-        tag: 'type',
-        choices: {
-          0x0005: XMRLicenseStructs.OutputProtectionLevelRestrictionObject,
-          0x0008: XMRLicenseStructs.AnalogVideoOutputConfigurationRestriction,
-          0x000a: XMRLicenseStructs.ContentKeyObject,
-          0x000b: XMRLicenseStructs.SignatureObject,
-          0x000d: XMRLicenseStructs.RightsSettingsObject,
-          0x0012: XMRLicenseStructs.ExpirationRestrictionObject,
-          0x0013: XMRLicenseStructs.IssueDateObject,
-          0x0016: XMRLicenseStructs.MeteringRestrictionObject,
-          0x001a: XMRLicenseStructs.GracePeriodObject,
-          0x0022: XMRLicenseStructs.SourceIdObject,
-          0x002a: XMRLicenseStructs.ECCKeyObject,
-          0x002c: XMRLicenseStructs.PolicyMetadataObject,
-          0x0029: XMRLicenseStructs.DomainRestrictionObject,
-          0x0030: XMRLicenseStructs.ExpirationAfterFirstPlayRestrictionObject,
-          0x0031: XMRLicenseStructs.DigitalAudioOutputRestrictionObject,
-          0x0032: XMRLicenseStructs.RevInfoVersionObject,
-          0x0033: XMRLicenseStructs.EmbeddedLicenseSettingsObject,
-          0x0034: XMRLicenseStructs.SecurityLevelObject,
-          0x0037: XMRLicenseStructs.MoveObject,
-          0x0039: XMRLicenseStructs.PlayEnablerType,
-          0x003a: XMRLicenseStructs.CopyEnablerObject,
-          0x003b: XMRLicenseStructs.UplinkKIDObject,
-          0x003d: XMRLicenseStructs.CopyCountRestrictionObject,
-          0x0050: XMRLicenseStructs.RemovalDateObject,
-          0x0051: XMRLicenseStructs.AuxiliaryKeysObject,
-          0x0052: XMRLicenseStructs.UplinkKeyObject3,
-          0x005a: XMRLicenseStructs.SecureStopRestrictionObject,
-          0x0059: XMRLicenseStructs.DigitalVideoOutputRestrictionObject,
-        },
-        defaultChoice: 'self',
-      });
-
-  static XmrLicense = new Parser()
-    .useContextVars()
-    .buffer('signature', { length: 4 })
-    .int32('xmr_version')
-    .buffer('rights_id', { length: 16 })
-    .array('containers', {
-      type: XMRLicenseStructs.XMRObject(),
-      readUntil: 'eof',
+  static XMR = new Parser()
+    .string('constant', { length: 4, assert: 'XMR\x00' })
+    .int32('version')
+    .buffer('rightsid', { length: 16 })
+    .nest('data', {
+      type: XMRLicenseStructsV2.FTLV,
     });
 }
 
-export class XMRLicense extends XMRLicenseStructs {
-  parsed: any;
-  _LICENSE: Parser;
+enum XMRTYPE {
+  XMR_OUTER_CONTAINER = 0x0001,
+  XMR_GLOBAL_POLICY_CONTAINER = 0x0002,
+  XMR_PLAYBACK_POLICY_CONTAINER = 0x0004,
+  XMR_KEY_MATERIAL_CONTAINER = 0x0009,
+  XMR_RIGHTS_SETTINGS = 0x000d,
+  XMR_EMBEDDED_LICENSE_SETTINGS = 0x0033,
+  XMR_REVOCATION_INFORMATION_VERSION = 0x0032,
+  XMR_SECURITY_LEVEL = 0x0034,
+  XMR_CONTENT_KEY_OBJECT = 0x000a,
+  XMR_ECC_KEY_OBJECT = 0x002a,
+  XMR_SIGNATURE_OBJECT = 0x000b,
+  XMR_OUTPUT_LEVEL_RESTRICTION = 0x0005,
+  XMR_AUXILIARY_KEY_OBJECT = 0x0051,
+  XMR_EXPIRATION_RESTRICTION = 0x0012,
+  XMR_ISSUE_DATE = 0x0013,
+  XMR_EXPLICIT_ANALOG_CONTAINER = 0x0007,
+}
 
-  constructor(
-    parsed_license: any,
-    license_obj: Parser = XMRLicenseStructs.XmrLicense
-  ) {
-    super();
-    this.parsed = parsed_license;
-    this._LICENSE = license_obj;
+export class XmrUtil {
+  public data: Buffer;
+  public license: ParsedLicense;
+
+  constructor(data: Buffer, license: ParsedLicense) {
+    this.data = data;
+    this.license = license;
   }
 
-  static loads(data: string | Buffer): XMRLicense {
-    if (typeof data === 'string') {
-      data = Buffer.from(data, 'base64');
-    }
-    if (!Buffer.isBuffer(data)) {
-      throw new Error(`Expecting Bytes or Base64 input, got ${data}`);
-    }
+  static parse(license: Buffer) {
+    const xmr = XMRLicenseStructsV2.XMR.parse(license);
 
-    const licence = XMRLicenseStructs.XmrLicense;
-    const parsed_license = licence.parse(data);
-    return new XMRLicense(parsed_license, licence);
-  }
+    const parsed_license: ParsedLicense = {
+      version: xmr.version,
+      rights: Buffer.from(xmr.rightsid).toString('hex'),
+      length: license.length,
+      license: {
+        length: xmr.data.length,
+      },
+    };
+    const container = parsed_license.license;
+    const data = xmr.data;
 
-  static load(filePath: string): XMRLicense {
-    if (typeof filePath !== 'string') {
-      throw new Error(`Expecting path string, got ${filePath}`);
-    }
-    const data = fs.readFileSync(filePath);
-    return XMRLicense.loads(data);
-  }
+    let pos = 0;
+    while (pos < data.length - 16) {
+      const value = XMRLicenseStructsV2.FTLV.parse(data.value.slice(pos));
 
-  dumps(): Buffer {
-    return this._LICENSE.parse(this.parsed);
-  }
+      // XMR_SIGNATURE_OBJECT
+      if (value.type === XMRTYPE.XMR_SIGNATURE_OBJECT) {
+        const signature = XMRLicenseStructsV2.SIGNATURE.parse(value.value);
 
-  struct(): Parser {
-    return this._LICENSE;
-  }
-
-  private _locate(container: any): any {
-    if (container.flags === 2 || container.flags === 3) {
-      return this._locate(container.data);
-    } else {
-      return container;
-    }
-  }
-
-  *get_object(type_: number): Generator<any> {
-    for (const obj of this.parsed.containers) {
-      const container = this._locate(obj);
-      if (container.type === type_) {
-        yield container.data;
+        container.signature = {
+          length: value.length,
+          type: signature.type,
+          value: Buffer.from(signature.signature).toString('hex'),
+        };
       }
+
+      // XMRTYPE.XMR_GLOBAL_POLICY_CONTAINER
+      if (value.type === XMRTYPE.XMR_GLOBAL_POLICY_CONTAINER) {
+        container.global_container = {};
+
+        let index = 0;
+        while (index < value.length - 16) {
+          const data = XMRLicenseStructsV2.FTLV.parse(value.value.slice(index));
+
+          // XMRTYPE.XMR_REVOCATION_INFORMATION_VERSION
+          if (data.type === XMRTYPE.XMR_REVOCATION_INFORMATION_VERSION) {
+            container.global_container.revocationInfo = {
+              version: data.value.readUInt32BE(0),
+            };
+          }
+
+          // XMRTYPE.XMR_SECURITY_LEVEL
+          if (data.type === XMRTYPE.XMR_SECURITY_LEVEL) {
+            container.global_container.securityLevel = {
+              level: data.value.readUInt16BE(0),
+            };
+          }
+
+          index += data.length;
+        }
+      }
+
+      // XMRTYPE.XMR_KEY_MATERIAL_CONTAINER
+      if (value.type === XMRTYPE.XMR_KEY_MATERIAL_CONTAINER) {
+        container.keyMaterial = {};
+
+        let index = 0;
+        while (index < value.length - 16) {
+          const data = XMRLicenseStructsV2.FTLV.parse(value.value.slice(index));
+
+          // XMRTYPE.XMR_CONTENT_KEY_OBJECT
+          if (data.type === XMRTYPE.XMR_CONTENT_KEY_OBJECT) {
+            const content_key = XMRLicenseStructsV2.CONTENT_KEY.parse(
+              data.value
+            );
+
+            container.keyMaterial.contentKey = {
+              kid: XmrUtil.fixUUID(content_key.kid).toString('hex'),
+              keyType: content_key.keytype,
+              ciphertype: content_key.ciphertype,
+              length: content_key.length,
+              value: content_key.value,
+            };
+          }
+
+          // XMRTYPE.XMR_ECC_KEY_OBJECT
+          if (data.type === XMRTYPE.XMR_ECC_KEY_OBJECT) {
+            const ecc_key = XMRLicenseStructsV2.ECC_KEY.parse(data.value);
+
+            container.keyMaterial.encryptionKey = {
+              curve: ecc_key.curve,
+              length: ecc_key.length,
+              value: Buffer.from(ecc_key.value).toString('hex'),
+            };
+          }
+
+          // XMRTYPE.XMR_AUXILIARY_KEY_OBJECT
+          if (data.type === XMRTYPE.XMR_AUXILIARY_KEY_OBJECT) {
+            const aux_keys = XMRLicenseStructsV2.AUXILIARY_KEY_OBJECT.parse(
+              data.value
+            );
+
+            container.keyMaterial.auxKeys = {
+              count: aux_keys.count,
+              value: aux_keys.locations.map((a: any) => {
+                return {
+                  location: a.location,
+                  value: Buffer.from(a.value).toString('hex'),
+                };
+              }),
+            };
+          }
+          index += data.length;
+        }
+      }
+
+      pos += value.length;
     }
+
+    return new XmrUtil(license, parsed_license);
   }
 
-  get_content_keys(): Generator<any> {
-    return this.get_object(0x000a);
+  static fixUUID(data: Buffer): Buffer {
+    return Buffer.concat([
+      Buffer.from(data.subarray(0, 4).reverse()),
+      Buffer.from(data.subarray(4, 6).reverse()),
+      Buffer.from(data.subarray(6, 8).reverse()),
+      data.subarray(8, 16),
+    ]);
   }
 }

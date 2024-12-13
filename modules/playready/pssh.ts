@@ -5,31 +5,37 @@ import WRMHeader from './wrmheader';
 const SYSTEM_ID = Buffer.from('9a04f07998404286ab92e65be0885f95', 'hex');
 
 const PSSHBox = new Parser()
-
   .uint32('length')
   .string('pssh', { length: 4, assert: 'pssh' })
   .uint32('fullbox')
   .buffer('system_id', { length: 16 })
   .uint32('data_length')
-  .buffer('data', { length: 'data_length' });
+  .buffer('data', {
+    length: 'data_length',
+  });
 
 const PlayreadyObject = new Parser()
-  .endianess('little')
+  .useContextVars()
   .uint16('type')
   .uint16('length')
   .choice('data', {
     tag: 'type',
     choices: {
       1: new Parser().string('data', {
-        length: 'length',
+        length: function () {
+          return (this as any).$parent.length;
+        },
         encoding: 'utf16le',
       }),
     },
-    defaultChoice: new Parser().buffer('data', { length: 'length' }),
+    defaultChoice: new Parser().buffer('data', {
+      length: function () {
+        return (this as any).$parent.length;
+      },
+    }),
   });
 
 const PlayreadyHeader = new Parser()
-  .endianess('little')
   .uint32('length')
   .uint16('record_count')
   .array('records', {
@@ -38,7 +44,7 @@ const PlayreadyHeader = new Parser()
   });
 
 function isPlayreadyPsshBox(data: Buffer): boolean {
-  if (data.length < 28) return false; // Ensure enough length
+  if (data.length < 28) return false;
   return data.subarray(12, 28).equals(SYSTEM_ID);
 }
 
@@ -111,10 +117,12 @@ export class PSSH {
 
   // Header downgrade
   public get_wrm_headers(downgrade_to_v4: boolean = false): string[] {
-    return this.wrm_headers.map(downgrade_to_v4 ? this._downgrade : (_) => _);
+    return this.wrm_headers.map(
+      downgrade_to_v4 ? this.downgradePSSH : (_) => _
+    );
   }
 
-  private _downgrade(wrm_header: string): string {
+  private downgradePSSH(wrm_header: string): string {
     const header = new WRMHeader(wrm_header);
     return header.to_v4_0_0_0();
   }

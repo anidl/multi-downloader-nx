@@ -2,8 +2,8 @@ import { CertificateChain } from './bcert';
 import ECCKey from './ecc_key';
 import ElGamal, { Point } from './elgamal';
 import XmlKey from './xml_key';
-import { CipherType, getCipherType, Key } from './key';
-import { XMRLicense } from './xmrlicense';
+import { Key } from './key';
+import { XmrUtil } from './xmrlicense';
 import crypto from 'crypto';
 import { randomBytes } from 'crypto';
 import { createHash } from 'crypto';
@@ -79,7 +79,7 @@ export default class Cdm {
 
   private getCipherData(): Buffer {
     const b64_chain = this.certificate_chain.dumps().toString('base64');
-    const body = `<Data><CertificateChains><CertificateChain>${b64_chain}</CertificateChain></CertificateChains></Data>`;
+    const body = `<Data><CertificateChains><CertificateChain>${b64_chain}</CertificateChain></CertificateChains><Features><Feature Name="AESCBC"></Feature></Features></Data>`;
 
     const cipher = crypto.createCipheriv(
       'aes-128-cbc',
@@ -105,7 +105,7 @@ export default class Cdm {
 
     return (
       '<LA xmlns="http://schemas.microsoft.com/DRM/2007/03/protocols" Id="SignedData" xml:space="preserve">' +
-      `<Version>${this.la_version}</Version>` +
+      '<Version>4</Version>' +
       `<ContentHeader>${content_header}</ContentHeader>` +
       '<CLIENTINFO>' +
       `<CLIENTVERSION>${this.client_version}</CLIENTVERSION>` +
@@ -209,7 +209,7 @@ export default class Cdm {
     return main_body;
   }
 
-  private _decryptEcc256Key(encrypted_key: Buffer): Buffer {
+  private decryptEcc256Key(encrypted_key: Buffer): Buffer {
     const point1 = this.curve.curve.point(
       encrypted_key.subarray(0, 32).toString('hex'),
       encrypted_key.subarray(32, 64).toString('hex')
@@ -253,33 +253,26 @@ export default class Cdm {
       const keys = [];
 
       for (const licenseElement of licenses) {
-        for (const key of XMRLicense.loads(licenseElement).get_content_keys()) {
-          if (getCipherType(key.cipher_type) === CipherType.ECC256) {
-            keys.push(
-              new Key(
-                this.fixUUID(key.key_id),
-                key.key_type,
-                key.cipher_type,
-                key.key_length,
-                this._decryptEcc256Key(key.encrypted_key)
-              )
-            );
-          }
-        }
+        const keyMaterial = XmrUtil.parse(Buffer.from(licenseElement, 'base64'))
+          .license.license.keyMaterial;
+
+        if (!keyMaterial || !keyMaterial.contentKey)
+          throw new Error('No Content Keys retrieved');
+
+        keys.push(
+          new Key(
+            keyMaterial.contentKey.kid,
+            keyMaterial.contentKey.keyType,
+            keyMaterial.contentKey.ciphertype,
+            keyMaterial.contentKey.length,
+            this.decryptEcc256Key(keyMaterial.contentKey.value)
+          )
+        );
       }
 
       return keys;
     } catch (error) {
       throw new Error(`Unable to parse license, ${error}`);
     }
-  }
-
-  fixUUID(data: Buffer): Buffer {
-    return Buffer.concat([
-      Buffer.from(data.subarray(0, 4).reverse()),
-      Buffer.from(data.subarray(4, 6).reverse()),
-      Buffer.from(data.subarray(6, 8).reverse()),
-      data.subarray(8, 16),
-    ]);
   }
 }
