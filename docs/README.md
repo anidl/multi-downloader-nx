@@ -108,5 +108,5 @@ In order to decrypt DRM content, you will need to have a dumped CDM, after that 
 
 ### Instructions (Playready)
 
-Playready CDMs are very easy to obtain, see: https://github.com/videohelp/Playready-SL2000 .
+Playready CDMs are very easy to obtain, you can find them even on Github.
 Place the CDM in the `./playready/` directory and you're all set!
