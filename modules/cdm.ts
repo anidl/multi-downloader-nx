@@ -152,7 +152,7 @@ export async function getKeysPRD(
   pssh: string | undefined,
   licenseServer: string,
   authData: Record<string, string>
-): Promise<KeyContainer[] | undefined> {
+): Promise<KeyContainer[]> {
   if (!pssh || !canDecrypt || !prd_cdm) return [];
   const pssh_parsed = new PSSH(pssh);
 
@@ -218,7 +218,7 @@ export async function getKeysPRD(
         };
       });
     } catch {
-      return undefined;
+      return [];
     }
   } else {
     console.info(
