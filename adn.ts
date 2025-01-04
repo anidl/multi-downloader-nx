@@ -26,15 +26,14 @@ import parseFileName, { Variable } from './modules/module.filename';
 import { AvailableFilenameVars } from './modules/module.args';
 
 // Types
-import { ServiceClass } from './@types/serviceClassInterface';
-import { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
-import { sxItem } from './crunchy';
-import { DownloadedMedia } from './@types/hidiveTypes';
-import { ADNSearch, ADNSearchShow } from './@types/adnSearch';
-import { ADNVideo, ADNVideos } from './@types/adnVideos';
-import { ADNPlayerConfig } from './@types/adnPlayerConfig';
-import { ADNStreams } from './@types/adnStreams';
-import { ADNSubtitles } from './@types/adnSubtitles';
+import type { ServiceClass } from './@types/serviceClassInterface';
+import type { AuthData, AuthResponse, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
+import type { DownloadedMedia, DownloadedMediaMap, sxItem } from './@types/downloaderTypes';
+import type { ADNSearch, ADNSearchShow } from './@types/adnSearch';
+import type { ADNVideo, ADNVideos } from './@types/adnVideos';
+import type { ADNPlayerConfig } from './@types/adnPlayerConfig';
+import type { ADNStreams } from './@types/adnStreams';
+import type { ADNSubtitles } from './@types/adnSubtitles';
 
 export default class AnimationDigitalNetwork implements ServiceClass { 
   public cfg: yamlCfg.ConfigObject;
@@ -316,7 +315,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     return { isOk: true, value: selEpsArr };
   }
 
-  public async muxStreams(data: DownloadedMedia[], options: yargs.ArgvType) {
+  public async muxStreams(data: DownloadedMedia[], mediaMap: DownloadedMediaMap[], options: yargs.ArgvType) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
     let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
@@ -325,9 +324,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       hasAudioStreams = true;
     }
     const merger = new Merger({
+      mediaMap,
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -337,8 +335,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       inverseTrackOrder: false,
       keepAllVideos: options.keepAllVideos,
       onlyAudio: hasAudioStreams ? data.filter(a => a.type === 'Audio').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -346,10 +342,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       }) : [],
       output: `${options.output}.${options.mp4 ? 'mp4' : 'mkv'}`,
       subtitles: data.filter(a => a.type === 'Subtitle').map((a) : SubtitleInput => {
-        if (a.type === 'Video')
-          throw new Error('Never');
-        if (a.type === 'Audio')
-          throw new Error('Never');
         return {
           file: a.path,
           language: a.language,
@@ -357,14 +349,10 @@ export default class AnimationDigitalNetwork implements ServiceClass {
         };
       }),
       simul: data.filter(a => a.type === 'Video').map((a) : boolean => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return !a.uncut as boolean;
       })[0],
       fonts: Merger.makeFontsList(this.cfg.dir.fonts, data.filter(a => a.type === 'Subtitle') as sxItem[]),
       videoAndAudio: hasAudioStreams ? [] : data.filter(a => a.type === 'Video').map((a) : MergerInput => {
-        if (a.type === 'Subtitle')
-          throw new Error('Never');
         return {
           lang: a.lang,
           path: a.path,
@@ -417,7 +405,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       return { isOk: false, reason: new Error('Failed to download media list') };
     } else {
       if (!options.skipmux) {
-        await this.muxStreams(res.data, { ...options, output: res.fileName });
+        await this.muxStreams(res.data, res.mediaMap, { ...options, output: res.fileName });
       } else {
         console.info('Skipping mux');
       }
@@ -446,6 +434,12 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     }
 
     const files: DownloadedMedia[] = [];
+    const mediaMap: DownloadedMediaMap[] = [];
+
+    const fileMap: DownloadedMediaMap = {
+      version: data.id.toString(),
+      files: []
+    };
 
     let dlFailed = false;
     let dlVideoOnce = false; // Variable to save if best selected video quality was downloaded
@@ -710,6 +704,11 @@ export default class AnimationDigitalNetwork implements ServiceClass {
                 path: `${tsFile}.ts`,
                 lang: audDub
               });
+              fileMap.files.push({
+                type: 'Video',
+                path: `${tsFile}.ts`,
+                lang: audDub
+              });
               dlVideoOnce = true;
             }
           } else{
@@ -773,7 +772,12 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
           files.push({
             path: `${tsFile}.txt`,
-            lang: langsData.languages.find(a=>a.code=='jpn'),
+            lang: langsData.languages.find(a=>a.code=='jpn')!,
+            type: 'Chapters'
+          });
+          fileMap.files.push({
+            path: `${tsFile}.txt`,
+            lang: langsData.languages.find(a=>a.code=='jpn')!,
             type: 'Chapters'
           });
         } catch {
@@ -899,6 +903,11 @@ export default class AnimationDigitalNetwork implements ServiceClass {
               ...sxData as sxItem,
               cc: false
             });
+            fileMap.files.push({
+              type: 'Subtitle',
+              ...sxData as sxItem,
+              cc: false
+            });
           }
           subIndex++;
         }
@@ -909,9 +918,12 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       console.info('Subtitles downloading skipped!');
     }
 
+    mediaMap.push(fileMap);
+
     return {
       error: dlFailed,
       data: files,
+      mediaMap,
       fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName)) || './unknown' : './unknown'
     };
   }

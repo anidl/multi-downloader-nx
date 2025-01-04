@@ -1,20 +1,33 @@
-import * as iso639 from 'iso-639';
-import * as yamlCfg from './module.cfg-loader';
-import { fontFamilies, fontMime } from './module.fontsData';
+// Native
 import path from 'path';
 import fs from 'fs';
-import { LanguageItem } from './module.langsData';
-import { AvailableMuxer } from './module.args';
+import { spawn } from 'child_process';
+import os from 'os';
+
+// Plugins
+import * as iso639 from 'iso-639';
 import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
+import { OggOpusDecodedAudio, OggOpusDecoder } from 'ogg-opus-decoder';
+import SynAudio, { MultipleClipMatch, MultipleClipMatchFirst } from 'synaudio';
+
+// Modules
+import { LanguageItem } from './module.langsData';
+import { AvailableMuxer } from './module.args';
+import * as yamlCfg from './module.cfg-loader';
+import { fontFamilies, fontMime } from './module.fontsData';
+
+// Types 
+import { DownloadedMediaMap } from '../@types/downloaderTypes';
 
 export type MergerInput = {
   path: string,
   lang: LanguageItem,
-  duration?: number,
+  duration?: OggOpusDecodedAudio,
   delay?: number,
   isPrimary?: boolean,
+  totalDuration?: number,
 }
 
 export type SubtitleInput = {
@@ -34,6 +47,7 @@ export type ParsedFont = {
 }
 
 export type MergerOptions = {
+  mediaMap?: DownloadedMediaMap[],
   videoAndAudio: MergerInput[],
   onlyVid: MergerInput[],
   onlyAudio: MergerInput[],
@@ -58,7 +72,7 @@ export type MergerOptions = {
 }
 
 class Merger {
-  
+
   constructor(private options: MergerOptions) {
     if (this.options.skipSubMux)
       this.options.subtitles = [];
@@ -66,46 +80,146 @@ class Merger {
       this.options.videoTitle = this.options.videoTitle.replace(/"/g, '\'');
   }
 
-  public async createDelays() {
-    //Don't bother scanning it if there is only 1 vna stream
-    if (this.options.videoAndAudio.length > 1) {
-      const bin = await yamlCfg.loadBinCfg();
-      const vnas = this.options.videoAndAudio;
-      //get and set durations on each videoAndAudio Stream
-      for (const [vnaIndex, vna] of vnas.entries()) {
-        const streamInfo = await ffprobe(vna.path, { path: bin.ffprobe as string });
-        const videoInfo = streamInfo.streams.filter(stream => stream.codec_type == 'video');
-        vnas[vnaIndex].duration = parseInt(videoInfo[0].duration as string);
-      }
-      //Sort videoAndAudio streams by duration (shortest first)
-      vnas.sort((a,b) => {
-        if (!a.duration || !b.duration) return -1;
-        return a.duration - b.duration;
+  async convertFile(path: string, ffmpeg: string): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+      const options = [
+        '-t',
+        '60',
+        '-i',
+        path,
+        '-vn',
+        '-c:a',
+        'libopus',
+        '-filter:a',
+        'loudnorm',
+        '-f',
+        'ogg',
+        'pipe:1'
+      ];
+      console.info(ffmpeg, options.join(' '));
+      const ffmpegSpawn = spawn(ffmpeg, options);
+      const data: number[] = [];
+
+      ffmpegSpawn.stdout.on('data', (chunk) => {
+        data.push(...chunk);
       });
-      //Set Delays
-      const shortestDuration = vnas[0].duration;
-      for (const [vnaIndex, vna] of vnas.entries()) {
-        //Don't calculate the shortestDuration track
-        if (vnaIndex == 0) {
-          if (!vna.isPrimary && vna.isPrimary !== undefined) 
-            console.warn('Shortest video isn\'t primary, this might lead to problems with subtitles. Please report on github or discord if you experience issues.');
-          continue;
+
+      ffmpegSpawn.stderr.on('data', (err) => {
+        //console.debug(err.toString().trimEnd());
+      });
+
+      ffmpegSpawn.on('close', (code) => {
+        if (code !== 0) {
+          console.error('FFmpeg exited with code: ', code);
+          return reject();
         }
-        if (vna.duration && shortestDuration) {
-          //Calculate the tracks delay
-          vna.delay = Math.ceil((vna.duration-shortestDuration) * 1000) / 1000;
-          //TODO: set primary language for audio so it can be used to determine which track needs the delay
-          //The above is a problem in the event that it isn't the dub that needs the delay, but rather the sub.
-          //Alternatively: Might not work: it could be checked if there are multiple of the same video language, and if there is
-          //more than 1 of the same video language, then do the subtitle delay on CC, else normal language.
-          const subtitles = this.options.subtitles.filter(sub => sub.language.code == vna.lang.code);
-          for (const [subIndex, sub] of subtitles.entries()) {
-            if (vna.isPrimary) subtitles[subIndex].delay = vna.delay;
-            else if (sub.closedCaption) subtitles[subIndex].delay = vna.delay;
+        resolve(new Uint8Array(data));
+      });
+    });
+  }
+
+  async decodeAudio(data: Uint8Array): Promise<OggOpusDecodedAudio> {
+    const decoder = new OggOpusDecoder();
+    await decoder.ready;
+
+    return decoder.decode(data);
+  }
+
+  public async createDelays() {
+    const bin = await yamlCfg.loadBinCfg();
+    const allFiles = [...this.options.onlyAudio, ...this.options.videoAndAudio, ...this.options.onlyVid, ...this.options.subtitles];
+    if (this.options.chapters)
+      allFiles.push(...this.options.chapters);
+    const audios = [...this.options.onlyAudio, ...this.options.videoAndAudio];
+    if (audios.length < 2)
+      return;
+
+    if (bin.ffmpeg === undefined || bin.ffmpeg.trim().length === 0)
+      return console.error('Unable to sync timing without ffmpeg!');
+
+    for (const audio of audios) {
+      try {
+        const track = (
+          await this.decodeAudio(
+            await this.convertFile(audio.path, bin.ffmpeg)
+          )
+        );
+        if (track.errors.length > 0) {
+          console.error(`Unable to decode ${audio.path}: ${track.errors}`);
+          return;
+        }
+        audio.duration = track;
+        const streamInfo = await ffprobe(audio.path, { path: bin.ffprobe as string });
+        const compare = streamInfo.streams.find(s => s.codec_type === 'video') || streamInfo.streams.find(s => s.codec_type === 'audio');
+        audio.totalDuration = parseInt(compare!.duration!);
+      } catch (e) {
+        console.error(`Unable to generate sync timing because of file ${audio.path}: ${e}`);
+        return;
+      }
+    }
+
+    audios.sort((a, b) => a.totalDuration! - b.totalDuration!);
+
+    const synAudio = new SynAudio({
+      correlationSampleSize: 50000,
+      initialGranularity: 12,
+      correlationThreshold: 0.5
+    });
+
+    const audioArray = await synAudio.syncMultiple(
+      audios.map((audio) => {
+        return {
+          name: audio.path,
+          data: {
+            channelData: audio.duration!.channelData,
+            samplesDecoded: audio.duration!.samplesDecoded,
+          }
+        };
+      }), 
+      os.cpus().length-1
+    );
+
+    //console.debug(audioArray);
+
+    // Find max sampleOffset value
+    const maxSampleOffset = Math.max(...audioArray[0].map(item => item.sampleOffset));
+
+    // Invert the sampleOffset values
+    const invertedArray = audioArray[0].map(item => ({
+      ...item,
+      sampleOffset: maxSampleOffset - item.sampleOffset
+    }));
+
+    //Iterate over found matches
+    invertedArray.forEach((clip: MultipleClipMatch | MultipleClipMatchFirst) => {
+      const audio = audios.find(a => a.path === clip.name)!;
+      audio.delay = (clip.sampleOffset || 0 ) / audio.duration!.sampleRate;
+
+      // Iterate over each DownloadedMediaMap in the array
+      for (const mediaMap of this.options.mediaMap!) {
+        // Iterate over the files array in each DownloadedMediaMap
+        for (const media of mediaMap.files) {
+          // Check if the path matches
+          if (media.path === clip.name) {
+            //console.debug('Matching path found:', media.path);
+
+            // Re-iterate over the files array where the match was found
+            mediaMap.files.forEach((file) => {
+              const mergerFile = allFiles.find(a => 
+                ('path' in a ? a.path : a.file) === file.path
+              );
+              if (mergerFile)
+                mergerFile.delay = audio.delay;
+              else 
+                console.error(`File ${file.path} was not found in allFiles array, this shouldn't happen`);
+            });
+
+            // We only want the first match, so break out of the loop
+            break;
           }
         }
       }
-    }
+    });
   }
 
   public FFmpeg() : string {
@@ -118,8 +232,9 @@ class Merger {
 
     for (const vid of this.options.videoAndAudio) {
       if (vid.delay && hasVideo) {
+        console.info('Inserting delay vid', vid.delay);
         args.push(
-          `-itsoffset -${Math.ceil(vid.delay*1000)}ms`
+          `-itsoffset ${Math.round(vid.delay * 1000) / 1000}`
         );
       }
       args.push(`-i "${vid.path}"`);
@@ -147,6 +262,10 @@ class Merger {
     }
 
     for (const aud of this.options.onlyAudio) {
+      if (aud.delay) {
+        console.info('Inserting delay', aud.delay);
+        args.push(`-itsoffset -${Math.ceil(aud.delay * 1000) / 1000}`);
+      }
       args.push(`-i "${aud.path}"`);
       metaData.push(`-map ${index}`);
       metaData.push(`-metadata:s:a:${audioIndex} language=${aud.lang.code}`);
@@ -158,7 +277,7 @@ class Merger {
       const sub = this.options.subtitles[index];
       if (sub.delay) {
         args.push(
-          `-itsoffset -${Math.ceil(sub.delay*1000)}ms`
+          `-itsoffset -${Math.round(sub.delay*1000)}ms`
         );
       }
       args.push(`-i "${sub.file}"`);
@@ -229,7 +348,7 @@ class Merger {
       const videoTrackNum = this.options.inverseTrackOrder ? '1' : '0';
       if (vid.delay) {
         args.push(
-          `--sync ${audioTrackNum}:-${Math.ceil(vid.delay*1000)}`
+          `--sync ${audioTrackNum}:-${Math.round(vid.delay*1000)}`
         );
       }
       if (!hasVideo || this.options.keepAllVideos) {
@@ -264,6 +383,11 @@ class Merger {
     }
 
     for (const aud of this.options.onlyAudio) {
+      if (aud.delay) {
+        args.push(
+          `--sync 0:-${Math.round(aud.delay*1000)}`
+        );
+      }
       const trackName = aud.lang.name;
       args.push('--track-name', `0:"${trackName}"`);
       args.push(`--language 0:${aud.lang.code}`);
@@ -283,7 +407,7 @@ class Merger {
       for (const subObj of this.options.subtitles) {
         if (subObj.delay) {
           args.push(
-            `--sync 0:-${Math.ceil(subObj.delay*1000)}`
+            `--sync 0:-${Math.round(subObj.delay*1000)}`
           );
         }
         args.push('--track-name', `0:"${(subObj.language.language || subObj.language.name) + `${subObj.closedCaption === true ? ` ${this.options.ccTag}` : ''}` + `${subObj.signs === true ? ' Signs' : ''}`}"`);
@@ -380,7 +504,7 @@ class Merger {
               path: fontPath,
               mime: mime,
             });
-          } 
+          }
         }
       }
     }

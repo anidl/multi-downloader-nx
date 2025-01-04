@@ -1,18 +1,17 @@
-// build-in
+// Built In
 import path from 'path';
 import fs from 'fs-extra';
+import { randomUUID } from 'crypto';
 
-// package program
+// Package
 import packageJson from './package.json';
 
-// plugins
-import { console } from './modules/log';
+// Plugins
 import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
-import streamdl, { M3U8Json } from './modules/hls-download';
-import { exec } from './modules/sei-helper-fixes';
 
 // custom modules
+import { console } from './modules/log';
 import * as fontsData from './modules/module.fontsData';
 import * as langsData from './modules/module.langsData';
 import * as yamlCfg from './modules/module.cfg-loader';
@@ -20,40 +19,32 @@ import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import getKeys, { canDecrypt } from './modules/widevine';
 //import vttConvert from './modules/module.vttconvert';
-
-// args
-
-// load req
 import { domain, api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.fetch';
-import { CrunchySearch } from './@types/crunchySearch';
-import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
-import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
-import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-import { CrunchyStreams, PlaybackData, Subtitles } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
-import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
-import { ServiceClass } from './@types/serviceClassInterface';
-import { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
-import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
-import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
-import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 import vtt2ass from './modules/module.vtt2ass';
-import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
-import { CrunchyPlayStreams } from './@types/enums';
-import { randomUUID } from 'node:crypto';
+import streamdl, { M3U8Json } from './modules/hls-download';
+import { exec } from './modules/sei-helper-fixes';
 
-export type sxItem = {
-  language: langsData.LanguageItem,
-  path: string,
-  file: string
-  title: string,
-  fonts: Font[]
-}
+// Types
+import type { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
+import type { DownloadedMedia, DownloadedMediaMap, sxItem } from './@types/downloaderTypes';
+import type { CrunchySearch } from './@types/crunchySearch';
+import type { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList';
+import type { ObjectInfo } from './@types/objectInfo';
+import type { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
+import type { ServiceClass } from './@types/serviceClassInterface';
+import type { CrunchyAndroidStreams } from './@types/crunchyAndroidStreams';
+import type { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
+import type { CrunchyPlayStream } from './@types/crunchyPlayStreams';
+import type { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
+import type { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
+import type { CrunchyStreams, PlaybackData, Subtitles } from './@types/playbackData';
+import { CrunchyPlayStreams } from './@types/enums';
 
 export default class Crunchy implements ServiceClass {
   public cfg: yamlCfg.ConfigObject;
@@ -985,7 +976,7 @@ export default class Crunchy implements ServiceClass {
       return false;
     } else {
       if (!options.skipmux) {
-        await this.muxStreams(res.data, { ...options, output: res.fileName });
+        await this.muxStreams(res.data, res.mediaMap, { ...options, output: res.fileName });
       } else {
         console.info('Skipping mux');
       }
@@ -1195,6 +1186,7 @@ export default class Crunchy implements ServiceClass {
 
   public async downloadMediaList(medias: CrunchyEpMeta, options: CrunchyDownloadOptions) : Promise<{
     data: DownloadedMedia[],
+    mediaMap: DownloadedMediaMap[],
     fileName: string,
     error: boolean
   } | undefined> {
@@ -1214,6 +1206,7 @@ export default class Crunchy implements ServiceClass {
     }
 
     const files: DownloadedMedia[] = [];
+    const mediaMap: DownloadedMediaMap[] = [];
 
     if(medias.data.every(a => !a.playback)){
       console.warn('Video not available!');
@@ -1229,6 +1222,11 @@ export default class Crunchy implements ServiceClass {
 
       // Make sure we have a media id without a : in it
       const currentMediaId = (mMeta.mediaId.includes(':') ? mMeta.mediaId.split(':')[1] : mMeta.mediaId);
+
+      const fileMap: DownloadedMediaMap = {
+        version: currentMediaId,
+        files: []
+      };
 
       //Make sure token is up-to-date
       await this.refreshToken(true, true);
@@ -1377,7 +1375,7 @@ export default class Crunchy implements ServiceClass {
       if (options.cstream !== 'none') {
         const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cstream]}/play`, AuthHeaders);
         if (!playbackReq.ok || !playbackReq.res) {
-          console.error('Non-DRM Request Stream URLs FAILED!');
+          console.error('Request for Stream URLs FAILED!');
         } else {
           playStream = await playbackReq.res.json() as CrunchyPlayStream;
           const derivedPlaystreams = {} as CrunchyStreams;
@@ -1779,6 +1777,12 @@ export default class Crunchy implements ServiceClass {
                       lang: lang,
                       isPrimary: isPrimary
                     });
+                    fileMap.files.push({
+                      type: 'Video',
+                      path: `${tsFile}.video.m4s`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
                   }
                 }
 
@@ -1801,6 +1805,12 @@ export default class Crunchy implements ServiceClass {
                       lang: lang,
                       isPrimary: isPrimary
                     });
+                    fileMap.files.push({
+                      type: 'Audio',
+                      path: `${tsFile}.audio.m4s`,
+                      lang: lang,
+                      isPrimary: isPrimary
+                    });
                     console.info('Decryption done for audio');
                   }
                 }
@@ -1815,9 +1825,21 @@ export default class Crunchy implements ServiceClass {
                   lang: lang,
                   isPrimary: isPrimary
                 });
+                fileMap.files.push({
+                  type: 'Video',
+                  path: `${tsFile}.video.m4s`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
               }
               if (audioDownloaded) {
                 files.push({
+                  type: 'Audio',
+                  path: `${tsFile}.audio.m4s`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
+                fileMap.files.push({
                   type: 'Audio',
                   path: `${tsFile}.audio.m4s`,
                   lang: lang,
@@ -1980,6 +2002,12 @@ export default class Crunchy implements ServiceClass {
                   lang: lang,
                   isPrimary: isPrimary
                 });
+                fileMap.files.push({
+                  type: 'Video',
+                  path: `${tsFile}.ts`,
+                  lang: lang,
+                  isPrimary: isPrimary
+                });
                 dlVideoOnce = true;
               }
             } else{
@@ -2013,6 +2041,11 @@ export default class Crunchy implements ServiceClass {
           }
           fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
           files.push({
+            path: `${tsFile}.txt`,
+            lang: lang,
+            type: 'Chapters'
+          });
+          fileMap.files.push({
             path: `${tsFile}.txt`,
             lang: lang,
             type: 'Chapters'
@@ -2104,6 +2137,12 @@ export default class Crunchy implements ServiceClass {
                   cc: isCC,
                   signs: isSigns,
                 });
+                fileMap.files.push({
+                  type: 'Subtitle',
+                  ...sxData as sxItem,
+                  cc: isCC,
+                  signs: isSigns,
+                });
               }
               else{
                 console.warn(`Failed to download subtitle: ${sxData.file}`);
@@ -2118,16 +2157,19 @@ export default class Crunchy implements ServiceClass {
         console.info('Subtitles downloading skipped!');
       }
 
+      mediaMap.push(fileMap);
       await this.sleep(options.waittime);
     }
+
     return {
       error: dlFailed,
       data: files,
+      mediaMap,
       fileName: fileName ? (path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName)) || './unknown' : './unknown'
     };
   }
 
-  public async muxStreams(data: DownloadedMedia[], options: CrunchyMuxOptions) {
+  public async muxStreams(data: DownloadedMedia[], mediaMap: DownloadedMediaMap[], options: CrunchyMuxOptions) {
     this.cfg.bin = await yamlCfg.loadBinCfg();
     let hasAudioStreams = false;
     if (options.novids || data.filter(a => a.type === 'Video').length === 0)
@@ -2136,6 +2178,7 @@ export default class Crunchy implements ServiceClass {
       hasAudioStreams = true;
     }
     const merger = new Merger({
+      mediaMap,
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {
         return {
           lang: a.lang,
