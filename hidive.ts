@@ -771,7 +771,7 @@ export default class Hidive implements ServiceClass {
     }
 
     if (chosenAudios[0].pssh_prd && cdm === 'playready' || chosenVideoSegments.pssh_prd && cdm === 'playready') {
-      encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_wvd, 'https://shield-drm.imggaming.com/api/v2/license', {
+      encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://shield-drm.imggaming.com/api/v2/license', {
         'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
         'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ubWljcm9zb2Z0LnBsYXlyZWFkeSJ9',
       });
