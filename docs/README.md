@@ -102,6 +102,11 @@ If you want to package the application, run pnpm run build-`{platform}`-`{type}`
 
 * mp4decrypt >= Any (http://www.bento4.com/) - Only required for decrypting
 
-### Instructions
+### Instructions (Widevine)
 
 In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (`device_client_id_blob` and `device_private_key`) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.
+
+### Instructions (Playready)
+
+Playready CDMs are very easy to obtain, you can find them even on Github.
+Place the CDM in the `./playready/` directory and you're all set!

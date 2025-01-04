@@ -15,7 +15,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import * as reqModule from './modules/module.fetch';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
-import getKeys, { canDecrypt } from './modules/widevine';
+import { canDecrypt, getKeysWVD, cdm, getKeysPRD } from './modules/cdm';
 import streamdl, { M3U8Json } from './modules/hls-download';
 import { exec } from './modules/sei-helper-fixes';
 import { console } from './modules/log';
@@ -597,7 +597,7 @@ export default class AnimeOnegai implements ServiceClass {
             };
             try {
               const videoDownload = await new streamdl({
-                output: chosenVideoSegments.pssh ? `${tempTsFile}.video.enc.mp4` : `${tsFile}.video.mp4`,
+                output: chosenVideoSegments.pssh_wvd ? `${tempTsFile}.video.enc.mp4` : `${tsFile}.video.mp4`,
                 timeout: options.timeout,
                 m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -645,7 +645,7 @@ export default class AnimeOnegai implements ServiceClass {
             };
             try {
               const audioDownload = await new streamdl({
-                output: chosenAudioSegments.pssh ? `${tempTsFile}.audio.enc.mp4` : `${tsFile}.audio.mp4`,
+                output: chosenAudioSegments.pssh_wvd ? `${tempTsFile}.audio.enc.mp4` : `${tsFile}.audio.mp4`,
                 timeout: options.timeout,
                 m3u8json: audioJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -677,10 +677,18 @@ export default class AnimeOnegai implements ServiceClass {
           }
 
           //Handle Decryption if needed
-          if ((chosenVideoSegments.pssh || chosenAudioSegments.pssh) && (videoDownloaded || audioDownloaded)) {
+          if ((chosenVideoSegments.pssh_wvd || chosenAudioSegments.pssh_wvd) && (videoDownloaded || audioDownloaded)) {
             console.info('Decryption Needed, attempting to decrypt');
-            const encryptionKeys = await getKeys(chosenVideoSegments.pssh, streamData.widevine_proxy, {});
-            if (encryptionKeys.length == 0) {
+            let encryptionKeys;
+
+            if (cdm === 'widevine') {
+              encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, streamData.widevine_proxy, {});
+            }
+            if (cdm === 'playready') {
+              encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, streamData.playready_proxy, {});
+            }
+
+            if (!encryptionKeys || encryptionKeys.length == 0) {
               console.error('Failed to get encryption keys');
               return undefined;
             }
@@ -690,7 +698,7 @@ export default class AnimeOnegai implements ServiceClass {
               });*/
 
             if (this.cfg.bin.mp4decrypt) {
-              const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+              const commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
               const commandVideo = commandBase+`"${tempTsFile}.video.enc.mp4" "${tempTsFile}.video.mp4"`;
               const commandAudio = commandBase+`"${tempTsFile}.audio.enc.mp4" "${tempTsFile}.audio.mp4"`;
 

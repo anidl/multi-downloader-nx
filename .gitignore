@@ -43,3 +43,5 @@ crunchyendpoints
 bin
 widevine/*
 !widevine/.gitkeep
+playready/*
+!playready/.gitkeep

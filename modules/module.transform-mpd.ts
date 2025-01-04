@@ -22,7 +22,8 @@ type Segment = {
 }
 
 export type PlaylistItem = {
-  pssh?: string,
+  pssh_wvd?: string,
+  pssh_prd?: string,
   bandwidth: number,
   segments: Segment[]
 }
@@ -45,6 +46,29 @@ export type MPDParsed = {
     audio: AudioPlayList[],
     video: VideoPlayList[]
   }
+}
+
+function extractPSSH(
+  manifest: string,
+  schemeIdUri: string,
+  psshTagNames: string[]
+): string | null {
+  const regex = new RegExp(
+    `<ContentProtection[^>]*schemeIdUri=["']${schemeIdUri}["'][^>]*>([\\s\\S]*?)</ContentProtection>`,
+    'i'
+  );
+  const match = regex.exec(manifest);
+  if (match && match[1]) {
+    const innerContent = match[1];
+    for (const tagName of psshTagNames) {
+      const psshRegex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)</${tagName}>`, 'i');
+      const psshMatch = psshRegex.exec(innerContent);
+      if (psshMatch && psshMatch[1]) {
+        return psshMatch[1].trim();
+      }
+    }
+  }
+  return null;
 }
 
 export async function parse(manifest: string, language?: LanguageItem, url?: string) {
@@ -123,9 +147,18 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
         })
       };
 
+      const playreadyPssh = extractPSSH(
+        manifest,
+        'urn:uuid:9A04F079-9840-4286-AB92-E65BE0885F95',
+        ['cenc:pssh', 'mspr:pro']
+      );
+
       if (playlist.contentProtection &&
         playlist.contentProtection?.['com.widevine.alpha'].pssh)
-        pItem.pssh = arrayBufferToBase64(playlist.contentProtection['com.widevine.alpha'].pssh);
+        pItem.pssh_wvd = arrayBufferToBase64(playlist.contentProtection['com.widevine.alpha'].pssh);
+  
+      if (playreadyPssh)
+        pItem.pssh_prd = playreadyPssh;
 
       ret[host].audio.push(pItem);
     }
@@ -189,9 +222,18 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
       })
     };
 
+    const playreadyPssh = extractPSSH(
+      manifest,
+      'urn:uuid:9A04F079-9840-4286-AB92-E65BE0885F95',
+      ['cenc:pssh', 'mspr:pro']
+    );
+
     if (playlist.contentProtection &&
       playlist.contentProtection?.['com.widevine.alpha'].pssh)
-      pItem.pssh = arrayBufferToBase64(playlist.contentProtection['com.widevine.alpha'].pssh);
+      pItem.pssh_wvd = arrayBufferToBase64(playlist.contentProtection['com.widevine.alpha'].pssh);
+
+    if (playreadyPssh)
+      pItem.pssh_prd = playreadyPssh;
 
     ret[host].video.push(pItem);
   }

@@ -35,7 +35,7 @@ import { Episode, NewHidiveEpisodeExtra, NewHidiveSeason, NewHidiveSeriesExtra }
 import { NewHidiveEpisode } from './@types/newHidiveEpisode';
 import { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
 import { MPDParsed, parse } from './modules/module.transform-mpd';
-import getKeys, { canDecrypt } from './modules/widevine';
+import { canDecrypt, getKeysWVD, cdm, getKeysPRD } from './modules/cdm';
 import { exec } from './modules/sei-helper-fixes';
 import { KeyContainer } from './modules/license';
 
@@ -763,10 +763,17 @@ export default class Hidive implements ServiceClass {
     console.info(`Selected (Available) Audio Languages: ${chosenAudios.map(a => a.language.name).join(', ')}`);
     console.info('Stream URL:', chosenVideoSegments.segments[0].map.uri.split('/init.mp4')[0]);
 
-    if (chosenAudios[0].pssh || chosenVideoSegments.pssh) {
-      encryptionKeys = await getKeys(chosenVideoSegments.pssh, 'https://shield-drm.imggaming.com/api/v2/license', {
+    if (chosenAudios[0].pssh_wvd && cdm === 'widevine' || chosenVideoSegments.pssh_wvd && cdm === 'widevine') {
+      encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, 'https://shield-drm.imggaming.com/api/v2/license', {
         'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
         'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ==',
+      });
+    }
+
+    if (chosenAudios[0].pssh_prd && cdm === 'playready' || chosenVideoSegments.pssh_prd && cdm === 'playready') {
+      encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://shield-drm.imggaming.com/api/v2/license', {
+        'Authorization': `Bearer ${selectedEpisode.jwtToken}`,
+        'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ubWljcm9zb2Z0LnBsYXlyZWFkeSJ9',
       });
     }
           
@@ -810,14 +817,14 @@ export default class Hidive implements ServiceClass {
         console.error(`DL Stats: ${JSON.stringify(videoDownload.parts)}\n`);
         dlFailed = true;
       } else {
-        if (chosenVideoSegments.pssh) {
+        if (chosenVideoSegments.pssh_wvd || chosenVideoSegments.pssh_prd) {
           console.info('Decryption Needed, attempting to decrypt');
           if (encryptionKeys.length == 0) {
             console.error('Failed to get encryption keys');
             return undefined;
           }
           if (this.cfg.bin.mp4decrypt) {
-            const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+            const commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
             const commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
 
             console.info('Started decrypting video');
@@ -892,14 +899,14 @@ export default class Hidive implements ServiceClass {
           console.error(`DL Stats: ${JSON.stringify(audioDownload.parts)}\n`);
           dlFailed = true;
         }
-        if (chosenAudioSegments.pssh) {
+        if (chosenAudioSegments.pssh_wvd || chosenAudioSegments.pssh_prd) {
           console.info('Decryption Needed, attempting to decrypt');
           if (encryptionKeys.length == 0) {
             console.error('Failed to get encryption keys');
             return undefined;
           }
           if (this.cfg.bin.mp4decrypt) {
-            const commandBase = `--show-progress --key ${encryptionKeys[1].kid}:${encryptionKeys[1].key} `;
+            const commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
             const commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
             console.info('Started decrypting audio');
