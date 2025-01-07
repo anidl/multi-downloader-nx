@@ -828,7 +828,7 @@ export default class Hidive implements ServiceClass {
             let commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
 
             if (this.cfg.bin.shaka) {
-              commandBase = ` --enable_raw_key_decryption --keys key_id=${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:key=${encryptionKeys[cdm === 'playready' ? 0 : 1].key}`;
+              commandBase = ` --enable_raw_key_decryption ${encryptionKeys.map(kb => '--keys key_id='+kb.kid+':key='+kb.key).join(' ')}`;
               commandVideo = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s"`+commandBase;
             }
 
