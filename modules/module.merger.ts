@@ -168,7 +168,7 @@ class Merger {
       if (this.options.fonts) {
         let fontIndex = 0;
         for (const font of this.options.fonts) {
-          args.push(`-attach ${font.path} -metadata:s:t:${fontIndex} mimetype=${font.mime}`);
+          args.push(`-attach ${font.path} -metadata:s:t:${fontIndex} mimetype=${font.mime} -metadata:s:t:${fontIndex} filename=${font.name}`);
           fontIndex++;
         }
       }

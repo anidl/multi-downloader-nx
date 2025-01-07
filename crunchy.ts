@@ -2055,8 +2055,8 @@ export default class Crunchy implements ServiceClass {
         options.skipsubs = true;
       }
 
-      if(!options.skipsubs && options.dlsubs.indexOf('none') == -1){
-        if(pbData.meta.subtitles && Object.values(pbData.meta.subtitles).length > 0){
+      if (!options.skipsubs && options.dlsubs.indexOf('none') == -1){
+        if ((pbData.meta.subtitles && Object.values(pbData.meta.subtitles).length) || (pbData.meta.closed_captions && Object.values(pbData.meta.closed_captions).length > 0)) {
           const subsData = Object.values(pbData.meta.subtitles);
           const capsData = Object.values(pbData.meta.closed_captions);
           const subsDataMapped = subsData.map((s) => {
