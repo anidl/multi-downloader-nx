@@ -697,14 +697,20 @@ export default class AnimeOnegai implements ServiceClass {
                 keys[key.kid] = key.key;
               });*/
 
-            if (this.cfg.bin.mp4decrypt) {
-              const commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
-              const commandVideo = commandBase+`"${tempTsFile}.video.enc.mp4" "${tempTsFile}.video.mp4"`;
-              const commandAudio = commandBase+`"${tempTsFile}.audio.enc.mp4" "${tempTsFile}.audio.mp4"`;
+            if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
+              let commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
+              let commandVideo = commandBase+`"${tempTsFile}.video.enc.mp4" "${tempTsFile}.video.mp4"`;
+              let commandAudio = commandBase+`"${tempTsFile}.audio.enc.mp4" "${tempTsFile}.audio.mp4"`;
+
+              if (this.cfg.bin.shaka) {
+                commandBase = ` --enable_raw_key_decryption --keys key_id=${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:key=${encryptionKeys[cdm === 'playready' ? 0 : 1].key}`;
+                commandVideo = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s"`+commandBase;
+                commandAudio = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s"`+commandBase;
+              }
 
               if (videoDownloaded) {
-                console.info('Started decrypting video');
-                const decryptVideo = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+                console.info('Started decrypting video,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
+                const decryptVideo = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
                 if (!decryptVideo.isOk) {
                   console.error(decryptVideo.err);
                   console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
@@ -725,8 +731,8 @@ export default class AnimeOnegai implements ServiceClass {
               }
 
               if (audioDownloaded) {
-                console.info('Started decrypting audio');
-                const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                console.info('Started decrypting audio,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
+                const decryptAudio = exec(this.cfg.bin.shaka ? 'shaka' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
                 if (!decryptAudio.isOk) {
                   console.error(decryptAudio.err);
                   console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
@@ -746,7 +752,7 @@ export default class AnimeOnegai implements ServiceClass {
                 }
               }
             } else {
-              console.warn('mp4decrypt not found, files need decryption. Decryption Keys:', encryptionKeys);
+              console.warn('mp4decrypt/shaka not found, files need decryption. Decryption Keys:', encryptionKeys);
             }
           } else {
             if (videoDownloaded) {
