@@ -86,6 +86,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
   fs.mkdirSync(`${buildDir}/config`);
   fs.mkdirSync(`${buildDir}/videos`);
   fs.mkdirSync(`${buildDir}/widevine`);
+  fs.mkdirSync(`${buildDir}/playready`);
   fs.copySync('./config/bin-path.yml', `${buildDir}/config/bin-path.yml`);
   fs.copySync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);
   fs.copySync('./config/dir-path.yml', `${buildDir}/config/dir-path.yml`);

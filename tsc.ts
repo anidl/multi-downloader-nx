@@ -42,6 +42,7 @@ const ignore = [
   './dev.js$',
   '*/node_modules/*',
   './widevine/*',
+  './playready/*',
   './videos/*',
   './logs/*',
 ].map(a => a.replace(/\*/g, '[^]*').replace(/\.\//g, escapeRegExp(__dirname) + '/').replace(/\//g, path.sep === '\\' ? '\\\\' : '/')).map(a => new RegExp(a, 'i'));
