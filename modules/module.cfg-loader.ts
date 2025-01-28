@@ -87,6 +87,7 @@ export type ConfigObject = {
     mkvmerge?: string,
     ffprobe?: string,
     mp4decrypt?: string
+    shaka?: string
   },
   cli: {
     [key: string]: any
@@ -151,7 +152,8 @@ const loadBinCfg = async () => {
     ffmpeg: 'ffmpeg',
     mkvmerge: 'mkvmerge',
     ffprobe: 'ffprobe',
-    mp4decrypt: 'mp4decrypt'
+    mp4decrypt: 'mp4decrypt',
+    shaka: 'shaka-packager'
   };
   const keys = Object.keys(defaultBin) as (keyof typeof defaultBin)[];
   for(const dir of keys){
