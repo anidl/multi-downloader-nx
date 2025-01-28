@@ -106,7 +106,7 @@ api.crunchyAuthHeader = {
 };
 
 api.crunchyAuthHeaderMob = {
-  Authorization: api.authBasicMob,
+  Authorization: api.authBasicSwitch,
   'user-agent': 'Crunchyroll/3.60.0 Android/9 okhttp/4.12.0'
 };
 
