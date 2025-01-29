@@ -27,7 +27,7 @@ const transformService = (str: Array<'crunchy'|'hidive'|'ao'|'adn'|'all'>) => {
   return services.join(', ');
 };
 
-let docs = `# ${packageJSON.name} (${packageJSON.version}v)
+let docs = `# ${packageJSON.name} (v${packageJSON.version})
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](${packageJSON.bugs.url}).
 

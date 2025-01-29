@@ -1409,7 +1409,7 @@ export default class Crunchy implements ServiceClass {
       if (options.cstream !== 'none') {
         const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cstream]}/play`, AuthHeaders);
         if (!playbackReq.ok || !playbackReq.res) {
-          console.error('Non-DRM Request Stream URLs FAILED!');
+          console.error('Request Stream URLs FAILED!');
         } else {
           playStream = await playbackReq.res.json() as CrunchyPlayStream;
           const derivedPlaystreams = {} as CrunchyStreams;
@@ -1460,7 +1460,11 @@ export default class Crunchy implements ServiceClass {
       const pbStreams = pbData.data[0];
 
       if (!canDecrypt) {
-        console.warn('Decryption not enabled!');
+        console.warn('Decryption not enabled, no CDM detected!');
+      }
+
+      if (!(this.cfg.bin.mp4decrypt || this.cfg.bin.shaka)) {
+        console.warn('No decryptor found, decryption not possible!');
       }
 
       for (const s of Object.keys(pbStreams)) {

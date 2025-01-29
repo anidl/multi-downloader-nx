@@ -656,7 +656,13 @@ export default class Hidive implements ServiceClass {
     const subsMargin = 0;
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] = [];
-    if (!canDecrypt) console.warn('Decryption not enabled!');
+    if (!canDecrypt) {
+      console.warn('Decryption not enabled, no CDM detected!');
+    }
+
+    if (!(this.cfg.bin.mp4decrypt || this.cfg.bin.shaka)) {
+      console.warn('No decryptor found, decryption not possible!');
+    }
 
     if (!this.cfg.bin.ffmpeg) 
       this.cfg.bin = await yamlCfg.loadBinCfg();

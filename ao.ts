@@ -476,7 +476,11 @@ export default class AnimeOnegai implements ServiceClass {
       }));
 
       if (!canDecrypt) {
-        console.warn('Decryption not enabled!');
+        console.warn('Decryption not enabled, no CDM detected!');
+      }
+
+      if (!(this.cfg.bin.mp4decrypt || this.cfg.bin.shaka)) {
+        console.warn('No decryptor found, decryption not possible!');
       }
 
       const lang = langsData.languages.find(a=>a.ao_locale == media.lang) as langsData.LanguageItem;
