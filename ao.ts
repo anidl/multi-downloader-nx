@@ -476,11 +476,13 @@ export default class AnimeOnegai implements ServiceClass {
       }));
 
       if (!canDecrypt) {
-        console.warn('Decryption not enabled, no CDM detected!');
+        console.warn('No Widevine or PlayReady CDM detected. Please ensure a supported CDM is installed.');
+        return undefined;
       }
-
-      if (!(this.cfg.bin.mp4decrypt || this.cfg.bin.shaka)) {
-        console.warn('No decryptor found, decryption not possible!');
+      
+      if (!this.cfg.bin.mp4decrypt && !this.cfg.bin.shaka) {
+        console.warn('Missing dependencies: Neither Shaka nor MP4Decrypt found. Please ensure at least one of them is installed.');
+        return undefined;
       }
 
       const lang = langsData.languages.find(a=>a.ao_locale == media.lang) as langsData.LanguageItem;

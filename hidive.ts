@@ -657,11 +657,13 @@ export default class Hidive implements ServiceClass {
     const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
     let encryptionKeys: KeyContainer[] = [];
     if (!canDecrypt) {
-      console.warn('Decryption not enabled, no CDM detected!');
+      console.warn('No Widevine or PlayReady CDM detected. Please ensure a supported CDM is installed.');
+      return undefined;
     }
 
-    if (!(this.cfg.bin.mp4decrypt || this.cfg.bin.shaka)) {
-      console.warn('No decryptor found, decryption not possible!');
+    if (!this.cfg.bin.mp4decrypt && !this.cfg.bin.shaka) {
+      console.warn('Missing dependencies: Neither Shaka nor MP4Decrypt found. Please ensure at least one of them is installed.');
+      return undefined;
     }
 
     if (!this.cfg.bin.ffmpeg) 
@@ -829,7 +831,7 @@ export default class Hidive implements ServiceClass {
             console.error('Failed to get encryption keys');
             return undefined;
           }
-          if (this.cfg.bin.mp4decrypt) {
+          if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
             let commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
             let commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
 
@@ -916,12 +918,17 @@ export default class Hidive implements ServiceClass {
             console.error('Failed to get encryption keys');
             return undefined;
           }
-          if (this.cfg.bin.mp4decrypt) {
-            const commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
-            const commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
+          if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
+            let commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
+            let commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
+
+            if (this.cfg.bin.shaka) {
+              commandBase = ` --enable_raw_key_decryption ${encryptionKeys.map(kb => '--keys key_id='+kb.kid+':key='+kb.key).join(' ')}`;
+              commandAudio = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s"`+commandBase;
+            }
 
             console.info('Started decrypting audio');
-            const decryptAudio = exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+            const decryptAudio = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
             if (!decryptAudio.isOk) {
               console.error(decryptAudio.err);
               console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);

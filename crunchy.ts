@@ -1460,18 +1460,19 @@ export default class Crunchy implements ServiceClass {
       const pbStreams = pbData.data[0];
 
       if (!canDecrypt) {
-        console.warn('Decryption not enabled, no CDM detected!');
+        console.warn('No Widevine or PlayReady CDM detected. Please ensure a supported CDM is installed.');
+        return undefined;
       }
 
-      if (!(this.cfg.bin.mp4decrypt || this.cfg.bin.shaka)) {
-        console.warn('No decryptor found, decryption not possible!');
+      if (!this.cfg.bin.mp4decrypt && !this.cfg.bin.shaka) {
+        console.warn('Missing dependencies: Neither Shaka nor MP4Decrypt found. Please ensure at least one of them is installed.');
+        return undefined;
       }
 
       for (const s of Object.keys(pbStreams)) {
         if (
           (s.match(/hls/) || s.match(/dash/)) 
           && !(s.match(/hls/) && s.match(/drm/)) 
-          && !((!canDecrypt || !this.cfg.bin.mp4decrypt) && s.match(/drm/))
           && !s.match(/trailer/)
         ) {
           const pb = Object.values(pbStreams[s]).map(v => {
