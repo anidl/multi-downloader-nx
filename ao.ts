@@ -592,12 +592,10 @@ export default class AnimeOnegai implements ServiceClass {
             const mathMsg    = `(${mathParts}*${options.partsize})`;
             console.info('Total parts in video stream:', totalParts, mathMsg);
             tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-            const split = outFile.split(path.sep).slice(0, -1);
-            split.forEach((val, ind, arr) => {
-              const isAbsolut = path.isAbsolute(outFile as string);
-              if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-                fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-            });
+            const dirName = path.dirname(tsFile);
+            if (!fs.existsSync(dirName)) {
+              fs.mkdirSync(dirName, { recursive: true });
+            }
             const videoJson: M3U8Json = {
               segments: chosenVideoSegments.segments
             };
@@ -640,12 +638,10 @@ export default class AnimeOnegai implements ServiceClass {
             const mathMsg    = `(${mathParts}*${options.partsize})`;
             console.info('Total parts in audio stream:', totalParts, mathMsg);
             tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-            const split = outFile.split(path.sep).slice(0, -1);
-            split.forEach((val, ind, arr) => {
-              const isAbsolut = path.isAbsolute(outFile as string);
-              if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-                fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-            });
+            const dirName = path.dirname(tsFile);
+            if (!fs.existsSync(dirName)) {
+              fs.mkdirSync(dirName, { recursive: true });
+            }
             const audioJson: M3U8Json = {
               segments: chosenAudioSegments.segments
             };
