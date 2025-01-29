@@ -809,7 +809,7 @@ export default class AnimeOnegai implements ServiceClass {
             }
             const dirName = path.dirname(sxData.path);
             if (!fs.existsSync(dirName)) {
-            fs.mkdirSync(dirName, { recursive: true });
+              fs.mkdirSync(dirName, { recursive: true });
             }
             sxData.language = subLang;
             if((options.dlsubs.includes('all') || options.dlsubs.includes(subLang.locale)) && sub.url.includes('.ass')) {

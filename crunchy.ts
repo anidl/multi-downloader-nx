@@ -1831,8 +1831,8 @@ export default class Crunchy implements ServiceClass {
                     if (!options.nocleanup) {
                       fs.removeSync(`${tempTsFile}.video.enc.m4s`);
                     }
-                    fs.copyFileSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`)
-                    fs.unlinkSync(`${tempTsFile}.video.m4s`)
+                    fs.copyFileSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
+                    fs.unlinkSync(`${tempTsFile}.video.m4s`);
                     files.push({
                       type: 'Video',
                       path: `${tsFile}.video.m4s`,
@@ -2140,7 +2140,7 @@ export default class Crunchy implements ServiceClass {
             }
             const dirName = path.dirname(sxData.path);
             if (!fs.existsSync(dirName)) {
-            fs.mkdirSync(dirName, { recursive: true });
+              fs.mkdirSync(dirName, { recursive: true });
             }
             if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC && a.signs === isSigns))
               continue;
