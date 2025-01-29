@@ -727,7 +727,8 @@ export default class AnimeOnegai implements ServiceClass {
                   if (!options.nocleanup) {
                     fs.removeSync(`${tempTsFile}.video.enc.mp4`);
                   }
-                  fs.renameSync(`${tempTsFile}.video.mp4`, `${tsFile}.video.mp4`);
+                  fs.copyFileSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
+                  fs.unlinkSync(`${tempTsFile}.video.m4s`);
                   files.push({
                     type: 'Video',
                     path: `${tsFile}.video.mp4`,
@@ -748,7 +749,8 @@ export default class AnimeOnegai implements ServiceClass {
                   if (!options.nocleanup) {
                     fs.removeSync(`${tempTsFile}.audio.enc.mp4`);
                   }
-                  fs.renameSync(`${tempTsFile}.audio.mp4`, `${tsFile}.audio.mp4`);
+                  fs.copyFileSync(`${tempTsFile}.audio.m4s`, `${tsFile}.audio.m4s`);
+                  fs.unlinkSync(`${tempTsFile}.audio.m4s`);
                   files.push({
                     type: 'Audio',
                     path: `${tsFile}.audio.mp4`,
@@ -800,7 +802,15 @@ export default class AnimeOnegai implements ServiceClass {
             }
             const sxData: Partial<sxItem> = {};
             sxData.file = langsData.subsFile(fileName as string, subIndex+'', subLang, false, options.ccTag);
-            sxData.path = path.join(this.cfg.dir.content, sxData.file);
+            if (path.isAbsolute(sxData.file)) {
+              sxData.path = sxData.file;
+            } else {
+              sxData.path = path.join(this.cfg.dir.content, sxData.file);
+            }
+            const dirName = path.dirname(sxData.path);
+            if (!fs.existsSync(dirName)) {
+            fs.mkdirSync(dirName, { recursive: true });
+            }
             sxData.language = subLang;
             if((options.dlsubs.includes('all') || options.dlsubs.includes(subLang.locale)) && sub.url.includes('.ass')) {
               const getSubtitle = await this.req.getData(sub.url, AuthHeaders);
