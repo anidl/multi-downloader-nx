@@ -212,7 +212,11 @@ export default class Crunchy implements ServiceClass {
           console.info('');
         }
         const fontUrl = fontsData.root + f;
-        const getFont = await this.req.getData(fontUrl);
+        const getFont = await this.req.getData(fontUrl, {
+          headers: {
+            'User-Agent': api.defaultUserAgent
+          }
+        });
         if(getFont.ok && getFont.res){
           fs.writeFileSync(fontLoc, Buffer.from(await getFont.res.arrayBuffer()));
           console.info(`Downloaded: ${f}`);
@@ -233,7 +237,8 @@ export default class Crunchy implements ServiceClass {
       'grant_type': 'password',
       'scope': 'offline_access',
       'device_id': uuid,
-      'device_type': 'Chrome on Windows'
+      'device_name': 'iPhone',
+      'device_type': 'iPhone 13'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
@@ -260,7 +265,8 @@ export default class Crunchy implements ServiceClass {
       'grant_type': 'client_id',
       'scope': 'offline_access',
       'device_id': uuid,
-      'device_type': 'Chrome on Windows'
+      'device_name': 'iPhone',
+      'device_type': 'iPhone 13'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
@@ -286,6 +292,7 @@ export default class Crunchy implements ServiceClass {
     const profileReqOptions = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -315,7 +322,8 @@ export default class Crunchy implements ServiceClass {
       //'grant_type': 'etp_rt_cookie',
       'scope': 'offline_access',
       'device_id': uuid,
-      'device_type': 'Chrome on Windows'
+      'device_name': 'iPhone',
+      'device_type': 'iPhone 13'
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
@@ -400,6 +408,7 @@ export default class Crunchy implements ServiceClass {
     const cmsTokenReqOpts = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -432,7 +441,11 @@ export default class Crunchy implements ServiceClass {
         'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
       }),
     ].join('');
-    const indexReq = await this.req.getData(indexReqOpts);
+    const indexReq = await this.req.getData(indexReqOpts, {
+      headers: {
+        'User-Agent': api.defaultUserAgent
+      }
+    });
     if(!indexReq.ok || ! indexReq.res){
       console.error('Get CMS index FAILED!');
       return;
@@ -448,6 +461,7 @@ export default class Crunchy implements ServiceClass {
     const searchReqOpts = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -715,6 +729,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -756,6 +771,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -795,6 +811,7 @@ export default class Crunchy implements ServiceClass {
     const newlyAddedReqOpts = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -829,6 +846,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -1031,7 +1049,11 @@ export default class Crunchy implements ServiceClass {
           }),
         ].join('');
 
-        const extIdReq = await this.req.getData(extIdReqOpts);
+        const extIdReq = await this.req.getData(extIdReqOpts, {
+          headers: {
+            'User-Agent': api.defaultUserAgent
+          }
+        });
         if (!extIdReq.ok || !extIdReq.res) {
           console.error('Objects Request FAILED!');
           if (extIdReq.error && extIdReq.error.res && extIdReq.error.res.body) {
@@ -1061,6 +1083,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -1240,6 +1263,7 @@ export default class Crunchy implements ServiceClass {
           'X-Cr-Disable-Drm': 'true',
           'X-Cr-Enable-Drm': 'false',
           'X-Cr-Stream-Limits': 'false',
+          'User-Agent': api.defaultUserAgent
           //'X-Cr-Segment-CDN': 'all',
           //'User-Agent': 'Crunchyroll/1.8.0 Nintendo Switch/12.3.12.0 UE4/4.27'
         }
@@ -1271,11 +1295,19 @@ export default class Crunchy implements ServiceClass {
       const compiledChapters: string[] = [];
       if (options.chapters) {
         //Make Chapter Request
-        const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${currentMediaId}.json`);
+        const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${currentMediaId}.json`, {
+          headers: {
+            'User-Agent': api.defaultUserAgent
+          }
+        });
         if(!chapterRequest.ok || !chapterRequest.res){
         //Old Chapter Request Fallback
           console.warn('Chapter request failed, attempting old API');
-          const oldChapterRequest = await this.req.getData(`https://static.crunchyroll.com/datalab-intro-v2/${currentMediaId}.json`);
+          const oldChapterRequest = await this.req.getData(`https://static.crunchyroll.com/datalab-intro-v2/${currentMediaId}.json`, {
+            headers: {
+              'User-Agent': api.defaultUserAgent
+            }
+          });
           if(!oldChapterRequest.ok || !oldChapterRequest.res) {
             console.warn('Old Chapter API request failed');
           } else {
@@ -1734,7 +1766,10 @@ export default class Crunchy implements ServiceClass {
                   'asset_id': assetId,
                   'session_id': sessionId,
                   'user_id': this.token.account_id
-                })
+                }),
+                headers: {
+                  'User-Agent': api.defaultUserAgent
+                }
               });
               if(!decReq.ok || !decReq.res){
                 console.error('Request to DRM Authentication failed:', decReq.error?.res.status, decReq.error?.message);
@@ -1947,7 +1982,11 @@ export default class Crunchy implements ServiceClass {
               fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
               const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
               console.info(`Output filename: ${outFile}`);
-              const chunkPage = await this.req.getData(selPlUrl);
+              const chunkPage = await this.req.getData(selPlUrl, {
+                headers: {
+                  'User-Agent': api.defaultUserAgent
+                }
+              });
               if(!chunkPage.ok || !chunkPage.res){
                 console.error('CAN\'T FETCH VIDEO PLAYLIST!');
                 dlFailed = true;
@@ -2097,7 +2136,11 @@ export default class Crunchy implements ServiceClass {
             if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC && a.signs === isSigns))
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
-              const subsAssReq = await this.req.getData(subsItem.url);
+              const subsAssReq = await this.req.getData(subsItem.url, {
+                headers: {
+                  'User-Agent': api.defaultUserAgent
+                }
+              });
               if(subsAssReq.ok && subsAssReq.res){
                 let sBody = await subsAssReq.res.text();
                 if (subsItem.format == 'vtt') {
@@ -2469,6 +2512,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };
@@ -2497,6 +2541,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
+        'User-Agent': api.defaultUserAgent
       },
       useProxy: true
     };

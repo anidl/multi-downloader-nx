@@ -24,6 +24,7 @@ export type APIType = {
   collections: string
   // beta api
   beta_auth: string
+  defaultUserAgent: string,
   authBasic: string
   authBasicMob: string
   authBasicSwitch: string,
@@ -72,17 +73,20 @@ const api: APIType = {
   search3:           `${domain.api}/autocomplete.0.json`,
   session:           `${domain.api}/start_session.0.json`,
   collections:       `${domain.api}/list_collections.0.json`,
-  // beta api
-  beta_auth:         `${domain.api_beta}/auth/v1/token`,
+  // new api
+  beta_auth:         `${domain.www}/auth/v1/token`,
+  // This User-Agent bypasses Cloudflare security by the newer Endpoint
+  defaultUserAgent:  'Crunchyroll/4.68.2 (bundle_identifier:com.crunchyroll.iphone; build_number:4007128.533694055) iOS/18.2.0 Gravity/4.68.2',
   authBasic:         'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
-  authBasicMob:      'Basic dXU4aG0wb2g4dHFpOWV0eXl2aGo6SDA2VnVjRnZUaDJ1dEYxM0FBS3lLNE85UTRhX3BlX1o=',
+  authBasicMob:      'Basic eHVuaWh2ZWRidDNtYmlzdWhldnQ6MWtJUzVkeVR2akUwX3JxYUEzWWVBaDBiVVhVbXhXMTE=',
   authBasicSwitch:   'Basic dC1rZGdwMmg4YzNqdWI4Zm4wZnE6eWZMRGZNZnJZdktYaDRKWFMxTEVJMmNDcXUxdjVXYW4=',
-  beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
-  beta_cmsToken:     `${domain.api_beta}/index/v2`,
-  search:            `${domain.api_beta}/content/v2/discover/search`,
-  cms:               `${domain.api_beta}/content/v2/cms`,
-  beta_browse:       `${domain.api_beta}/content/v1/browse`,
-  beta_cms:          `${domain.api_beta}/cms/v2`,
+  beta_profile:      `${domain.www}/accounts/v1/me/profile`,
+  beta_cmsToken:     `${domain.www}/index/v2`,
+  search:            `${domain.www}/content/v2/discover/search`,
+  cms:               `${domain.www}/content/v2/cms`,
+  beta_browse:       `${domain.www}/content/v1/browse`,
+  beta_cms:          `${domain.www}/cms/v2`,
+  // beta api
   drm:               `${domain.api_beta}/drm/v1/auth`,
   crunchyAuthHeader: {},
   crunchyAuthHeaderMob: {},
@@ -106,8 +110,9 @@ api.crunchyAuthHeader = {
 };
 
 api.crunchyAuthHeaderMob = {
-  Authorization: api.authBasicSwitch,
-  'user-agent': 'Crunchyroll/3.60.0 Android/9 okhttp/4.12.0'
+  Authorization: api.authBasicMob,
+  'User-Agent': api.defaultUserAgent,
+  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
 };
 
 api.crunchyAuthHeaderSwitch = { 
