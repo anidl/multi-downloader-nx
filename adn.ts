@@ -677,12 +677,10 @@ export default class AnimationDigitalNetwork implements ServiceClass {
               const mathMsg    = `(${mathParts}*${options.partsize})`;
               console.info('Total parts in stream:', totalParts, mathMsg);
               tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-              const split = outFile.split(path.sep).slice(0, -1);
-              split.forEach((val, ind, arr) => {
-                const isAbsolut = path.isAbsolute(outFile as string);
-                if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-                  fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-              });
+              const dirName = path.dirname(tsFile);
+              if (!fs.existsSync(dirName)) {
+                fs.mkdirSync(dirName, { recursive: true });
+              }
               const dlStreamByPl = await new streamdl({
                 output: `${tsFile}.ts`,
                 timeout: options.timeout,
@@ -764,12 +762,10 @@ export default class AnimationDigitalNetwork implements ServiceClass {
           fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
           const outFile = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
           const tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-          const split = outFile.split(path.sep).slice(0, -1);
-          split.forEach((val, ind, arr) => {
-            const isAbsolut = path.isAbsolute(outFile as string);
-            if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-              fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-          });
+          const dirName = path.dirname(tsFile);
+          if (!fs.existsSync(dirName)) {
+            fs.mkdirSync(dirName, { recursive: true });
+          }
           fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
           files.push({
             path: `${tsFile}.txt`,

@@ -794,12 +794,10 @@ export default class Hidive implements ServiceClass {
       const tsFile = path.isAbsolute(fileName) ? fileName : path.join(this.cfg.dir.content, fileName);
       const tempFile = parseFileName(`temp-${selectedEpisode.id}`, variables, options.numbers, options.override).join(path.sep);
       const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
-      const split = fileName.split(path.sep).slice(0, -1);
-      split.forEach((val, ind, arr) => {
-        const isAbsolut = path.isAbsolute(fileName);
-        if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-          fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-      });
+      const dirName = path.dirname(tsFile);
+      if (!fs.existsSync(dirName)) {
+        fs.mkdirSync(dirName, { recursive: true });
+      }
       const videoJson: M3U8Json = {
         segments: chosenVideoSegments.segments
       };
@@ -882,12 +880,10 @@ export default class Hidive implements ServiceClass {
         const tempTsFile = path.isAbsolute(tempFile as string) ? tempFile : path.join(this.cfg.dir.content, tempFile);
         const outFile = parseFileName(options.fileName + '.' + (chosenAudioSegments.language.name), variables, options.numbers, options.override).join(path.sep);
         const tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
-        const split = outFile.split(path.sep).slice(0, -1);
-        split.forEach((val, ind, arr) => {
-          const isAbsolut = path.isAbsolute(outFile as string);
-          if (!fs.existsSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val)))
-            fs.mkdirSync(path.join(isAbsolut ? '' : this.cfg.dir.content, ...arr.slice(0, ind), val));
-        });
+        const dirName = path.dirname(tsFile);
+        if (!fs.existsSync(dirName)) {
+          fs.mkdirSync(dirName, { recursive: true });
+        }
         const audioJson: M3U8Json = {
           segments: chosenAudioSegments.segments
         };
