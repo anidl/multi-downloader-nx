@@ -112,3 +112,4 @@ In order to decrypt DRM content, you will need to have a dumped CDM, after that 
 
 Playready CDMs are very easy to obtain, you can find them even on Github.
 Place the CDM in the `./playready/` directory and you're all set!
+**IMPORTANT**: The Playready CDM (SL2000/SL3000) needs to be provisioned as a **V3 Device** by pyplayready (https://github.com/ready-dl/pyplayready).
