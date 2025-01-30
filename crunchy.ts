@@ -1460,12 +1460,12 @@ export default class Crunchy implements ServiceClass {
       const pbStreams = pbData.data[0];
 
       if (!canDecrypt) {
-        console.warn('No Widevine or PlayReady CDM detected. Please ensure a supported CDM is installed.');
+        console.error('No valid Widevine or PlayReady CDM detected. Please ensure a supported and functional CDM is installed.');
         return undefined;
       }
-
+      
       if (!this.cfg.bin.mp4decrypt && !this.cfg.bin.shaka) {
-        console.warn('Missing dependencies: Neither Shaka nor MP4Decrypt found. Please ensure at least one of them is installed.');
+        console.error('Neither Shaka nor MP4Decrypt found. Please ensure at least one of them is installed.');
         return undefined;
       }
 

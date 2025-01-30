@@ -19,38 +19,49 @@ export let canDecrypt: boolean;
 try {
   const files_prd = fs.readdirSync(path.join(workingDir, 'playready'));
   const prd_file_found = files_prd.find((f) => f.includes('.prd'));
-  if (prd_file_found) {
-    const file_prd = path.join(workingDir, 'playready', prd_file_found);
-    const stats = fs.statSync(file_prd);
-    if (stats.size < 1024 * 8 && stats.isFile()) {
-      const fileContents = fs.readFileSync(file_prd, {
-        encoding: 'utf8',
-      });
-      if (fileContents.includes('CERT')) {
-        prd = fs.readFileSync(file_prd);
-        const device = Device.loads(prd);
-        prd_cdm = Cdm.fromDevice(device);
+  try {
+    if (prd_file_found) {
+      const file_prd = path.join(workingDir, 'playready', prd_file_found);
+      const stats = fs.statSync(file_prd);
+      if (stats.size < 1024 * 8 && stats.isFile()) {
+        const fileContents = fs.readFileSync(file_prd, {
+          encoding: 'utf8',
+        });
+        if (fileContents.includes('CERT')) {
+          prd = fs.readFileSync(file_prd);
+          const device = Device.loads(prd);
+          prd_cdm = Cdm.fromDevice(device);
+        }
       }
     }
+  } catch (e) {
+    console.error('Error loading Playready CDM, ensure the CDM is provisioned as a V3 Device and not malformed. For more informations read the readme.');
+    prd = Buffer.from([]);
   }
 
   const files_wvd = fs.readdirSync(path.join(workingDir, 'widevine'));
-  files_wvd.forEach(function (file) {
-    file = path.join(workingDir, 'widevine', file);
-    const stats = fs.statSync(file);
-    if (stats.size < 1024 * 8 && stats.isFile()) {
-      const fileContents = fs.readFileSync(file, { encoding: 'utf8' });
-      if (
-        fileContents.includes('-BEGIN PRIVATE KEY-') ||
-        fileContents.includes('-BEGIN RSA PRIVATE KEY-')
-      ) {
-        privateKey = fs.readFileSync(file);
+  try {
+    files_wvd.forEach(function (file) {
+      file = path.join(workingDir, 'widevine', file);
+      const stats = fs.statSync(file);
+      if (stats.size < 1024 * 8 && stats.isFile()) {
+        const fileContents = fs.readFileSync(file, { encoding: 'utf8' });
+        if (
+          fileContents.includes('-BEGIN PRIVATE KEY-') ||
+          fileContents.includes('-BEGIN RSA PRIVATE KEY-')
+        ) {
+          privateKey = fs.readFileSync(file);
+        }
+        if (fileContents.includes('widevine_cdm_version')) {
+          identifierBlob = fs.readFileSync(file);
+        }
       }
-      if (fileContents.includes('widevine_cdm_version')) {
-        identifierBlob = fs.readFileSync(file);
-      }
-    }
-  });
+    });
+  } catch (e) {
+    console.error('Error loading Widevine CDM, malformed client blob or private key.');
+    privateKey = Buffer.from([]);
+    identifierBlob = Buffer.from([]);
+  }
 
   if (privateKey.length !== 0 && identifierBlob.length !== 0) {
     cdm = 'widevine';
@@ -58,14 +69,15 @@ try {
   } else if (prd.length !== 0) {
     cdm = 'playready';
     canDecrypt = true;
-  } else if (privateKey.length == 0) {
+  } else if (privateKey.length === 0 && identifierBlob.length !== 0) {
     console.warn('Private key missing');
     canDecrypt = false;
-  } else if (identifierBlob.length == 0) {
+  } else if (identifierBlob.length === 0 && privateKey.length !== 0) {
     console.warn('Identifier blob missing');
     canDecrypt = false;
   } else if (prd.length == 0) {
-    console.warn('PRD is missing');
+    canDecrypt = false;
+  } else {
     canDecrypt = false;
   }
 } catch (e) {
