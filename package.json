@@ -49,7 +49,7 @@
     "elliptic": "^6.6.1",
     "esbuild": "^0.21.5",
     "express": "^4.19.2",
-    "fast-xml-parser": "^4.5.0",
+    "fast-xml-parser": "^4.5.1",
     "ffprobe": "^1.1.2",
     "fs-extra": "^11.2.0",
     "got": "^11.8.6",
