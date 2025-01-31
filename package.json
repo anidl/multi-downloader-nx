@@ -47,7 +47,7 @@
     "bn.js": "^5.2.1",
     "cors": "^2.8.5",
     "elliptic": "^6.6.1",
-    "esbuild": "^0.21.5",
+    "esbuild": "^0.24.2",
     "express": "^4.19.2",
     "fast-xml-parser": "^4.5.0",
     "ffprobe": "^1.1.2",
