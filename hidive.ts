@@ -660,14 +660,14 @@ export default class Hidive implements ServiceClass {
       console.error('No valid Widevine or PlayReady CDM detected. Please ensure a supported and functional CDM is installed.');
       return undefined;
     }
-    
+
+    if (!this.cfg.bin.ffmpeg) 
+      this.cfg.bin = await yamlCfg.loadBinCfg();
+
     if (!this.cfg.bin.mp4decrypt && !this.cfg.bin.shaka) {
       console.error('Neither Shaka nor MP4Decrypt found. Please ensure at least one of them is installed.');
       return undefined;
     }
-
-    if (!this.cfg.bin.ffmpeg) 
-      this.cfg.bin = await yamlCfg.loadBinCfg();
 
     variables.push(...([
       ['title', selectedEpisode.title, true],
