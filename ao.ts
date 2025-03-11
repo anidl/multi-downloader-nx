@@ -706,8 +706,8 @@ export default class AnimeOnegai implements ServiceClass {
 
               if (this.cfg.bin.shaka) {
                 commandBase = ` --enable_raw_key_decryption ${encryptionKeys.map(kb => '--keys key_id='+kb.kid+':key='+kb.key).join(' ')}`;
-                commandVideo = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s"`+commandBase;
-                commandAudio = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s"`+commandBase;
+                commandVideo = `input="${tempTsFile}.video.enc.mp4",stream=video,output="${tempTsFile}.video.mp4"`+commandBase;
+                commandAudio = `input="${tempTsFile}.audio.enc.mp4",stream=audio,output="${tempTsFile}.audio.mp4"`+commandBase;
               }
 
               if (videoDownloaded) {
@@ -723,8 +723,8 @@ export default class AnimeOnegai implements ServiceClass {
                   if (!options.nocleanup) {
                     fs.removeSync(`${tempTsFile}.video.enc.mp4`);
                   }
-                  fs.copyFileSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
-                  fs.unlinkSync(`${tempTsFile}.video.m4s`);
+                  fs.copyFileSync(`${tempTsFile}.video.mp4`, `${tsFile}.video.mp4`);
+                  fs.unlinkSync(`${tempTsFile}.video.mp4`);
                   files.push({
                     type: 'Video',
                     path: `${tsFile}.video.mp4`,
@@ -745,8 +745,8 @@ export default class AnimeOnegai implements ServiceClass {
                   if (!options.nocleanup) {
                     fs.removeSync(`${tempTsFile}.audio.enc.mp4`);
                   }
-                  fs.copyFileSync(`${tempTsFile}.audio.m4s`, `${tsFile}.audio.m4s`);
-                  fs.unlinkSync(`${tempTsFile}.audio.m4s`);
+                  fs.copyFileSync(`${tempTsFile}.audio.mp4`, `${tsFile}.audio.mp4`);
+                  fs.unlinkSync(`${tempTsFile}.audio.mp4`);
                   files.push({
                     type: 'Audio',
                     path: `${tsFile}.audio.mp4`,
