@@ -601,7 +601,7 @@ export default class AnimeOnegai implements ServiceClass {
             };
             try {
               const videoDownload = await new streamdl({
-                output: chosenVideoSegments.pssh_wvd ? `${tempTsFile}.video.enc.mp4` : `${tsFile}.video.mp4`,
+                output: chosenVideoSegments.pssh_wvd ? `${tempTsFile}.video.enc.m4s` : `${tsFile}.video.m4s`,
                 timeout: options.timeout,
                 m3u8json: videoJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -647,7 +647,7 @@ export default class AnimeOnegai implements ServiceClass {
             };
             try {
               const audioDownload = await new streamdl({
-                output: chosenAudioSegments.pssh_wvd ? `${tempTsFile}.audio.enc.mp4` : `${tsFile}.audio.mp4`,
+                output: chosenAudioSegments.pssh_wvd ? `${tempTsFile}.audio.enc.m4s` : `${tsFile}.audio.m4s`,
                 timeout: options.timeout,
                 m3u8json: audioJson,
                 // baseurl: chunkPlaylist.baseUrl,
@@ -701,8 +701,8 @@ export default class AnimeOnegai implements ServiceClass {
 
             if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
               let commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
-              let commandVideo = commandBase+`"${tempTsFile}.video.enc.mp4" "${tempTsFile}.video.mp4"`;
-              let commandAudio = commandBase+`"${tempTsFile}.audio.enc.mp4" "${tempTsFile}.audio.mp4"`;
+              let commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
+              let commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
               if (this.cfg.bin.shaka) {
                 commandBase = ` --enable_raw_key_decryption ${encryptionKeys.map(kb => '--keys key_id='+kb.kid+':key='+kb.key).join(' ')}`;
@@ -716,18 +716,18 @@ export default class AnimeOnegai implements ServiceClass {
                 if (!decryptVideo.isOk) {
                   console.error(decryptVideo.err);
                   console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
-                  fs.renameSync(`${tempTsFile}.video.enc.mp4`, `${tsFile}.video.enc.mp4`);
+                  fs.renameSync(`${tempTsFile}.video.enc.m4s`, `${tsFile}.video.enc.m4s`);
                   return undefined;
                 } else {
                   console.info('Decryption done for video');
                   if (!options.nocleanup) {
-                    fs.removeSync(`${tempTsFile}.video.enc.mp4`);
+                    fs.removeSync(`${tempTsFile}.video.enc.m4s`);
                   }
                   fs.copyFileSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
                   fs.unlinkSync(`${tempTsFile}.video.m4s`);
                   files.push({
                     type: 'Video',
-                    path: `${tsFile}.video.mp4`,
+                    path: `${tsFile}.video.m4s`,
                     lang: lang
                   });
                 }
@@ -739,17 +739,17 @@ export default class AnimeOnegai implements ServiceClass {
                 if (!decryptAudio.isOk) {
                   console.error(decryptAudio.err);
                   console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
-                  fs.renameSync(`${tempTsFile}.audio.enc.mp4`, `${tsFile}.audio.enc.mp4`);
+                  fs.renameSync(`${tempTsFile}.audio.enc.m4s`, `${tsFile}.audio.enc.m4s`);
                   return undefined;
                 } else {
                   if (!options.nocleanup) {
-                    fs.removeSync(`${tempTsFile}.audio.enc.mp4`);
+                    fs.removeSync(`${tempTsFile}.audio.enc.m4s`);
                   }
                   fs.copyFileSync(`${tempTsFile}.audio.m4s`, `${tsFile}.audio.m4s`);
                   fs.unlinkSync(`${tempTsFile}.audio.m4s`);
                   files.push({
                     type: 'Audio',
-                    path: `${tsFile}.audio.mp4`,
+                    path: `${tsFile}.audio.m4s`,
                     lang: lang
                   });
                   console.info('Decryption done for audio');
@@ -762,14 +762,14 @@ export default class AnimeOnegai implements ServiceClass {
             if (videoDownloaded) {
               files.push({
                 type: 'Video',
-                path: `${tsFile}.video.mp4`,
+                path: `${tsFile}.video.m4s`,
                 lang: lang
               });
             }
             if (audioDownloaded) {
               files.push({
                 type: 'Audio',
-                path: `${tsFile}.audio.mp4`,
+                path: `${tsFile}.audio.m4s`,
                 lang: lang
               });
             }
