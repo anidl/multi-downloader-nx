@@ -10,6 +10,7 @@ const domain = {
 };
 
 export type APIType = {
+  bundlejs: string,
   newani: string,
   search1: string,
   search2: string,
@@ -25,10 +26,6 @@ export type APIType = {
   // beta api
   beta_auth: string
   defaultUserAgent: string,
-  authBasic: string
-  authBasicMob: string
-  authBasicIOS: string
-  authBasicSwitch: string,
   beta_profile: string
   beta_cmsToken: string
   search: string
@@ -37,17 +34,9 @@ export type APIType = {
   beta_cms: string,
   drm: string;
   /**
-   * Web Header
+   * Header
    */
   crunchyAuthHeader: Record<string, string>,
-  /**
-   * Mobile Header
-   */
-  crunchyAuthHeaderMob: Record<string, string>,
-  /**
-   * Switch Header
-   */
-  crunchyAuthHeaderSwitch: Record<string, string>,
   hd_apikey: string,
   hd_devName: string,
   hd_appId: string,
@@ -62,6 +51,7 @@ export type APIType = {
 // api urls
 const api: APIType = {
   // web
+  bundlejs:          'https://static.crunchyroll.com/vilos-v2/web/vilos/js/bundle.js',
   newani:            `${domain.www}/rss/anime`,
   search1:           `${domain.www}/ajax/?req=RpcApiSearch_GetSearchCandidates`,
   search2:           `${domain.www}/search_page`,
@@ -78,10 +68,6 @@ const api: APIType = {
   beta_auth:         `${domain.api_beta}/auth/v1/token`,
   // This User-Agent bypasses Cloudflare security by the newer Endpoint
   defaultUserAgent:  'Crunchyroll/4.71.0 (bundle_identifier:com.crunchyroll.iphone; build_number:4052956.474096152) iOS/18.3.2 Gravity/4.71.0',
-  authBasic:         'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
-  authBasicMob:      'Basic cHVuaDRoa3FxYzkwMXV5aWlqejc6bE44MEx3T3pzNkxRcDd1RzNEUmNTaVFUR2RUU3dHbzQ=',
-  authBasicIOS:      'Basic eHVuaWh2ZWRidDNtYmlzdWhldnQ6MWtJUzVkeVR2akUwX3JxYUEzWWVBaDBiVVhVbXhXMTE=',
-  authBasicSwitch:   'Basic dC1rZGdwMmg4YzNqdWI4Zm4wZnE6eWZMRGZNZnJZdktYaDRKWFMxTEVJMmNDcXUxdjVXYW4=',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
   search:            `${domain.api_beta}/content/v2/discover/search`,
@@ -91,8 +77,6 @@ const api: APIType = {
   // beta api
   drm:               `${domain.api_beta}/drm/v1/auth`,
   crunchyAuthHeader: {},
-  crunchyAuthHeaderMob: {},
-  crunchyAuthHeaderSwitch: {},
   //hidive API
   hd_apikey:        '508efd7b42d546e19cc24f4d0b414e57e351ca73',
   hd_devName:       'Android',
@@ -107,18 +91,9 @@ const api: APIType = {
 };
 
 // set header
-api.crunchyAuthHeader = { 
-  Authorization: api.authBasic,
-};
-
-api.crunchyAuthHeaderMob = {
-  Authorization: api.authBasicMob,
+api.crunchyAuthHeader = {
   'User-Agent': api.defaultUserAgent,
   'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
-};
-
-api.crunchyAuthHeaderSwitch = { 
-  Authorization: api.authBasicSwitch,
 };
 
 export {
