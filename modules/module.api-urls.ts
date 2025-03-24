@@ -79,7 +79,7 @@ const api: APIType = {
   // This User-Agent bypasses Cloudflare security by the newer Endpoint
   defaultUserAgent:  'Crunchyroll/4.71.0 (bundle_identifier:com.crunchyroll.iphone; build_number:4052956.474096152) iOS/18.3.2 Gravity/4.71.0',
   authBasic:         'Basic bm9haWhkZXZtXzZpeWcwYThsMHE6',
-  authBasicMob:      'Basic ZG1yeWZlc2NkYm90dWJldW56NXo6NU45aThPV2cyVmtNcm1oekNfNUNXekRLOG55SXo0QU0=',
+  authBasicMob:      'Basic cHVuaDRoa3FxYzkwMXV5aWlqejc6bE44MEx3T3pzNkxRcDd1RzNEUmNTaVFUR2RUU3dHbzQ=',
   authBasicIOS:      'Basic eHVuaWh2ZWRidDNtYmlzdWhldnQ6MWtJUzVkeVR2akUwX3JxYUEzWWVBaDBiVVhVbXhXMTE=',
   authBasicSwitch:   'Basic dC1rZGdwMmg4YzNqdWI4Zm4wZnE6eWZMRGZNZnJZdktYaDRKWFMxTEVJMmNDcXUxdjVXYW4=',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
