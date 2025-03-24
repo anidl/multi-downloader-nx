@@ -67,6 +67,7 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.23.0",
     "@types/bn.js": "^5.1.6",
     "@types/cors": "^2.8.17",
     "@types/elliptic": "^6.4.18",
