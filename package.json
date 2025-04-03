@@ -63,7 +63,7 @@
     "protobufjs": "^7.4.0",
     "sei-helper": "^3.3.0",
     "ws": "^8.18.1",
-    "yaml": "^2.7.0",
+    "yaml": "^2.7.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
