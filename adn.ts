@@ -281,7 +281,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     }
     for (const special of specials) {
       console.info(` (Special) (${special.id}) [${special.shortNumber}] ${special.number} - ${special.name}`);
-      show.value.videos.splice(show.value.videos.findIndex(i => i.id === special.id), 1)
+      show.value.videos.splice(show.value.videos.findIndex(i => i.id === special.id), 1);
     }
     show.value.videos.push(...specials);
     return { isOk: true, value: show.value };
