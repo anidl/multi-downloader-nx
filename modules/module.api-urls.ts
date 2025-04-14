@@ -2,7 +2,6 @@
 const domain = {
   www:      'https://www.crunchyroll.com',
   api:      'https://api.crunchyroll.com',
-  www_beta: 'https://beta.crunchyroll.com',
   api_beta: 'https://beta-api.crunchyroll.com',
   hd_www:   'https://www.hidive.com',
   hd_api:   'https://api.hidive.com',
