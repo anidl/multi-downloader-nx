@@ -271,9 +271,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       show.value.videos[episodeIndex].season = episode.season;
       if (!episodeNumber) {
         specialIndex++;
-        const special = show.value.videos.splice(episodeIndex, 1);
-        special[0].shortNumber = 'S'+specialIndex;
-        specials.push(...special);
+        episode.shortNumber = 'S'+specialIndex;
+        specials.push(episode);
         episodeIndex--;
       } else {
         console.info(`  (${episode.id}) [E${episode.shortNumber}] ${episode.number} - ${episode.name}`);
@@ -281,7 +280,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       episodeIndex++;
     }
     for (const special of specials) {
-      console.info(`  (${special.id}) [${special.shortNumber}] ${special.number} - ${special.name}`);
+      console.info(` (Special) (${special.id}) [${special.shortNumber}] ${special.number} - ${special.name}`);
+      show.value.videos.splice(show.value.videos.findIndex(i => i.id === special.id), 1);
     }
     show.value.videos.push(...specials);
     return { isOk: true, value: show.value };
