@@ -24,7 +24,6 @@ export type APIType = {
   session: string
   collections: string
   // beta api
-  beta_auth: string
   defaultUserAgent: string,
   beta_profile: string
   beta_cmsToken: string
@@ -59,14 +58,12 @@ const api: APIType = {
   rss_gid:           `${domain.www}/syndication/feed?type=episodes&group_id=`, // &lang=enUS
   media_page:        `${domain.www}/media-`,
   series_page:       `${domain.www}/series-`,
-  auth:              `${domain.www}/login`,
+  auth:              `${domain.api_beta}/auth/v1/token`,
   // mobile api
   search3:           `${domain.api}/autocomplete.0.json`,
   session:           `${domain.api}/start_session.0.json`,
   collections:       `${domain.api}/list_collections.0.json`,
-  // new api
-  beta_auth:         `${domain.api_beta}/auth/v1/token`,
-  // This User-Agent bypasses Cloudflare security by the newer Endpoint
+  // This User-Agent bypasses Cloudflare security of the newer Endpoint
   defaultUserAgent:  'Crunchyroll/4.75.0 (bundle_identifier:com.crunchyroll.iphone; build_number:4100608.433889621) iOS/18.3.2 Gravity/4.75.0',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
