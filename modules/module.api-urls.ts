@@ -32,6 +32,8 @@ export type APIType = {
   beta_browse: string
   beta_cms: string,
   drm: string;
+  drm_widevine: string;
+  drm_playready: string;
   /**
    * Header
    */
@@ -73,6 +75,10 @@ const api: APIType = {
   beta_cms:          `${domain.api_beta}/cms/v2`,
   // beta api
   drm:               `${domain.api_beta}/drm/v1/auth`,
+  // new drm endpoints
+  drm_widevine:      `${domain.www}/license/v1/license/widevine`,
+  // playready endpoint currently broken
+  drm_playready:     `${domain.www}/license/v1/license/playReady`,
   crunchyAuthHeader: {},
   //hidive API
   hd_apikey:        '508efd7b42d546e19cc24f4d0b414e57e351ca73',
