@@ -23,7 +23,10 @@ const parseFileName = (input: string, variables: Variable[], numbers: number, ov
   for (let i = 0; i < vars.length; i++) {
     const type = vars[i];
     const varName = type.slice(2, -1);
-    const use = overridenVars.find(a => a.name === varName);
+    let use = overridenVars.find(a => a.name === varName);
+    if (use === undefined && type === '${height}') {
+      use = { type: 'number', replaceWith: 0 } as Variable<string>;
+    }
     if (use === undefined) {
       console.info(`[ERROR] Found variable '${type}' in fileName but no values was internally found!`);
       continue;
