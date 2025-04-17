@@ -2455,7 +2455,7 @@ export default class Crunchy implements ServiceClass {
           epNum = key.startsWith('E') ? key.slice(1) : key;
         }
 
-       // set data
+        // set data
         const images = (item.images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
         const epMeta: CrunchyEpMeta = {
           data: [
