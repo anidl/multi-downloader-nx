@@ -2368,7 +2368,8 @@ export default class Crunchy implements ServiceClass {
 
     for (const key of Object.keys(sortedEpisodes)) {
       const item = sortedEpisodes[key];
-      console.info(`[${key}] [${item.items[0].upload_date ? new Date(item.items[0].upload_date).toISOString().slice(0, 10) : '0000-00-00'}] ${
+      const epNum = key.startsWith('E') ? (`E${data?.absolute ? (item.items[0].episode_number?.toString() || item.items[0].episode) : key.slice(1)}`) : key;
+      console.info(`[${data?.absolute ? epNum : key}] [${item.items[0].upload_date ? new Date(item.items[0].upload_date).toISOString().slice(0, 10) : '0000-00-00'}] ${
         item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
       } - Season ${item.items[0].season_number} - ${item.items[0].title} [${
         item.items.map((a, index) => {
@@ -2384,8 +2385,14 @@ export default class Crunchy implements ServiceClass {
     return { data: sortedEpisodes, list: Object.entries(sortedEpisodes).map(([key, value]) => {
       const images = (value.items[0].images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
       const seconds = Math.floor(value.items[0].duration_ms / 1000);
+      let epNum;
+      if (data?.absolute) {
+        epNum = value.items[0].episode_number !== null && value.items[0].episode_number !== undefined ? value.items[0].episode_number.toString() : (value.items[0].episode !== null && value.items[0].episode !== undefined ? value.items[0].episode : (key.startsWith('E') ? key.slice(1) : key));
+      } else {
+        epNum = key.startsWith('E') ? key.slice(1) : key;
+      }
       return {
-        e: key.startsWith('E') ? key.slice(1) : key,
+        e: epNum,
         lang: value.langs.map(a => a?.code),
         name: value.items[0].title,
         season: value.items[0].season_number.toString(),
@@ -2405,7 +2412,7 @@ export default class Crunchy implements ServiceClass {
     console.info('');
     console.info('-'.repeat(30));
     console.info('');
-    const selected = this.itemSelectMultiDub(episodes, data.dubLang, data.but, data.all, data.e);
+    const selected = this.itemSelectMultiDub(episodes, data.dubLang, data.but, data.all, data.e, data.absolute);
     for (const key of Object.keys(selected)) {
       const item = selected[key];
       console.info(`[S${item.season}E${item.episodeNumber}] - ${item.episodeTitle} [${
@@ -2420,7 +2427,7 @@ export default class Crunchy implements ServiceClass {
   public itemSelectMultiDub (eps: Record<string, {
     items: CrunchyEpisode[],
     langs: langsData.LanguageItem[]
-  }>, dubLang: string[], but?: boolean, all?: boolean, e?: string, ) {
+  }>, dubLang: string[], but?: boolean, all?: boolean, e?: string, absolute?: boolean) {
     const doEpsFilter = parseSelect(e as string);
 
     const ret: Record<string, CrunchyEpMeta> = {};
@@ -2441,8 +2448,14 @@ export default class Crunchy implements ServiceClass {
           item.series_title = 'NO_TITLE';
         }
 
-        const epNum = key.startsWith('E') ? key.slice(1) : key;
-        // set data
+        let epNum;
+        if (absolute) {
+          epNum = item.episode_number !== null && item.episode_number !== undefined ? item.episode_number.toString() : (item.episode !== null && item.episode !== undefined ? item.episode : (key.startsWith('E') ? key.slice(1) : key));
+        } else {
+          epNum = key.startsWith('E') ? key.slice(1) : key;
+        }
+
+       // set data
         const images = (item.images.thumbnail ?? [[ { source: '/notFound.png' } ]])[0];
         const epMeta: CrunchyEpMeta = {
           data: [
@@ -2475,7 +2488,7 @@ export default class Crunchy implements ServiceClass {
             item.playback = item.streams_link;
           }
         }
-        // find episode numbers
+
         if(item.playback && ((but && !doEpsFilter.isSelected([epNum, item.id])) || (all || (doEpsFilter.isSelected([epNum, item.id])) && !but))) {
           if (Object.prototype.hasOwnProperty.call(ret, key)) {
             const epMe = ret[key];
