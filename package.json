@@ -86,7 +86,7 @@
     "removeNPMAbsolutePaths": "^3.0.1",
     "ts-node": "^10.9.2",
     "ts-proto": "^1.181.2",
-    "typescript": "5.5.2",
+    "typescript": "5.8.3",
     "typescript-eslint": "7.13.1"
   },
   "scripts": {
