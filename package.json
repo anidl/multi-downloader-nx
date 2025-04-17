@@ -40,7 +40,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@yao-pkg/pkg": "^5.16.1",
+    "@yao-pkg/pkg": "^6.4.0",
     "binary-parser": "^2.2.1",
     "binary-parser-encoder": "^1.5.3",
     "bn.js": "^5.2.1",
