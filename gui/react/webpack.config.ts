@@ -16,7 +16,7 @@ const config: Configuration & DevServerConfig = {
   entry: './src/index.tsx',
   mode: 'production',
   output: {
-    path: path.resolve(__dirname, './build'),
+    path: path.resolve(process.cwd(), './build'),
     filename: 'index.js',
   },
   target: 'web',
@@ -50,7 +50,7 @@ const config: Configuration & DevServerConfig = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'public', 'index.html')
+      template: path.join(process.cwd(), 'public', 'index.html')
     })
   ]
 };
