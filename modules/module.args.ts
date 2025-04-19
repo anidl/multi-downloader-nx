@@ -49,6 +49,15 @@ export type TAppArg<T extends boolean|string|number|unknown[], K = any> = {
 }
 
 const args: TAppArg<boolean|number|string|unknown[]>[] = [
+  { 
+    name: 'absolute',
+    describe: 'Use absolute numbers for the episode',
+    docDescribe: 'Use absolute numbers for the episode. If not set, it will use the default index numbers',
+    group: 'dl',
+    service: ['crunchy'],
+    type: 'boolean',
+    usage: '',
+  },
   {
     name: 'auth',
     describe: 'Enter authentication mode',
