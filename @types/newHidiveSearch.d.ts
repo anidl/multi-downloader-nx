@@ -14,7 +14,7 @@ export interface Result {
   query:               string;
   params:              string;
   index:               string;
-  renderingContent:    RenderingContent;
+  renderingContent:    object;
   processingTimeMS:    number;
   processingTimingsMS: ProcessingTimingsMS;
   serverTimeMS:        number;
@@ -31,7 +31,7 @@ export interface Hit {
   id:               number;
   name:             string;
   description:      string;
-  meta:             RenderingContent;
+  meta:             object;
   coverUrl:         string;
   smallCoverUrl:    string;
   seasonsCount:     number;
@@ -72,9 +72,6 @@ export interface HitLocalisations {
 export interface HitLocalization {
   title:       string;
   description: string;
-}
-
-export interface RenderingContent {
 }
 
 export interface Ratings {

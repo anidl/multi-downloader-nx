@@ -2,7 +2,7 @@ export interface HidiveDashboard {
   Code:      number;
   Status:    string;
   Message:   null;
-  Messages:  Messages;
+  Messages:  object;
   Data:      Data;
   Timestamp: string;
   IPAddress: string;
@@ -67,7 +67,4 @@ export enum Status {
   Paused = 'Paused',
   Playing = 'Playing',
   Watching = 'Watching',
-}
-
-export interface Messages {
 }

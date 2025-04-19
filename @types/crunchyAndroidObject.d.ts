@@ -4,13 +4,10 @@ export interface CrunchyAndroidObject {
   __class__:        string;
   __href__:         string;
   __resource_key__: string;
-  __links__:        Actions;
-  __actions__:      Actions;
+  __links__:        object;
+  __actions__:      object;
   total:            number;
   items:            AndroidObject[];
-}
-
-export interface Actions {
 }
 
 export interface AndroidObject {
