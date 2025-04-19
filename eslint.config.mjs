@@ -15,6 +15,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-declaration-merging': 'warn',
       '@typescript-eslint/no-unused-vars' : 'warn',
+      '@typescript-eslint/no-unused-expressions': 'warn',
       'indent': [
         'error',
         2
