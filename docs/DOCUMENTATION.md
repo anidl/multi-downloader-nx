@@ -183,7 +183,7 @@ Select specific stream
 #### `--cstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `samsungtv`, `lgtv`, `rokutv`, `android`, `iphone`, `ipad`, `none`] | `chrome`| `cstream: ` |
+| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `android`, `androidt`, `iphone`, `ipad`, `vision`, `none`] | `vidaa`| `cstream: ` |
 
 Select specific crunchy play stream by device, or disable stream with "none"
 #### `--hslang`
