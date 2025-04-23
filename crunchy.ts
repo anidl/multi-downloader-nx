@@ -1281,9 +1281,9 @@ export default class Crunchy implements ServiceClass {
       const AuthHeaders: RequestInit = {
         headers: {
           Authorization: `Bearer ${this.token.access_token}`,
-          'X-Cr-Disable-Drm': 'true',
-          'X-Cr-Enable-Drm': 'false',
-          'X-Cr-Stream-Limits': 'false',
+          // 'X-Cr-Disable-Drm': 'true',
+          // 'X-Cr-Enable-Drm': 'false',
+          // 'X-Cr-Stream-Limits': 'false',
           'User-Agent': api.defaultUserAgent
           //'X-Cr-Segment-CDN': 'all',
           //'User-Agent': 'Crunchyroll/1.8.0 Nintendo Switch/12.3.12.0 UE4/4.27'
@@ -1428,7 +1428,7 @@ export default class Crunchy implements ServiceClass {
 
       let playStream: CrunchyPlayStream | null = null;
       if (options.cstream !== 'none') {
-        const playbackReq = await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v2/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cstream]}/play`, AuthHeaders);
+        const playbackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v2/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.cstream]}/play`, AuthHeaders);
         if (!playbackReq.ok || !playbackReq.res) {
           console.warn('Request Stream URLs FAILED!');
         } else {
@@ -1861,7 +1861,7 @@ export default class Crunchy implements ServiceClass {
 
                 if (audioDownloaded) {
                   console.info('Started decrypting audio,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-                  const decryptAudio = exec(this.cfg.bin.shaka ? 'shaka' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                  const decryptAudio = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
                   if (!decryptAudio.isOk) {
                     console.error(decryptAudio.err);
                     console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
