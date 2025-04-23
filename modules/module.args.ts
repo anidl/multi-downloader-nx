@@ -293,7 +293,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Select specific crunchy play stream by device, or disable stream with "none"',
     choices: [...Object.keys(CrunchyPlayStreams), 'none'],
     default: {
-      default: 'chrome'
+      default: 'vidaa'
     },
     docDescribe: true,
     usage: '${device}'
