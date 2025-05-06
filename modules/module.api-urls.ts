@@ -59,13 +59,13 @@ const api: APIType = {
   rss_gid:           `${domain.www}/syndication/feed?type=episodes&group_id=`, // &lang=enUS
   media_page:        `${domain.www}/media-`,
   series_page:       `${domain.www}/series-`,
-  auth:              `${domain.api_beta}/auth/v1/token`,
+  auth:              `${domain.www}/auth/v1/token`,
   // mobile api
   search3:           `${domain.api}/autocomplete.0.json`,
   session:           `${domain.api}/start_session.0.json`,
   collections:       `${domain.api}/list_collections.0.json`,
   // This User-Agent bypasses Cloudflare security of the newer Endpoint
-  defaultUserAgent:  'Crunchyroll/4.75.0 (bundle_identifier:com.crunchyroll.iphone; build_number:4100608.433889621) iOS/18.3.2 Gravity/4.75.0',
+  defaultUserAgent:  'Crunchyroll/4.77.2 (bundle_identifier:com.crunchyroll.iphone; build_number:4139672.438176041) iOS/18.3.2 Gravity/4.77.2',
   beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
   beta_cmsToken:     `${domain.api_beta}/index/v2`,
   search:            `${domain.api_beta}/content/v2/discover/search`,
@@ -73,6 +73,7 @@ const api: APIType = {
   beta_browse:       `${domain.api_beta}/content/v1/browse`,
   beta_cms:          `${domain.api_beta}/cms/v2`,
   // beta api
+  // broken - deprecated since 06.05.2025
   drm:               `${domain.api_beta}/drm/v1/auth`,
   // new drm endpoints
   drm_widevine:      `${domain.www}/license/v1/license/widevine`,

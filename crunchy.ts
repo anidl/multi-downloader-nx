@@ -382,7 +382,6 @@ export default class Crunchy implements ServiceClass {
       const authData = new URLSearchParams({
         'refresh_token': this.token.refresh_token,
         'grant_type': 'refresh_token',
-        //'grant_type': 'etp_rt_cookie',
         'scope': 'offline_access',
         'device_id': uuid,
         'device_name': 'iPhone',
@@ -1587,10 +1586,10 @@ export default class Crunchy implements ServiceClass {
 
       // Delete the stream if it's not needed
       if (options.novids && options.noaudio) {
-        if (playStream) {
-          await this.refreshToken(true, true);
-          await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
-        }
+        // if (playStream) {
+        //   await this.refreshToken(true, true);
+        //   await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+        // }
       }
 
       if(!dlFailed && curStream !== undefined && !(options.novids && options.noaudio)){
@@ -1602,10 +1601,10 @@ export default class Crunchy implements ServiceClass {
           const streamPlaylistBody = await streamPlaylistsReq.res.text();
           if (streamPlaylistBody.match('MPD')) {
             //We have the stream, so go ahead and delete the active stream
-            if (playStream) {
-              await this.refreshToken(true, true);
-              await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
-            }
+            // if (playStream) {
+            //   await this.refreshToken(true, true);
+            //   await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+            // }
 
             //Parse MPD Playlists
             const streamPlaylists = await parse(streamPlaylistBody, langsData.findLang(langsData.fixLanguageTag(pbData.meta.audio_locale as string) || ''), curStream.url.match(/.*\.urlset\//)[0]);
@@ -1776,44 +1775,49 @@ export default class Crunchy implements ServiceClass {
 
             //Handle Decryption if needed
             if ((chosenVideoSegments.pssh_wvd ||chosenVideoSegments.pssh_prd || chosenAudioSegments.pssh_wvd || chosenAudioSegments.pssh_prd) && (videoDownloaded || audioDownloaded)) {
-              const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
-              const assetId = assetIdRegex ? assetIdRegex[1] : null;
-              const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
+              // const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
+              // const assetId = assetIdRegex ? assetIdRegex[1] : null;
+              // const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
               console.info('Decryption Needed, attempting to decrypt');
 
-              const decReq = await this.req.getData(`${api.drm}`, {
-                'method': 'POST',
-                'body': JSON.stringify({
-                  'accounting_id': 'crunchyroll',
-                  'asset_id': assetId,
-                  'session_id': sessionId,
-                  'user_id': this.token.account_id
-                }),
-                headers: {
-                  'User-Agent': api.defaultUserAgent
-                }
-              });
-              if(!decReq.ok || !decReq.res){
-                console.error('Request to DRM Authentication failed:', decReq.error?.res.status, decReq.error?.message);
-                return undefined;
-              }
-              const authData = await decReq.res.json() as {'custom_data': string, 'token': string};
+              // const decReq = await this.req.getData(`${api.drm}`, {
+              //   'method': 'POST',
+              //   'body': JSON.stringify({
+              //     'accounting_id': 'crunchyroll',
+              //     'asset_id': assetId,
+              //     'session_id': sessionId,
+              //     'user_id': this.token.account_id
+              //   }),
+              //   headers: {
+              //     'User-Agent': api.defaultUserAgent
+              //   }
+              // });
+              // if(!decReq.ok || !decReq.res){
+              //   console.error('Request to DRM Authentication failed:', decReq.error?.res.status, decReq.error?.message);
+              //   return undefined;
+              // }
+              // const authData = await decReq.res.json() as {'custom_data': string, 'token': string};
 
               let encryptionKeys;
 
               if (cdm === 'widevine') {
-                encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, 'https://lic.drmtoday.com/license-proxy-widevine/cenc/', {
-                  'dt-custom-data': authData.custom_data,
-                  'x-dt-auth-token': authData.token
+                encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, api.drm_widevine, {
+                  Authorization: `Bearer ${this.token.access_token}`,
+                  'User-Agent': api.defaultUserAgent,
+                  Pragma: 'no-cache',
+                  'Cache-Control': 'no-cache',
+                  'content-type': 'application/octet-stream',
+                  'x-cr-content-id': currentVersion!.guid,
+                  'x-cr-video-token': playStream!.token
                 });
               }
 
-              if (cdm === 'playready') {
-                encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://lic.drmtoday.com/license-proxy-headerauth/drmtoday/RightsManager.asmx', {
-                  'dt-custom-data': authData.custom_data,
-                  'x-dt-auth-token': authData.token
-                });
-              }
+              // if (cdm === 'playready') {
+              //   encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://lic.drmtoday.com/license-proxy-headerauth/drmtoday/RightsManager.asmx', {
+              //     'dt-custom-data': authData.custom_data,
+              //     'x-dt-auth-token': authData.token
+              //   });
+              // }
 
               if (!encryptionKeys || encryptionKeys.length == 0) {
                 console.error('Failed to get encryption keys');

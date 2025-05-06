@@ -99,12 +99,17 @@ export async function getKeysWVD(
 
   //Generate license
   let response;
-  try {
-    response = await got(licenseServer, {
+  console.log(licenseServer)
+  console.log({
       method: 'POST',
       body: session.createLicenseRequest(),
-      headers: authData,
-      responseType: 'text',
+      headers: authData
+    } as any)
+  try {
+    response = await fetch(licenseServer, {
+      method: 'POST',
+      body: session.createLicenseRequest(),
+      headers: authData
     });
   } catch (_error) {
     const error = _error as {
@@ -142,19 +147,21 @@ export async function getKeysWVD(
     return [];
   }
 
-  if (response.statusCode === 200) {
+  if (response.status === 200) {
     //Parse License and return keys
+    const buffer = await response.arrayBuffer();
+    const text = new TextDecoder().decode(buffer);
     try {
-      const json = JSON.parse(response.body);
+      const json = JSON.parse(text);
       return session.parseLicense(Buffer.from(json['license'], 'base64'));
     } catch {
-      return session.parseLicense(response.rawBody);
+      return session.parseLicense(Buffer.from(new Uint8Array(buffer)));
     }
   } else {
     console.info(
       'License request failed:',
-      response.statusMessage,
-      response.body
+      response.status,
+      await response.text()
     );
     return [];
   }
