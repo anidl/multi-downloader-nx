@@ -1807,7 +1807,7 @@ export default class Crunchy implements ServiceClass {
                   Pragma: 'no-cache',
                   'Cache-Control': 'no-cache',
                   'content-type': 'application/octet-stream',
-                  'x-cr-content-id': currentVersion!.guid,
+                  'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
                   'x-cr-video-token': playStream!.token
                 });
               }
