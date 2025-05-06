@@ -1798,10 +1798,11 @@ export default class Crunchy implements ServiceClass {
               // }
               // const authData = await decReq.res.json() as {'custom_data': string, 'token': string};
 
-              let encryptionKeys;
+              let encryptionKeysVideo;
+              let encryptionKeysAudio;
 
               if (cdm === 'widevine') {
-                encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, api.drm_widevine, {
+                encryptionKeysVideo = await getKeysWVD(chosenVideoSegments.pssh_wvd, api.drm_widevine, {
                   Authorization: `Bearer ${this.token.access_token}`,
                   'User-Agent': api.defaultUserAgent,
                   Pragma: 'no-cache',
@@ -1810,6 +1811,20 @@ export default class Crunchy implements ServiceClass {
                   'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
                   'x-cr-video-token': playStream!.token
                 });
+
+                if (chosenAudioSegments.pssh_wvd && chosenAudioSegments.pssh_wvd !== chosenVideoSegments.pssh_wvd) {
+                  encryptionKeysAudio = await getKeysWVD(chosenAudioSegments.pssh_wvd, api.drm_widevine, {
+                    Authorization: `Bearer ${this.token.access_token}`,
+                    'User-Agent': api.defaultUserAgent,
+                    Pragma: 'no-cache',
+                    'Cache-Control': 'no-cache',
+                    'content-type': 'application/octet-stream',
+                    'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
+                    'x-cr-video-token': playStream!.token
+                  });
+                } else {
+                  encryptionKeysAudio = encryptionKeysVideo
+                }
               }
 
               // if (cdm === 'playready') {
@@ -1819,24 +1834,27 @@ export default class Crunchy implements ServiceClass {
               //   });
               // }
 
-              if (!encryptionKeys || encryptionKeys.length == 0) {
+              if (!encryptionKeysVideo || encryptionKeysVideo.length == 0 || !encryptionKeysAudio || encryptionKeysAudio.length == 0) {
                 console.error('Failed to get encryption keys');
                 return undefined;
               }
+
               /*const keys = {} as Record<string, string>;
               encryptionKeys.forEach(function(key) {
                 keys[key.kid] = key.key;
               });*/
 
               if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
-                let commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
-                let commandVideo = commandBase+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
-                let commandAudio = commandBase+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
+                let commandBaseVideo = `--show-progress --key ${encryptionKeysVideo[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeysVideo[cdm === 'playready' ? 0 : 1].key} `;
+                let commandBaseAudio = `--show-progress --key ${encryptionKeysAudio[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeysAudio[cdm === 'playready' ? 0 : 1].key} `;
+                let commandVideo = commandBaseVideo+`"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
+                let commandAudio = commandBaseAudio+`"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
                 if (this.cfg.bin.shaka) {
-                  commandBase = ` --enable_raw_key_decryption ${encryptionKeys.map(kb => '--keys key_id='+kb.kid+':key='+kb.key).join(' ')}`;
-                  commandVideo = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s"`+commandBase;
-                  commandAudio = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s"`+commandBase;
+                  commandBaseVideo = ` --enable_raw_key_decryption ${encryptionKeysVideo.map(kb => '--keys key_id='+kb.kid+':key='+kb.key).join(' ')}`;
+                  commandBaseAudio = ` --enable_raw_key_decryption ${encryptionKeysAudio.map(kb => '--keys key_id='+kb.kid+':key='+kb.key).join(' ')}`;
+                  commandVideo = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s"`+commandBaseVideo;
+                  commandAudio = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s"`+commandBaseAudio;
                 }
 
                 if (videoDownloaded) {
@@ -1887,7 +1905,7 @@ export default class Crunchy implements ServiceClass {
                   }
                 }
               } else {
-                console.warn('mp4decrypt/shaka not found, files need decryption. Decryption Keys:', encryptionKeys);
+                console.warn('mp4decrypt/shaka not found, files need decryption. Decryption Keys:', encryptionKeysVideo, encryptionKeysAudio);
               }
             } else {
               if (videoDownloaded) {

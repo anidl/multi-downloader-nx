@@ -59,7 +59,7 @@ const api: APIType = {
   rss_gid:           `${domain.www}/syndication/feed?type=episodes&group_id=`, // &lang=enUS
   media_page:        `${domain.www}/media-`,
   series_page:       `${domain.www}/series-`,
-  auth:              `${domain.www}/auth/v1/token`,
+  auth:              `${domain.api_beta}/auth/v1/token`,
   // mobile api
   search3:           `${domain.api}/autocomplete.0.json`,
   session:           `${domain.api}/start_session.0.json`,
