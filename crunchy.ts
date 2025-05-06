@@ -1823,7 +1823,7 @@ export default class Crunchy implements ServiceClass {
                     'x-cr-video-token': playStream!.token
                   });
                 } else {
-                  encryptionKeysAudio = encryptionKeysVideo
+                  encryptionKeysAudio = encryptionKeysVideo;
                 }
               }
 
