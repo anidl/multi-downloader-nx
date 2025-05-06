@@ -99,12 +99,6 @@ export async function getKeysWVD(
 
   //Generate license
   let response;
-  console.log(licenseServer)
-  console.log({
-      method: 'POST',
-      body: session.createLicenseRequest(),
-      headers: authData
-    } as any)
   try {
     response = await fetch(licenseServer, {
       method: 'POST',
