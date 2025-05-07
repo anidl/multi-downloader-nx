@@ -1802,6 +1802,7 @@ export default class Crunchy implements ServiceClass {
               let encryptionKeysAudio;
 
               if (cdm === 'widevine') {
+                await this.refreshToken(true, true);
                 encryptionKeysVideo = await getKeysWVD(chosenVideoSegments.pssh_wvd, api.drm_widevine, {
                   Authorization: `Bearer ${this.token.access_token}`,
                   'User-Agent': api.defaultUserAgent,
@@ -1813,6 +1814,7 @@ export default class Crunchy implements ServiceClass {
                 });
 
                 if (chosenAudioSegments.pssh_wvd && chosenAudioSegments.pssh_wvd !== chosenVideoSegments.pssh_wvd) {
+                  await this.refreshToken(true, true);
                   encryptionKeysAudio = await getKeysWVD(chosenAudioSegments.pssh_wvd, api.drm_widevine, {
                     Authorization: `Bearer ${this.token.access_token}`,
                     'User-Agent': api.defaultUserAgent,
@@ -2038,10 +2040,10 @@ export default class Crunchy implements ServiceClass {
                 dlFailed = true;
               } else {
                 // We have the stream, so go ahead and delete the active stream
-                if (playStream) {
-                  await this.refreshToken(true, true);
-                  await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
-                }
+                // if (playStream) {
+                //   await this.refreshToken(true, true);
+                //   await this.req.getData(`https://cr-play-service.prd.crunchyrollsvc.com/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${playStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+                // }
 
                 const chunkPageBody = await chunkPage.res.text();
                 const chunkPlaylist = m3u8(chunkPageBody);
