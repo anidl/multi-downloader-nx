@@ -1,4 +1,3 @@
-import { KeyContainer, Session } from './license';
 import fs from 'fs';
 import { console } from './log';
 import got from 'got';
@@ -8,6 +7,7 @@ import { ReadError, Response } from 'got';
 import { Device } from './playready/device';
 import Cdm from './playready/cdm';
 import { PSSH } from './playready/pssh';
+import { KeyContainer, Session } from './widevine/license';
 
 //read cdm files located in the same directory
 let privateKey: Buffer = Buffer.from([]),
@@ -147,9 +147,9 @@ export async function getKeysWVD(
     const text = new TextDecoder().decode(buffer);
     try {
       const json = JSON.parse(text);
-      return session.parseLicense(Buffer.from(json['license'], 'base64'));
+      return session.parseLicense(Buffer.from(json['license'], 'base64')) as KeyContainer[];
     } catch {
-      return session.parseLicense(Buffer.from(new Uint8Array(buffer)));
+      return session.parseLicense(Buffer.from(new Uint8Array(buffer))) as KeyContainer[];
     }
   } else {
     console.info(
