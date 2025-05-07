@@ -37,7 +37,7 @@ import { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
 import { MPDParsed, parse } from './modules/module.transform-mpd';
 import { canDecrypt, getKeysWVD, cdm, getKeysPRD } from './modules/cdm';
 import { exec } from './modules/sei-helper-fixes';
-import { KeyContainer } from './modules/license';
+import { KeyContainer } from './modules/widevine/license';
 
 export default class Hidive implements ServiceClass { 
   public cfg: yamlCfg.ConfigObject;
