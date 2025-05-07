@@ -1775,11 +1775,14 @@ export default class Crunchy implements ServiceClass {
 
             //Handle Decryption if needed
             if ((chosenVideoSegments.pssh_wvd ||chosenVideoSegments.pssh_prd || chosenAudioSegments.pssh_wvd || chosenAudioSegments.pssh_prd) && (videoDownloaded || audioDownloaded)) {
+              // Part of the old (now deprecated) DRM system
               // const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
               // const assetId = assetIdRegex ? assetIdRegex[1] : null;
               // const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
+
               console.info('Decryption Needed, attempting to decrypt');
 
+              // Part of the old (now deprecated) DRM system
               // const decReq = await this.req.getData(`${api.drm}`, {
               //   'method': 'POST',
               //   'body': JSON.stringify({
@@ -1801,6 +1804,7 @@ export default class Crunchy implements ServiceClass {
               let encryptionKeysVideo;
               let encryptionKeysAudio;
 
+              // New Crunchyroll DRM endpoint for Widevine
               if (cdm === 'widevine') {
                 await this.refreshToken(true, true);
                 encryptionKeysVideo = await getKeysWVD(chosenVideoSegments.pssh_wvd, api.drm_widevine, {
@@ -1813,6 +1817,7 @@ export default class Crunchy implements ServiceClass {
                   'x-cr-video-token': playStream!.token
                 });
 
+                // Check if the audio pssh is different since Crunchyroll started to have different dec keys for audio tracks
                 if (chosenAudioSegments.pssh_wvd && chosenAudioSegments.pssh_wvd !== chosenVideoSegments.pssh_wvd) {
                   await this.refreshToken(true, true);
                   encryptionKeysAudio = await getKeysWVD(chosenAudioSegments.pssh_wvd, api.drm_widevine, {
@@ -1829,6 +1834,37 @@ export default class Crunchy implements ServiceClass {
                 }
               }
 
+              // New Crunchyroll DRM endpoint for Playready (currently broken on Crunchyrolls part and therefore disabled)
+              // if (cdm === 'playready') {
+              //   await this.refreshToken(true, true);
+              //   encryptionKeysVideo = await getKeysPRD(chosenVideoSegments.pssh_prd, api.drm_playready, {
+              //     Authorization: `Bearer ${this.token.access_token}`,
+              //     'User-Agent': api.defaultUserAgent,
+              //     Pragma: 'no-cache',
+              //     'Cache-Control': 'no-cache',
+              //     'content-type': 'application/octet-stream',
+              //     'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
+              //     'x-cr-video-token': playStream!.token
+              //   });
+
+              //   // Check if the audio pssh is different since Crunchyroll started to have different dec keys for audio tracks
+              //   if (chosenAudioSegments.pssh_prd && chosenAudioSegments.pssh_prd !== chosenVideoSegments.pssh_prd) {
+              //     await this.refreshToken(true, true);
+              //     encryptionKeysAudio = await getKeysPRD(chosenAudioSegments.pssh_prd, api.drm_playready, {
+              //       Authorization: `Bearer ${this.token.access_token}`,
+              //       'User-Agent': api.defaultUserAgent,
+              //       Pragma: 'no-cache',
+              //       'Cache-Control': 'no-cache',
+              //       'content-type': 'application/octet-stream',
+              //       'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
+              //       'x-cr-video-token': playStream!.token
+              //     });
+              //   } else {
+              //     encryptionKeysAudio = encryptionKeysVideo;
+              //   }
+              // }
+
+              // Part of the old (now deprecated) DRM system
               // if (cdm === 'playready') {
               //   encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://lic.drmtoday.com/license-proxy-headerauth/drmtoday/RightsManager.asmx', {
               //     'dt-custom-data': authData.custom_data,
