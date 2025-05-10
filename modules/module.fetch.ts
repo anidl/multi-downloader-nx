@@ -1,9 +1,8 @@
 import * as yamlCfg from './module.cfg-loader';
 import { console } from './log';
-import { Method } from 'got';
 
 export type Params = {
-  method?: Method,
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   headers?: Record<string, string>,
   body?: string | Buffer,
   binary?: boolean,
@@ -35,29 +34,10 @@ export class Req {
     // options
     const options: RequestInit = {
       method: params.method ? params.method : 'GET',
-      headers: {
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        'pragma': 'no-cache',
-        'sec-ch-ua': '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'document',
-        'sec-fetch-mode': 'navigate',
-        'sec-fetch-site': 'none',
-        'sec-fetch-user': '?1',
-        'upgrade-insecure-requests': '1',
-      },
     };
     // additional params
     if(params.headers){
-      options.headers = {...options.headers, ...params.headers};
-    }
-    if(options.method == 'POST'){
-      if (!(options.headers as Record<string, string>)['Content-Type']) {
-        (options.headers as Record<string, string>)['Content-Type'] = 'application/x-www-form-urlencoded';
-      }
+      options.headers = params.headers;
     }
     if(params.body){
       options.body = params.body;
