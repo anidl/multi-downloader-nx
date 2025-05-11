@@ -4,12 +4,10 @@ import fs from 'fs/promises';
 import fsp from 'fs';
 import url from 'url';
 
-// extra
-import shlp from 'sei-helper';
-
 import { console } from './log';
 import { ProgressData } from '../@types/messageHandler';
 import { ofetch } from 'ofetch';
+import Helper from './module.helper';
 
 export type HLSCallback = (data: ProgressData) => unknown;
 
@@ -131,7 +129,7 @@ class hlsDownload {
     }
     // ask before rewrite file
     if (fsp.existsSync(`${fn}`) && !this.data.isResume) {
-      let rwts = this.data.override ?? (await shlp.question(`[Q] File «${fn}» already exists! Rewrite? ([y]es/[N]o/[c]ontinue)`));
+      let rwts = this.data.override ?? (await Helper.question(`[Q] File «${fn}» already exists! Rewrite? ([y]es/[N]o/[c]ontinue)`));
       rwts = rwts || 'N';
       if (['Y', 'y'].includes(rwts[0])) {
         console.info(`Deleting «${fn}»...`);
@@ -258,7 +256,7 @@ class hlsDownload {
         })
       );
       console.info(
-        `${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${shlp.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(
+        `${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${Helper.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(
           data.downloadSpeed / 1000000
         ).toPrecision(2)}Mb/s)`
       );

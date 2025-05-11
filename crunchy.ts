@@ -7,10 +7,9 @@ import packageJson from './package.json';
 
 // plugins
 import { console } from './modules/log';
-import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
 import streamdl, { M3U8Json } from './modules/hls-download';
-import { exec } from './modules/sei-helper-fixes';
+import Helper from './modules/module.helper';
 
 // custom modules
 import * as fontsData from './modules/module.fontsData';
@@ -95,8 +94,8 @@ export default class Crunchy implements ServiceClass {
     // select mode
     if (argv.silentAuth && !argv.auth) {
       await this.doAuth({
-        username: argv.username ?? await shlp.question('[Q] LOGIN/EMAIL'),
-        password: argv.password ?? await shlp.question('[Q] PASSWORD   ')
+        username: argv.username ?? await Helper.question('[Q] LOGIN/EMAIL: '),
+        password: argv.password ?? await Helper.question('[Q] PASSWORD: ')
       });
     }
     if(argv.dlFonts){
@@ -104,8 +103,8 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.auth){
       await this.doAuth({
-        username: argv.username ?? await shlp.question('[Q] LOGIN/EMAIL'),
-        password: argv.password ?? await shlp.question('[Q] PASSWORD   ')
+        username: argv.username ?? await Helper.question('[Q] LOGIN/EMAIL: '),
+        password: argv.password ?? await Helper.question('[Q] PASSWORD: ')
       });
     }
     else if (argv.token) {
@@ -612,7 +611,7 @@ export default class Crunchy implements ServiceClass {
 
     // set object booleans
     if(iMetadata.duration_ms){
-      oBooleans.push(shlp.formatTime(iMetadata.duration_ms/1000));
+      oBooleans.push(Helper.formatTime(iMetadata.duration_ms/1000));
     }
     if(iMetadata.is_simulcast) {
       oBooleans.push('SIMULCAST');
@@ -1888,7 +1887,7 @@ export default class Crunchy implements ServiceClass {
 
                 if (videoDownloaded) {
                   console.info('Started decrypting video,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-                  const decryptVideo = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+                  const decryptVideo = Helper.exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
                   if (!decryptVideo.isOk) {
                     console.error(decryptVideo.err);
                     console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
@@ -1912,7 +1911,7 @@ export default class Crunchy implements ServiceClass {
 
                 if (audioDownloaded) {
                   console.info('Started decrypting audio,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-                  const decryptAudio = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                  const decryptAudio = Helper.exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
                   if (!decryptAudio.isOk) {
                     console.error(decryptAudio.err);
                     console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);

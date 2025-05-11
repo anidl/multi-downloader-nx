@@ -2,13 +2,15 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import url from 'url';
+import readline from 'readline/promises';
+import { stdin as input, stdout as output } from 'process';
 
 // extra
-import shlp from 'sei-helper';
 import got, { Response } from 'got';
 
 import { console } from './log';
 import { ProgressData } from '../@types/messageHandler';
+import Helper from './module.helper';
 
 // The following function should fix an issue with downloading. For more information see https://github.com/sindresorhus/got/issues/1489
 const fixMiddleWare = (res: Response) => {
@@ -155,7 +157,9 @@ class hlsDownload {
     }
     // ask before rewrite file
     if (fs.existsSync(`${fn}`) && !this.data.isResume) {
-      let rwts = this.data.override ?? await shlp.question(`[Q] File «${fn}» already exists! Rewrite? ([y]es/[N]o/[c]ontinue)`);
+      const rl = readline.createInterface({ input, output });
+      let rwts = this.data.override ?? await rl.question(`[Q] File «${fn}» already exists! Rewrite? ([y]es/[N]o/[c]ontinue)`);
+      rl.close();
       rwts = rwts || 'N';
       if (['Y', 'y'].includes(rwts[0])) {
         console.info(`Deleting «${fn}»...`);
@@ -284,7 +288,7 @@ class hlsDownload {
         completed: this.data.parts.completed,
         total: totalSeg
       }));
-      console.info(`${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${shlp.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(data.downloadSpeed / 1000000).toPrecision(2)}Mb/s)`);
+      console.info(`${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${Helper.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(data.downloadSpeed / 1000000).toPrecision(2)}Mb/s)`);
       if (this.data.callback)
         this.data.callback({ total: this.data.parts.total, cur: this.data.parts.completed, bytes: this.data.bytesDownloaded, percent: data.percent, time: data.time, downloadSpeed: data.downloadSpeed });
     }

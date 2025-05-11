@@ -6,9 +6,9 @@ import packageJson from '../package.json';
 import { CompilerOptions, transpileModule } from 'typescript';
 import tsConfig from '../tsconfig.json';
 import fsextra from 'fs-extra';
-import seiHelper from 'sei-helper';
 import { workingDir } from './module.cfg-loader';
 import { console } from './log';
+import Helper from './module.helper';
 const updateFilePlace = path.join(workingDir, 'config', 'updates.json');
 
 const updateIgnore = [
@@ -95,7 +95,7 @@ export default async (force = false) => {
 
     for (const a of changedFiles.filter((a) => a.status !== 'added')) {
       if (!askBeforeUpdate.some((pattern) => matchString(pattern, a.filename))) continue;
-      const answer = await seiHelper.question(
+      const answer = await Helper.question(
         `The developer decided that the file '${a.filename}' may contain information you changed yourself. Should they be overriden to be updated? [y/N]`
       );
       if (answer.toLowerCase() === 'y') remove.push(a.sha);

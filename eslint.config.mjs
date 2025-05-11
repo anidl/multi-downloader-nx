@@ -2,7 +2,6 @@
 
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import react from 'eslint-plugin-react';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -32,9 +31,6 @@ export default tseslint.config(
         'error',
         'always'
       ]
-    },
-    plugins: {
-      react
     },
     languageOptions: {
       parserOptions: {

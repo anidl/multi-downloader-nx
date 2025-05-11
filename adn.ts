@@ -7,7 +7,6 @@ import fs from 'fs-extra';
 import crypto from 'crypto';
 
 // Plugins
-import shlp from 'sei-helper';
 import m3u8 from 'm3u8-parsed';
 
 // Modules
@@ -24,6 +23,7 @@ import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import parseFileName, { Variable } from './modules/module.filename';
 import { AvailableFilenameVars } from './modules/module.args';
+import Helper from './modules/module.helper';
 
 // Types
 import { ServiceClass } from './@types/serviceClassInterface';
@@ -91,8 +91,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
     if (argv.auth) {
       //Authenticate
       await this.doAuth({
-        username: argv.username ?? await shlp.question('[Q] LOGIN/EMAIL'),
-        password: argv.password ?? await shlp.question('[Q] PASSWORD   ')
+        username: argv.username ?? await Helper.question('[Q] LOGIN/EMAIL: '),
+        password: argv.password ?? await Helper.question('[Q] PASSWORD: ')
       });
     } else if (argv.search && argv.search.length > 2) {
       //Search

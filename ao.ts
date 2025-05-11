@@ -5,9 +5,6 @@ import packageJson from './package.json';
 import path from 'path';
 import fs from 'fs-extra';
 
-// Plugins
-import shlp from 'sei-helper';
-
 // Modules
 import * as fontsData from './modules/module.fontsData';
 import * as langsData from './modules/module.langsData';
@@ -17,7 +14,6 @@ import * as reqModule from './modules/module.fetch';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import { canDecrypt, getKeysWVD, cdm, getKeysPRD } from './modules/cdm';
 import streamdl, { M3U8Json } from './modules/hls-download';
-import { exec } from './modules/sei-helper-fixes';
 import { console } from './modules/log';
 import { domain } from './modules/module.api-urls';
 import { downloaded } from './modules/module.downloadArchive';
@@ -25,6 +21,7 @@ import parseSelect from './modules/module.parseSelect';
 import parseFileName, { Variable } from './modules/module.filename';
 import { AvailableFilenameVars } from './modules/module.args';
 import { parse } from './modules/module.transform-mpd';
+import Helper from './modules/module.helper';
 
 // Types
 import { ServiceClass } from './@types/serviceClassInterface';
@@ -103,8 +100,8 @@ export default class AnimeOnegai implements ServiceClass {
     if (argv.auth) {
       //Authenticate
       await this.doAuth({
-        username: argv.username ?? await shlp.question('[Q] LOGIN/EMAIL'),
-        password: argv.password ?? await shlp.question('[Q] PASSWORD   ')
+        username: argv.username ?? await Helper.question('[Q] LOGIN/EMAIL: '),
+        password: argv.password ?? await Helper.question('[Q] PASSWORD: ')
       });
     } else if (argv.search && argv.search.length > 2) {
       //Search
@@ -712,7 +709,7 @@ export default class AnimeOnegai implements ServiceClass {
 
               if (videoDownloaded) {
                 console.info('Started decrypting video,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-                const decryptVideo = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+                const decryptVideo = Helper.exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
                 if (!decryptVideo.isOk) {
                   console.error(decryptVideo.err);
                   console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
@@ -735,7 +732,7 @@ export default class AnimeOnegai implements ServiceClass {
 
               if (audioDownloaded) {
                 console.info('Started decrypting audio,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-                const decryptAudio = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+                const decryptAudio = Helper.exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
                 if (!decryptAudio.isOk) {
                   console.error(decryptAudio.err);
                   console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);

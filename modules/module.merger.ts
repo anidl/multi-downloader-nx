@@ -5,9 +5,9 @@ import path from 'path';
 import fs from 'fs';
 import { LanguageItem } from './module.langsData';
 import { AvailableMuxer } from './module.args';
-import { exec } from './sei-helper-fixes';
 import { console } from './log';
 import ffprobe from 'ffprobe';
+import Helper from './module.helper';
 
 export type MergerInput = {
   path: string,
@@ -402,7 +402,7 @@ class Merger {
       return;
     }
     console.info(`[${type}] Started merging`);
-    const res = exec(type, `"${bin}"`, command);
+    const res = Helper.exec(type, `"${bin}"`, command);
     if (!res.isOk && type === 'mkvmerge' && res.err.code === 1) {
       console.info(`[${type}] Mkvmerge finished with at least one warning`);
     } else if (!res.isOk) {

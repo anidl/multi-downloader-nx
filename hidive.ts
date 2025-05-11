@@ -7,7 +7,6 @@ import packageJson from './package.json';
 
 // plugins
 import { console } from './modules/log';
-import shlp from 'sei-helper';
 import streamdl, { M3U8Json } from './modules/hls-download';
 
 // custom modules
@@ -17,6 +16,7 @@ import * as yamlCfg from './modules/module.cfg-loader';
 import * as yargs from './modules/module.app-args';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import vtt2ass from './modules/module.vtt2ass';
+import Helper from './modules/module.helper';
 
 // load req
 import { domain, api } from './modules/module.api-urls';
@@ -36,7 +36,6 @@ import { NewHidiveEpisode } from './@types/newHidiveEpisode';
 import { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
 import { MPDParsed, parse } from './modules/module.transform-mpd';
 import { canDecrypt, getKeysWVD, cdm, getKeysPRD } from './modules/cdm';
-import { exec } from './modules/sei-helper-fixes';
 import { KeyContainer } from './modules/widevine/license';
 
 export default class Hidive implements ServiceClass { 
@@ -71,8 +70,8 @@ export default class Hidive implements ServiceClass {
     if (argv.auth) {
       //Authenticate
       await this.doAuth({
-        username: argv.username ?? await shlp.question('[Q] LOGIN/EMAIL'),
-        password: argv.password ?? await shlp.question('[Q] PASSWORD   ')
+        username: argv.username ?? await Helper.question('[Q] LOGIN/EMAIL: '),
+        password: argv.password ?? await Helper.question('[Q] PASSWORD: ')
       });
     } else if (argv.search && argv.search.length > 2){
       await this.doSearch({ ...argv, search: argv.search as string });
@@ -839,7 +838,7 @@ export default class Hidive implements ServiceClass {
             }
 
             console.info('Started decrypting video,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-            const decryptVideo = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+            const decryptVideo = Helper.exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
             if (!decryptVideo.isOk) {
               console.error(decryptVideo.err);
               console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
@@ -925,7 +924,7 @@ export default class Hidive implements ServiceClass {
             }
 
             console.info('Started decrypting audio');
-            const decryptAudio = exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+            const decryptAudio = Helper.exec(this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt', this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
             if (!decryptAudio.isOk) {
               console.error(decryptAudio.err);
               console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
