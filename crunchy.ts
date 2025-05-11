@@ -269,7 +269,7 @@ export default class Crunchy implements ServiceClass {
     }
     // To prevent any Cloudflare errors in the future
     if (authReq.res.headers.get('Set-Cookie')) {
-      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
+      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
     }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
@@ -301,7 +301,7 @@ export default class Crunchy implements ServiceClass {
     }
     // To prevent any Cloudflare errors in the future
     if (authReq.res.headers.get('Set-Cookie')) {
-      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
+      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
     }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
@@ -365,7 +365,7 @@ export default class Crunchy implements ServiceClass {
     }
     // To prevent any Cloudflare errors in the future
     if (authReq.res.headers.get('Set-Cookie')) {
-      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
+      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
     }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
@@ -411,7 +411,7 @@ export default class Crunchy implements ServiceClass {
       }
       // To prevent any Cloudflare errors in the future
       if (authReq.res.headers.get('Set-Cookie')) {
-        api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
+        api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
       }
       this.token = await authReq.res.json();
       this.token.device_id = uuid;
