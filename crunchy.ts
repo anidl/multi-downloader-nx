@@ -212,9 +212,7 @@ export default class Crunchy implements ServiceClass {
         }
         const fontUrl = fontsData.root + f;
         const getFont = await this.req.getData(fontUrl, {
-          headers: {
-            'User-Agent': api.defaultUserAgent
-          }
+          headers: api.crunchyDefHeader
         });
         if(getFont.ok && getFont.res){
           fs.writeFileSync(fontLoc, Buffer.from(await getFont.res.arrayBuffer()));
@@ -269,6 +267,10 @@ export default class Crunchy implements ServiceClass {
       console.error('Authentication failed!');
       return { isOk: false, reason: new Error('Authentication failed') };
     }
+    // To prevent any Cloudflare errors in the future
+    if (authReq.res.headers.get('Set-Cookie')) {
+      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
+    }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
     this.token.expires = new Date(Date.now() + this.token.expires_in);
@@ -296,6 +298,10 @@ export default class Crunchy implements ServiceClass {
     if(!authReq.ok || !authReq.res){
       console.error('Anonymous Authentication failed!');
       return;
+    }
+    // To prevent any Cloudflare errors in the future
+    if (authReq.res.headers.get('Set-Cookie')) {
+      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
     }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
@@ -357,6 +363,10 @@ export default class Crunchy implements ServiceClass {
       }
       return;
     }
+    // To prevent any Cloudflare errors in the future
+    if (authReq.res.headers.get('Set-Cookie')) {
+      api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
+    }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
     this.token.expires = new Date(Date.now() + this.token.expires_in);
@@ -398,6 +408,10 @@ export default class Crunchy implements ServiceClass {
           console.warn('Token is likely wrong, please login again!');
         }
         return;
+      }
+      // To prevent any Cloudflare errors in the future
+      if (authReq.res.headers.get('Set-Cookie')) {
+        api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string
       }
       this.token = await authReq.res.json();
       this.token.device_id = uuid;
