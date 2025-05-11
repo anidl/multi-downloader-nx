@@ -428,7 +428,7 @@ export default class Crunchy implements ServiceClass {
     const cmsTokenReqOpts = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -481,7 +481,7 @@ export default class Crunchy implements ServiceClass {
     const searchReqOpts = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -749,7 +749,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -791,7 +791,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -831,7 +831,7 @@ export default class Crunchy implements ServiceClass {
     const newlyAddedReqOpts = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -866,7 +866,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -1103,7 +1103,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -1280,12 +1280,7 @@ export default class Crunchy implements ServiceClass {
       const AuthHeaders: RequestInit = {
         headers: {
           Authorization: `Bearer ${this.token.access_token}`,
-          // 'X-Cr-Disable-Drm': 'true',
-          // 'X-Cr-Enable-Drm': 'false',
-          // 'X-Cr-Stream-Limits': 'false',
-          'User-Agent': api.defaultUserAgent
-          //'X-Cr-Segment-CDN': 'all',
-          //'User-Agent': 'Crunchyroll/1.8.0 Nintendo Switch/12.3.12.0 UE4/4.27'
+          ...api.crunchyDefHeader
         }
       };
 
@@ -1316,17 +1311,13 @@ export default class Crunchy implements ServiceClass {
       if (options.chapters) {
         //Make Chapter Request
         const chapterRequest = await this.req.getData(`https://static.crunchyroll.com/skip-events/production/${currentMediaId}.json`, {
-          headers: {
-            'User-Agent': api.defaultUserAgent
-          }
+          headers: api.crunchyDefHeader
         });
         if(!chapterRequest.ok || !chapterRequest.res){
         //Old Chapter Request Fallback
           console.warn('Chapter request failed, attempting old API');
           const oldChapterRequest = await this.req.getData(`https://static.crunchyroll.com/datalab-intro-v2/${currentMediaId}.json`, {
-            headers: {
-              'User-Agent': api.defaultUserAgent
-            }
+            headers: api.crunchyDefHeader
           });
           if(!oldChapterRequest.ok || !oldChapterRequest.res) {
             console.warn('Old Chapter API request failed');
@@ -1809,7 +1800,7 @@ export default class Crunchy implements ServiceClass {
                 await this.refreshToken(true, true);
                 encryptionKeysVideo = await getKeysWVD(chosenVideoSegments.pssh_wvd, api.drm_widevine, {
                   Authorization: `Bearer ${this.token.access_token}`,
-                  'User-Agent': api.defaultUserAgent,
+                  ...api.crunchyDefHeader,
                   Pragma: 'no-cache',
                   'Cache-Control': 'no-cache',
                   'content-type': 'application/octet-stream',
@@ -1822,7 +1813,7 @@ export default class Crunchy implements ServiceClass {
                   await this.refreshToken(true, true);
                   encryptionKeysAudio = await getKeysWVD(chosenAudioSegments.pssh_wvd, api.drm_widevine, {
                     Authorization: `Bearer ${this.token.access_token}`,
-                    'User-Agent': api.defaultUserAgent,
+                    ...api.crunchyDefHeader,
                     Pragma: 'no-cache',
                     'Cache-Control': 'no-cache',
                     'content-type': 'application/octet-stream',
@@ -2067,9 +2058,7 @@ export default class Crunchy implements ServiceClass {
               const outFile = parseFileName(options.fileName + '.' + (mMeta.lang?.name || lang.name), variables, options.numbers, options.override).join(path.sep);
               console.info(`Output filename: ${outFile}`);
               const chunkPage = await this.req.getData(selPlUrl, {
-                headers: {
-                  'User-Agent': api.defaultUserAgent
-                }
+                headers: api.crunchyDefHeader,
               });
               if(!chunkPage.ok || !chunkPage.res){
                 console.error('CAN\'T FETCH VIDEO PLAYLIST!');
@@ -2219,9 +2208,7 @@ export default class Crunchy implements ServiceClass {
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
               const subsAssReq = await this.req.getData(subsItem.url, {
-                headers: {
-                  'User-Agent': api.defaultUserAgent
-                }
+                headers: api.crunchyDefHeader
               });
               if(subsAssReq.ok && subsAssReq.res){
                 let sBody = await subsAssReq.res.text();
@@ -2594,7 +2581,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };
@@ -2623,7 +2610,7 @@ export default class Crunchy implements ServiceClass {
     const AuthHeaders = {
       headers: {
         Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader
       },
       useProxy: true
     };

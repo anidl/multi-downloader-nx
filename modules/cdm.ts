@@ -45,11 +45,14 @@ try {
       const stats = fs.statSync(file);
       if (stats.size < 1024 * 8 && stats.isFile()) {
         const fileContents = fs.readFileSync(file, { encoding: 'utf8' });
-        if (fileContents.includes('-BEGIN PRIVATE KEY-') || fileContents.includes('-BEGIN RSA PRIVATE KEY-')) {
+        if (fileContents.startsWith('-----BEGIN RSA PRIVATE KEY-----') && fileContents.endsWith('-----END RSA PRIVATE KEY-----')) {
           privateKey = fs.readFileSync(file);
         }
-        if (fileContents.includes('widevine_cdm_version')) {
+        if (fileContents.includes('widevine_cdm_version') && fileContents.includes('oem_crypto_security_patch_level') && !fileContents.startsWith('WVD')) {
           identifierBlob = fs.readFileSync(file);
+        }
+        if (fileContents.startsWith('WVD')) {
+          console.warn('Found WVD file in folder, AniDL currently only supports device_client_id_blob and device_private_key, make sure to have them in the widevine folder.');
         }
       }
     });
