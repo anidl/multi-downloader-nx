@@ -106,7 +106,7 @@ If you want to package the application, run pnpm run build-`{platform}`-`{type}`
 
 ### Instructions (Widevine)
 
-In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (`device_client_id_blob` and `device_private_key`) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.
+In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (`device_client_id_blob` and `device_private_key` or `client_id.bin` and `private_key.pem`) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.
 
 ### Instructions (Playready)
 
