@@ -7,6 +7,7 @@ import { execSync } from 'child_process';
 import { console } from './log';
 import esbuild from 'esbuild';
 import path from 'path';
+import { builtinModules } from 'module';
 
 const buildsDir = './_builds';
 const nodeVer = 'node20-';
@@ -63,7 +64,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
     keepNames: true,
     outfile: path.join(buildsDir, 'index.cjs'),
     metafile: true,
-    external: ['cheerio']
+    external: ['cheerio', ...builtinModules]
   });
 
   if (build.errors?.length > 0) console.error(build.errors);
