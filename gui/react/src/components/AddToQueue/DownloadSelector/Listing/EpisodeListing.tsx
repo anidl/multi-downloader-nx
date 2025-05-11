@@ -1,6 +1,6 @@
 import { Box, List, ListItem, Typography, Divider, Dialog, Select, MenuItem, FormControl, InputLabel, Checkbox } from '@mui/material';
 import { CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material';
-import React from 'react';
+import React, { RefObject } from 'react';
 import useStore from '../../../../hooks/useStore';
 import ContextMenu from '../../../reusable/ContextMenu';
 import { useSnackbar } from 'notistack';
@@ -130,7 +130,7 @@ const EpisodeListing: React.FC = () => {
             onClick: () => {
               window.open(item.img);
             }
-          } ]} popupItem={imageRef} />
+          } ]} popupItem={imageRef as RefObject<HTMLElement>} />
           <ContextMenu options={[
             {
               onClick: async () => {
@@ -141,7 +141,7 @@ const EpisodeListing: React.FC = () => {
               },
               text: 'Copy summary to clipboard'
             }
-          ]} popupItem={summaryRef} />
+          ]} popupItem={summaryRef as RefObject<HTMLElement>} />
           {index < length - 1 && <Divider />}
         </Box>;
       })}

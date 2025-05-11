@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { RefObject } from 'react';
 import { Box, ClickAwayListener, Divider, List, ListItem, Paper, TextField, Typography } from '@mui/material';
 import { SearchResponse } from '../../../../../../@types/messageHandler';
 import useStore from '../../../hooks/useStore';
@@ -92,7 +92,7 @@ const SearchBox: React.FC = () => {
                   onClick: () => {
                     window.open(a.image);
                   }
-                } ]} popupItem={imageRef} />
+                } ]} popupItem={imageRef as RefObject<HTMLElement>} />
                 {a.desc &&
                   <ContextMenu options={[
                     {
@@ -104,7 +104,7 @@ const SearchBox: React.FC = () => {
                       },
                       text: 'Copy summary to clipboard'
                     }
-                  ]} popupItem={summaryRef} />
+                  ]} popupItem={summaryRef as RefObject<HTMLElement>} />
                 }
                 {(ind < arr.length - 1) && <Divider />}
               </Box>;
