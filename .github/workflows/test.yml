@@ -20,7 +20,7 @@ jobs:
         node-version: 20
         check-latest: true
     - run: pnpm i 
-    - run: npx eslint .
+    - run: npx eslint . --quiet
   test: 
     needs: eslint
     runs-on: ubuntu-latest
