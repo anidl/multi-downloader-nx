@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2
         with:
-          version: 8.6.6
+          version: latest
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
