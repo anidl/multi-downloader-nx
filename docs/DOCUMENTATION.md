@@ -93,6 +93,12 @@ Set the local that will be used for the API.
 
 Get last updated series list
 ### Downloading
+#### `--absolute`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--absolute ` | `boolean` | `No`| `NaN` | `NaN` |
+
+Use absolute numbers for the episode. If not set, it will use the default index numbers
 #### `--movie-listing`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
