@@ -518,7 +518,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       }
     });
     if(!streamsRequest.ok || !streamsRequest.res){
-      if (streamsRequest.error?.res.status == 403 || streamsRequest.res?.status == 403) {
+      if (streamsRequest.error?.res!.status == 403 || streamsRequest.res?.status == 403) {
         console.error('Georestricted!');
       } else {
         console.error('Streams request failed!');
