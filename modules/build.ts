@@ -64,7 +64,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
     keepNames: true,
     outfile: path.join(buildsDir, 'index.cjs'),
     metafile: true,
-    external: ['cheerio', ...builtinModules]
+    external: ['cheerio', 'sleep', ...builtinModules]
   });
 
   if (build.errors?.length > 0) console.error(build.errors);
