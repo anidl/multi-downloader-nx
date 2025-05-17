@@ -270,6 +270,13 @@ export default class Crunchy implements ServiceClass {
     // To prevent any Cloudflare errors in the future
     if (authReq.res.headers.get('Set-Cookie')) {
       api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+      api.crunchyAuthHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+    }
+    if (authReq.headers && authReq.headers['Set-Cookie']) {
+      api.crunchyDefHeader['Cookie'] = authReq.headers['Set-Cookie'];
+      api.crunchyAuthHeader['Cookie'] = authReq.headers['Set-Cookie'];
+      api.crunchyDefHeader['User-Agent'] = authReq.headers['User-Agent'];
+      api.crunchyAuthHeader['User-Agent'] = authReq.headers['User-Agent'];
     }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
@@ -302,6 +309,13 @@ export default class Crunchy implements ServiceClass {
     // To prevent any Cloudflare errors in the future
     if (authReq.res.headers.get('Set-Cookie')) {
       api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+      api.crunchyAuthHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+    }
+    if (authReq.headers && authReq.headers['Set-Cookie']) {
+      api.crunchyDefHeader['Cookie'] = authReq.headers['Set-Cookie'];
+      api.crunchyAuthHeader['Cookie'] = authReq.headers['Set-Cookie'];
+      api.crunchyDefHeader['User-Agent'] = authReq.headers['User-Agent'];
+      api.crunchyAuthHeader['User-Agent'] = authReq.headers['User-Agent'];
     }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
@@ -316,8 +330,8 @@ export default class Crunchy implements ServiceClass {
     }
     const profileReqOptions = {
       headers: {
-        Authorization: `Bearer ${this.token.access_token}`,
-        'User-Agent': api.defaultUserAgent
+        ...api.crunchyDefHeader,
+        Authorization: `Bearer ${this.token.access_token}`
       },
       useProxy: true
     };
@@ -366,6 +380,13 @@ export default class Crunchy implements ServiceClass {
     // To prevent any Cloudflare errors in the future
     if (authReq.res.headers.get('Set-Cookie')) {
       api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+      api.crunchyAuthHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+    }
+    if (authReq.headers && authReq.headers['Set-Cookie']) {
+      api.crunchyDefHeader['Cookie'] = authReq.headers['Set-Cookie'];
+      api.crunchyAuthHeader['Cookie'] = authReq.headers['Set-Cookie'];
+      api.crunchyDefHeader['User-Agent'] = authReq.headers['User-Agent'];
+      api.crunchyAuthHeader['User-Agent'] = authReq.headers['User-Agent'];
     }
     this.token = await authReq.res.json();
     this.token.device_id = uuid;
@@ -398,7 +419,7 @@ export default class Crunchy implements ServiceClass {
       }).toString();
       const authReqOpts: reqModule.Params = {
         method: 'POST',
-        headers: {...api.crunchyAuthHeader, Authorization: `Basic ${await this.productionToken()}`, Cookie: `etp_rt=${this.token.refresh_token}`},
+        headers: {...api.crunchyAuthHeader, Authorization: `Basic ${await this.productionToken()}`},
         body: authData
       };
       const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -412,6 +433,13 @@ export default class Crunchy implements ServiceClass {
       // To prevent any Cloudflare errors in the future
       if (authReq.res.headers.get('Set-Cookie')) {
         api.crunchyDefHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+        api.crunchyAuthHeader['Cookie'] = authReq.res.headers.get('Set-Cookie') as string;
+      }
+      if (authReq.headers && authReq.headers['Set-Cookie']) {
+        api.crunchyDefHeader['Cookie'] = authReq.headers['Set-Cookie'];
+        api.crunchyAuthHeader['Cookie'] = authReq.headers['Set-Cookie'];
+        api.crunchyDefHeader['User-Agent'] = authReq.headers['User-Agent'];
+        api.crunchyAuthHeader['User-Agent'] = authReq.headers['User-Agent'];
       }
       this.token = await authReq.res.json();
       this.token.device_id = uuid;
