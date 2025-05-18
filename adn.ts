@@ -151,7 +151,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
   public async doSearch(data: SearchData): Promise<SearchResponse> {
     const limit = 12;
     const offset = data.page ? data.page * limit : 0;
-    const searchReq = await this.req.getData(`https://gw.api.animationdigitalnetwork.fr/show/catalog?maxAgeCategory=18&offset=${offset}&limit=${limit}&search=${encodeURIComponent(data.search)}`, {
+    const searchReq = await this.req.getData(`https://gw.api.animationdigitalnetwork.com/show/catalog?maxAgeCategory=18&offset=${offset}&limit=${limit}&search=${encodeURIComponent(data.search)}`, {
       'headers': {
         'X-Target-Distribution': this.locale
       }
@@ -188,17 +188,20 @@ export default class AnimationDigitalNetwork implements ServiceClass {
   }
 
   public async doAuth(data: AuthData): Promise<AuthResponse>  {
-    const authData = new URLSearchParams({
+    const authData = JSON.stringify({
       'username': data.username,
       'password': data.password,
-      'source': 'Web',
-      'rememberMe': 'true'
-    }).toString();
+      'source': 'Web'
+    });
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      body: authData
+      body: authData,
+      headers: {
+        'content-type': 'application/json',
+        'x-target-distribution': this.locale,
+      }
     };
-    const authReq = await this.req.getData('https://gw.api.animationdigitalnetwork.fr/authentication/login', authReqOpts);
+    const authReq = await this.req.getData('https://gw.api.animationdigitalnetwork.com/authentication/login', authReqOpts);
     if(!authReq.ok || !authReq.res){
       console.error('Authentication failed!');
       return { isOk: false, reason: new Error('Authentication failed') };
@@ -210,12 +213,13 @@ export default class AnimationDigitalNetwork implements ServiceClass {
   }
 
   public async refreshToken() {
-    const authReq = await this.req.getData('https://gw.api.animationdigitalnetwork.fr/authentication/refresh', {
+    const authReq = await this.req.getData('https://gw.api.animationdigitalnetwork.com/authentication/refresh', {
       method: 'POST',  
       headers: {
         Authorization: `Bearer ${this.token.accessToken}`,
         'X-Access-Token': this.token.accessToken,
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        'x-target-distribution': this.locale
       },
       body: JSON.stringify({refreshToken: this.token.refreshToken})
     });
@@ -229,7 +233,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
   }
 
   public async getShow(id: number) {
-    const getShowData = await this.req.getData(`https://gw.api.animationdigitalnetwork.fr/video/show/${id}?maxAgeCategory=18&limit=-1&order=asc`, {
+    const getShowData = await this.req.getData(`https://gw.api.animationdigitalnetwork.com/video/show/${id}?maxAgeCategory=18&limit=-1&order=asc`, {
       'headers': {
         'X-Target-Distribution': this.locale
       }
@@ -467,7 +471,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       return undefined;
     }
 
-    const configReq = await this.req.getData(`https://gw.api.animationdigitalnetwork.fr/player/video/${data.id}/configuration`, {
+    const configReq = await this.req.getData(`https://gw.api.animationdigitalnetwork.com/player/video/${data.id}/configuration`, {
       headers: {
         Authorization: `Bearer ${this.token.accessToken}`,
         'X-Target-Distribution': this.locale
@@ -482,7 +486,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       console.error('You don\'t have access to this video!');
       return undefined;
     }
-    const tokenReq = await this.req.getData(configuration.player.options.user.refreshTokenUrl || 'https://gw.api.animationdigitalnetwork.fr/player/refresh/token', {
+    const tokenReq = await this.req.getData(configuration.player.options.user.refreshTokenUrl || 'https://gw.api.animationdigitalnetwork.com/player/refresh/token', {
       method: 'POST',  
       headers: {
         'X-Player-Refresh-Token': `${configuration.player.options.user.refreshToken}`
@@ -498,7 +502,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
       token: string
     };
 
-    const linksUrl = configuration.player.options.video.url || `https://gw.api.animationdigitalnetwork.fr/player/video/${data.id}/link`;
+    const linksUrl = configuration.player.options.video.url || `https://gw.api.animationdigitalnetwork.com/player/video/${data.id}/link`;
     const key = this.generateRandomString(16);
     const decryptionKey = key + '7fac1178830cfe0c';
 

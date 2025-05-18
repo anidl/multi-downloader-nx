@@ -116,7 +116,7 @@ export class Req {
         }
       }
       return {
-        ok: true,
+        ok: res.ok,
         res,
         headers: params.headers as Record<string, string>
       };
