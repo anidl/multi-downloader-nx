@@ -26,6 +26,7 @@ export type APIType = {
   defaultUserAgent: string,
   beta_profile: string
   beta_cmsToken: string
+  browse_all_series: string,
   search: string
   cms: string
   beta_browse: string
@@ -73,6 +74,7 @@ const api: APIType = {
   cms:               `${domain.api_beta}/content/v2/cms`,
   beta_browse:       `${domain.api_beta}/content/v1/browse`,
   beta_cms:          `${domain.api_beta}/cms/v2`,
+  browse_all_series: `${domain.api_beta}/content/v2/discover/browse`,
   // beta api
   // broken - deprecated since 06.05.2025
   drm:               `${domain.api_beta}/drm/v1/auth`,
