@@ -312,7 +312,7 @@ export default class Crunchy implements ServiceClass {
       useProxy: true
     };
 
-    let allShows: any[] = [];
+    const allShows: any[] = [];
     let page = 1;
     let hasMorePages = true;
 
