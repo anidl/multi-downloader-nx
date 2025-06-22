@@ -105,6 +105,24 @@ Use absolute numbers for the episode. If not set, it will use the default index 
 | Crunchyroll | `--movie-listing ${ID}` | `string` | `No`| `--flm` | `NaN` |
 
 Get video list by Movie Listing ID
+#### `--show-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--show-raw ${ID}` | `string` | `No`| `--sraw` | `NaN` |
+
+Get Raw Show data
+#### `--season-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--season-raw ${ID}` | `string` | `No`| `--seraw` | `NaN` |
+
+Get Raw Season data
+#### `--show-list-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--show-list-raw ` | `boolean` | `No`| `--slraw` | `NaN` |
+
+Get Raw Show list data
 #### `--series`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -189,7 +207,7 @@ Select specific stream
 #### `--cstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `android`, `androidt`, `iphone`, `ipad`, `vision`, `none`] | `lgtv`| `cstream: ` |
+| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `chromecast`, `firetv`, `androidtv`, `android`, `androidtab`, `none`] | `lgtv`| `cstream: ` |
 
 Select specific crunchy play stream by device, or disable stream with "none"
 #### `--hslang`

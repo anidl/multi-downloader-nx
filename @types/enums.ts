@@ -12,9 +12,9 @@ export enum CrunchyPlayStreams {
     'samsungtv' = 'tv/samsung',
     'lgtv'      = 'tv/lg',
     'rokutv'    = 'tv/roku',
+    'chromecast'= 'tv/chromecast',
+    'firetv'    = 'tv/fire_tv',
+    'androidtv' = 'tv/android_tv',
     'android'   = 'android/phone',
-    'androidt'  = 'android/tablet',
-    'iphone'    = 'ios/iphone',
-    'ipad'      = 'ios/ipad',
-    'vision'    = 'ios/vision',
+    'androidtab'= 'android/tablet'
 }
