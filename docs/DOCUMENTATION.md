@@ -105,6 +105,24 @@ Use absolute numbers for the episode. If not set, it will use the default index 
 | Crunchyroll | `--movie-listing ${ID}` | `string` | `No`| `--flm` | `NaN` |
 
 Get video list by Movie Listing ID
+#### `--show-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--show-raw ${ID}` | `string` | `No`| `--sraw` | `NaN` |
+
+Get Raw Show data
+#### `--season-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--season-raw ${ID}` | `string` | `No`| `--seraw` | `NaN` |
+
+Get Raw Season data
+#### `--show-list-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--show-list-raw ` | `boolean` | `No`| `--slraw` | `NaN` |
+
+Get Raw Show list data
 #### `--series`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
