@@ -1613,7 +1613,6 @@ export default class Crunchy implements ServiceClass {
               let epDuration: number | undefined;
               const epiMeta = await this.req.getData(`${api.cms}/objects/${currentMediaId}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
               if(!epiMeta.ok || !epiMeta.res){
-                console.warn('EP Meta info Request FAILED! Maybe the chapters are not working properly...');
                 epDuration = 7200;
               } else {
                 epDuration = Math.floor((await epiMeta.res.json()).data[0].episode_metadata.duration_ms / 1000 - 3);
