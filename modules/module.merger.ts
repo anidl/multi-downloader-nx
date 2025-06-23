@@ -8,6 +8,7 @@ import { AvailableMuxer } from './module.args';
 import { console } from './log';
 import ffprobe from 'ffprobe';
 import Helper from './module.helper';
+import { convertChaptersToFFmpegFormat } from './module.ffmpegChapter';
 
 export type MergerInput = {
   path: string,
@@ -164,6 +165,13 @@ class Merger {
       args.push(`-i "${sub.file}"`);
     }
 
+    if (this.options.chapters && this.options.chapters.length > 0) {
+      const chapterFilePath = this.options.chapters[0].path;
+      const chapterData = convertChaptersToFFmpegFormat(this.options.chapters[0].path);
+      fs.writeFileSync(chapterFilePath, chapterData, 'utf-8');
+      args.push(`-i "${chapterFilePath}" -map_metadata 1`);
+    }
+
     if (this.options.output.split('.').pop() === 'mkv') {
       if (this.options.fonts) {
         let fontIndex = 0;
@@ -173,8 +181,6 @@ class Merger {
         }
       }
     }
-
-    //TODO: Make it possible for chapters to work with ffmpeg merging
 
     args.push(...metaData);
     args.push(...this.options.subtitles.map((_, subIndex) => `-map ${subIndex + index}`));

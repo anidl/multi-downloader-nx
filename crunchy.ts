@@ -1558,12 +1558,12 @@ export default class Crunchy implements ServiceClass {
             if (chapterData.startTime > 1) {
               compiledChapters.push(
                 `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
-                `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
               );
             }
             compiledChapters.push(
               `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
-              `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+              `CHAPTER${(compiledChapters.length/2)+1}NAME=Intro`
             );
             compiledChapters.push(
               `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
@@ -1586,7 +1586,8 @@ export default class Crunchy implements ServiceClass {
           if (chapters.length > 0) {
             chapters.sort((a, b) => a.start - b.start);
             //Check if chapters has an intro
-            if (!(chapters.find(c => c.type === 'intro') || chapters.find(c => c.type === 'recap'))) {
+            //if (!(chapters.find(c => c.type === 'intro') || chapters.find(c => c.type === 'recap'))) {
+            if (!(chapters.find(c => c.type === 'intro'))) {
               compiledChapters.push(
                 `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
                 `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
@@ -1602,32 +1603,52 @@ export default class Crunchy implements ServiceClass {
               endTime.setSeconds(chapter.end);
               const startFormatted = startTime.toISOString().substring(11, 19)+'.00';
               const endFormatted = endTime.toISOString().substring(11, 19)+'.00';
-            
+              //Find the max start time from the chapters
+              const maxStart = Math.max(
+                ...chapters
+                  .map(obj => obj.start)
+                  .filter((start): start is number => start !== null && start !== undefined)
+              );
+              //We need the duration of the ep
+              let epDuration: number | undefined;
+              const epiMeta = await this.req.getData(`${api.cms}/objects/${currentMediaId}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+              if(!epiMeta.ok || !epiMeta.res){
+                epDuration = 7200;
+              } else {
+                epDuration = Math.floor((await epiMeta.res.json()).data[0].episode_metadata.duration_ms / 1000 - 3);
+              }
+
               //Push generated chapters
               if (chapter.type == 'intro') {
                 if (chapter.start > 0) {
                   compiledChapters.push(
                     `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
-                    `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
+                    `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
                   );
                 }
                 compiledChapters.push(
                   `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
-                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Opening`
+                  `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)}`
                 );
-                compiledChapters.push(
-                  `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
-                  `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
-                );
+                if (chapter.end < epDuration && chapter.end != maxStart) {
+                  compiledChapters.push(
+                    `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                    `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+                  );
+                }
               } else {
-                compiledChapters.push(
-                  `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
-                  `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} Start`
-                );
-                compiledChapters.push(
-                  `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
-                  `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)} End`
-                );
+                if (chapter.type !== 'recap') {
+                  compiledChapters.push(
+                    `CHAPTER${(compiledChapters.length/2)+1}=${startFormatted}`,
+                    `CHAPTER${(compiledChapters.length/2)+1}NAME=${chapter.type.charAt(0).toUpperCase() + chapter.type.slice(1)}`
+                  );
+                  if (chapter.end < epDuration && chapter.end != maxStart) {
+                    compiledChapters.push(
+                      `CHAPTER${(compiledChapters.length/2)+1}=${endFormatted}`,
+                      `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+                    );
+                  }
+                }
               }
             }
           }
