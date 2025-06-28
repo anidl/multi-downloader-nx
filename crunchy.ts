@@ -370,9 +370,9 @@ export default class Crunchy implements ServiceClass {
     return allShows;
   }
 
-  public async getFonts() {
+  public async getFonts(missingFonts?: string[]) {
     console.info('Downloading fonts...');
-    const fonts = Object.values(fontsData.fontFamilies).reduce((pre, curr) => pre.concat(curr));
+    const fonts = missingFonts ?? Object.values(fontsData.fontFamilies).reduce((pre, curr) => pre.concat(curr));
     for(const f of fonts) {
       const fontLoc  = path.join(this.cfg.dir.fonts, f);
       if(fs.existsSync(fontLoc) && fs.statSync(fontLoc).size != 0){
@@ -403,6 +403,34 @@ export default class Crunchy implements ServiceClass {
       }
     }
     console.info('All required fonts downloaded!');
+  }
+  
+  public async checkFonts() {
+
+    if (!fs.existsSync(this.cfg.dir.fonts) || fs.readdirSync(this.cfg.dir.fonts).length === 0) {
+      console.info('\nFont folder is missing or empty\n');
+      await this.getFonts();
+      return;
+    }
+
+    const existingFonts = fs.readdirSync(this.cfg.dir.fonts).map(f => f.toLowerCase());
+    const missingFonts: string[] = [];
+
+    for (const [familyName, files] of Object.entries(fontsData.fontFamilies)) {
+      const missingFiles = files.filter(file => !existingFonts.includes(file.toLowerCase()));
+    
+      if (missingFiles.length > 0) {
+        console.log(`Missing files for "${familyName}": ${missingFiles.join(', ')}`);
+        missingFonts.push(...missingFiles);
+      }
+    }
+
+    if (missingFonts.length > 0) {
+      console.info('\nAt least one font file is missing\n');
+      await this.getFonts(missingFonts);
+    } else {
+      console.info('\nAll required fonts are present.');
+    }
   }
 
   private async productionToken() {
@@ -2505,6 +2533,9 @@ export default class Crunchy implements ServiceClass {
       return console.info('Skip muxing since no vids are downloaded');
     if (data.some(a => a.type === 'Audio')) {
       hasAudioStreams = true;
+    }
+    if (options.checkFonts) {
+      await this.checkFonts();
     }
     const merger = new Merger({
       onlyVid: hasAudioStreams ? data.filter(a => a.type === 'Video').map((a) : MergerInput => {

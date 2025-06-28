@@ -636,6 +636,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${fontName}',
   },
   {
+    name: 'checkFonts',
+    group: 'fonts',
+    describe: 'Check fonts before mux and missing will be downloaded',
+    docDescribe: true,
+    service: ['crunchy'],
+    type: 'boolean',
+    default: {
+      default: false
+    },
+    usage: ''
+  },
+  {
     name: 'but',
     describe: 'Download everything but the -e selection',
     docDescribe: true,

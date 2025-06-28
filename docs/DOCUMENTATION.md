@@ -55,6 +55,12 @@ Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt 
 
 Crunchyroll uses a variaty of fonts for the subtitles.
 Use this command to download all the fonts and add them to the muxed **mkv** file.
+#### `--checkFonts`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--checkFonts ` | `boolean` | `No`| `NaN` | `false`| `checkFonts: ` |
+
+Check fonts before mux and missing will be downloaded
 #### `--fontName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 

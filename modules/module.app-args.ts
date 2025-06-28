@@ -70,6 +70,7 @@ let argvC: {
   service: 'crunchy' | 'hidive' | 'ao' | 'adn'; 
   update: boolean; 
   fontName: string | undefined; 
+  checkFonts: boolean; 
   _: (string | number)[]; 
   $0: string; 
   dlVideoOnce: boolean; 
