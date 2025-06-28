@@ -36,6 +36,8 @@ let argvC: {
   locale: string; 
   new: boolean | undefined; 
   'movie-listing': string | undefined; 
+  'show-raw': string | undefined; 
+  'season-raw': string | undefined; 
   series: string | undefined; 
   s: string | undefined;  
   srz: string | undefined; 
