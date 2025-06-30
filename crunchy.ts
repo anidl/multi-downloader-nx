@@ -2447,6 +2447,9 @@ export default class Crunchy implements ServiceClass {
             if (files.some(a => a.type === 'Subtitle' && (a.language.cr_locale == langItem.cr_locale || a.language.locale == langItem.locale) && a.cc === isCC && a.signs === isSigns))
               continue;
             if(options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)){
+              if (!subsItem.url) {
+                continue;
+              }
               const subsAssReq = await this.req.getData(subsItem.url, {
                 headers: api.crunchyDefHeader
               });
