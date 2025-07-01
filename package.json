@@ -89,7 +89,7 @@
     "removeNPMAbsolutePaths": "^3.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.35.0"
+    "typescript-eslint": "^8.35.1"
   },
   "scripts": {
     "prestart": "pnpm run tsc test",
