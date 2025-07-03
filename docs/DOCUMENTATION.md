@@ -171,7 +171,6 @@ This will speed up the download speed, if multiple languages are selected.
 | Crunchyroll, AnimationDigitalNetwork | `--chapters ` | `boolean` | `No`| `NaN` | `true`| `chapters: ` |
 
 Will fetch the chapters and add them into the final video.
-Currently only works with mkvmerge.
 #### `--crapi`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
@@ -209,7 +208,7 @@ Select specific stream
 | --- | --- | --- | --- | --- | --- | --- | ---| 
 | Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `chromecast`, `firetv`, `androidtv`, `android`, `androidtab`, `none`] | `lgtv`| `cstream: ` |
 
-Select specific crunchy play stream by device, or disable stream with "none"
+Select a specific Crunchyroll playback endpoint by device, or disable the stream using "none". Since Crunchyroll has started rolling out their new VBR encodes, we highly recommend using a TV endpoint (e.g. vidaa, samsungtv, lgtv, rokutv, chromecast, firetv, androidtv) to access the old CBR encodes. Please note: The older encodes do not include the new 192 kbps audio, the new audio is only available with the new VBR encodes.
 #### `--hslang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
