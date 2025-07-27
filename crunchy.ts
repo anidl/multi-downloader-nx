@@ -2113,7 +2113,7 @@ export default class Crunchy implements ServiceClass {
             }
 
             //Handle Decryption if needed
-            if ((chosenVideoSegments.pssh_wvd ||chosenVideoSegments.pssh_prd || chosenAudioSegments.pssh_wvd || chosenAudioSegments.pssh_prd) && (videoDownloaded || audioDownloaded)) {
+            if ((chosenVideoSegments.pssh_wvd || chosenVideoSegments.pssh_prd || chosenAudioSegments.pssh_wvd || chosenAudioSegments.pssh_prd) && (videoDownloaded || audioDownloaded) && !dlFailed) {
               console.info('Decryption Needed, attempting to decrypt');
               if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
                 let commandBaseVideo = `--show-progress --key ${encryptionKeysVideo?.[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeysVideo?.[cdm === 'playready' ? 0 : 1].key} `;
@@ -2178,6 +2178,8 @@ export default class Crunchy implements ServiceClass {
               } else {
                 console.warn('mp4decrypt/shaka not found, files need decryption. Decryption Keys:', encryptionKeysVideo, encryptionKeysAudio);
               }
+            } else if (dlFailed) {
+              console.error('Download failed, skipping decryption');
             } else {
               if (videoDownloaded) {
                 files.push({
