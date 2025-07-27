@@ -55,20 +55,20 @@ export default class AnimeOnegai implements ServiceClass {
   private req: reqModule.Req;
   public locale: string;
   public jpnStrings: string[] = [
-    'Japonés con Subtítulos en Español', 
-    'Japonés con Subtítulos en Portugués',
-    'Japonês com legendas em espanhol',
-    'Japonês com legendas em português',
-    'Japonés'
+    'japonés con subtítulos en español', 
+    'japonés con subtítulos en portugués',
+    'japonês com legendas em espanhol',
+    'japonês com legendas em português',
+    'japonés'
   ];
   public spaStrings: string[] = [
-    'Doblaje en Español',
-    'Dublagem em espanhol',
-    'Español',
+    'doblaje en español',
+    'dublagem em espanhol',
+    'español',
   ];
   public porStrings: string[] = [
-    'Doblaje en Portugués',
-    'Dublagem em português'
+    'doblaje en portugués',
+    'dublagem em português'
   ];
   private defaultOptions: RequestInit = {
     'headers': {
@@ -197,9 +197,9 @@ export default class AnimeOnegai implements ServiceClass {
     const episodes: { [key: string]: (Episode & { lang?: string })[] } = {};
     for (const season of series.seasons) {
       let lang: string | undefined = undefined;
-      if (this.jpnStrings.includes(season.name.trim())) lang = 'ja';
-      else if (this.porStrings.includes(season.name.trim())) lang = 'pt';
-      else if (this.spaStrings.includes(season.name.trim())) lang = 'es';
+      if (this.jpnStrings.includes(season.name.trim().toLowerCase())) lang = 'ja';
+      else if (this.porStrings.includes(season.name.trim().toLowerCase())) lang = 'pt';
+      else if (this.spaStrings.includes(season.name.trim().toLowerCase())) lang = 'es';
       else {lang = 'unknown';console.error(`Language (${season.name.trim()}) not known, please report this!`);}
       for (const episode of season.list) {
         if (!episodes[episode.number]) {
@@ -211,9 +211,9 @@ export default class AnimeOnegai implements ServiceClass {
     //Item is movie, lets define it manually
     if (series.data.asset_type === 1 && series.seasons.length === 0) {
       let lang: string | undefined;
-      if (this.jpnStrings.some(str => series.data.title.includes(str))) lang = 'ja';
-      else if (this.porStrings.some(str => series.data.title.includes(str))) lang = 'pt';
-      else if (this.spaStrings.some(str => series.data.title.includes(str))) lang = 'es';
+      if (this.jpnStrings.some(str => series.data.title.includes(str.toLowerCase()))) lang = 'ja';
+      else if (this.porStrings.some(str => series.data.title.includes(str.toLowerCase()))) lang = 'pt';
+      else if (this.spaStrings.some(str => series.data.title.includes(str.toLowerCase()))) lang = 'es';
       else {lang = 'unknown';console.error('Language could not be parsed from movie title, please report this!');}
       episodes[1] = [{
         'video_entry': series.data.video_entry,
