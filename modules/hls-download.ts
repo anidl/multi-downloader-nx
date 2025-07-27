@@ -207,28 +207,43 @@ class hlsDownload {
         const curp = segments[px] as Segment;
         prq.set(px, () => this.downloadPart(curp, px, this.data.offset));
       }
-      // parts download
-      for (const [px, downloadFn] of prq.entries()) {
-        let retriesLeft = this.data.retries;
-        let success = false;
-        // new retry logic (there was NONE before ts)
-        while (retriesLeft > 0 && !success) {
-          try {
-            const r = await downloadFn();
-            res[px - offset] = r.dec;
-            success = true;
-          } catch (error: any) {
-            retriesLeft--;
-            console.warn(`Retrying part ${error.p + 1 + this.data.offset} (${this.data.retries - retriesLeft}/${this.data.retries})`);
-            if (retriesLeft > 0) {
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-            } else {
-              console.error(`Part ${error.p + 1 + this.data.offset} download failed after ${this.data.retries} retries:\n\t${error.message}`);
-              errcnt++;
+      // Parallelized part download with retry logic and optional concurrency limit
+      const maxConcurrency = this.data.threads;
+      const partEntries = [...prq.entries()];
+      let index = 0;
+
+      async function worker(this: hlsDownload) {
+        while (index < partEntries.length) {
+          const i = index++;
+          const [px, downloadFn] = partEntries[i];
+
+          let retriesLeft = this.data.retries;
+          let success = false;
+          while (retriesLeft > 0 && !success) {
+            try {
+              const r = await downloadFn();
+              res[px - offset] = r.dec;
+              success = true;
+            } catch (error: any) {
+              retriesLeft--;
+              console.warn(`Retrying part ${error.p + 1 + this.data.offset} (${this.data.retries - retriesLeft}/${this.data.retries})`);
+              if (retriesLeft > 0) {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+              } else {
+                console.error(`Part ${error.p + 1 + this.data.offset} download failed after ${this.data.retries} retries:\n\t${error.message}`);
+                errcnt++;
+              }
             }
           }
         }
       }
+
+      const workers = [];
+      for (let i = 0; i < maxConcurrency; i++) {
+        workers.push(worker.call(this));
+      }
+      await Promise.all(workers);
+
       // catch error
       if (errcnt > 0) {
         console.error(`${errcnt} parts not downloaded`);
