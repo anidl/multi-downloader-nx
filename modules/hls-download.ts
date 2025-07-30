@@ -188,7 +188,7 @@ class hlsDownload {
       // map download threads
       const krq = new Map(),
         prq = new Map();
-      const res = [];
+      const res: any[] = [];
       let errcnt = 0;
       for (let px = offset; px < dlOffset && px < segments.length; px++) {
         const curp = segments[px];
