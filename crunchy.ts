@@ -1977,30 +1977,7 @@ export default class Crunchy implements ServiceClass {
               
             //Handle Getting Decryption Keys if needed
             if ((chosenVideoSegments.pssh_wvd ||chosenVideoSegments.pssh_prd || chosenAudioSegments.pssh_wvd || chosenAudioSegments.pssh_prd)) {
-              // Part of the old (now deprecated) DRM system
-              // const assetIdRegex = chosenVideoSegments.segments[0].uri.match(/\/assets\/(?:p\/)?([^_,]+)/);
-              // const assetId = assetIdRegex ? assetIdRegex[1] : null;
-              // const sessionId = new Date().getUTCMilliseconds().toString().padStart(3, '0') + process.hrtime.bigint().toString().slice(0, 13);
-
-              // Part of the old (now deprecated) DRM system
-              // const decReq = await this.req.getData(`${api.drm}`, {
-              //   'method': 'POST',
-              //   'body': JSON.stringify({
-              //     'accounting_id': 'crunchyroll',
-              //     'asset_id': assetId,
-              //     'session_id': sessionId,
-              //     'user_id': this.token.account_id
-              //   }),
-              //   headers: {
-              //     'User-Agent': api.defaultUserAgent
-              //   }
-              // });
-              // if(!decReq.ok || !decReq.res){
-              //   console.error('Request to DRM Authentication failed:', decReq.error?.res.status, decReq.error?.message);
-              //   return undefined;
-              // }
-              // const authData = await decReq.res.json() as {'custom_data': string, 'token': string};
-
+              console.info(`Getting decryption keys with ${cdm}`);
               // New Crunchyroll DRM endpoint for Widevine
               if (cdm === 'widevine') {
                 await this.refreshToken(true, true);
@@ -2031,61 +2008,50 @@ export default class Crunchy implements ServiceClass {
                 }
               }
 
-              if (videoStream) {
+              // New Crunchyroll DRM endpoint for Playready
+              if (cdm === 'playready') {
                 await this.refreshToken(true, true);
-                await this.req.getData(`https://www.crunchyroll.com/playback/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${videoStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+                encryptionKeysVideo = await getKeysPRD(chosenVideoSegments.pssh_prd, api.drm_playready, {
+                  Authorization: `Bearer ${this.token.access_token}`,
+                  ...api.crunchyDefHeader,
+                  Pragma: 'no-cache',
+                  'Cache-Control': 'no-cache',
+                  'content-type': 'application/octet-stream',
+                  'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
+                  'x-cr-video-token': videoStream!.token
+                });
+
+                // Check if the audio pssh is different since Crunchyroll started to have different dec keys for audio tracks
+                if (chosenAudioSegments.pssh_prd && chosenAudioSegments.pssh_prd !== chosenVideoSegments.pssh_prd) {
+                  await this.refreshToken(true, true);
+                  encryptionKeysAudio = await getKeysPRD(chosenAudioSegments.pssh_prd, api.drm_playready, {
+                    Authorization: `Bearer ${this.token.access_token}`,
+                    ...api.crunchyDefHeader,
+                    Pragma: 'no-cache',
+                    'Cache-Control': 'no-cache',
+                    'content-type': 'application/octet-stream',
+                    'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
+                    'x-cr-video-token': audioStream!.token
+                  });
+                } else {
+                  encryptionKeysAudio = encryptionKeysVideo;
+                }
               }
-              if (audioStream && (videoStream?.token !== audioStream.token)) {
-                await this.req.getData(`https://www.crunchyroll.com/playback/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${audioStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
-              }
-
-              // New Crunchyroll DRM endpoint for Playready (currently broken on Crunchyrolls part and therefore disabled)
-              // if (cdm === 'playready') {
-              //   await this.refreshToken(true, true);
-              //   encryptionKeysVideo = await getKeysPRD(chosenVideoSegments.pssh_prd, api.drm_playready, {
-              //     Authorization: `Bearer ${this.token.access_token}`,
-              //     'User-Agent': api.defaultUserAgent,
-              //     Pragma: 'no-cache',
-              //     'Cache-Control': 'no-cache',
-              //     'content-type': 'application/octet-stream',
-              //     'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
-              //     'x-cr-video-token': playStream!.token
-              //   });
-
-              //   // Check if the audio pssh is different since Crunchyroll started to have different dec keys for audio tracks
-              //   if (chosenAudioSegments.pssh_prd && chosenAudioSegments.pssh_prd !== chosenVideoSegments.pssh_prd) {
-              //     await this.refreshToken(true, true);
-              //     encryptionKeysAudio = await getKeysPRD(chosenAudioSegments.pssh_prd, api.drm_playready, {
-              //       Authorization: `Bearer ${this.token.access_token}`,
-              //       'User-Agent': api.defaultUserAgent,
-              //       Pragma: 'no-cache',
-              //       'Cache-Control': 'no-cache',
-              //       'content-type': 'application/octet-stream',
-              //       'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
-              //       'x-cr-video-token': playStream!.token
-              //     });
-              //   } else {
-              //     encryptionKeysAudio = encryptionKeysVideo;
-              //   }
-              // }
-
-              // Part of the old (now deprecated) DRM system
-              // if (cdm === 'playready') {
-              //   encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://lic.drmtoday.com/license-proxy-headerauth/drmtoday/RightsManager.asmx', {
-              //     'dt-custom-data': authData.custom_data,
-              //     'x-dt-auth-token': authData.token
-              //   });
-              // }
 
               if (!encryptionKeysVideo || encryptionKeysVideo.length == 0 || !encryptionKeysAudio || encryptionKeysAudio.length == 0) {
                 console.error('Failed to get encryption keys');
                 return undefined;
               }
 
-              /*const keys = {} as Record<string, string>;
-              encryptionKeys.forEach(function(key) {
-                keys[key.kid] = key.key;
-              });*/
+              console.info('Got decryption keys');
+            }
+
+            if (videoStream) {
+              await this.refreshToken(true, true);
+              await this.req.getData(`https://www.crunchyroll.com/playback/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${videoStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+            }
+            if (audioStream && (videoStream?.token !== audioStream.token)) {
+              await this.req.getData(`https://www.crunchyroll.com/playback/v1/token/${currentVersion ? currentVersion.guid : currentMediaId}/${audioStream.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
             }
 
             let [audioDownloaded, videoDownloaded] = [false, false];
