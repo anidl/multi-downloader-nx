@@ -5,7 +5,7 @@ import { connect } from 'puppeteer-real-browser';
 export type Params = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   headers?: Record<string, string>;
-  body?: string | Buffer;
+  body?: BodyInit | undefined;
   binary?: boolean;
   followRedirect?: 'follow' | 'error' | 'manual';
 };

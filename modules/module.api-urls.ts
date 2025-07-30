@@ -24,13 +24,13 @@ export type APIType = {
   collections: string
   // beta api
   defaultUserAgent: string,
-  beta_profile: string
-  beta_cmsToken: string
+  profile: string
+  cmsToken: string
   browse_all_series: string,
   search: string
   cms: string
-  beta_browse: string
-  beta_cms: string,
+  cms_bucket: string
+  browse: string
   drm: string;
   drm_widevine: string;
   drm_playready: string;
@@ -66,15 +66,14 @@ const api: APIType = {
   search3:           `${domain.api}/autocomplete.0.json`,
   session:           `${domain.api}/start_session.0.json`,
   collections:       `${domain.api}/list_collections.0.json`,
-  // This User-Agent bypasses Cloudflare security of the newer Endpoint
-  defaultUserAgent:  'Crunchyroll/4.77.3 (bundle_identifier:com.crunchyroll.iphone; build_number:4148147.285670380) iOS/18.3.2 Gravity/4.77.3',
-  beta_profile:      `${domain.api_beta}/accounts/v1/me/profile`,
-  beta_cmsToken:     `${domain.api_beta}/index/v2`,
-  search:            `${domain.api_beta}/content/v2/discover/search`,
-  cms:               `${domain.api_beta}/content/v2/cms`,
-  beta_browse:       `${domain.api_beta}/content/v1/browse`,
-  beta_cms:          `${domain.api_beta}/cms/v2`,
-  browse_all_series: `${domain.api_beta}/content/v2/discover/browse`,
+  defaultUserAgent:  'Crunchyroll/4.83.0 (bundle_identifier:com.crunchyroll.iphone; build_number:4254815.324030705) iOS/19.0.0 Gravity/4.83.0',
+  profile:           `${domain.www}/accounts/v1/me/profile`,
+  cmsToken:          `${domain.www}/index/v2`,
+  search:            `${domain.www}/content/v2/discover/search`,
+  cms:               `${domain.www}/content/v2/cms`,
+  cms_bucket:        `${domain.api_beta}/cms/v2`,
+  browse:            `${domain.www}/content/v1/browse`,
+  browse_all_series: `${domain.www}/content/v2/discover/browse`,
   // beta api
   // broken - deprecated since 06.05.2025
   drm:               `${domain.api_beta}/drm/v1/auth`,

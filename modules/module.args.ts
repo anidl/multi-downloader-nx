@@ -255,20 +255,21 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
       default: true
     }
   },
-  {
-    name: 'crapi',
-    describe: 'Selects the API type for Crunchyroll',
-    type: 'string',
-    group: 'dl',
-    service: ['crunchy'],
-    docDescribe: 'If set to Android, it has lower quality, but Non-DRM streams,'
-      + '\nIf set to Web, it has a higher quality adaptive stream, but everything is DRM.',
-    usage: '',
-    choices: ['android', 'web'],
-    default: {
-      default: 'web'
-    }
-  },
+  // Deprecated
+  // {
+  //   name: 'crapi',
+  //   describe: 'Selects the API type for Crunchyroll',
+  //   type: 'string',
+  //   group: 'dl',
+  //   service: ['crunchy'],
+  //   docDescribe: 'If set to Android, it has lower quality, but Non-DRM streams,'
+  //     + '\nIf set to Web, it has a higher quality adaptive stream, but everything is DRM.',
+  //   usage: '',
+  //   choices: ['android', 'web'],
+  //   default: {
+  //     default: 'web'
+  //   }
+  // },
   {
     name: 'removeBumpers',
     describe: 'Remove bumpers from final video',
@@ -305,33 +306,60 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     type: 'number',
     alias: 'server',
     docDescribe: true,
-    service: ['crunchy'],
+    service: ['all'],
     usage: '${server}'
   },
-  {
-    name: 'kstream',
-    group: 'dl',
-    alias: 'k',
-    describe: 'Select specific stream',
-    choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    default: {
-      default: 1
-    },
-    docDescribe: true,
-    service: ['crunchy'],
-    type: 'number',
-    usage: '${stream}'
-  },
+  // Deprecated
+  // {
+  //   name: 'kstream',
+  //   group: 'dl',
+  //   alias: 'k',
+  //   describe: 'Select specific stream',
+  //   choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  //   default: {
+  //     default: 1
+  //   },
+  //   docDescribe: true,
+  //   service: ['crunchy'],
+  //   type: 'number',
+  //   usage: '${stream}'
+  // },
+  // About to Deprecate
   {
     name: 'cstream',
     group: 'dl',
     alias: 'cs',
     service: ['crunchy'],
     type: 'string',
-    describe: 'Select a specific Crunchyroll playback endpoint by device, or disable the stream using "none". Since Crunchyroll has started rolling out their new VBR encodes, we highly recommend using a TV endpoint (e.g. vidaa, samsungtv, lgtv, rokutv, chromecast, firetv, androidtv) to access the old CBR encodes. Please note: The older encodes do not include the new 192 kbps audio, the new audio is only available with the new VBR encodes.',
+    describe: '(Please use --vstream and --astream instead, this will deprecate soon) Select a specific Crunchyroll playback endpoint by device. Since Crunchyroll has started rolling out their new VBR encodes, we highly recommend using a TV endpoint (e.g. vidaa, samsungtv, lgtv, rokutv, chromecast, firetv, androidtv) to access the old CBR encodes. Please note: The older encodes do not include the new 192 kbps audio, the new audio is only available with the new VBR encodes.',
+    choices: [...Object.keys(CrunchyPlayStreams), 'none'],
+    docDescribe: true,
+    usage: '${device}'
+  },
+  {
+    name: 'vstream',
+    group: 'dl',
+    alias: 'vs',
+    service: ['crunchy'],
+    type: 'string',
+    describe: 'Select a specific Crunchyroll video playback endpoint by device.',
     choices: [...Object.keys(CrunchyPlayStreams), 'none'],
     default: {
       default: 'lgtv'
+    },
+    docDescribe: true,
+    usage: '${device}'
+  },
+  {
+    name: 'astream',
+    group: 'dl',
+    alias: 'as',
+    service: ['crunchy'],
+    type: 'string',
+    describe: 'Select a specific Crunchyroll audio playback endpoint by device.',
+    choices: [...Object.keys(CrunchyPlayStreams), 'none'],
+    default: {
+      default: 'firefox'
     },
     docDescribe: true,
     usage: '${device}'

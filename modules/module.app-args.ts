@@ -45,8 +45,10 @@ let argvC: {
   extid: string | undefined; 
   q: number; 
   x: number; 
-  kstream: number;
-  cstream: keyof typeof CrunchyPlayStreams | 'none';
+  // kstream: number;
+  cstream: keyof typeof CrunchyPlayStreams;
+  vstream: keyof typeof CrunchyPlayStreams;
+  astream: keyof typeof CrunchyPlayStreams;
   partsize: number; 
   hslang: string; 
   dlsubs: string[]; 
@@ -76,7 +78,7 @@ let argvC: {
   $0: string; 
   dlVideoOnce: boolean; 
   chapters: boolean;
-  crapi: 'android' | 'web';
+  // crapi: 'android' | 'web';
   removeBumpers: boolean;
   originalFontSize: boolean;
   keepAllVideos: boolean;
