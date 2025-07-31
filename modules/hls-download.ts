@@ -281,8 +281,18 @@ class hlsDownload {
           total: totalSeg
         })
       );
+      function formatDLSpeedB(s: number) {
+        if (s < 1000000) return `${(s / 1000).toFixed(2)} KB/s`;
+        if (s < 1000000000) return `${(s / 1000000).toFixed(2)} MB/s`;
+        return `${(s / 1000000000).toFixed(2)} GB/s`;
+      }
+      function formatDLSpeedBit(s: number) {
+        if (s * 8 < 1000000) return `${(s * 8 / 1000).toFixed(2)} KBit/s`;
+        if (s * 8 < 1000000000) return `${(s * 8 / 1000000).toFixed(2)} MBit/s`;
+        return `${(s * 8 / 1000000000).toFixed(2)} GBit/s`;
+      }
       console.info(
-        `${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${Helper.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(data.downloadSpeed / 1000000).toFixed(2)} MB/s / ${(data.downloadSpeed * 8 / 1000000).toFixed(2)} Mbit/s)`
+        `${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${Helper.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${formatDLSpeedB(data.downloadSpeed)} / ${formatDLSpeedBit(data.downloadSpeed)})`
       );
       if (this.data.callback)
         this.data.callback({
