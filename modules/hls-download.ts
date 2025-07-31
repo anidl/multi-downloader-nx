@@ -282,7 +282,7 @@ class hlsDownload {
         })
       );
       console.info(
-        `${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${Helper.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(data.downloadSpeed / 1000000).toFixed(2)} MB/s)`
+        `${downloadedSeg} of ${totalSeg} parts downloaded [${data.percent}%] (${Helper.formatTime(parseInt((data.time / 1000).toFixed(0)))} | ${(data.downloadSpeed / 1000000).toFixed(2)} MB/s / ${(data.downloadSpeed * 8 / 1000000).toFixed(2)} Mbit/s)`
       );
       if (this.data.callback)
         this.data.callback({
