@@ -2915,32 +2915,37 @@ export default class Crunchy implements ServiceClass {
 
     let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info
-    const reqEpsListOpts = [
-      api.cms_bucket,
-      this.cmsToken.cms.bucket,
-      '/episodes?',
-      new URLSearchParams({
-        'force_locale': '',
-        'preferred_audio_language': 'ja-JP',
-        'locale': this.locale,
-        'season_id': item.id,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
-      }),
-    ].join('');
-    const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
-    if(!reqEpsList.ok || !reqEpsList.res){
-      console.error('Episode List Request FAILED!');
-      return;
+    for (const s of showInfo.data) {
+      const original_id = s.versions?.find((v: { original: boolean; }) => v.original)?.guid
+      const id = original_id ? original_id : s.id
+
+      const reqEpsListOpts = [
+        api.cms_bucket,
+        this.cmsToken.cms.bucket,
+        '/episodes?',
+        new URLSearchParams({
+          'force_locale': '',
+          'preferred_audio_language': 'ja-JP',
+          'locale': this.locale,
+          'season_id': id,
+          'Policy': this.cmsToken.cms.policy,
+          'Signature': this.cmsToken.cms.signature,
+          'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        }),
+      ].join('');
+      const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
+      if(!reqEpsList.ok || !reqEpsList.res){
+        console.error('Episode List Request FAILED!');
+        return;
+      }
+
+      const episodeListAndroid = await reqEpsList.res.json() as CrunchyAndroidEpisodes;
+      episodeList = {
+        total: episodeList.total + episodeListAndroid.total,
+        data: [...episodeList.data, ...episodeListAndroid.items],
+        meta: {}
+      };
     }
-    //CrunchyEpisodeList
-    const episodeListAndroid = await reqEpsList.res.json() as CrunchyAndroidEpisodes;
-    episodeList = {
-      total: episodeListAndroid.total,
-      data: episodeListAndroid.items,
-      meta: {}
-    };
 
     if(episodeList.total < 1){
       console.info('  Season is empty!');
