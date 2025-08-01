@@ -1708,12 +1708,12 @@ export default class Crunchy implements ServiceClass {
       const vpbStreams = pbData.vpb;
       const apbStreams = pbData.apb;
 
-      if (!canDecrypt) {
+      if (!canDecrypt && (!options.novids || !options.noaudio)) {
         console.error('No valid Widevine or PlayReady CDM detected. Please ensure a supported and functional CDM is installed.');
         return undefined;
       }
       
-      if (!this.cfg.bin.mp4decrypt && !this.cfg.bin.shaka) {
+      if (!this.cfg.bin.mp4decrypt && !this.cfg.bin.shaka && (!options.novids || !options.noaudio)) {
         console.error('Neither Shaka nor MP4Decrypt found. Please ensure at least one of them is installed.');
         return undefined;
       }
