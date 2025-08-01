@@ -2916,8 +2916,8 @@ export default class Crunchy implements ServiceClass {
     let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
     //get episode info
     for (const s of showInfo.data) {
-      const original_id = s.versions?.find((v: { original: boolean; }) => v.original)?.guid
-      const id = original_id ? original_id : s.id
+      const original_id = s.versions?.find((v: { original: boolean; }) => v.original)?.guid;
+      const id = original_id ? original_id : s.id;
 
       const reqEpsListOpts = [
         api.cms_bucket,
