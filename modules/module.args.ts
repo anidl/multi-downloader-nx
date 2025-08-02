@@ -367,7 +367,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
   {
     name: 'tsd',
     group: 'dl',
-    describe: '(Total Session Death) Kills all active Crunchyroll Streaming Sessions to prevent getting the "TOO_MANY_ACTIVE_STREAMS" error',
+    describe: '(Total Session Death) Kills all active Crunchyroll Streaming Sessions to prevent getting the "TOO_MANY_ACTIVE_STREAMS" error.',
     docDescribe: true,
     service: ['crunchy'],
     type: 'boolean',
