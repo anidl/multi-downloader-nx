@@ -1,4 +1,4 @@
-# multi-downloader-nx (v5.5.1)
+# multi-downloader-nx (v5.5.2)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -471,6 +471,12 @@ Force the tool to check for updates (code version only)
 | All | `--skipUpdate ` | `boolean` | `No`| `NaN` | `false`| `skipUpdate: ` |
 
 If true, the tool won't check for updates
+#### `--raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--raw ` | `boolean` | `No`| `NaN` | `false`| `raw: ` |
+
+If true, the tool will output the raw data from the API (Where applicable, the feature is a WIP)
 ### Help
 #### `--help`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
