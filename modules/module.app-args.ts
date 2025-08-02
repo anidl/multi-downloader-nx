@@ -69,7 +69,8 @@ let argvC: {
   fileName: string; 
   numbers: number; 
   nosess: string; 
-  debug: boolean | undefined; 
+  debug: boolean | undefined;  
+  raw: boolean;
   nocleanup: boolean; 
   help: boolean | undefined; 
   service: 'crunchy' | 'hidive' | 'ao' | 'adn'; 

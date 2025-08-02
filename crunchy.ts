@@ -113,7 +113,7 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.new){
       await this.refreshToken();
-      await this.getNewlyAdded(argv.page);
+      await this.getNewlyAdded(argv.page, argv.raw);
     }
     else if(argv.search && argv.search.length > 2){
       await this.refreshToken();
@@ -1028,7 +1028,7 @@ export default class Crunchy implements ServiceClass {
     }
   }
 
-  public async getNewlyAdded(page?: number){
+  public async getNewlyAdded(page?: number, raw: boolean = false) {
     if(!this.token.access_token){
       console.error('Authentication required!');
       return;
@@ -1042,7 +1042,7 @@ export default class Crunchy implements ServiceClass {
     };
     const newlyAddedParams = new URLSearchParams({
       sort_by: 'newly_added',
-      n: '25',
+      n: '50',
       start: (page ? (page-1)*25 : 0).toString(),
     }).toString();
     const newlyAddedReq = await this.req.getData(`${api.browse}?${newlyAddedParams}`, newlyAddedReqOpts);
@@ -1051,6 +1051,12 @@ export default class Crunchy implements ServiceClass {
       return;
     }
     const newlyAddedResults = await newlyAddedReq.res.json();
+
+    if (raw) {
+      console.info(JSON.stringify(newlyAddedResults, null, 2));
+      return;
+    }
+
     console.info('Newly added:');
     for(const i of newlyAddedResults.items){
       await this.logObject(i, 2);

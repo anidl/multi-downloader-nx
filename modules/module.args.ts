@@ -832,6 +832,18 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
+    name: 'raw',
+    describe: 'If true, the tool will output the raw data from the API (Where applicable, the feature is a WIP)',
+    docDescribe: true,
+    group: 'util',
+    service: ['all'],
+    type: 'boolean',
+    usage: '',
+    default: {
+      default: false
+    }
+  },
+  {
     name: 'force',
     describe: 'Set the default option for the \'alredy exists\' prompt',
     docDescribe: 'If a file already exists, the tool will ask you how to proceed. With this, you can answer in advance.',
