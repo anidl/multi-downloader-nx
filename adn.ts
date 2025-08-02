@@ -274,6 +274,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
         episode.season = '1';
       }
       show.value.videos[episodeIndex].season = episode.season;
+      show.value.videos[episodeIndex].shortNumber = episodeIndex+'';
       if (!episodeNumber) {
         specialIndex++;
         episode.shortNumber = 'S'+specialIndex;
