@@ -113,7 +113,7 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.new){
       await this.refreshToken();
-      await this.getNewlyAdded(argv.page!, argv['search-type'], argv.raw, argv.rawoutput);
+      await this.getNewlyAdded(argv.page, argv['search-type'], argv.raw, argv.rawoutput);
     }
     else if(argv.search && argv.search.length > 2){
       await this.refreshToken();
@@ -1028,7 +1028,7 @@ export default class Crunchy implements ServiceClass {
     }
   }
 
-  public async getNewlyAdded(page: number, type: string, raw: boolean = false, rawoutput?: string) {
+  public async getNewlyAdded(page: number = 1, type: string, raw: boolean = false, rawoutput?: string) {
     if(!this.token.access_token){
       console.error('Authentication required!');
       return;
