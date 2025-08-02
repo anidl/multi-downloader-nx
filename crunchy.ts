@@ -73,7 +73,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public checkToken(): boolean {
-    return Object.keys(this.cmsToken.cms ?? {}).length > 0;
+    return Object.keys(this.cmsToken.cms_web ?? {}).length > 0;
   }
 
   public async cli() {
@@ -202,7 +202,7 @@ export default class Crunchy implements ServiceClass {
 
   public async logShowRawById(id: string){
     // check token
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -215,7 +215,7 @@ export default class Crunchy implements ServiceClass {
       useProxy: true
     };
     // seasons list
-    const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+    const seriesSeasonListReq = await this.req.getData(`${api.content_cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
       console.error('Series Request FAILED!');
       return;
@@ -231,7 +231,7 @@ export default class Crunchy implements ServiceClass {
 
   public async logSeasonRawById(id: string){
     // check token
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -248,16 +248,16 @@ export default class Crunchy implements ServiceClass {
     //get episode info
     const reqEpsListOpts = [
       api.cms_bucket,
-      this.cmsToken.cms.bucket,
+      this.cmsToken.cms_web.bucket,
       '/episodes?',
       new URLSearchParams({
         'force_locale': '',
         'preferred_audio_language': 'ja-JP',
         'locale': this.locale,
         'season_id': id,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        'Policy': this.cmsToken.cms_web.policy,
+        'Signature': this.cmsToken.cms_web.signature,
+        'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id,
       }),
     ].join('');
     const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
@@ -283,7 +283,7 @@ export default class Crunchy implements ServiceClass {
 
   public async logShowListRaw() {
     // check token
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -624,8 +624,8 @@ export default class Crunchy implements ServiceClass {
       return;
     }
 
-    if (ifNeeded && this.cmsToken.cms) {
-      if (!(Date.now() >= new Date(this.cmsToken.cms.expires).getTime())) {
+    if (ifNeeded && this.cmsToken.cms_web) {
+      if (!(Date.now() >= new Date(this.cmsToken.cms_web.expires).getTime())) {
         return;
       }
     }
@@ -637,38 +637,38 @@ export default class Crunchy implements ServiceClass {
       },
       useProxy: true
     };
-    const cmsTokenReq = await this.req.getData(api.cmsToken, cmsTokenReqOpts);
+    const cmsTokenReq = await this.req.getData(api.cms_auth, cmsTokenReqOpts);
     if(!cmsTokenReq.ok || !cmsTokenReq.res){
       console.error('Authentication CMS token failed!');
       return;
     }
     this.cmsToken = await cmsTokenReq.res.json();
-    console.info('Your Country: %s\n', this.cmsToken.cms?.bucket.split('/')[1]);
+    console.info('Your Country: %s\n', this.cmsToken.cms_web?.bucket.split('/')[1]);
   }
 
   public async getCmsData(){
     // check token
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
     // opts
     const indexReqOpts = [
       api.cms_bucket,
-      this.cmsToken.cms.bucket,
+      this.cmsToken.cms_web.bucket,
       '/index?',
       new URLSearchParams({
         'force_locale': '',
         'preferred_audio_language': 'ja-JP',
         'locale': this.locale,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        'Policy': this.cmsToken.cms_web.policy,
+        'Signature': this.cmsToken.cms_web.signature,
+        'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id,
       }),
     ].join('');
     const indexReq = await this.req.getData(indexReqOpts, {
       headers: {
-        'User-Agent': api.defaultUserAgent
+        'User-Agent': api.crunchyDefUserAgent
       }
     });
     if(!indexReq.ok || ! indexReq.res){
@@ -946,7 +946,7 @@ export default class Crunchy implements ServiceClass {
     pad = pad || 0;
     hideSeriesTitle = hideSeriesTitle !== undefined ? hideSeriesTitle : false;
     // check token
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -960,7 +960,7 @@ export default class Crunchy implements ServiceClass {
     };
     // reqs
     if(!hideSeriesTitle){
-      const seriesReq = await this.req.getData(`${api.cms}/series/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+      const seriesReq = await this.req.getData(`${api.content_cms}/series/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
       if(!seriesReq.ok || !seriesReq.res){
         console.error('Series Request FAILED!');
         return;
@@ -969,7 +969,7 @@ export default class Crunchy implements ServiceClass {
       await this.logObject(seriesData.data[0], pad, false);
     }
     // seasons list
-    const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+    const seriesSeasonListReq = await this.req.getData(`${api.content_cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
       console.error('Series Request FAILED!');
       return;
@@ -987,7 +987,7 @@ export default class Crunchy implements ServiceClass {
 
   public async logMovieListingById(id: string, pad?: number){
     pad = pad || 2;
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -1002,7 +1002,7 @@ export default class Crunchy implements ServiceClass {
     };
 
     //Movie Listing
-    const movieListingReq = await this.req.getData(`${api.cms}/movie_listings/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+    const movieListingReq = await this.req.getData(`${api.content_cms}/movie_listings/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!movieListingReq.ok || !movieListingReq.res){
       console.error('Movie Listing Request FAILED!');
       return;
@@ -1017,7 +1017,7 @@ export default class Crunchy implements ServiceClass {
     }
 
     //Movies
-    const moviesListReq = await this.req.getData(`${api.cms}/movie_listings/${id}/movies?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+    const moviesListReq = await this.req.getData(`${api.content_cms}/movie_listings/${id}/movies?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!moviesListReq.ok || !moviesListReq.res){
       console.error('Movies List Request FAILED!');
       return;
@@ -1073,14 +1073,14 @@ export default class Crunchy implements ServiceClass {
       await this.logObject(i, 2);
     }
     // calculate pages
-    const itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.api_beta).searchParams.get('start') as string);
+    const itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.cr_www).searchParams.get('start') as string);
     const pageCur = itemPad > 0 ? Math.ceil(itemPad/25) + 1 : 1;
     const pageMax = Math.ceil(newlyAddedResults.total/25);
     console.info(`  Total results: ${newlyAddedResults.total} (Page: ${pageCur}/${pageMax})`);
   }
 
   public async getSeasonById(id: string, numbers: number, e: string|undefined, but: boolean, all: boolean) : Promise<ResponseBase<CrunchyEpMeta[]>> {
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return { isOk: false, reason: new Error('Authentication required') };
     }
@@ -1095,7 +1095,7 @@ export default class Crunchy implements ServiceClass {
 
 
     //get show info
-    const showInfoReq = await this.req.getData(`${api.cms}/seasons/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+    const showInfoReq = await this.req.getData(`${api.content_cms}/seasons/${id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!showInfoReq.ok || !showInfoReq.res){
       console.error('Show Request FAILED!');
       return { isOk: false, reason: new Error('Show request failed. No more information provided.') };
@@ -1107,16 +1107,16 @@ export default class Crunchy implements ServiceClass {
     //get episode info
     const reqEpsListOpts = [
       api.cms_bucket,
-      this.cmsToken.cms.bucket,
+      this.cmsToken.cms_web.bucket,
       '/episodes?',
       new URLSearchParams({
         'force_locale': '',
         'preferred_audio_language': 'ja-JP',
         'locale': this.locale,
         'season_id': id,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        'Policy': this.cmsToken.cms_web.policy,
+        'Signature': this.cmsToken.cms_web.signature,
+        'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id,
       }),
     ].join('');
     const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
@@ -1255,7 +1255,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async getObjectById(e?: string, earlyReturn?: boolean, external_id?: boolean): Promise<ObjectInfo|Partial<CrunchyEpMeta>[]|undefined> {
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return [];
     }
@@ -1267,7 +1267,7 @@ export default class Crunchy implements ServiceClass {
       for (const ob of epFilter.values) {
         const extIdReqOpts = [
           api.cms_bucket,
-          this.cmsToken.cms.bucket,
+          this.cmsToken.cms_web.bucket,
           '/channels/crunchyroll/objects',
           '?',
           new URLSearchParams({
@@ -1275,15 +1275,15 @@ export default class Crunchy implements ServiceClass {
             'preferred_audio_language': 'ja-JP',
             'locale': this.locale,
             'external_id': ob,
-            'Policy': this.cmsToken.cms.policy,
-            'Signature': this.cmsToken.cms.signature,
-            'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+            'Policy': this.cmsToken.cms_web.policy,
+            'Signature': this.cmsToken.cms_web.signature,
+            'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id,
           }),
         ].join('');
 
         const extIdReq = await this.req.getData(extIdReqOpts, {
           headers: {
-            'User-Agent': api.defaultUserAgent
+            'User-Agent': api.crunchyDefUserAgent
           }
         });
         if (!extIdReq.ok || !extIdReq.res) {
@@ -1324,7 +1324,7 @@ export default class Crunchy implements ServiceClass {
     let objectInfo: ObjectInfo = { total: 0, data: [], meta: {} };
     const objectReqOpts = [
       api.cms_bucket,
-      this.cmsToken.cms.bucket,
+      this.cmsToken.cms_web.bucket,
       '/objects/',
       doEpsFilter.values.join(','),
       '?',
@@ -1332,9 +1332,9 @@ export default class Crunchy implements ServiceClass {
         'force_locale': '',
         'preferred_audio_language': 'ja-JP',
         'locale': this.locale,
-        'Policy': this.cmsToken.cms.policy,
-        'Signature': this.cmsToken.cms.signature,
-        'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+        'Policy': this.cmsToken.cms_web.policy,
+        'Signature': this.cmsToken.cms_web.signature,
+        'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id,
       }),
     ].join('');
     const objectReq = await this.req.getData(objectReqOpts, AuthHeaders);
@@ -1438,7 +1438,7 @@ export default class Crunchy implements ServiceClass {
     fileName: string,
     error: boolean
   } | undefined> {
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -1588,7 +1588,7 @@ export default class Crunchy implements ServiceClass {
               );
               //We need the duration of the ep
               let epDuration: number | undefined;
-              const epiMeta = await this.req.getData(`${api.cms}/objects/${currentMediaId}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+              const epiMeta = await this.req.getData(`${api.content_cms}/objects/${currentMediaId}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
               if(!epiMeta.ok || !epiMeta.res){
                 epDuration = 7200;
               } else {
@@ -1639,7 +1639,7 @@ export default class Crunchy implements ServiceClass {
 
       if (options.tsd) {
         console.warn('Total Session Death Active');
-        const activeStreamsReq = await this.req.getData(api.streaming, AuthHeaders);
+        const activeStreamsReq = await this.req.getData(api.streaming_sessions, AuthHeaders);
         if (activeStreamsReq.ok && activeStreamsReq.res){
           const data = await activeStreamsReq.res.json();
           for (const s of data.items) {
@@ -2890,7 +2890,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async parseSeriesById(id: string) {
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -2904,7 +2904,7 @@ export default class Crunchy implements ServiceClass {
     };
 
     // seasons list
-    const seriesSeasonListReq = await this.req.getData(`${api.cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+    const seriesSeasonListReq = await this.req.getData(`${api.content_cms}/series/${id}/seasons?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!seriesSeasonListReq.ok || !seriesSeasonListReq.res){
       console.error('Series Request FAILED!');
       return;
@@ -2919,7 +2919,7 @@ export default class Crunchy implements ServiceClass {
   }
 
   public async getSeasonDataById(item: SeriesSearchItem, log = false){
-    if(!this.cmsToken.cms){
+    if(!this.cmsToken.cms_web){
       console.error('Authentication required!');
       return;
     }
@@ -2933,7 +2933,7 @@ export default class Crunchy implements ServiceClass {
     };
 
     //get show info
-    const showInfoReq = await this.req.getData(`${api.cms}/seasons/${item.id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
+    const showInfoReq = await this.req.getData(`${api.content_cms}/seasons/${item.id}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`, AuthHeaders);
     if(!showInfoReq.ok || !showInfoReq.res){
       console.error('Show Request FAILED!');
       return;
@@ -2950,16 +2950,16 @@ export default class Crunchy implements ServiceClass {
 
       const reqEpsListOpts = [
         api.cms_bucket,
-        this.cmsToken.cms.bucket,
+        this.cmsToken.cms_web.bucket,
         '/episodes?',
         new URLSearchParams({
           'force_locale': '',
           'preferred_audio_language': 'ja-JP',
           'locale': this.locale,
           'season_id': id,
-          'Policy': this.cmsToken.cms.policy,
-          'Signature': this.cmsToken.cms.signature,
-          'Key-Pair-Id': this.cmsToken.cms.key_pair_id,
+          'Policy': this.cmsToken.cms_web.policy,
+          'Signature': this.cmsToken.cms_web.signature,
+          'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id,
         }),
       ].join('');
       const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
