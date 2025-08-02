@@ -371,7 +371,10 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     docDescribe: true,
     service: ['crunchy'],
     type: 'boolean',
-    usage: ''
+    usage: '',
+    default: {
+      default: false
+    }
   },
   {
     name: 'hslang',
