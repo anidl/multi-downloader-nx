@@ -113,7 +113,7 @@ export default class Crunchy implements ServiceClass {
     }
     else if(argv.new){
       await this.refreshToken();
-      await this.getNewlyAdded(argv.page, argv.raw);
+      await this.getNewlyAdded(argv.page, argv.raw, argv.rawoutput);
     }
     else if(argv.search && argv.search.length > 2){
       await this.refreshToken();
@@ -1028,7 +1028,7 @@ export default class Crunchy implements ServiceClass {
     }
   }
 
-  public async getNewlyAdded(page?: number, raw: boolean = false) {
+  public async getNewlyAdded(page?: number, raw: boolean = false, rawoutput?: string) {
     if(!this.token.access_token){
       console.error('Authentication required!');
       return;
@@ -1054,6 +1054,14 @@ export default class Crunchy implements ServiceClass {
 
     if (raw) {
       console.info(JSON.stringify(newlyAddedResults, null, 2));
+      if (rawoutput) {
+        try {
+          fs.writeFileSync(rawoutput, JSON.stringify(newlyAddedResults), { encoding: 'utf-8' });
+          console.info(`Raw output saved to ${rawoutput}`);
+        } catch (e) {
+          console.error(`Failed to save raw output to ${rawoutput}:`, e);
+        }
+      }
       return;
     }
 

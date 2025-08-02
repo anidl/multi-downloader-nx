@@ -71,6 +71,7 @@ let argvC: {
   nosess: string; 
   debug: boolean | undefined;  
   raw: boolean;
+  rawoutput: string;
   nocleanup: boolean; 
   help: boolean | undefined; 
   service: 'crunchy' | 'hidive' | 'ao' | 'adn'; 
