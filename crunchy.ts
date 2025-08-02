@@ -1518,7 +1518,7 @@ export default class Crunchy implements ServiceClass {
             if (chapterData.startTime > 1) {
               compiledChapters.push(
                 `CHAPTER${(compiledChapters.length/2)+1}=00:00:00.00`,
-                `CHAPTER${(compiledChapters.length/2)+1}NAME=Episode`
+                `CHAPTER${(compiledChapters.length/2)+1}NAME=Prologue`
               );
             }
             compiledChapters.push(
