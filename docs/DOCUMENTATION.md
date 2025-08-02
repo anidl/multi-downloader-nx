@@ -209,9 +209,9 @@ Select a specific Crunchyroll video playback endpoint by device.
 
 Select a specific Crunchyroll audio playback endpoint by device.
 #### `--tsd`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
-| --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--tsd ` | `boolean` | `No`| `NaN` | `NaN` |
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--tsd ` | `boolean` | `No`| `NaN` | `false`| `tsd: ` |
 
 (Total Session Death) Kills all active Crunchyroll Streaming Sessions to prevent getting the "TOO_MANY_ACTIVE_STREAMS" error
 #### `--hslang`
