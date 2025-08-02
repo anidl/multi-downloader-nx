@@ -1620,6 +1620,18 @@ export default class Crunchy implements ServiceClass {
       let videoStream: CrunchyPlayStream | null = null;
       let audioStream: CrunchyPlayStream | null = null;
 
+      if (options.tsd) {
+        console.warn('Total Session Death Active');
+        const activeStreamsReq = await this.req.getData(api.streaming, AuthHeaders);
+        if (activeStreamsReq.ok && activeStreamsReq.res){
+          const data = await activeStreamsReq.res.json();
+          for (const s of data.items) {
+            await this.req.getData(`https://www.crunchyroll.com/playback/v1/token/${s.contentId}/${s.token}`, {...{method: 'DELETE'}, ...AuthHeaders});
+          }
+          console.warn(`Killed ${data.items?.length ?? 0} Sessions`);
+        }
+      }
+
       const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.vstream]}/play`, AuthHeaders);
       if (!videoPlaybackReq.ok || !videoPlaybackReq.res) {
         console.warn('Request Video Stream URLs FAILED!');

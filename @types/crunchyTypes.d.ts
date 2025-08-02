@@ -10,6 +10,7 @@ export type CrunchyDownloadOptions = {
   cstream: keyof typeof CrunchyPlayStreams,
   vstream: keyof typeof CrunchyPlayStreams,
   astream: keyof typeof CrunchyPlayStreams,
+  tsd?: boolean,
   novids?: boolean,
   noaudio?: boolean,
   x: number,

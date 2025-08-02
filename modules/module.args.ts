@@ -365,6 +365,15 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     usage: '${device}'
   },
   {
+    name: 'tsd',
+    group: 'dl',
+    describe: '(Total Session Death) Kills all active Crunchyroll Streaming Sessions to prevent getting the "TOO_MANY_ACTIVE_STREAMS" error',
+    docDescribe: true,
+    service: ['crunchy'],
+    type: 'boolean',
+    usage: ''
+  },
+  {
     name: 'hslang',
     group: 'dl',
     describe: 'Download video with specific hardsubs',

@@ -49,6 +49,7 @@ let argvC: {
   cstream: keyof typeof CrunchyPlayStreams;
   vstream: keyof typeof CrunchyPlayStreams;
   astream: keyof typeof CrunchyPlayStreams;
+  tsd: boolean | undefined; 
   partsize: number; 
   hslang: string; 
   dlsubs: string[]; 

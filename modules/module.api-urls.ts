@@ -34,6 +34,7 @@ export type APIType = {
   drm: string;
   drm_widevine: string;
   drm_playready: string;
+  streaming: string;
   /**
    * Header
    */
@@ -81,6 +82,8 @@ const api: APIType = {
   drm_widevine:      `${domain.www}/license/v1/license/widevine`,
   // playready endpoint currently broken
   drm_playready:     `${domain.www}/license/v1/license/playReady`,
+  // endpoint to get active streaming sessions
+  streaming:     `${domain.www}/playback/v1/sessions/streaming`,
   crunchyDefHeader: {},
   crunchyAuthHeader: {},
   //hidive API
