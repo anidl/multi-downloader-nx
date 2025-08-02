@@ -1044,6 +1044,9 @@ export default class Crunchy implements ServiceClass {
       sort_by: 'newly_added',
       n: '50',
       start: (page ? (page-1)*25 : 0).toString(),
+      preferred_audio_language: 'ja-JP',
+      force_locale: '',
+      locale: this.locale
     }).toString();
     const newlyAddedReq = await this.req.getData(`${api.browse}?${newlyAddedParams}`, newlyAddedReqOpts);
     if(!newlyAddedReq.ok || !newlyAddedReq.res){
