@@ -477,6 +477,12 @@ If true, the tool won't check for updates
 | All | `--raw ` | `boolean` | `No`| `NaN` | `false`| `raw: ` |
 
 If true, the tool will output the raw data from the API (Where applicable, the feature is a WIP)
+#### `--rawoutput`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--rawoutput ` | `string` | `No`| `NaN` | ``| `rawoutput: ` |
+
+Provide a path to output the raw data from the API into a file (Where applicable, the feature is a WIP)
 ### Help
 #### `--help`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
