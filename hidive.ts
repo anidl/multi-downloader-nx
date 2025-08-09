@@ -151,7 +151,7 @@ export default class Hidive implements ServiceClass {
     };
     let apiReq = await this.req.getData(options.url, apiReqOpts);
     if(!apiReq.ok || !apiReq.res){
-      if (apiReq.error && apiReq.error.res?.status == 401) {
+      if ((apiReq.error && apiReq.error.res?.status == 401) || (apiReq.res && apiReq.res.status == 401)) {
         console.warn('Token expired, refreshing token and retrying.');
         if (await this.refreshToken()) {
           if (authType == 'other') {
