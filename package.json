@@ -67,7 +67,7 @@
     "protobufjs": "^7.5.3",
     "puppeteer-real-browser": "^1.4.3",
     "ws": "^8.18.3",
-    "yaml": "^2.8.0",
+    "yaml": "^2.8.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
