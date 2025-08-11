@@ -148,7 +148,7 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@24.2.1)(typescript@5.8.3)
       typescript:
-        specifier: ^5.8.3
+        specifier: 5.8.3
         version: 5.8.3
       typescript-eslint:
         specifier: ^8.39.0
