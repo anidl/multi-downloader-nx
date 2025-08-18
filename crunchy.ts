@@ -11,6 +11,8 @@ import m3u8 from 'm3u8-parsed';
 import streamdl, { M3U8Json } from './modules/hls-download';
 import Helper from './modules/module.helper';
 
+import { locale2language, langCode2name } from './modules/module.langsData';
+
 // custom modules
 import * as fontsData from './modules/module.fontsData';
 import * as langsData from './modules/module.langsData';
@@ -2672,17 +2674,31 @@ export default class Crunchy implements ServiceClass {
           } else {
             item = episodes[`${seasonIdentifier}E${episode.episode || episode.episode_number}`];
           }
-
+          
           if (episode.versions) {
             //Iterate over episode versions for audio languages
-            for (const version of episode.versions) {
-              //Make sure there is only one of the same language
-              if (!item.langs.find(a => a?.cr_locale == version.audio_locale)) {
-                //Push to arrays if there is no duplicates of the same language.
-                item.items.push(episode);
-                item.langs.push(langsData.languages.find(a => a.cr_locale == version.audio_locale) as langsData.LanguageItem);
+
+            // const argv = yargs.appArgv(this.cfg.cli);
+            // episode.versions.sort(version => {
+              //   const audioLang = langsData.fixAndFindCrLC(version.audio_locale)
+              //   return argv.indexOf(audioLang.code);
+              // });
+              
+              for (const version of episode.versions) {
+                //Make sure there is only one of the same language
+                if (!item.langs.find(a => a?.cr_locale == version.audio_locale)) {
+                  //Push to arrays if there is no duplicates of the same language.
+                  item.items.push(episode);
+                  item.langs.push(langsData.languages.find(a => a.cr_locale == version.audio_locale) as langsData.LanguageItem);
+                }
               }
+              
+            //Sort audio tracks according to the order of languages passed to the 'dubLang' option
+            const argv = yargs.appArgv(this.cfg.cli);
+            if(!argv.allDubs) {
+              item.langs.sort((a,b) => argv.dubLang.indexOf(a.code) - argv.dubLang.indexOf(b.code));
             }
+            
           } else {
             //Episode didn't have versions, mark it as such to be logged.
             serieshasversions = false;
