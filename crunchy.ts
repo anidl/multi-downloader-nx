@@ -390,25 +390,25 @@ export default class Crunchy implements ServiceClass {
     console.info('All required fonts downloaded!');
   }
 
-  private async productionToken() {
-    const tokenReq = await this.req.getData(api.bundlejs);
+  // private async productionToken() {
+  //   const tokenReq = await this.req.getData(api.bundlejs);
 
-    if (!tokenReq.ok || !tokenReq.res) {
-      console.error('Failed to get Production Token!');
-      return { isOk: false, reason: new Error('Failed to get Production Token') };
-    }
+  //   if (!tokenReq.ok || !tokenReq.res) {
+  //     console.error('Failed to get Production Token!');
+  //     return { isOk: false, reason: new Error('Failed to get Production Token') };
+  //   }
 
-    const rawjs = await tokenReq.res.text();
+  //   const rawjs = await tokenReq.res.text();
 
-    const tokens = rawjs.match(/prod="([\w-]+:[\w-]+)"/);
+  //   const tokens = rawjs.match(/prod="([\w-]+:[\w-]+)"/);
 
-    if (!tokens) {
-      console.error('Failed to find Production Token in js!');
-      return { isOk: false, reason: new Error('Failed to find Production Token in js') };
-    }
+  //   if (!tokens) {
+  //     console.error('Failed to find Production Token in js!');
+  //     return { isOk: false, reason: new Error('Failed to find Production Token in js') };
+  //   }
 
-    return Buffer.from(tokens[1], 'latin1').toString('base64');
-  }
+  //   return Buffer.from(tokens[1], 'latin1').toString('base64');
+  // }
 
   public async doAuth(data: AuthData): Promise<AuthResponse> {
     const uuid = randomUUID();
@@ -423,7 +423,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: {...api.crunchyAuthHeader, Authorization: `Basic ${await this.productionToken()}`},
+      headers: api.crunchyAuthHeader,
       body: authData
     };
     const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -462,7 +462,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: {...api.crunchyAuthHeader, Authorization: `Basic ${await this.productionToken()}`},
+      headers: api.crunchyAuthHeader,
       body: authData
     };
     const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -530,7 +530,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: {...api.crunchyAuthHeader, Authorization: `Basic ${await this.productionToken()}`, Cookie: `etp_rt=${refreshToken}`},
+      headers: {...api.crunchyAuthHeader, Cookie: `etp_rt=${refreshToken}`},
       body: authData
     };
     const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -583,7 +583,7 @@ export default class Crunchy implements ServiceClass {
       }).toString();
       const authReqOpts: reqModule.Params = {
         method: 'POST',
-        headers: {...api.crunchyAuthHeader, Authorization: `Basic ${await this.productionToken()}`},
+        headers: api.crunchyAuthHeader,
         body: authData
       };
       const authReq = await this.req.getData(api.auth, authReqOpts);

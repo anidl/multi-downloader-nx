@@ -11,6 +11,7 @@ export type APIType = {
   // Crunchyroll Vilos bundle.js
   bundlejs:               string;
   // Crunchyroll API
+  basic_auth_token:       string;
   auth:                   string;
   profile:                string;
   search:                 string;
@@ -47,6 +48,7 @@ const api: APIType = {
   bundlejs:               'https://static.crunchyroll.com/vilos-v2/web/vilos/js/bundle.js',
   //
   // Crunchyroll API
+  basic_auth_token:       'Ym1icmt4eXgzZDd1NmpzZnlsYTQ6QUlONEQ1VkVfY3Awd1Z6Zk5vUDBZcUhVcllGcDloU2c=',
   auth:                   `${domain.cr_www}/auth/v1/token`,
   profile:                `${domain.cr_www}/accounts/v1/me/profile`,
   search:                 `${domain.cr_www}/content/v2/discover/search`,
@@ -62,7 +64,7 @@ const api: APIType = {
   cms_auth:               `${domain.cr_www}/index/v2`,
   //
   // Crunchyroll Headers
-  crunchyDefUserAgent:    'Crunchyroll/4.83.0 (bundle_identifier:com.crunchyroll.iphone; build_number:4254815.324030705) iOS/19.0.0 Gravity/4.83.0',
+  crunchyDefUserAgent:    'Crunchyroll/ANDROIDTV/3.42.1_22267 (Android 16; en-US; sdk_gphone64_x86_64)',
   crunchyDefHeader:       {},
   crunchyAuthHeader:      {},
   //
@@ -92,6 +94,7 @@ api.crunchyDefHeader = {
 
 // set header
 api.crunchyAuthHeader = {
+  Authorization:          `Basic ${api.basic_auth_token}`,
   'Content-Type':         'application/x-www-form-urlencoded; charset=utf-8',
   ...api.crunchyDefHeader
 };

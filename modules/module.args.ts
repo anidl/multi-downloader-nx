@@ -359,7 +359,7 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     describe: 'Select a specific Crunchyroll audio playback endpoint by device.',
     choices: [...Object.keys(CrunchyPlayStreams), 'none'],
     default: {
-      default: 'firefox'
+      default: 'android'
     },
     docDescribe: true,
     usage: '${device}'
