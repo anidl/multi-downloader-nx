@@ -2687,6 +2687,11 @@ export default class Crunchy implements ServiceClass {
                 item.langs.push(langsData.languages.find(a => a.cr_locale == version.audio_locale) as langsData.LanguageItem);
               }
             }
+            //Sort audio tracks according to the order of languages passed to the 'dubLang' option
+            const argv = yargs.appArgv(this.cfg.cli);
+            if(!argv.allDubs) {
+              item.langs.sort((a,b) => argv.dubLang.indexOf(a.code) - argv.dubLang.indexOf(b.code));
+            }
           } else {
             //Episode didn't have versions, mark it as such to be logged.
             serieshasversions = false;
