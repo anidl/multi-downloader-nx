@@ -743,7 +743,6 @@ export default class Hidive implements ServiceClass {
       replaceWith: chosenVideoSegments.quality.width
     });
 
-    const chosenAudios: typeof audios[0][] = [];
     const audioByLanguage: Record<string,typeof audios[0][]> = {};
     for (const audio of audios) {
       if (!audioByLanguage[audio.language.code]) audioByLanguage[audio.language.code] = [];
@@ -754,7 +753,7 @@ export default class Hidive implements ServiceClass {
 
     // RULE 1: If there is only one audio track and it's 'und', it must be Japanese.
     if (availableLangs.length === 1 && audioByLanguage['und']) {
-        console.info('[INFO] Correcting single \'undetermined\' audio track to Japanese.');
+        console.info('Correcting single \'undetermined\' audio track to Japanese.');
         audioByLanguage['jpn'] = audioByLanguage['und'];
         delete audioByLanguage['und'];
         const japaneseLangItem = langsData.languages.find(lang => lang.code === 'jpn');
@@ -766,7 +765,7 @@ export default class Hidive implements ServiceClass {
     else if (availableLangs.length === 2 && audioByLanguage['und']) {
         // The known track is Japanese, so 'und' must be English.
         if (audioByLanguage['jpn']) {
-            console.info('[INFO] Correcting \'undetermined\' audio track to English.');
+            console.info('Correcting \'undetermined\' audio track to English.');
             audioByLanguage['eng'] = audioByLanguage['und'];
             delete audioByLanguage['und'];
             const englishLangItem = langsData.languages.find(lang => lang.code === 'eng');
@@ -776,7 +775,7 @@ export default class Hidive implements ServiceClass {
         } 
         // The known track is English, so 'und' must be Japanese.
         else if (audioByLanguage['eng']) {
-            console.info('[INFO] Correcting \'undetermined\' audio track to Japanese.');
+            console.info('Correcting \'undetermined\' audio track to Japanese.');
             audioByLanguage['jpn'] = audioByLanguage['und'];
             delete audioByLanguage['und'];
             const japaneseLangItem = langsData.languages.find(lang => lang.code === 'jpn');
@@ -801,9 +800,9 @@ export default class Hidive implements ServiceClass {
     if (chosenAudios.length == 0) {
       const finalAvailableLangs = Object.keys(audioByLanguage);
       if (finalAvailableLangs.length > 0) {
-        console.error(`[ERROR] Requested audio language(s) '${options.dubLang.join(', ')}' not found. Available languages: '${finalAvailableLangs.join(', ')}'. Skipping download.`);
+        console.error(`Requested audio language(s) '${options.dubLang.join(', ')}' not found. Available languages: '${finalAvailableLangs.join(', ')}'. Skipping download.`);
       } else {
-        console.error(`[CRITICAL] No audio tracks available for episode ${selectedEpisode.episodeInformation.episodeNumber}.`);
+        console.error(`No audio tracks available for episode ${selectedEpisode.episodeInformation.episodeNumber}.`);
       }
       return undefined;
     }
