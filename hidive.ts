@@ -749,9 +749,47 @@ export default class Hidive implements ServiceClass {
       if (!audioByLanguage[audio.language.code]) audioByLanguage[audio.language.code] = [];
       audioByLanguage[audio.language.code].push(audio);
     }
+
+    const availableLangs = Object.keys(audioByLanguage);
+
+    // RULE 1: If there is only one audio track and it's 'und', it must be Japanese.
+    if (availableLangs.length === 1 && audioByLanguage['und']) {
+        console.info('[INFO] Correcting single \'undetermined\' audio track to Japanese.');
+        audioByLanguage['jpn'] = audioByLanguage['und'];
+        delete audioByLanguage['und'];
+        const japaneseLangItem = langsData.languages.find(lang => lang.code === 'jpn');
+        if (japaneseLangItem) {
+            audioByLanguage['jpn'].forEach(track => { track.language = japaneseLangItem; });
+        }
+    } 
+    // RULE 2: If there are two tracks and one is 'und', the 'und' track must be the other language.
+    else if (availableLangs.length === 2 && audioByLanguage['und']) {
+        // The known track is Japanese, so 'und' must be English.
+        if (audioByLanguage['jpn']) {
+            console.info('[INFO] Correcting \'undetermined\' audio track to English.');
+            audioByLanguage['eng'] = audioByLanguage['und'];
+            delete audioByLanguage['und'];
+            const englishLangItem = langsData.languages.find(lang => lang.code === 'eng');
+            if (englishLangItem) {
+                audioByLanguage['eng'].forEach(track => { track.language = englishLangItem; });
+            }
+        } 
+        // The known track is English, so 'und' must be Japanese.
+        else if (audioByLanguage['eng']) {
+            console.info('[INFO] Correcting \'undetermined\' audio track to Japanese.');
+            audioByLanguage['jpn'] = audioByLanguage['und'];
+            delete audioByLanguage['und'];
+            const japaneseLangItem = langsData.languages.find(lang => lang.code === 'jpn');
+            if (japaneseLangItem) {
+                audioByLanguage['jpn'].forEach(track => { track.language = japaneseLangItem; });
+            }
+        }
+    }
+
+    const chosenAudios: typeof audios[0][] = [];
     for (const dubLang of options.dubLang as string[]) {
       if (audioByLanguage[dubLang]) {
-        let chosenAudioQuality = options.q === 0 ? audios.length : options.q;
+        let chosenAudioQuality = options.q === 0 ? audioByLanguage[dubLang].length : options.q;
         if(chosenAudioQuality > audioByLanguage[dubLang].length) {
           chosenAudioQuality = audioByLanguage[dubLang].length;
         }
@@ -759,20 +797,15 @@ export default class Hidive implements ServiceClass {
         chosenAudios.push(audioByLanguage[dubLang][chosenAudioQuality]);
       }
     }
+
     if (chosenAudios.length == 0) {
-      console.warn(`Chosen audio language(s) does not exist for episode ${selectedEpisode.episodeInformation.episodeNumber}, falling back to first available audio`);
-      if (audios.length > 0) {
-        let chosenAudioQuality = options.q === 0 ? audios.length : options.q;
-        if(chosenAudioQuality > audios.length) {
-          chosenAudioQuality = audios.length;
-        }
-        chosenAudioQuality--;
-        chosenAudios.push(audios[chosenAudioQuality]);
-        console.info(`Using audio track: ${audios[chosenAudioQuality].language.code || 'unknown'}`);
+      const finalAvailableLangs = Object.keys(audioByLanguage);
+      if (finalAvailableLangs.length > 0) {
+        console.error(`[ERROR] Requested audio language(s) '${options.dubLang.join(', ')}' not found. Available languages: '${finalAvailableLangs.join(', ')}'. Skipping download.`);
       } else {
-        console.error(`No audio tracks available for episode ${selectedEpisode.episodeInformation.episodeNumber}`);
-        return undefined;
+        console.error(`[CRITICAL] No audio tracks available for episode ${selectedEpisode.episodeInformation.episodeNumber}.`);
       }
+      return undefined;
     }
 
     const fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
