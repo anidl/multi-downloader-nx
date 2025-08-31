@@ -4,7 +4,7 @@ import crypto from 'crypto';
 export class AES_CMAC {
   private readonly BLOCK_SIZE = 16;
   private readonly XOR_RIGHT = Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x87]);
-  private readonly EMPTY_BLOCK_SIZE_BUFFER = Buffer.alloc(this.BLOCK_SIZE);
+  private readonly EMPTY_BLOCK_SIZE_BUFFER = Buffer.alloc(this.BLOCK_SIZE) as Buffer;
 
   private _key: Buffer;
   private _subkeys: { first: Buffer; second: Buffer };

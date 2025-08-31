@@ -217,7 +217,7 @@ export class Session {
         const keyId = keyContainer.id ? Buffer.from(keyContainer.id).toString('hex') : '00000000000000000000000000000000';
         const decipher = forge.cipher.createDecipher('AES-CBC', encKey.toString('binary'));
         decipher.start({ iv: Buffer.from(keyContainer.iv).toString('binary') });
-        decipher.update(forge.util.createBuffer(keyContainer.key));
+        decipher.update(forge.util.createBuffer(new Uint8Array(keyContainer.key)));
         decipher.finish();
         const decryptedKey = Buffer.from(decipher.output.data, 'binary');
         const key: KeyContainer = {
