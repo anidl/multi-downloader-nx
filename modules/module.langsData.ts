@@ -42,6 +42,7 @@ const languages: LanguageItem[] = [
   { cr_locale: 'id-ID', locale: 'id-ID', code: 'ind', name: 'Indonesian', language: 'Bahasa Indonesia' },
   { cr_locale: 'te-IN', locale: 'te-IN', code: 'tel', name: 'Telugu (India)', language: 'తెలుగు' },
   { cr_locale: 'ja-JP', adn_locale: 'ja', ao_locale: 'ja', hd_locale: 'Japanese', locale: 'ja', code: 'jpn', name: 'Japanese' },
+  { locale: 'un', code: 'und', name: 'Undetermined', language: 'Undetermined', new_hd_locale: 'und', cr_locale: 'und', adn_locale: 'und', ao_locale: 'und' },
 ];
 
 // add en language names
@@ -97,7 +98,7 @@ const fixLanguageTag = (tag: string) => {
 // find lang by cr_locale
 const findLang = (cr_locale: string) => {
   const lang = languages.find(l => { return l.cr_locale == cr_locale; });
-  return lang ? lang : { cr_locale: 'und', locale: 'un', code: 'und', name: '', language: '' };
+  return lang ? lang : languages.find(l => l.code === 'und') || { cr_locale: 'und', locale: 'un', code: 'und', name: 'Undetermined', language: 'Undetermined' };
 };
 
 const fixAndFindCrLC = (cr_locale: string) => {
