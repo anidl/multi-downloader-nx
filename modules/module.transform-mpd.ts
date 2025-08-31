@@ -153,12 +153,19 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
         ['cenc:pssh', 'mspr:pro']
       );
 
-      if (playlist.contentProtection &&
-        playlist.contentProtection?.['com.widevine.alpha'].pssh)
-        pItem.pssh_wvd = arrayBufferToBase64(playlist.contentProtection['com.widevine.alpha'].pssh);
+      const widevinePssh = extractPSSH(
+        manifest,
+        'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
+        ['cenc:pssh']
+      );
+
+      if (widevinePssh) {
+        pItem.pssh_wvd = widevinePssh;
+      }
   
-      if (playreadyPssh)
+      if (playreadyPssh) {
         pItem.pssh_prd = playreadyPssh;
+      }
 
       ret[host].audio.push(pItem);
     }
@@ -228,12 +235,19 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
       ['cenc:pssh', 'mspr:pro']
     );
 
-    if (playlist.contentProtection &&
-      playlist.contentProtection?.['com.widevine.alpha'].pssh)
-      pItem.pssh_wvd = arrayBufferToBase64(playlist.contentProtection['com.widevine.alpha'].pssh);
+    const widevinePssh = extractPSSH(
+      manifest,
+      'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
+      ['cenc:pssh']
+    );
 
-    if (playreadyPssh)
+    if (widevinePssh) {
+      pItem.pssh_wvd = widevinePssh;
+    }
+
+    if (playreadyPssh) {
       pItem.pssh_prd = playreadyPssh;
+    }
 
     ret[host].video.push(pItem);
   }
