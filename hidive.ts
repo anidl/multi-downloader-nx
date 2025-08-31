@@ -760,19 +760,8 @@ export default class Hidive implements ServiceClass {
       }
     }
     if (chosenAudios.length == 0) {
-      console.warn(`Chosen audio language(s) does not exist for episode ${selectedEpisode.episodeInformation.episodeNumber}, falling back to first available audio`);
-      if (audios.length > 0) {
-        let chosenAudioQuality = options.q === 0 ? audios.length : options.q;
-        if(chosenAudioQuality > audios.length) {
-          chosenAudioQuality = audios.length;
-        }
-        chosenAudioQuality--;
-        chosenAudios.push(audios[chosenAudioQuality]);
-        console.info(`Using audio track: ${audios[chosenAudioQuality].language.code || 'unknown'}`);
-      } else {
-        console.error(`No audio tracks available for episode ${selectedEpisode.episodeInformation.episodeNumber}`);
-        return undefined;
-      }
+      console.error(`Chosen audio language(s) does not exist for episode ${selectedEpisode.episodeInformation.episodeNumber}`);
+      return undefined;
     }
 
     const fileName = parseFileName(options.fileName, variables, options.numbers, options.override).join(path.sep);
