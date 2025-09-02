@@ -199,13 +199,13 @@ Select the server to use
 #### `--vstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--vstream ${device}` | `string` | `No`| `--vs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `chromecast`, `firetv`, `androidtv`, `android`, `androidtab`, `none`] | `lgtv`| `vstream: ` |
+| Crunchyroll | `--vstream ${device}` | `string` | `No`| `--vs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `chromecast`, `firetv`, `androidtv`, `android`, `androidtab`, `none`] | `androidtv`| `vstream: ` |
 
 Select a specific Crunchyroll video playback endpoint by device.
 #### `--astream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--astream ${device}` | `string` | `No`| `--as` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `chromecast`, `firetv`, `androidtv`, `android`, `androidtab`, `none`] | `firefox`| `astream: ` |
+| Crunchyroll | `--astream ${device}` | `string` | `No`| `--as` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `xboxone`, `vidaa`, `samsungtv`, `lgtv`, `rokutv`, `chromecast`, `firetv`, `androidtv`, `android`, `androidtab`, `none`] | `androidtv`| `astream: ` |
 
 Select a specific Crunchyroll audio playback endpoint by device.
 #### `--tsd`
