@@ -65,7 +65,7 @@
     "ofetch": "^1.4.1",
     "open": "^8.4.2",
     "protobufjs": "^7.5.4",
-    "puppeteer-real-browser": "^1.4.3",
+    "puppeteer-real-browser": "^1.4.4",
     "ws": "^8.18.3",
     "yaml": "^2.8.1",
     "yargs": "^17.7.2"

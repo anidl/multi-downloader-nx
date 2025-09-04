@@ -84,8 +84,8 @@ importers:
         specifier: ^7.5.4
         version: 7.5.4
       puppeteer-real-browser:
-        specifier: ^1.4.3
-        version: 1.4.3
+        specifier: ^1.4.4
+        version: 1.4.4
       ws:
         specifier: ^8.18.3
         version: 8.18.3
@@ -770,8 +770,8 @@ packages:
   bare-events@2.6.1:
     resolution: {integrity: sha512-AuTJkq9XmE6Vk0FJVNq5QxETrSA/vKHarWVBG5l/JbdCL1prJemiyJqUS0jrlXO0MftuPq4m3YVYhoNc5+aE/g==}
 
-  bare-fs@4.2.1:
-    resolution: {integrity: sha512-mELROzV0IhqilFgsl1gyp48pnZsaV9xhQapHLDsvn4d4ZTfbFhcghQezl7FTEDNBcGqLUnNI3lUlm6ecrLWdFA==}
+  bare-fs@4.2.3:
+    resolution: {integrity: sha512-1aGs5pRVLToMQ79elP+7cc0u0s/wXAzfBv/7hDloT7WFggLqECCas5qqPky7WHCFdsBH5WDq6sD4fAoz5sJbtA==}
     engines: {bare: '>=1.16.0'}
     peerDependencies:
       bare-buffer: '*'
@@ -1798,8 +1798,8 @@ packages:
       puppeteer-core:
         optional: true
 
-  puppeteer-real-browser@1.4.3:
-    resolution: {integrity: sha512-tul5v//zYe9AwV+jaQkT6gXa9yYxCfSXQqPx0AlnmiiELhlSkWuk6XeLbgXsS+w6YgdIilKbztaXEoKxE5cC3w==}
+  puppeteer-real-browser@1.4.4:
+    resolution: {integrity: sha512-1CYGlL1Y0SdxP55byi9WQ8dtLkyIYBmRpGr+D+cB6uZDrW17+ZxWMnc7CDZfNuNuJaF15DWW5zvChS/ikymdmg==}
 
   qs@6.14.0:
     resolution: {integrity: sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==}
@@ -2843,7 +2843,7 @@ snapshots:
   bare-events@2.6.1:
     optional: true
 
-  bare-fs@4.2.1:
+  bare-fs@4.2.3:
     dependencies:
       bare-events: 2.6.1
       bare-path: 3.0.0
@@ -3925,7 +3925,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  puppeteer-real-browser@1.4.3:
+  puppeteer-real-browser@1.4.4:
     dependencies:
       chrome-launcher: 1.2.0
       ghost-cursor: 1.4.1
@@ -4203,7 +4203,7 @@ snapshots:
       pump: 3.0.3
       tar-stream: 3.1.7
     optionalDependencies:
-      bare-fs: 4.2.1
+      bare-fs: 4.2.3
       bare-path: 3.0.0
     transitivePeerDependencies:
       - bare-buffer
