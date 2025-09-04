@@ -1,19 +1,8 @@
-export enum CrunchyPlayStreams {
-    'chrome'    = 'web/chrome',
-    'firefox'   = 'web/firefox',
-    'safari'    = 'web/safari',
-    'edge'      = 'web/edge',
-    'fallback'  = 'web/fallback',
-    'ps4'       = 'console/ps4',
-    'ps5'       = 'console/ps5',
-    'switch'    = 'console/switch',
-    'xboxone'   = 'console/xbox_one',
-    'vidaa'     = 'tv/vidaa',
-    'samsungtv' = 'tv/samsung',
-    'lgtv'      = 'tv/lg',
-    'rokutv'    = 'tv/roku',
-    'chromecast'= 'tv/chromecast',
-    'firetv'    = 'tv/fire_tv',
+export enum CrunchyVideoPlayStreams {
+    'androidtv' = 'tv/android_tv'
+}
+
+export enum CrunchyAudioPlayStreams {
     'androidtv' = 'tv/android_tv',
     'android'   = 'android/phone',
     'androidtab'= 'android/tablet'

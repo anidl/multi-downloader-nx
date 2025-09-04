@@ -2,14 +2,14 @@ import { HLSCallback } from 'hls-download';
 import { sxItem } from '../crunchy';
 import { LanguageItem } from '../modules/module.langsData';
 import { DownloadInfo } from './messageHandler';
-import { CrunchyPlayStreams } from './enums';
+import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from './enums';
 
 export type CrunchyDownloadOptions = {
   hslang: string,
   // kstream: number,
-  cstream: keyof typeof CrunchyPlayStreams,
-  vstream: keyof typeof CrunchyPlayStreams,
-  astream: keyof typeof CrunchyPlayStreams,
+  cstream: keyof typeof CrunchyVideoPlayStreams,
+  vstream: keyof typeof CrunchyVideoPlayStreams,
+  astream: keyof typeof CrunchyAudioPlayStreams,
   tsd?: boolean,
   novids?: boolean,
   noaudio?: boolean,

@@ -43,7 +43,7 @@ import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
 import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 import vtt2ass from './modules/module.vtt2ass';
 import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
-import { CrunchyPlayStreams } from './@types/enums';
+import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from './@types/enums';
 import { randomUUID } from 'node:crypto';
 
 export type sxItem = {
@@ -1434,6 +1434,20 @@ export default class Crunchy implements ServiceClass {
     return selectedMedia;
   }
 
+  private convertDownloadToPlayback(audioUrl: string, videoUrl: string): string {
+    try {
+      const url = new URL(audioUrl);
+      const urla = new URL(videoUrl);
+      url.pathname = url.pathname.replace('/manifest/download/', '/manifest/');
+      url.searchParams.delete('downloadGuid');
+      url.searchParams.set('playbackGuid', urla.searchParams.get('playbackGuid') as string);
+
+      return url.toString();
+    } catch (err) {
+      return audioUrl;
+    }
+  }
+
   public async downloadMediaList(medias: CrunchyEpMeta, options: CrunchyDownloadOptions) : Promise<{
     data: DownloadedMedia[],
     fileName: string,
@@ -1637,6 +1651,7 @@ export default class Crunchy implements ServiceClass {
 
       let videoStream: CrunchyPlayStream | null = null;
       let audioStream: CrunchyPlayStream | null = null;
+      const isDLBypass: boolean = options.astream === 'android' || options.astream === 'androidtab' ? true : false;
 
       if (options.tsd) {
         console.warn('Total Session Death Active');
@@ -1650,7 +1665,7 @@ export default class Crunchy implements ServiceClass {
         }
       }
 
-      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.vstream]}/play`, AuthHeaders);
+      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams[options.vstream]}/play`, AuthHeaders);
       if (!videoPlaybackReq.ok || !videoPlaybackReq.res) {
         console.warn('Request Video Stream URLs FAILED!');
       } else {
@@ -1681,8 +1696,8 @@ export default class Crunchy implements ServiceClass {
         };
       }
 
-      if (!options.cstream && (options.vstream !== options.astream)) {
-        const audioPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyPlayStreams[options.astream]}/play`, AuthHeaders);
+      if (!options.cstream && (options.vstream !== options.astream) && videoStream) {
+        const audioPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyAudioPlayStreams[options.astream]}/${isDLBypass ? 'download' : 'play'}`, AuthHeaders);
         if (!audioPlaybackReq.ok || !audioPlaybackReq.res) {
           console.warn('Request Audio Stream URLs FAILED!');
         } else {
@@ -1695,9 +1710,17 @@ export default class Crunchy implements ServiceClass {
               'hardsub_locale': stream.hlang
             };
           }
-          derivedPlaystreams[''] = {
-            url: audioStream.url,
-            hardsub_locale: ''
+          if (isDLBypass) {
+            audioStream.token = videoStream.token;
+            derivedPlaystreams[''] = {
+              url: this.convertDownloadToPlayback(audioStream.url, videoStream.url),
+              hardsub_locale: ''
+            };
+          } else {
+            derivedPlaystreams[''] = {
+              url: audioStream.url,
+              hardsub_locale: ''
+            };
           };
           pbData.meta = {
             audio_locale: audioStream.audioLocale,
