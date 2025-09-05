@@ -18,7 +18,9 @@ This tool is not responsible for your actions; please make an informed decision 
 ## Table of Contents
 
 - [Dependencies](#dependencies)
-- [Widevine CDM](#widevine-cdm)
+- [CDM Setup](#cdm-setup)
+    - [Widevine CDM](#widevine)
+    - [Playready CDM](#playready)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
@@ -131,26 +133,30 @@ As long as you see some output and no "command not found" errors, everything is 
 
 You have now completed the dependencies installation!
 
-## Widevine CDM
+## CDM Setup
 
-When you dump your CDM key, you will usually get 2 files. One ending in `.bin` and the other in `.pem`. You need to do the following renaming:
-- Rename the `.bin` file to `device_client_id_blob.bin`
-- Rename the `.pem` file to `device_private_key.pem`
+> [!NOTE]  
+> If you do not have either a Widevine or Playready CDM, you will get an error like "No valid Widevine or PlayReady CDM detected." when trying to download.
 
-If you want the file names to be shorter, you can also rename them to:
-- Rename the `.bin` file to `client_id.bin`
-- Rename the `.pem` file to `private_key.pem`
+### Widevine
 
-Note that if the files are not named correctly, you may get an error like "No valid Widevine or PlayReady CDM detected." when trying to download. \
-After renaming, place both renamed files in the `widevine` folder in the same directory you opened `aniDL.exe` from.
+When you dump your CDM key, you will usually get 2 files. One ending in `.bin` and the other in `.pem`. \
+All you need to do is place both files in the `widevine` folder, which is in the same directory you opened `aniDL.exe` from. \
+It will detect what each file is based on the file contents.
 
-`widevine` folder structure should look like this:
+If you do want to name them though (optional):
+- The `.bin` file should be named `device_client_id_blob.bin` or `client_id.bin`
+- The `.pem` file should be named `device_private_key.pem` or `private_key.pem`
 
-```
-widevine
-    ├── device_client_id_blob.bin
-    └── device_private_key.pem
-```
+Again, the renaming is totally optional. Just make sure both files are in the `widevine` folder.
+
+### Playready
+
+If you have a Playready CDM key dump, you just need to make sure:
+1. Its provisioned as a V3 Device by [pyplayready](https://github.com/ready-dl/pyplayready).
+2. Security level is either SL2000 or SL3000
+
+After you have confirmed the above, place the file(s) in the `playready` folder, which is in the same directory you opened `aniDL.exe` from.
 
 ## Installation
 
