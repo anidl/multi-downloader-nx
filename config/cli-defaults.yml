@@ -1,7 +1,5 @@
 # Set the quality of the stream, 0 is highest available.
 q: 0
-# Set which stream to use
-kstream: 1
 # Set which server to use
 server: 1
 # How many parts to download at once. Increasing may improve download speed.
@@ -22,3 +20,9 @@ dubLang: ["jpn"]
 dlsubs: ["all"]
 # What language Audio to set as default
 defaultAudio: "jpn"
+# Video Playback Endpoint (Crunchyroll)
+vstream: "androidtv"
+# Audio Playback Endpoint (Crunchyroll)
+astream: "android"
+# Total Session Death (Could kill active streaming sessions from watching users if account shared, use with caution) (Crunchyroll)
+tsd: false
