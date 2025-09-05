@@ -181,6 +181,11 @@ astream: "android"
 ```
 `astream` is the option, and `android` is the value you want to set it to. Since the "Type" column says "string", you need to put the value in quotes.
 
+> [!NOTE]  
+> The `android` endpoint (192 kb/s audio) requires a Crunchyroll "Mega Fan" or higher subscription. \
+> Without it, set `astream` to `androidtv` (default is `android` as of 9/5/2025. You can check the up-to-date default [here](https://github.com/anidl/multi-downloader-nx/blob/master/docs/DOCUMENTATION.md#--astream)). \
+> With "Mega Fan" or higher, both `android` and `androidtv` work.
+
 Pretty simple, right? You can set any option you want in this file. Just make sure to follow the YAML syntax. Strings need to be in quotes, arrays need to be in square brackets and each entry needs to be separated by a comma, booleans are either "true" or "false" without any quotes - just the word as-is. If you want to set a list with only one entry, it still needs to be in square brackets.
 
 For example, if you wanted to set `--dubLang`to only `eng`, you would do it like this:
