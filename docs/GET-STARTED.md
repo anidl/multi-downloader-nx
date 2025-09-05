@@ -135,8 +135,8 @@ You have now completed the dependencies installation!
 
 ## CDM Setup
 
-> [!NOTE]  
-> If you do not have either a Widevine or Playready CDM, you will get an error like "No valid Widevine or PlayReady CDM detected." when trying to download.
+> [!NOTE]
+> If you do not have either a Widevine or PlayReady CDM, you will get an error like "No valid Widevine or PlayReady CDM detected." when trying to download. The same error can also appear if a Widevine CDM is present but corrupted, since it will not be detected or function correctly.
 
 ### Widevine
 
