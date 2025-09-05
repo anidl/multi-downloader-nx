@@ -1651,7 +1651,13 @@ export default class Crunchy implements ServiceClass {
 
       let videoStream: CrunchyPlayStream | null = null;
       let audioStream: CrunchyPlayStream | null = null;
-      const isDLBypass: boolean = options.astream === 'android' || options.astream === 'androidtab' ? true : false;
+      let isDLBypass: boolean = options.astream === 'android' || options.astream === 'androidtab' ? true : false;
+
+      if (isDLBypass && !(this.token.scope as string)?.includes('offline_access')) {
+        isDLBypass = false;
+        options.astream = 'androidtv';
+        console.warn('192 kb/s audio downloads are not available on your current Crunchyroll plan. Please upgrade to the "Mega Fan" plan to enable this feature. Falling back to 128 kb/s CBR stream.');
+      }
 
       if (options.tsd) {
         console.warn('Total Session Death Active');
