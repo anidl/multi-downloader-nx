@@ -13,6 +13,7 @@ export type LanguageItem = {
 }
 
 const languages: LanguageItem[] = [
+  { locale: 'un', code: 'und', name: 'Undetermined', language: 'Undetermined', new_hd_locale: 'und', cr_locale: 'und', adn_locale: 'und', ao_locale: 'und' },
   { cr_locale: 'en-US', new_hd_locale: 'en-US', hd_locale: 'English', locale: 'en', code: 'eng', name: 'English' },
   { cr_locale: 'en-IN', locale: 'en-IN', code: 'eng', name: 'English (India)', },
   { cr_locale: 'es-LA', new_hd_locale: 'es-MX', hd_locale: 'Spanish LatAm', locale: 'es-419', code: 'spa', name: 'Spanish', language: 'Latin American Spanish' },
@@ -42,7 +43,6 @@ const languages: LanguageItem[] = [
   { cr_locale: 'id-ID', locale: 'id-ID', code: 'ind', name: 'Indonesian', language: 'Bahasa Indonesia' },
   { cr_locale: 'te-IN', locale: 'te-IN', code: 'tel', name: 'Telugu (India)', language: 'తెలుగు' },
   { cr_locale: 'ja-JP', adn_locale: 'ja', ao_locale: 'ja', hd_locale: 'Japanese', locale: 'ja', code: 'jpn', name: 'Japanese' },
-  { locale: 'un', code: 'und', name: 'Undetermined', language: 'Undetermined', new_hd_locale: 'und', cr_locale: 'und', adn_locale: 'und', ao_locale: 'und' },
 ];
 
 // add en language names
