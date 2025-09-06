@@ -1651,10 +1651,11 @@ export default class Crunchy implements ServiceClass {
 
       let videoStream: CrunchyPlayStream | null = null;
       let audioStream: CrunchyPlayStream | null = null;
-      let isDLBypass: boolean = options.astream === 'android' || options.astream === 'androidtab' ? true : false;
+      let isDLVideoBypass: boolean = options.vstream === 'android' || options.vstream === 'androidtab' ? true : false;
+      let isDLAudioBypass: boolean = options.astream === 'android' || options.astream === 'androidtab' ? true : false;
       let isDLBypassCapable: boolean = true;
 
-      if (isDLBypass) {
+      if (isDLVideoBypass || isDLAudioBypass) {
         const me = await this.req.getData(api.me, AuthHeaders);
         if (me.ok && me.res) {
           const data_me = await me.res.json();
@@ -1672,8 +1673,14 @@ export default class Crunchy implements ServiceClass {
         }
       }
 
-      if (isDLBypass && !isDLBypassCapable) {
-        isDLBypass = false;
+      if (isDLVideoBypass && !isDLBypassCapable) {
+        isDLVideoBypass = false;
+        options.vstream = 'androidtv';
+        console.warn('VBR video downloads are not available on your current Crunchyroll plan. Please upgrade to the "Mega Fan" plan to enable this feature. Falling back to CBR video stream.');
+      }
+
+      if (isDLAudioBypass && !isDLBypassCapable) {
+        isDLAudioBypass = false;
         options.astream = 'androidtv';
         console.warn('192 kb/s audio downloads are not available on your current Crunchyroll plan. Please upgrade to the "Mega Fan" plan to enable this feature. Falling back to 128 kb/s CBR stream.');
       }
@@ -1690,7 +1697,7 @@ export default class Crunchy implements ServiceClass {
         }
       }
 
-      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams[options.vstream]}/play`, AuthHeaders);
+      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams['androidtv']}/play`, AuthHeaders);
       if (!videoPlaybackReq.ok || !videoPlaybackReq.res) {
         console.warn('Request Video Stream URLs FAILED!');
       } else {
@@ -1703,10 +1710,26 @@ export default class Crunchy implements ServiceClass {
             'hardsub_locale': stream.hlang
           };
         }
-        derivedPlaystreams[''] = {
-          url: videoStream.url,
-          hardsub_locale: ''
-        };
+        if (isDLVideoBypass) {
+          const videoDLReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams[options.vstream]}/download`, AuthHeaders);
+          if (videoDLReq.ok && videoDLReq.res) {
+            const data = await videoDLReq.res.json() as CrunchyPlayStream;
+            derivedPlaystreams[''] = {
+              url: this.convertDownloadToPlayback(data.url, videoStream.url),
+              hardsub_locale: ''
+            };
+          } else {
+            derivedPlaystreams[''] = {
+              url: videoStream.url,
+              hardsub_locale: ''
+            };
+          }
+        } else {
+          derivedPlaystreams[''] = {
+            url: videoStream.url,
+            hardsub_locale: ''
+          };
+        }
         pbData.meta = {
           audio_locale: videoStream.audioLocale,
           bifs: [videoStream.bifs],
@@ -1722,7 +1745,7 @@ export default class Crunchy implements ServiceClass {
       }
 
       if (!options.cstream && (options.vstream !== options.astream) && videoStream) {
-        const audioPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyAudioPlayStreams[options.astream]}/${isDLBypass ? 'download' : 'play'}`, AuthHeaders);
+        const audioPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyAudioPlayStreams[options.astream]}/${isDLAudioBypass ? 'download' : 'play'}`, AuthHeaders);
         if (!audioPlaybackReq.ok || !audioPlaybackReq.res) {
           console.warn('Request Audio Stream URLs FAILED!');
         } else {
@@ -1735,7 +1758,7 @@ export default class Crunchy implements ServiceClass {
               'hardsub_locale': stream.hlang
             };
           }
-          if (isDLBypass) {
+          if (isDLAudioBypass) {
             audioStream.token = videoStream.token;
             derivedPlaystreams[''] = {
               url: this.convertDownloadToPlayback(audioStream.url, videoStream.url),
