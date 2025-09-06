@@ -1652,7 +1652,7 @@ export default class Crunchy implements ServiceClass {
       let videoStream: CrunchyPlayStream | null = null;
       let audioStream: CrunchyPlayStream | null = null;
       let isDLBypass: boolean = options.astream === 'android' || options.astream === 'androidtab' ? true : false;
-      let isDLBypassCapable: boolean = true
+      let isDLBypassCapable: boolean = true;
 
       if (isDLBypass) {
         const me = await this.req.getData(api.me, AuthHeaders);
