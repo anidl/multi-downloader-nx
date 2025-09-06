@@ -13,6 +13,7 @@ export type APIType = {
   // Crunchyroll API
   basic_auth_token:       string;
   auth:                   string;
+  me:                     string;
   profile:                string;
   search:                 string;
   content_cms:            string;
@@ -50,6 +51,7 @@ const api: APIType = {
   // Crunchyroll API
   basic_auth_token:       'cHVnMG43eW11YW9sa2tnaTNsYmo6WGlraXNhQ2FYRllCY1hxb09sa1NUMWg2b1pYbHdESk4=',
   auth:                   `${domain.cr_www}/auth/v1/token`,
+  me:                     `${domain.cr_www}/accounts/v1/me`,
   profile:                `${domain.cr_www}/accounts/v1/me/profile`,
   search:                 `${domain.cr_www}/content/v2/discover/search`,
   content_cms:            `${domain.cr_www}/content/v2/cms`,
