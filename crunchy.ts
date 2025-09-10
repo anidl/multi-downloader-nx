@@ -1791,7 +1791,7 @@ export default class Crunchy implements ServiceClass {
         ['episode', isNaN(parseFloat(medias.episodeNumber)) ? medias.episodeNumber : parseFloat(medias.episodeNumber), false],
         ['service', 'CR', false],
         ['seriesTitle', medias.seriesTitle, true],
-        ['showTitle', medias.seasonTitle, true],
+        ['showTitle', medias.seriesTitle ?? medias.seasonTitle, true],
         ['season', medias.season, false]
       ] as [AvailableFilenameVars, string|number, boolean][]).map((a): Variable => {
         return {
@@ -3064,3 +3064,5 @@ export default class Crunchy implements ServiceClass {
   }
 
 }
+
+
