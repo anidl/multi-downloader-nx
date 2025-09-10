@@ -185,9 +185,9 @@ Currently disabling this sometimes results in bugs such as video/audio desync
 
 Set the output directory.
 #### `-o`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--output ${path}` | `string` | `No`| `-o` | `NaN` | `NaN` | `${cwd}/videos` |
+| All | `--output ${path}` | `string` | `No`| `-o` | `NaN` | `${cwd}/videos` |
 
 Select the server to use
 #### `--cstream`
