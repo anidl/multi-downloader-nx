@@ -296,19 +296,30 @@ const args: TAppArg<boolean|number|string|unknown[]>[] = [
     }
   },
   {
-    name: 'x',
+    name: 'output',
+    alias: 'o',
     group: 'dl',
-    describe: 'Select the server to use',
-    choices: [1, 2, 3, 4],
-    default: {
-      default: 1
-    },
-    type: 'number',
-    alias: 'server',
+    type: 'string',
+    describe: 'Set output directory',
     docDescribe: true,
     service: ['all'],
-    usage: '${server}'
+    usage: '${path}'
   },
+  // Deprecated 
+  // {
+  //  name: 'x',
+  //  group: 'dl',
+  //  describe: 'Select the server to use',
+  //  choices: [1, 2, 3, 4],
+  //  default: {
+  //    default: 1
+  //  },
+  //  type: 'number',
+  //  alias: 'server',
+  //  docDescribe: true,
+  //  service: ['all'],
+  //  usage: '${server}'
+  // },
   // Deprecated
   // {
   //   name: 'kstream',
@@ -988,3 +999,4 @@ export {
   groups,
   availableFilenameVars
 };
+
