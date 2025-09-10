@@ -1195,7 +1195,7 @@ export default class Crunchy implements ServiceClass {
         image: images[Math.floor(images.length / 2)].source
       };
       // Check for streams_link and update playback var if needed
-      if (item.__links__?.streams.href) {
+      if (item.__links__?.streams?.href) {
         epMeta.data[0].playback = item.__links__.streams.href;
         if(!item.playback) {
           item.playback = item.__links__.streams.href;
