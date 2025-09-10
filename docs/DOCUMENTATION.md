@@ -183,11 +183,11 @@ Currently disabling this sometimes results in bugs such as video/audio desync
 | --- | --- | --- | --- | --- | --- | ---| 
 | Hidive | `--originalFontSize ` | `boolean` | `No`| `NaN` | `true`| `originalFontSize: ` |
 
-If selected, it will prefer to keep the original Font Size defined by the service.
-#### `-x`
+Set the output directory.
+#### `-o`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `-x ${server}` | `number` | `No`| `--server` | [`1`, `2`, `3`, `4`] | `1`| `x: ` |
+| All | `--output ${path}` | `string` | `No`| `-o` | `NaN` | `NaN` | `${cwd}/videos` |
 
 Select the server to use
 #### `--cstream`
