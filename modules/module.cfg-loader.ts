@@ -129,6 +129,13 @@ const loadCfg = () : ConfigObject => {
       defaultCfg.dir[key] = path.join(workingDir, defaultCfg.dir[key].replace(/^\${wdir}/, ''));
     }
   }
+  // override content dir via env
+  const envOut = process.env.ANIDL_OUTPUT_DIR;
+  if (envOut && typeof envOut === 'string' && envOut.trim() !== '') {
+    defaultCfg.dir.content = path.isAbsolute(envOut)
+      ? envOut
+      : path.join(workingDir, envOut);
+  }
   if(!fs.existsSync(defaultCfg.dir.content)){
     try{
       fs.ensureDirSync(defaultCfg.dir.content);
