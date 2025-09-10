@@ -423,7 +423,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.crunchyAuthHeader,
+      headers: { ...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid },
       body: authData
     };
     const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -462,7 +462,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: api.crunchyAuthHeader,
+      headers: { ...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid },
       body: authData
     };
     const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -530,7 +530,7 @@ export default class Crunchy implements ServiceClass {
     }).toString();
     const authReqOpts: reqModule.Params = {
       method: 'POST',
-      headers: {...api.crunchyAuthHeader, Cookie: `etp_rt=${refreshToken}`},
+      headers: {...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid, Cookie: `etp_rt=${refreshToken}`},
       body: authData
     };
     const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -576,14 +576,13 @@ export default class Crunchy implements ServiceClass {
       const authData = new URLSearchParams({
         'refresh_token': this.token.refresh_token,
         'grant_type': 'refresh_token',
-        'scope': 'offline_access',
         'device_id': uuid,
         'device_name': 'iPhone',
         'device_type': 'iPhone 13'
       }).toString();
       const authReqOpts: reqModule.Params = {
         method: 'POST',
-        headers: api.crunchyAuthHeader,
+        headers: { ...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid },
         body: authData
       };
       const authReq = await this.req.getData(api.auth, authReqOpts);
@@ -1697,7 +1696,7 @@ export default class Crunchy implements ServiceClass {
         }
       }
 
-      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams['androidtv']}/play`, AuthHeaders);
+      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams['androidtv']}/play?queue=1`, AuthHeaders);
       if (!videoPlaybackReq.ok || !videoPlaybackReq.res) {
         console.warn('Request Video Stream URLs FAILED!');
       } else {
@@ -1745,7 +1744,7 @@ export default class Crunchy implements ServiceClass {
       }
 
       if (!options.cstream && (options.vstream !== options.astream) && videoStream) {
-        const audioPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyAudioPlayStreams[options.astream]}/${isDLAudioBypass ? 'download' : 'play'}`, AuthHeaders);
+        const audioPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyAudioPlayStreams[options.astream]}/${isDLAudioBypass ? 'download' : 'play?queue=1'}`, AuthHeaders);
         if (!audioPlaybackReq.ok || !audioPlaybackReq.res) {
           console.warn('Request Audio Stream URLs FAILED!');
         } else {

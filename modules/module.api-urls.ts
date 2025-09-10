@@ -49,7 +49,7 @@ const api: APIType = {
   bundlejs:               'https://static.crunchyroll.com/vilos-v2/web/vilos/js/bundle.js',
   //
   // Crunchyroll API
-  basic_auth_token:       'cHVnMG43eW11YW9sa2tnaTNsYmo6WGlraXNhQ2FYRllCY1hxb09sa1NUMWg2b1pYbHdESk4=',
+  basic_auth_token:       'Y2I5bnpybWh0MzJ2Z3RleHlna286S1V3bU1qSlh4eHVyc0hJVGQxenZsMkMyeVFhUW84TjQ=',
   auth:                   `${domain.cr_www}/auth/v1/token`,
   me:                     `${domain.cr_www}/accounts/v1/me`,
   profile:                `${domain.cr_www}/accounts/v1/me/profile`,
@@ -66,7 +66,7 @@ const api: APIType = {
   cms_auth:               `${domain.cr_www}/index/v2`,
   //
   // Crunchyroll Headers
-  crunchyDefUserAgent:    'Crunchyroll/ANDROIDTV/3.45.0_22272 (Android 16; en-US; sdk_gphone64_x86_64)',
+  crunchyDefUserAgent:    'Crunchyroll/ANDROIDTV/3.45.1_22273 (Android 16; en-US; sdk_gphone64_x86_64)',
   crunchyDefHeader:       {},
   crunchyAuthHeader:      {},
   //
@@ -88,9 +88,8 @@ const api: APIType = {
 api.crunchyDefHeader = {
   'User-Agent':           api.crunchyDefUserAgent,
   Accept:                 '*/*',
-  'Accept-Encoding':      'gzip;q=1.0, compress;q=0.5',
-  'Accept-Language':      'de-IT;q=1.0, it-IT;q=0.9, en-GB;q=0.8',
-  Connection:             'keep-alive',
+  'Accept-Encoding':      'gzip',
+  Connection:             'Keep-Alive',
   Host:                   'www.crunchyroll.com'
 };
 
@@ -98,6 +97,7 @@ api.crunchyDefHeader = {
 api.crunchyAuthHeader = {
   Authorization:          `Basic ${api.basic_auth_token}`,
   'Content-Type':         'application/x-www-form-urlencoded; charset=utf-8',
+  'Request-Type':         'SignIn',
   ...api.crunchyDefHeader
 };
 
