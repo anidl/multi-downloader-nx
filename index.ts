@@ -70,15 +70,15 @@ import update from './modules/module.updater';
 
 async function loadService(serviceName: string): Promise<ServiceClass> {
   switch(serviceName) {
-    case 'crunchy': return new (await import('./crunchy')).default;
-    case 'hidive':  return new (await import('./hidive')).default;
-    case 'ao':      return new (await import('./ao')).default;
-    case 'adn':     return new (await import('./adn')).default;
-    default:        
-      try {
-        return new (await import(`./${serviceName}`)).default;
-      } catch (error) {
-        throw new Error(`Service "${serviceName}" not found or failed to load`);
-      }
+  case 'crunchy': return new (await import('./crunchy')).default;
+  case 'hidive':  return new (await import('./hidive')).default;
+  case 'ao':      return new (await import('./ao')).default;
+  case 'adn':     return new (await import('./adn')).default;
+  default:        
+    try {
+      return new (await import(`./${serviceName}`)).default;
+    } catch (error) {
+      throw new Error(`Service "${serviceName}" not found or failed to load`);
+    }
   }
 }
