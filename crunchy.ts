@@ -1696,7 +1696,7 @@ export default class Crunchy implements ServiceClass {
         }
       }
 
-      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams['androidtv']}/play?queue=1`, AuthHeaders);
+      const videoPlaybackReq = await this.req.getData(`https://www.crunchyroll.com/playback/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams['androidtv']}/play?queue=0`, AuthHeaders);
       if (!videoPlaybackReq.ok || !videoPlaybackReq.res) {
         console.warn('Request Video Stream URLs FAILED!');
       } else {
