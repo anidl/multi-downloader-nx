@@ -94,91 +94,91 @@ export type ArgvType = typeof argvC;
 const appArgv = (cfg: {
   [key: string]: unknown
 }, isGUI = false) => {
-  if (argvC)
-    return argvC;
-  yargs(process.argv.slice(2));
-  const argv = getArgv(cfg, isGUI)
-    .parseSync();
-  argvC = argv;
-  return argv;
+    if (argvC)
+        return argvC;
+    yargs(process.argv.slice(2));
+    const argv = getArgv(cfg, isGUI)
+        .parseSync();
+    argvC = argv;
+    return argv;
 };
 
 
 const overrideArguments = (cfg: { [key:string]: unknown }, override: Partial<typeof argvC>, isGUI = false) => {
-  const argv = getArgv(cfg, isGUI).middleware((ar) => {
-    for (const key of Object.keys(override)) {
-      ar[key] = override[key];
-    }
-  }).parseSync();
-  argvC = argv;
+    const argv = getArgv(cfg, isGUI).middleware((ar) => {
+        for (const key of Object.keys(override)) {
+            ar[key] = override[key];
+        }
+    }).parseSync();
+    argvC = argv;
 };
     
 export {
-  appArgv,
-  overrideArguments
+    appArgv,
+    overrideArguments
 };
     
 const getArgv = (cfg: { [key:string]: unknown }, isGUI: boolean) => {
-  const parseDefault = <T = unknown>(key: string, _default: T) : T=> {
-    if (Object.prototype.hasOwnProperty.call(cfg, key)) {
-      return cfg[key] as T;
-    } else
-      return _default;
-  };  
-  const argv = yargs.parserConfiguration({
-    'duplicate-arguments-array': false,
-    'camel-case-expansion': false,
-  })
-    .wrap(yargs.terminalWidth())
-    .usage('Usage: $0 [options]')
-    .help(true);
+    const parseDefault = <T = unknown>(key: string, _default: T) : T=> {
+        if (Object.prototype.hasOwnProperty.call(cfg, key)) {
+            return cfg[key] as T;
+        } else
+            return _default;
+    };  
+    const argv = yargs.parserConfiguration({
+        'duplicate-arguments-array': false,
+        'camel-case-expansion': false,
+    })
+        .wrap(yargs.terminalWidth())
+        .usage('Usage: $0 [options]')
+        .help(true);
     //.strictOptions()
-  const data = args.map(a => {
-    return {
-      ...a,
-      demandOption: !isGUI && a.demandOption,
-      group: groups[a.group],
-      default: typeof a.default === 'object' && !Array.isArray(a.default) ? 
-        parseDefault((a.default as any).name || a.name, (a.default as any).default) : a.default
-    };
-  });
-  for (const item of data)
-    argv.option(item.name, {
-      ...item,
-      coerce: (value) => {
-        if (item.transformer) {
-          return item.transformer(value);
-        } else {  
-          return value;
-        }
-      },
-      choices: item.name === 'service' && isGUI ? undefined : item.choices as unknown as Choices
+    const data = args.map(a => {
+        return {
+            ...a,
+            demandOption: !isGUI && a.demandOption,
+            group: groups[a.group],
+            default: typeof a.default === 'object' && !Array.isArray(a.default) ? 
+                parseDefault((a.default as any).name || a.name, (a.default as any).default) : a.default
+        };
     });
+    for (const item of data)
+        argv.option(item.name, {
+            ...item,
+            coerce: (value) => {
+                if (item.transformer) {
+                    return item.transformer(value);
+                } else {  
+                    return value;
+                }
+            },
+            choices: item.name === 'service' && isGUI ? undefined : item.choices as unknown as Choices
+        });
 
-  // Custom logic for suggesting corrections for misspelled options
-  argv.middleware((argv: Record<string, any>) => {
+    // Custom logic for suggesting corrections for misspelled options
+    argv.middleware((argv: Record<string, any>) => {
     // List of valid options
-    const validOptions = [
-      ...args.map(a => a.name),
-      ...args.map(a => a.alias).filter(alias => alias !== undefined) as string[]
-    ];
-    const unknownOptions = Object.keys(argv).filter(key => !validOptions.includes(key) && key !== '_'  && key !== '$0'); // Filter out known options
+        const validOptions = [
+            ...args.map(a => a.name),
+            ...args.map(a => a.alias).filter(alias => alias !== undefined) as string[]
+        ];
+        const unknownOptions = Object.keys(argv).filter(key => !validOptions.includes(key) && key !== '_'  && key !== '$0'); // Filter out known options
   
-    const suggestedOptions: Record<string, boolean> = {};
-    unknownOptions.forEach(actualOption => {
-      const closestOption = validOptions.find(option => {
-        const levenVal = leven(option, actualOption);
-        return levenVal <= 2 && levenVal > 0;
-      });
+        const suggestedOptions: Record<string, boolean> = {};
+        unknownOptions.forEach(actualOption => {
+            const closestOption = validOptions.find(option => {
+                const levenVal = leven(option, actualOption);
+                return levenVal <= 2 && levenVal > 0;
+            });
       
-      if (closestOption && !suggestedOptions[closestOption]) {
-        suggestedOptions[closestOption] = true;
-        console.info(`Unknown option ${actualOption}, did you mean ${closestOption}?`);
-      } else if (!suggestedOptions[actualOption]) {
-        suggestedOptions[actualOption] = true;
-        console.info(`Unknown option ${actualOption}`);
-      }
+            if (closestOption && !suggestedOptions[closestOption]) {
+                suggestedOptions[closestOption] = true;
+                console.info(`Unknown option ${actualOption}, did you mean ${closestOption}?`);
+            } else if (!suggestedOptions[actualOption]) {
+                suggestedOptions[actualOption] = true;
+                console.info(`Unknown option ${actualOption}`);
+            }
+        });
     });
-  });
-  return argv as unknown as yargs.Argv<typeof argvC>;
+    return argv as unknown as yargs.Argv<typeof argvC>;
 };

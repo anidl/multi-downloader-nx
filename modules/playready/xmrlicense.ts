@@ -44,57 +44,57 @@ type ParsedLicense = {
 };
 
 export class XMRLicenseStructsV2 {
-  static CONTENT_KEY = new Parser()
-    .buffer('kid', { length: 16 })
-    .uint16('keytype')
-    .uint16('ciphertype')
-    .uint16('length')
-    .buffer('value', {
-      length: 'length',
-    });
+    static CONTENT_KEY = new Parser()
+        .buffer('kid', { length: 16 })
+        .uint16('keytype')
+        .uint16('ciphertype')
+        .uint16('length')
+        .buffer('value', {
+            length: 'length',
+        });
 
-  static ECC_KEY = new Parser()
-    .uint16('curve')
-    .uint16('length')
-    .buffer('value', {
-      length: 'length',
-    });
+    static ECC_KEY = new Parser()
+        .uint16('curve')
+        .uint16('length')
+        .buffer('value', {
+            length: 'length',
+        });
 
-  static FTLV = new Parser()
-    .uint16('flags')
-    .uint16('type')
-    .uint32('length')
-    .buffer('value', {
-      length: function () {
-        return (this as any).length - 8;
-      },
-    });
+    static FTLV = new Parser()
+        .uint16('flags')
+        .uint16('type')
+        .uint32('length')
+        .buffer('value', {
+            length: function () {
+                return (this as any).length - 8;
+            },
+        });
 
-  static AUXILIARY_LOCATIONS = new Parser()
-    .uint32('location')
-    .buffer('value', { length: 16 });
+    static AUXILIARY_LOCATIONS = new Parser()
+        .uint32('location')
+        .buffer('value', { length: 16 });
 
-  static AUXILIARY_KEY_OBJECT = new Parser()
-    .uint16('count')
-    .array('locations', {
-      length: 'count',
-      type: XMRLicenseStructsV2.AUXILIARY_LOCATIONS,
-    });
+    static AUXILIARY_KEY_OBJECT = new Parser()
+        .uint16('count')
+        .array('locations', {
+            length: 'count',
+            type: XMRLicenseStructsV2.AUXILIARY_LOCATIONS,
+        });
 
-  static SIGNATURE = new Parser()
-    .uint16('type')
-    .uint16('siglength')
-    .buffer('signature', {
-      length: 'siglength',
-    });
+    static SIGNATURE = new Parser()
+        .uint16('type')
+        .uint16('siglength')
+        .buffer('signature', {
+            length: 'siglength',
+        });
 
-  static XMR = new Parser()
-    .string('constant', { length: 4, assert: 'XMR\x00' })
-    .int32('version')
-    .buffer('rightsid', { length: 16 })
-    .nest('data', {
-      type: XMRLicenseStructsV2.FTLV,
-    });
+    static XMR = new Parser()
+        .string('constant', { length: 4, assert: 'XMR\x00' })
+        .int32('version')
+        .buffer('rightsid', { length: 16 })
+        .nest('data', {
+            type: XMRLicenseStructsV2.FTLV,
+        });
 }
 
 enum XMRTYPE {
@@ -117,135 +117,135 @@ enum XMRTYPE {
 }
 
 export class XmrUtil {
-  public data: Buffer;
-  public license: ParsedLicense;
+    public data: Buffer;
+    public license: ParsedLicense;
 
-  constructor(data: Buffer, license: ParsedLicense) {
-    this.data = data;
-    this.license = license;
-  }
-
-  static parse(license: Buffer) {
-    const xmr = XMRLicenseStructsV2.XMR.parse(license);
-
-    const parsed_license: ParsedLicense = {
-      version: xmr.version,
-      rights: Buffer.from(xmr.rightsid).toString('hex'),
-      length: license.length,
-      license: {
-        length: xmr.data.length,
-      },
-    };
-    const container = parsed_license.license;
-    const data = xmr.data;
-
-    let pos = 0;
-    while (pos < data.length - 16) {
-      const value = XMRLicenseStructsV2.FTLV.parse(data.value.slice(pos));
-
-      // XMR_SIGNATURE_OBJECT
-      if (value.type === XMRTYPE.XMR_SIGNATURE_OBJECT) {
-        const signature = XMRLicenseStructsV2.SIGNATURE.parse(value.value);
-
-        container.signature = {
-          length: value.length,
-          type: signature.type,
-          value: Buffer.from(signature.signature).toString('hex'),
-        };
-      }
-
-      // XMRTYPE.XMR_GLOBAL_POLICY_CONTAINER
-      if (value.type === XMRTYPE.XMR_GLOBAL_POLICY_CONTAINER) {
-        container.global_container = {};
-
-        let index = 0;
-        while (index < value.length - 16) {
-          const data = XMRLicenseStructsV2.FTLV.parse(value.value.slice(index));
-
-          // XMRTYPE.XMR_REVOCATION_INFORMATION_VERSION
-          if (data.type === XMRTYPE.XMR_REVOCATION_INFORMATION_VERSION) {
-            container.global_container.revocationInfo = {
-              version: data.value.readUInt32BE(0),
-            };
-          }
-
-          // XMRTYPE.XMR_SECURITY_LEVEL
-          if (data.type === XMRTYPE.XMR_SECURITY_LEVEL) {
-            container.global_container.securityLevel = {
-              level: data.value.readUInt16BE(0),
-            };
-          }
-
-          index += data.length;
-        }
-      }
-
-      // XMRTYPE.XMR_KEY_MATERIAL_CONTAINER
-      if (value.type === XMRTYPE.XMR_KEY_MATERIAL_CONTAINER) {
-        container.keyMaterial = {};
-
-        let index = 0;
-        while (index < value.length - 16) {
-          const data = XMRLicenseStructsV2.FTLV.parse(value.value.slice(index));
-
-          // XMRTYPE.XMR_CONTENT_KEY_OBJECT
-          if (data.type === XMRTYPE.XMR_CONTENT_KEY_OBJECT) {
-            const content_key = XMRLicenseStructsV2.CONTENT_KEY.parse(
-              data.value
-            );
-
-            container.keyMaterial.contentKey = {
-              kid: XmrUtil.fixUUID(content_key.kid).toString('hex'),
-              keyType: content_key.keytype,
-              ciphertype: content_key.ciphertype,
-              length: content_key.length,
-              value: content_key.value,
-            };
-          }
-
-          // XMRTYPE.XMR_ECC_KEY_OBJECT
-          if (data.type === XMRTYPE.XMR_ECC_KEY_OBJECT) {
-            const ecc_key = XMRLicenseStructsV2.ECC_KEY.parse(data.value);
-
-            container.keyMaterial.encryptionKey = {
-              curve: ecc_key.curve,
-              length: ecc_key.length,
-              value: Buffer.from(ecc_key.value).toString('hex'),
-            };
-          }
-
-          // XMRTYPE.XMR_AUXILIARY_KEY_OBJECT
-          if (data.type === XMRTYPE.XMR_AUXILIARY_KEY_OBJECT) {
-            const aux_keys = XMRLicenseStructsV2.AUXILIARY_KEY_OBJECT.parse(
-              data.value
-            );
-
-            container.keyMaterial.auxKeys = {
-              count: aux_keys.count,
-              value: aux_keys.locations.map((a: any) => {
-                return {
-                  location: a.location,
-                  value: Buffer.from(a.value).toString('hex'),
-                };
-              }),
-            };
-          }
-          index += data.length;
-        }
-      }
-
-      pos += value.length;
+    constructor(data: Buffer, license: ParsedLicense) {
+        this.data = data;
+        this.license = license;
     }
 
-    return new XmrUtil(license, parsed_license);
-  }
+    static parse(license: Buffer) {
+        const xmr = XMRLicenseStructsV2.XMR.parse(license);
 
-  static fixUUID(data: Buffer): Buffer {
-    return Buffer.concat([
-      Buffer.from(data.subarray(0, 4).reverse()),
-      Buffer.from(data.subarray(4, 6).reverse()),
-      Buffer.from(data.subarray(6, 8).reverse()),
-      data.subarray(8, 16),
-    ]);
-  }
+        const parsed_license: ParsedLicense = {
+            version: xmr.version,
+            rights: Buffer.from(xmr.rightsid).toString('hex'),
+            length: license.length,
+            license: {
+                length: xmr.data.length,
+            },
+        };
+        const container = parsed_license.license;
+        const data = xmr.data;
+
+        let pos = 0;
+        while (pos < data.length - 16) {
+            const value = XMRLicenseStructsV2.FTLV.parse(data.value.slice(pos));
+
+            // XMR_SIGNATURE_OBJECT
+            if (value.type === XMRTYPE.XMR_SIGNATURE_OBJECT) {
+                const signature = XMRLicenseStructsV2.SIGNATURE.parse(value.value);
+
+                container.signature = {
+                    length: value.length,
+                    type: signature.type,
+                    value: Buffer.from(signature.signature).toString('hex'),
+                };
+            }
+
+            // XMRTYPE.XMR_GLOBAL_POLICY_CONTAINER
+            if (value.type === XMRTYPE.XMR_GLOBAL_POLICY_CONTAINER) {
+                container.global_container = {};
+
+                let index = 0;
+                while (index < value.length - 16) {
+                    const data = XMRLicenseStructsV2.FTLV.parse(value.value.slice(index));
+
+                    // XMRTYPE.XMR_REVOCATION_INFORMATION_VERSION
+                    if (data.type === XMRTYPE.XMR_REVOCATION_INFORMATION_VERSION) {
+                        container.global_container.revocationInfo = {
+                            version: data.value.readUInt32BE(0),
+                        };
+                    }
+
+                    // XMRTYPE.XMR_SECURITY_LEVEL
+                    if (data.type === XMRTYPE.XMR_SECURITY_LEVEL) {
+                        container.global_container.securityLevel = {
+                            level: data.value.readUInt16BE(0),
+                        };
+                    }
+
+                    index += data.length;
+                }
+            }
+
+            // XMRTYPE.XMR_KEY_MATERIAL_CONTAINER
+            if (value.type === XMRTYPE.XMR_KEY_MATERIAL_CONTAINER) {
+                container.keyMaterial = {};
+
+                let index = 0;
+                while (index < value.length - 16) {
+                    const data = XMRLicenseStructsV2.FTLV.parse(value.value.slice(index));
+
+                    // XMRTYPE.XMR_CONTENT_KEY_OBJECT
+                    if (data.type === XMRTYPE.XMR_CONTENT_KEY_OBJECT) {
+                        const content_key = XMRLicenseStructsV2.CONTENT_KEY.parse(
+                            data.value
+                        );
+
+                        container.keyMaterial.contentKey = {
+                            kid: XmrUtil.fixUUID(content_key.kid).toString('hex'),
+                            keyType: content_key.keytype,
+                            ciphertype: content_key.ciphertype,
+                            length: content_key.length,
+                            value: content_key.value,
+                        };
+                    }
+
+                    // XMRTYPE.XMR_ECC_KEY_OBJECT
+                    if (data.type === XMRTYPE.XMR_ECC_KEY_OBJECT) {
+                        const ecc_key = XMRLicenseStructsV2.ECC_KEY.parse(data.value);
+
+                        container.keyMaterial.encryptionKey = {
+                            curve: ecc_key.curve,
+                            length: ecc_key.length,
+                            value: Buffer.from(ecc_key.value).toString('hex'),
+                        };
+                    }
+
+                    // XMRTYPE.XMR_AUXILIARY_KEY_OBJECT
+                    if (data.type === XMRTYPE.XMR_AUXILIARY_KEY_OBJECT) {
+                        const aux_keys = XMRLicenseStructsV2.AUXILIARY_KEY_OBJECT.parse(
+                            data.value
+                        );
+
+                        container.keyMaterial.auxKeys = {
+                            count: aux_keys.count,
+                            value: aux_keys.locations.map((a: any) => {
+                                return {
+                                    location: a.location,
+                                    value: Buffer.from(a.value).toString('hex'),
+                                };
+                            }),
+                        };
+                    }
+                    index += data.length;
+                }
+            }
+
+            pos += value.length;
+        }
+
+        return new XmrUtil(license, parsed_license);
+    }
+
+    static fixUUID(data: Buffer): Buffer {
+        return Buffer.concat([
+            Buffer.from(data.subarray(0, 4).reverse()),
+            Buffer.from(data.subarray(4, 6).reverse()),
+            Buffer.from(data.subarray(6, 8).reverse()),
+            data.subarray(8, 16),
+        ]);
+    }
 }
