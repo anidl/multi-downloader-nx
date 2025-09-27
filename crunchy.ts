@@ -119,7 +119,7 @@ export default class Crunchy implements ServiceClass {
       await this.refreshToken();
       await this.doSearch({ ...argv, search: argv.search as string });
     }
-    else if(argv.series && argv.series.match(/^[0-9A-Z]{9}$/)){
+    else if(argv.series && argv.series.match(/^[0-9A-Z]{9,}$/)){
       await this.refreshToken();
       await this.logSeriesById(argv.series as string);
       const selected = await this.downloadFromSeriesID(argv.series, { ...argv });
@@ -133,15 +133,15 @@ export default class Crunchy implements ServiceClass {
       }
       return true;
     }
-    else if(argv['movie-listing'] && argv['movie-listing'].match(/^[0-9A-Z]{9}$/)){
+    else if(argv['movie-listing'] && argv['movie-listing'].match(/^[0-9A-Z]{9,}$/)){
       await this.refreshToken();
       await this.logMovieListingById(argv['movie-listing'] as string);
     }
-    else if(argv['show-raw'] && argv['show-raw'].match(/^[0-9A-Z]{9}$/)){
+    else if(argv['show-raw'] && argv['show-raw'].match(/^[0-9A-Z]{9,}$/)){
       await this.refreshToken();
       await this.logShowRawById(argv['show-raw'] as string);
     }
-    else if(argv['season-raw'] && argv['season-raw'].match(/^[0-9A-Z]{9}$/)){
+    else if(argv['season-raw'] && argv['season-raw'].match(/^[0-9A-Z]{9,}$/)){
       await this.refreshToken();
       await this.logSeasonRawById(argv['season-raw'] as string);
     }
@@ -149,7 +149,7 @@ export default class Crunchy implements ServiceClass {
       await this.refreshToken();
       await this.logShowListRaw();
     }
-    else if(argv.s && argv.s.match(/^[0-9A-Z]{9}$/)){
+    else if(argv.s && argv.s.match(/^[0-9A-Z]{9,}$/)){
       await this.refreshToken();
       if (argv.dubLang.length > 1) {
         console.info('One show can only be downloaded with one dub. Use --srz instead.');
