@@ -56,8 +56,10 @@ export default tseslint.config(
         files: ['gui/react/**/*'],
         rules: {
             'no-console': 0,
-            // Disabled because ESLint bugs around on .tsx files somehow?
-            indent: 'off'
+            'indent': [
+                'error',
+                4
+            ],
         }
     }
 );

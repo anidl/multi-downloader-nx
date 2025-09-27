@@ -6,31 +6,31 @@ import { messageChannelContext } from '../provider/MessageChannel';
 import Require from './Require';
 
 const LogoutButton: React.FC = () => {
-  const messageChannel = React.useContext(messageChannelContext);
-  const [, dispatch] = useStore();
+    const messageChannel = React.useContext(messageChannelContext);
+    const [, dispatch] = useStore();
 
-  const logout = async () => {
-    if (await messageChannel?.isDownloading())
-      return alert('You are currently downloading. Please finish the download first.');
-    if (await messageChannel?.logout())
-      dispatch({
-        type: 'service',
-        payload: undefined
-      });
-    else 
-      alert('Unable to change service');
-  };
+    const logout = async () => {
+        if (await messageChannel?.isDownloading())
+            return alert('You are currently downloading. Please finish the download first.');
+        if (await messageChannel?.logout())
+            dispatch({
+                type: 'service',
+                payload: undefined
+            });
+        else 
+            alert('Unable to change service');
+    };
 
-  return <Require value={messageChannel}>
-    <Button
-      startIcon={<ExitToApp />}
-      variant='contained'
-      onClick={logout}
-      sx={{ maxHeight: '2.3rem' }}
-    >
+    return <Require value={messageChannel}>
+        <Button
+            startIcon={<ExitToApp />}
+            variant='contained'
+            onClick={logout}
+            sx={{ maxHeight: '2.3rem' }}
+        >
       Service select
-    </Button>
-  </Require>;
+        </Button>
+    </Require>;
 
 };
 
