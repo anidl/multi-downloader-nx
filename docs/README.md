@@ -21,7 +21,7 @@ By default this application uses the following paths to programs (main executabl
 * `ffprobe.exe` (From PATH)
 * `mkvmerge.exe` (From PATH)
 * `mp4decrypt.exe` (From PATH) (or shaka-packager)
-* `shaka-packager.exe` (From PATH) (or mp4decrypt)
+* `shaka-packager.exe` (v2.6.1 or older) (From PATH) (or mp4decrypt)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
