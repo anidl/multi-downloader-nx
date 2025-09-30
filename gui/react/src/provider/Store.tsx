@@ -32,35 +32,35 @@ export type StoreAction<T extends (keyof StoreState)> = {
 }
 
 const Reducer = <T extends keyof StoreState,>(state: StoreState, action: StoreAction<T>): StoreState => {
-  switch(action.type) {
-  default:
-    return { ...state, [action.type]: action.payload };
-  }
+    switch(action.type) {
+    default:
+        return { ...state, [action.type]: action.payload };
+    }
 };
 
 const initialState: StoreState = {
-  downloadOptions: {
-    id: '',
-    q: 0,
-    e: '',
-    dubLang: [ 'jpn' ],
-    dlsubs: [ 'all' ],
-    fileName: '',
-    dlVideoOnce: false,
-    all: false,
-    but: false,
-    noaudio: false,
-    novids: false,
-    simul: false
-  },
-  service: undefined,
-  episodeListing: [],
-  version: '',
+    downloadOptions: {
+        id: '',
+        q: 0,
+        e: '',
+        dubLang: [ 'jpn' ],
+        dlsubs: [ 'all' ],
+        fileName: '',
+        dlVideoOnce: false,
+        all: false,
+        but: false,
+        noaudio: false,
+        novids: false,
+        simul: false
+    },
+    service: undefined,
+    episodeListing: [],
+    version: '',
 };
 
 const Store: FCWithChildren = ({children}) => {
-  const [state, dispatch] = React.useReducer(Reducer, initialState);
-  /*React.useEffect(() => {
+    const [state, dispatch] = React.useReducer(Reducer, initialState);
+    /*React.useEffect(() => {
     if (!state.unsavedChanges.has)
       return;
     const unsavedChanges = (ev: BeforeUnloadEvent, lang: LanguageContextType) => {
@@ -79,11 +79,11 @@ const Store: FCWithChildren = ({children}) => {
     return () => window.removeEventListener('beforeunload', windowListener);
   }, [state.unsavedChanges.has]);*/
 
-  return (
-    <StoreContext.Provider value={[state, dispatch]}>
-      {children}
-    </StoreContext.Provider>
-  );
+    return (
+        <StoreContext.Provider value={[state, dispatch]}>
+            {children}
+        </StoreContext.Provider>
+    );
 };
 
 /* Importent Notice -- The 'queue' generic will be overriden */

@@ -1,120 +1,120 @@
 {
-  "name": "multi-downloader-nx",
-  "short_name": "aniDL",
-  "version": "5.5.7",
-  "description": "Downloader for Crunchyroll, Hidive, AnimeOnegai, and AnimationDigitalNetwork with CLI and GUI",
-  "keywords": [
-    "download",
-    "downloader",
-    "hidive",
-    "crunchy",
-    "crunchyroll",
-    "util",
-    "utility",
-    "cli",
-    "gui"
-  ],
-  "engines": {
-    "node": ">=18",
-    "pnpm": ">=7"
-  },
-  "author": "AnimeDL <AnimeDL@users.noreply.github.com>",
-  "contributors": [
-    {
-      "name": "AnimeDL <AnimeDL@users.noreply.github.com>"
+    "name": "multi-downloader-nx",
+    "short_name": "aniDL",
+    "version": "5.5.7",
+    "description": "Downloader for Crunchyroll, Hidive, AnimeOnegai, and AnimationDigitalNetwork with CLI and GUI",
+    "keywords": [
+        "download",
+        "downloader",
+        "hidive",
+        "crunchy",
+        "crunchyroll",
+        "util",
+        "utility",
+        "cli",
+        "gui"
+    ],
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=7"
     },
-    {
-      "name": "AniDL <AniDL@users.noreply.github.com>"
+    "author": "AnimeDL <AnimeDL@users.noreply.github.com>",
+    "contributors": [
+        {
+            "name": "AnimeDL <AnimeDL@users.noreply.github.com>"
+        },
+        {
+            "name": "AniDL <AniDL@users.noreply.github.com>"
+        },
+        {
+            "name": "AnidlSupport <AnidlSupport@users.noreply.github.com>"
+        }
+    ],
+    "homepage": "https://github.com/anidl/multi-downloader-nx",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/anidl/multi-downloader-nx.git"
     },
-    {
-      "name": "AnidlSupport <AnidlSupport@users.noreply.github.com>"
+    "bugs": {
+        "url": "https://github.com/anidl/multi-downloader-nx/issues"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "@bufbuild/buf": "^1.57.2",
+        "@bufbuild/protobuf": "^2.8.0",
+        "@bufbuild/protoc-gen-es": "^2.8.0",
+        "@yao-pkg/pkg": "^6.6.0",
+        "binary-parser": "^2.2.1",
+        "binary-parser-encoder": "^1.5.3",
+        "bn.js": "^5.2.2",
+        "cors": "^2.8.5",
+        "elliptic": "^6.6.1",
+        "esbuild": "^0.25.10",
+        "express": "^5.1.0",
+        "fast-xml-parser": "^5.2.5",
+        "ffprobe": "^1.1.2",
+        "fs-extra": "^11.3.2",
+        "iso-639": "^0.2.2",
+        "leven": "^3.1.0",
+        "log4js": "^6.9.1",
+        "long": "^5.3.2",
+        "lookpath": "^1.2.3",
+        "m3u8-parsed": "^2.0.0",
+        "mpd-parser": "^1.3.1",
+        "node-forge": "^1.3.1",
+        "ofetch": "^1.4.1",
+        "open": "^8.4.2",
+        "protobufjs": "^7.5.4",
+        "puppeteer-real-browser": "^1.4.4",
+        "ws": "^8.18.3",
+        "yaml": "^2.8.1",
+        "yargs": "^17.7.2"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.35.0",
+        "@types/bn.js": "^5.2.0",
+        "@types/cors": "^2.8.19",
+        "@types/elliptic": "^6.4.18",
+        "@types/express": "^5.0.3",
+        "@types/ffprobe": "^1.1.8",
+        "@types/fs-extra": "^11.0.4",
+        "@types/node": "^24.5.1",
+        "@types/node-forge": "^1.3.14",
+        "@types/ws": "^8.18.1",
+        "@types/yargs": "^17.0.33",
+        "@typescript-eslint/eslint-plugin": "^8.44.0",
+        "@typescript-eslint/parser": "^8.44.0",
+        "eslint": "^9.35.0",
+        "protoc": "^1.1.3",
+        "removeNPMAbsolutePaths": "^3.0.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.2",
+        "typescript-eslint": "^8.44.0"
+    },
+    "scripts": {
+        "prestart": "pnpm run tsc test",
+        "start": "pnpm prestart && cd lib && node gui.js",
+        "gui": "cd ./gui/react/ && pnpm start",
+        "docs": "ts-node modules/build-docs.ts",
+        "tsc": "ts-node tsc.ts",
+        "proto:compile": "protoc --plugin=protoc-gen-ts_proto=.\\node_modules\\.bin\\protoc-gen-ts_proto.cmd --ts_proto_opt=\"esModuleInterop=true\" --ts_proto_opt=\"forceLong=long\" --ts_proto_opt=\"env=node\" --ts_proto_out=. modules/*.proto",
+        "prebuild-cli": "pnpm run tsc false false",
+        "build-windows-cli": "pnpm run prebuild-cli && cd lib && node modules/build windows-x64",
+        "build-linux-cli": "pnpm run prebuild-cli && cd lib && node modules/build linuxstatic-x64",
+        "build-arm-cli": "pnpm run prebuild-cli && cd lib && node modules/build linux-arm64",
+        "build-macos-cli": "pnpm run prebuild-cli && cd lib && node modules/build macos-x64",
+        "build-alpine-cli": "pnpm run prebuild-cli && cd lib && node modules/build alpine-x64",
+        "build-android-cli": "pnpm run prebuild-cli && cd lib && node modules/build linuxstatic-armv7",
+        "prebuild-gui": "pnpm run tsc",
+        "build-windows-gui": "pnpm run prebuild-gui && cd lib && node modules/build windows-x64 true",
+        "build-linux-gui": "pnpm run prebuild-gui && cd lib && node modules/build linuxstatic-x64 true",
+        "build-arm-gui": "pnpm run prebuild-gui && cd lib && node modules/build linux-arm64 true",
+        "build-macos-gui": "pnpm run prebuild-gui && cd lib && node modules/build macos-x64 true",
+        "build-alpine-gui": "pnpm run prebuild-gui && cd lib && node modules/build alpine-x64 true",
+        "build-android-gui": "pnpm run prebuild-gui && cd lib && node modules/build linuxstatic-armv7 true",
+        "eslint": "npx eslint .",
+        "eslint-fix": "npx eslint . --fix",
+        "pretest": "pnpm run tsc",
+        "test": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build linuxstatic-x64 && node modules/build macos-x64"
     }
-  ],
-  "homepage": "https://github.com/anidl/multi-downloader-nx",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/anidl/multi-downloader-nx.git"
-  },
-  "bugs": {
-    "url": "https://github.com/anidl/multi-downloader-nx/issues"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "@bufbuild/buf": "^1.57.2",
-    "@bufbuild/protobuf": "^2.8.0",
-    "@bufbuild/protoc-gen-es": "^2.8.0",
-    "@yao-pkg/pkg": "^6.6.0",
-    "binary-parser": "^2.2.1",
-    "binary-parser-encoder": "^1.5.3",
-    "bn.js": "^5.2.2",
-    "cors": "^2.8.5",
-    "elliptic": "^6.6.1",
-    "esbuild": "^0.25.10",
-    "express": "^5.1.0",
-    "fast-xml-parser": "^5.2.5",
-    "ffprobe": "^1.1.2",
-    "fs-extra": "^11.3.2",
-    "iso-639": "^0.2.2",
-    "leven": "^3.1.0",
-    "log4js": "^6.9.1",
-    "long": "^5.3.2",
-    "lookpath": "^1.2.3",
-    "m3u8-parsed": "^2.0.0",
-    "mpd-parser": "^1.3.1",
-    "node-forge": "^1.3.1",
-    "ofetch": "^1.4.1",
-    "open": "^8.4.2",
-    "protobufjs": "^7.5.4",
-    "puppeteer-real-browser": "^1.4.4",
-    "ws": "^8.18.3",
-    "yaml": "^2.8.1",
-    "yargs": "^17.7.2"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.35.0",
-    "@types/bn.js": "^5.2.0",
-    "@types/cors": "^2.8.19",
-    "@types/elliptic": "^6.4.18",
-    "@types/express": "^5.0.3",
-    "@types/ffprobe": "^1.1.8",
-    "@types/fs-extra": "^11.0.4",
-    "@types/node": "^24.5.1",
-    "@types/node-forge": "^1.3.14",
-    "@types/ws": "^8.18.1",
-    "@types/yargs": "^17.0.33",
-    "@typescript-eslint/eslint-plugin": "^8.44.0",
-    "@typescript-eslint/parser": "^8.44.0",
-    "eslint": "^9.35.0",
-    "protoc": "^1.1.3",
-    "removeNPMAbsolutePaths": "^3.0.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.0"
-  },
-  "scripts": {
-    "prestart": "pnpm run tsc test",
-    "start": "pnpm prestart && cd lib && node gui.js",
-    "gui": "cd ./gui/react/ && pnpm start",
-    "docs": "ts-node modules/build-docs.ts",
-    "tsc": "ts-node tsc.ts",
-    "proto:compile": "protoc --plugin=protoc-gen-ts_proto=.\\node_modules\\.bin\\protoc-gen-ts_proto.cmd --ts_proto_opt=\"esModuleInterop=true\" --ts_proto_opt=\"forceLong=long\" --ts_proto_opt=\"env=node\" --ts_proto_out=. modules/*.proto",
-    "prebuild-cli": "pnpm run tsc false false",
-    "build-windows-cli": "pnpm run prebuild-cli && cd lib && node modules/build windows-x64",
-    "build-linux-cli": "pnpm run prebuild-cli && cd lib && node modules/build linuxstatic-x64",
-    "build-arm-cli": "pnpm run prebuild-cli && cd lib && node modules/build linux-arm64",
-    "build-macos-cli": "pnpm run prebuild-cli && cd lib && node modules/build macos-x64",
-    "build-alpine-cli": "pnpm run prebuild-cli && cd lib && node modules/build alpine-x64",
-    "build-android-cli": "pnpm run prebuild-cli && cd lib && node modules/build linuxstatic-armv7",
-    "prebuild-gui": "pnpm run tsc",
-    "build-windows-gui": "pnpm run prebuild-gui && cd lib && node modules/build windows-x64 true",
-    "build-linux-gui": "pnpm run prebuild-gui && cd lib && node modules/build linuxstatic-x64 true",
-    "build-arm-gui": "pnpm run prebuild-gui && cd lib && node modules/build linux-arm64 true",
-    "build-macos-gui": "pnpm run prebuild-gui && cd lib && node modules/build macos-x64 true",
-    "build-alpine-gui": "pnpm run prebuild-gui && cd lib && node modules/build alpine-x64 true",
-    "build-android-gui": "pnpm run prebuild-gui && cd lib && node modules/build linuxstatic-armv7 true",
-    "eslint": "npx eslint .",
-    "eslint-fix": "npx eslint . --fix",
-    "pretest": "pnpm run tsc",
-    "test": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build linuxstatic-x64 && node modules/build macos-x64"
-  }
 }

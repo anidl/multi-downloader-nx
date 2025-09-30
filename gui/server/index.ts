@@ -25,7 +25,7 @@ app.use(express.static(path.join(workingDir, 'gui', 'server', 'build'), { maxAge
 console.info(`\n=== Multi Downloader NX GUI ${packageJson.version} ===\n`);
 
 const server = app.listen(cfg.gui.port, () => {
-  console.info(`GUI server started on port ${cfg.gui.port}`);
+    console.info(`GUI server started on port ${cfg.gui.port}`);
 });
 
 new PublicWebSocket(server);

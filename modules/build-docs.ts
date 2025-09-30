@@ -4,27 +4,27 @@ import path from 'path';
 import { args, groups } from './module.args';
 
 const transformService = (str: Array<'crunchy'|'hidive'|'ao'|'adn'|'all'>) => {
-  const services: string[] = [];
-  str.forEach(function(part) {
-    switch(part) {
-    case 'crunchy':
-      services.push('Crunchyroll');
-      break;
-    case 'hidive':
-      services.push('Hidive');
-      break;
-    case 'ao':
-      services.push('AnimeOnegai');
-      break;
-    case 'adn':
-      services.push('AnimationDigitalNetwork');
-      break;
-    case 'all':
-      services.push('All');
-      break;
-    }
-  });
-  return services.join(', ');
+    const services: string[] = [];
+    str.forEach(function(part) {
+        switch(part) {
+        case 'crunchy':
+            services.push('Crunchyroll');
+            break;
+        case 'hidive':
+            services.push('Hidive');
+            break;
+        case 'ao':
+            services.push('AnimeOnegai');
+            break;
+        case 'adn':
+            services.push('AnimationDigitalNetwork');
+            break;
+        case 'all':
+            services.push('All');
+            break;
+        }
+    });
+    return services.join(', ');
 };
 
 let docs = `# ${packageJSON.name} (v${packageJSON.version})
@@ -45,30 +45,30 @@ This tool is not responsible for your actions; please make an informed decision 
 `;
 
 Object.entries(groups).forEach(([key, value]) => {
-  docs += `\n### ${value.slice(0, -1)}\n`;
+    docs += `\n### ${value.slice(0, -1)}\n`;
   
-  docs += args.filter(a => a.group === key).map(argument => {
-    return [`#### \`${argument.name.length > 1 ? '--' : '-'}${argument.name}\``,
-      `| **Service** | **Usage** | **Type** | **Required** | **Alias** | ${argument.choices ? '**Choices** |' : ''} ${argument.default ? '**Default** |' : ''}**cli-default Entry**`,
-      `| --- | --- | --- | --- | --- | ${argument.choices ? '--- | ' : ''}${argument.default ? '--- | ' : ''}---| `,
-      `| ${transformService(argument.service)} | \`${argument.name.length > 1 ? '--' : '-'}${argument.name} ${argument.usage}\` | \`${argument.type}\` | \`${argument.demandOption ? 'Yes' : 'No'}\`|`
+    docs += args.filter(a => a.group === key).map(argument => {
+        return [`#### \`${argument.name.length > 1 ? '--' : '-'}${argument.name}\``,
+            `| **Service** | **Usage** | **Type** | **Required** | **Alias** | ${argument.choices ? '**Choices** |' : ''} ${argument.default ? '**Default** |' : ''}**cli-default Entry**`,
+            `| --- | --- | --- | --- | --- | ${argument.choices ? '--- | ' : ''}${argument.default ? '--- | ' : ''}---| `,
+            `| ${transformService(argument.service)} | \`${argument.name.length > 1 ? '--' : '-'}${argument.name} ${argument.usage}\` | \`${argument.type}\` | \`${argument.demandOption ? 'Yes' : 'No'}\`|`
     + ` \`${(argument.alias ? `${argument.alias.length > 1 ? '--' : '-'}${argument.alias}` : undefined) ?? 'NaN'}\` |`
     + `${argument.choices ? ` [${argument.choices.map(a => `\`${a || '\'\''}\``).join(', ')}] |` : ''}`
     + `${argument.default ? ` \`${
-      typeof argument.default === 'object'
-        ? Array.isArray(argument.default) 
-          ? JSON.stringify(argument.default)
-          : (argument.default as any).default
-        : argument.default
+        typeof argument.default === 'object'
+            ? Array.isArray(argument.default) 
+                ? JSON.stringify(argument.default)
+                : (argument.default as any).default
+            : argument.default
     }\`|` : ''}`
     + ` ${typeof argument.default === 'object' && !Array.isArray(argument.default)
-      ? `\`${argument.default.name || argument.name}: \``
-      : '`NaN`'
+        ? `\`${argument.default.name || argument.name}: \``
+        : '`NaN`'
     } |`,
-      '',
-      argument.docDescribe === true ? argument.describe : argument.docDescribe
-    ].join('\n');
-  }).join('\n');
+            '',
+            argument.docDescribe === true ? argument.describe : argument.docDescribe
+        ].join('\n');
+    }).join('\n');
 });
 
 

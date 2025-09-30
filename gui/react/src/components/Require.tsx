@@ -6,9 +6,9 @@ export type RequireType<T> = {
 }
 
 const Require = <T, >(props: React.PropsWithChildren<RequireType<T>>) => {
-  return props.value === undefined ? <Backdrop open>
-    <CircularProgress />
-  </Backdrop> : <Box>{props.children}</Box>;
+    return props.value === undefined ? <Backdrop open>
+        <CircularProgress />
+    </Backdrop> : <Box>{props.children}</Box>;
 };
 
 export default Require;
