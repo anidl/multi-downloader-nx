@@ -1,35 +1,35 @@
 export interface NewHidiveSeries {
-	id:              number;
-	title:           string;
-	description:     string;
+	id: number;
+	title: string;
+	description: string;
 	longDescription: string;
-	smallCoverUrl:   string;
-	coverUrl:        string;
-	titleUrl:        string;
-	posterUrl:       string;
-	seasons:         Season[];
-	rating:          Rating;
-	contentRating:   Rating;
+	smallCoverUrl: string;
+	coverUrl: string;
+	titleUrl: string;
+	posterUrl: string;
+	seasons: Season[];
+	rating: Rating;
+	contentRating: Rating;
 	displayableTags: any[];
-	paging:          Paging;
+	paging: Paging;
 }
 
 export interface Rating {
-	rating:      string;
+	rating: string;
 	descriptors: any[];
 }
 
 export interface Paging {
 	moreDataAvailable: boolean;
-	lastSeen:          number;
+	lastSeen: number;
 }
 
 export interface Season {
-	title:           string;
-	description:     string;
+	title: string;
+	description: string;
 	longDescription: string;
-	seasonNumber:    number;
-	episodeCount:    number;
+	seasonNumber: number;
+	episodeCount: number;
 	displayableTags: any[];
-	id:              number;
+	id: number;
 }

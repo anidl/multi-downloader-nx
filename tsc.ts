@@ -9,19 +9,9 @@ let buildIgnore: string[] = [];
 const isTest = argv.length > 0 && argv[0] === 'test';
 const isGUI = !(argv.length > 1 && argv[1] === 'false');
 
-if (!isTest)
-	buildIgnore = [
-		'*/\\.env',
-		'./config/setup.json'
-	];
+if (!isTest) buildIgnore = ['*/\\.env', './config/setup.json'];
 
-if (!isGUI)
-	buildIgnore = buildIgnore.concat([
-		'./gui*',
-		'./build*',
-		'gui.ts'
-	]);
-
+if (!isGUI) buildIgnore = buildIgnore.concat(['./gui*', './build*', 'gui.ts']);
 
 const ignore = [
 	...buildIgnore,
@@ -44,13 +34,19 @@ const ignore = [
 	'./widevine/*',
 	'./playready/*',
 	'./videos/*',
-	'./logs/*',
-].map(a => a.replace(/\*/g, '[^]*').replace(/\.\//g, escapeRegExp(__dirname) + '/').replace(/\//g, path.sep === '\\' ? '\\\\' : '/')).map(a => new RegExp(a, 'i'));
+	'./logs/*'
+]
+	.map((a) =>
+		a
+			.replace(/\*/g, '[^]*')
+			.replace(/\.\//g, escapeRegExp(__dirname) + '/')
+			.replace(/\//g, path.sep === '\\' ? '\\\\' : '/')
+	)
+	.map((a) => new RegExp(a, 'i'));
 
 export { ignore };
 
 (async () => {
-
 	const waitForProcess = async (proc: ChildProcess) => {
 		return new Promise((resolve, reject) => {
 			proc.stdout?.on('data', console.log);
@@ -76,7 +72,7 @@ export { ignore };
 		process.stdout.write('✓\nBuilding react... ');
 
 		const installReactDependencies = exec('pnpm install', {
-			cwd: path.join(__dirname, 'gui', 'react'),
+			cwd: path.join(__dirname, 'gui', 'react')
 		});
 
 		await waitForProcess(installReactDependencies);
@@ -98,11 +94,10 @@ export { ignore };
 	}
 
 	const files = readDir(__dirname);
-	files.forEach(item => {
+	files.forEach((item) => {
 		const itemPath = path.join(__dirname, 'lib', item.path.replace(__dirname, ''));
 		if (item.stats.isDirectory()) {
-			if (!fs.existsSync(itemPath))
-				fs.mkdirSync(itemPath);
+			if (!fs.existsSync(itemPath)) fs.mkdirSync(itemPath);
 		} else {
 			copyFileSync(item.path, itemPath);
 		}
@@ -120,19 +115,18 @@ export { ignore };
 })();
 
 function readDir(dir: string): {
-	path: string,
-	stats: fs.Stats
+	path: string;
+	stats: fs.Stats;
 }[] {
 	const items: {
-		path: string,
-		stats: fs.Stats
+		path: string;
+		stats: fs.Stats;
 	}[] = [];
 	const content = fs.readdirSync(dir);
 	itemLoop: for (const item of content) {
 		const itemPath = path.join(dir, item);
 		for (const ignoreItem of ignore) {
-			if (ignoreItem.test(itemPath))
-				continue itemLoop;
+			if (ignoreItem.test(itemPath)) continue itemLoop;
 		}
 		const stats = fs.statSync(itemPath);
 		items.push({
@@ -154,9 +148,7 @@ async function copyDir(src: string, dest: string) {
 		const srcPath = path.join(src, entry.name);
 		const destPath = path.join(dest, entry.name);
 
-		entry.isDirectory() ?
-			await copyDir(srcPath, destPath) :
-			await fs.promises.copyFile(srcPath, destPath);
+		entry.isDirectory() ? await copyDir(srcPath, destPath) : await fs.promises.copyFile(srcPath, destPath);
 	}
 }
 

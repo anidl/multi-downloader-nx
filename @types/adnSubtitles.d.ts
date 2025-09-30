@@ -3,9 +3,9 @@ export interface ADNSubtitles {
 }
 
 export interface Subtitle {
-	startTime:     number;
-	endTime:       number;
+	startTime: number;
+	endTime: number;
 	positionAlign: string;
-	lineAlign:     string;
-	text:          string;
+	lineAlign: string;
+	text: string;
 }

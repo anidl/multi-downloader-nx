@@ -13,16 +13,16 @@ dlVideoOnce: false
 # Whether to keep all downloaded videos or only a single copy
 keepAllVideos: false
 # What to use as the file name template
-fileName: "[${service}] ${showTitle} - S${season}E${episode} [${height}p]"
+fileName: '[${service}] ${showTitle} - S${season}E${episode} [${height}p]'
 # What Audio languages to download
-dubLang: ["jpn"]
+dubLang: ['jpn']
 # What Subtitle languages to download
-dlsubs: ["all"]
+dlsubs: ['all']
 # What language Audio to set as default
-defaultAudio: "jpn"
+defaultAudio: 'jpn'
 # Video Playback Endpoint (Crunchyroll)
-vstream: "androidtv"
+vstream: 'androidtv'
 # Audio Playback Endpoint (Crunchyroll)
-astream: "android"
+astream: 'android'
 # Total Session Death (Could kill active streaming sessions from watching users if account shared, use with caution) (Crunchyroll)
 tsd: false

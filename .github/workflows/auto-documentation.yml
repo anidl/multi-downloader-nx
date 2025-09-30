@@ -1,26 +1,26 @@
 name: auto-documentation
 
 on:
-  push:
-    branches: [ master ]
+    push:
+        branches: [master]
 
 jobs:
-  documentation:
-    runs-on: ubuntu-latest
+    documentation:
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.head_ref }}
-    - uses: pnpm/action-setup@v2
-      with:
-        version: latest
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
-    - run: pnpm i 
-    - run: pnpm run docs
-    - uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: ${{ github.event.head_commit.message }} + Documentation
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  ref: ${{ github.head_ref }}
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+            - run: pnpm i
+            - run: pnpm run docs
+            - uses: stefanzweifel/git-auto-commit-action@v4
+              with:
+                  commit_message: ${{ github.event.head_commit.message }} + Documentation

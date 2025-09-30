@@ -17,7 +17,7 @@
 //   const isResponseOk = (response: Response) => {
 //     const {statusCode} = response;
 //     const limitStatusCode = response.request.options.followRedirect ? 299 : 399;
-    
+
 //     return (statusCode >= 200 && statusCode <= limitStatusCode) || statusCode === 304;
 //   };
 //   if (isResponseOk(res)) {
@@ -94,8 +94,8 @@
 //     // check playlist
 //     if(
 //       !options
-//       || !options.m3u8json 
-//       || !options.m3u8json.segments 
+//       || !options.m3u8json
+//       || !options.m3u8json.segments
 //       || options.m3u8json.segments.length === 0
 //     ){
 //       throw new Error('Playlist is empty!');
@@ -386,7 +386,7 @@
 //     return crypto.createDecipheriv('aes-128-cbc', this.data.keys[kURI], iv);
 //   }
 // }
-      
+
 // const extFn = {
 //   getURI: (uri: string, baseurl?: string) => {
 //     const httpURI = /^https{0,1}:/.test(uri);
@@ -453,5 +453,5 @@
 //     return got(uri, options);
 //   }
 // };
-    
+
 // export default hlsDownload;

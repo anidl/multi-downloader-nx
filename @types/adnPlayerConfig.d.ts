@@ -3,48 +3,48 @@ export interface ADNPlayerConfig {
 }
 
 export interface Player {
-	image:   string;
+	image: string;
 	options: Options;
 }
 
 export interface Options {
-	user:       User;
+	user: User;
 	chromecast: Chromecast;
-	ios:        Ios;
-	video:      Video;
-	dock:       any[];
+	ios: Ios;
+	video: Video;
+	dock: any[];
 	preference: Preference;
 }
 
 export interface Chromecast {
-	appId:           string;
+	appId: string;
 	refreshTokenUrl: string;
 }
 
 export interface Ios {
 	videoUrl: string;
-	appUrl:   string;
-	title:    string;
+	appUrl: string;
+	title: string;
 }
 
 export interface Preference {
-	quality:  string;
+	quality: string;
 	autoplay: boolean;
 	language: string;
-	green:    boolean;
+	green: boolean;
 }
 
 export interface User {
-	hasAccess:       boolean;
-	profileId:       number;
-	refreshToken:    string;
+	hasAccess: boolean;
+	profileId: number;
+	refreshToken: string;
 	refreshTokenUrl: string;
 }
 
 export interface Video {
-	startDate:   null;
+	startDate: null;
 	currentDate: Date;
-	available:   boolean;
-	free:        boolean;
-	url:         string;
+	available: boolean;
+	free: boolean;
+	url: string;
 }

@@ -7,6 +7,20 @@ on:
     branches: [ master ]
 
 jobs:
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: pnpm/action-setup@v2
+      with:
+        version: latest
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
+        check-latest: true
+    - run: pnpm i 
+    - run: npx tsc
   eslint:
     runs-on: ubuntu-latest
     steps:
@@ -17,10 +31,24 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 20
+        node-version: 22
         check-latest: true
     - run: pnpm i 
-    - run: npx eslint . --quiet
+    - run: pnpm run eslint
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: pnpm/action-setup@v2
+      with:
+        version: latest
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
+        check-latest: true
+    - run: pnpm i 
+    - run: pnpm run prettier
   test: 
     needs: eslint
     runs-on: ubuntu-latest
@@ -32,7 +60,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 20
+        node-version: 22
         check-latest: true
     - run: pnpm i 
     - run: pnpm run test

@@ -11,10 +11,5 @@
 		"downlevelIteration": true,
 		"jsx": "react"
 	},
-	"exclude": [
-		"./videos",
-		"./tsc.ts",
-		"lib/**/*",
-		"gui/react/**/*"
-	]
+	"exclude": ["./videos", "./tsc.ts", "lib/**/*", "gui/react/**/*"]
 }
