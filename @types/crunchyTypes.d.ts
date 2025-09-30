@@ -44,6 +44,7 @@ export type CrunchyDownloadOptions = {
 	fontSize: number;
 	dubLang: string[];
 	// Subtitle Fix Options
+	noSubFix: boolean;
 	srtAssFix: boolean;
 	layoutResFix: boolean;
 	scaledBorderAndShadowFix: boolean;

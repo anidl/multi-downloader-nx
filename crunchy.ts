@@ -2663,7 +2663,7 @@ export default class Crunchy implements ServiceClass {
 									let playResY = Number(mY?.[1]);
 
 									// Fix for Crunchyroll CCC SRT ASS
-									if (sBody.includes('www.closedcaptionconverter.com') && options.srtAssFix) {
+									if (sBody.includes('www.closedcaptionconverter.com') && options.srtAssFix && !options.noSubFix) {
 										playResX = 640;
 										playResY = 360;
 
@@ -2671,14 +2671,68 @@ export default class Crunchy implements ServiceClass {
 										sBody = sBody.replace(/,,,,25.00,,/g, ',,0,0,0,,').replace('PlayDepth: 0\n', '');
 
 										// Fix fonts
-										if (langItem.language === 'German') {
-											sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
-												return `Style: ${name},Arial,23,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,2,0,${align},0,0,20,1`;
-											});
-										} else {
-											sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
-												return `Style: ${name},Trebuchet MS,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
-											});
+										switch (langItem.cr_locale) {
+											case 'de-DE':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Arial,23,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,2,0,${align},0,0,20,1`;
+												});
+												break;
+											case 'id-ID':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Arial,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
+												});
+												break;
+											case 'vi-VN':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Arial Unicode MS,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
+												});
+												break;
+											case 'ms-MY':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Arial,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
+												});
+												break;
+											case 'th-TH':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Noto Sans Thai,30,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
+												});
+												break;
+											case 'zh-CN':
+											case 'zh-HK':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Arial Unicode MS,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
+												});
+												break;
+											case 'ru-RU':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Tahoma,22,&H00FFFFFF,&H000000FF,&H00000000,&H96000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0025,204`;
+												});
+												break;
+											case 'it-IT':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Trebuchet MS,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,${align},0010,0010,0015,1`;
+												});
+												break;
+											case 'ar-SA':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Adobe Arabic,26,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1,0,${align},0010,0010,0018,0`;
+												});
+												break;
+											case 'fr-FR':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Trebuchet MS,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1,1,${align},0002,0002,0025,1`;
+												});
+												break;
+											case 'pt-BR':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Trebuchet MS,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,2,1,${align},0040,0040,0015,0`;
+												});
+												break;
+											default:
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Trebuchet MS,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
+												});
+												break;
 										}
 
 										// Removing CCC credits
@@ -2697,17 +2751,17 @@ export default class Crunchy implements ServiceClass {
 
 									if (!sBody.includes('www.closedcaptionconverter.com')) {
 										// LayoutRes Fix
-										if (options.layoutResFix) {
+										if (options.layoutResFix && !options.noSubFix) {
 											sBody = sBody.replace(/^(PlayResY:\s*\d+)/m, `$1\nLayoutResX: ${playResX}\nLayoutResY: ${playResY}`);
 										}
 
 										// ScaleBorderAndShadow Fix
-										if (options.scaledBorderAndShadowFix) {
+										if (options.scaledBorderAndShadowFix && !options.noSubFix) {
 											sBody = sBody.replace(/^(WrapStyle:.*)$/m, `$1\nScaledBorderAndShadow: ${options.scaledBorderAndShadow}`);
 										}
 
 										// Fix VLC wrong parsing if URL not avaiable
-										if (options.originalScriptFix) {
+										if (options.originalScriptFix && !options.noSubFix) {
 											sBody = sBody.replace(/^Original Script:.*$/gm, 'Original Script: Crunchyroll');
 										}
 									}

@@ -373,6 +373,18 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		usage: '${sub1} ${sub2}'
 	},
 	{
+		name: 'noSubFix',
+		group: 'dl',
+		describe: 'Disables all subtitle fixes and downloads raw subtitles.',
+		docDescribe: true,
+		service: ['crunchy'],
+		type: 'boolean',
+		usage: '',
+		default: {
+			default: false
+		}
+	},
+	{
 		name: 'srtAssFix',
 		group: 'dl',
 		describe: 'Fixes the recently changed Crunchyroll subtitles provided by Closed Caption Converter.',
