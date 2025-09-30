@@ -893,12 +893,14 @@ export default class Crunchy implements ServiceClass {
 		if (item.subtitle_locales) {
 			iMetadata.subtitle_locales = item.subtitle_locales;
 		}
-		if (item.versions && audio_languages.length > 0) {
-			console.info('%s- Versions: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(audio_languages));
-		}
-		if (iMetadata.subtitle_locales && iMetadata.subtitle_locales.length > 0) {
-			console.info('%s- Subtitles: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(iMetadata.subtitle_locales));
-		}
+        // commented out for new per-episode sub listing
+        // instead of the series/season level sub listing
+		// if (item.versions && audio_languages.length > 0) {
+		// 	console.info('%s- Versions: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(audio_languages));
+		// }
+		// if (iMetadata.subtitle_locales && iMetadata.subtitle_locales.length > 0) {
+		// 	console.info('%s- Subtitles: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(iMetadata.subtitle_locales));
+		// }
 		if (item.availability_notes) {
 			console.info('%s- Availability notes: %s', ''.padStart(pad + 2, ' '), item.availability_notes.replace(/\[[^\]]*]?/gm, ''));
 		}
@@ -2920,19 +2922,16 @@ export default class Crunchy implements ServiceClass {
 			normal = Object.entries(episodes).filter((a) => a[0].startsWith('E')),
 			sortedEpisodes = Object.fromEntries([...normal, ...specials]);
 
-		for (const key of Object.keys(sortedEpisodes)) {
-			const item = sortedEpisodes[key];
-			const epNum = key.startsWith('E') ? `E${data?.absolute ? item.items[0].episode_number?.toString() || item.items[0].episode : key.slice(1)}` : key;
-			console.info(
-				`[${data?.absolute ? epNum : key}] [${item.items[0].upload_date ? new Date(item.items[0].upload_date).toISOString().slice(0, 10) : '0000-00-00'}] ${
-					item.items.find((a) => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
-				} - Season ${item.items[0].season_number} - ${item.items[0].title} [${item.items
-					.map((a, index) => {
-						return `${a.is_premium_only ? '☆ ' : ''}${item.langs[index]?.name ?? 'Unknown'}`;
-					})
-					.join(', ')}]`
-			);
-		}
+        for (const key of Object.keys(sortedEpisodes)) {
+            const item = sortedEpisodes[key];
+            const epNum = key.startsWith('E') ? (`E${data?.absolute ? (item.items[0].episode_number?.toString() || item.items[0].episode) : key.slice(1)}`) : key;
+            console.info(`[${data?.absolute ? epNum : key}] [${item.items[0].upload_date ? new Date(item.items[0].upload_date).toISOString().slice(0, 10) : '0000-00-00'}] ${
+                item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
+            } - Season ${item.items[0].season_number} - ${item.items[0].title}
+            \r\t- Dubs: ${item.items.map((a, index) => {return `${a.is_premium_only ? '☆ ' : ''}${item.langs?.[index]?.name ?? 'Unknown'}`;}).join(', ')}
+            \r\t- Subs: ${[...new Set(item.items.flatMap(a => a.subtitle_locales ?? 'None'))].join(', ')}`
+            );
+        }
 
 		if (!serieshasversions) {
 			console.warn("Couldn't find versions on some episodes, fell back to old method.");
