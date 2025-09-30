@@ -227,6 +227,36 @@ Download video with specific hardsubs
 
 Download subtitles by language tag (space-separated)
 Crunchy Only: un, en, en-IN, es-419, es-419, es-ES, pt-BR, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, zh-TW, zh-HK, ko, ca-ES, pl-PL, th-TH, ta-IN, ms-MY, vi-VN, id-ID, te-IN, ja
+#### `--srtAssFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--srtAssFix ` | `boolean` | `No`| `NaN` | `true`| `srtAssFix: ` |
+
+Fixes the recently changed Crunchyroll subtitles provided by Closed Caption Converter.
+#### `--layoutResFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--layoutResFix ` | `boolean` | `No`| `NaN` | `true`| `layoutResFix: ` |
+
+Applies the LayoutRes Fix to all ASS subtitles.
+#### `--scaledBorderAndShadowFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--scaledBorderAndShadowFix ` | `boolean` | `No`| `NaN` | `true`| `scaledBorderAndShadowFix: ` |
+
+Applies the ScaledBorderAndShadow Fix to all ASS subtitles.
+#### `--scaledBorderAndShadow`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--scaledBorderAndShadow ${yes/no}` | `string` | `No`| `NaN` | [`yes`, `no`] | `yes`| `scaledBorderAndShadow: ` |
+
+Select if ScaledBorderAndShadow should be set to "yes" or "no".
+#### `--originalScriptFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--originalScriptFix ` | `boolean` | `No`| `NaN` | `true`| `originalScriptFix: ` |
+
+Removes the URL in the Original Script line of the ASS subtitles, it prevents from bricking the subs in VLC (Fonts not loading when url not returning 200).
 #### `--novids`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
