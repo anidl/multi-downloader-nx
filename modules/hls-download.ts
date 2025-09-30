@@ -109,18 +109,30 @@ class hlsDownload {
 		// try load resume file
 		if (fsp.existsSync(fn) && fsp.existsSync(`${fn}.resume`) && this.data.offset < 1) {
 			try {
-				console.info('Resume data found! Trying to resume...');
-				const resumeData = JSON.parse(await fs.readFile(`${fn}.resume`, 'utf-8'));
-				if (resumeData.total == this.data.m3u8json.segments.length && resumeData.completed != resumeData.total && !isNaN(resumeData.completed)) {
-					console.info('Resume data is ok!');
-					this.data.offset = resumeData.completed;
-					this.data.isResume = true;
+				const stats = await fs.stat(`${fn}.resume`);
+				const age = Date.now() - stats.mtimeMs;
+
+				// Only resume download if data is not older than 24 hours
+				if (age < 24 * 60 * 60 * 1000) {
+					console.info('Resume data found! Trying to resume...');
+					const resumeData = JSON.parse(await fs.readFile(`${fn}.resume`, 'utf-8'));
+					if (resumeData.total == this.data.m3u8json.segments.length && resumeData.completed != resumeData.total && !isNaN(resumeData.completed)) {
+						console.info('Resume data is ok!');
+						this.data.offset = resumeData.completed;
+						this.data.isResume = true;
+					} else {
+						console.warn(' Resume data is wrong!');
+						console.warn({
+							resume: { total: resumeData.total, dled: resumeData.completed },
+							current: { total: this.data.m3u8json.segments.length }
+						});
+					}
 				} else {
-					console.warn(' Resume data is wrong!');
-					console.warn({
-						resume: { total: resumeData.total, dled: resumeData.completed },
-						current: { total: this.data.m3u8json.segments.length }
-					});
+					console.warn('Resume data found, but too old! Redownloading everything...');
+					try {
+						await fs.unlink(fn);
+						await fs.unlink(`${fn}.resume`);
+					} catch (e) {}
 				}
 			} catch (e) {
 				console.error('Resume failed, downloading will be not resumed!');
