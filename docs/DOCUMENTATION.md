@@ -4,7 +4,7 @@ If you find any bugs in this documentation or in the program itself please repor
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive*, *AnimeOnegai*, or *AnimationDigitalNetwork*.
+This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive* or *AnimationDigitalNetwork*.
 This application enables you to download videos for offline viewing which may be forbidden by law in your country.
 The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider.
 This tool is not responsible for your actions; please make an informed decision before using this application.
@@ -44,7 +44,7 @@ Authenticate every time the script runs. Use at your own risk.
 #### `--token`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, AnimeOnegai | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
+| Crunchyroll | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
 
 Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)
 ### Fonts
@@ -83,7 +83,7 @@ The output is organized in pages. Use this command to output the items for the g
 #### `--locale`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, AnimeOnegai, AnimationDigitalNetwork | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `und`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `zh-HK`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `und`, `fr`, `de`, `''`, `und`, `es`, `pt`] | `en-US`| `locale: ` |
+| Crunchyroll, AnimationDigitalNetwork | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `und`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `zh-HK`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `und`, `fr`, `de`] | `en-US`| `locale: ` |
 
 Set the local that will be used for the API.
 #### `--new`
@@ -159,7 +159,7 @@ Set the quality level. Use 0 to use the maximum quality.
 #### `--dlVideoOnce`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, AnimeOnegai | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `false`| `dlVideoOnce: ` |
+| Crunchyroll | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `false`| `dlVideoOnce: ` |
 
 If selected, the best selected quality will be downloaded only for the first language,
 then the worst video quality with the same audio quality will be downloaded for every other language.
@@ -486,7 +486,7 @@ Debug mode (tokens may be revealed in the console output)
 #### `--service`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--service ${service}` | `string` | `Yes`| `NaN` | [`crunchy`, `hidive`, `ao`, `adn`] | ``| `service: ` |
+| All | `--service ${service}` | `string` | `Yes`| `NaN` | [`crunchy`, `hidive`, `adn`] | ``| `service: ` |
 
 Set the service you want to use
 #### `--update`
