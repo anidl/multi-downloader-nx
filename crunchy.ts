@@ -2799,44 +2799,16 @@ export default class Crunchy implements ServiceClass {
             normal = Object.entries(episodes).filter(a => a[0].startsWith('E')),
             sortedEpisodes = Object.fromEntries([...normal, ...specials]);
 
-
-
-        // old version with new feature
         for (const key of Object.keys(sortedEpisodes)) {
             const item = sortedEpisodes[key];
             const epNum = key.startsWith('E') ? (`E${data?.absolute ? (item.items[0].episode_number?.toString() || item.items[0].episode) : key.slice(1)}`) : key;
             console.info(`[${data?.absolute ? epNum : key}] [${item.items[0].upload_date ? new Date(item.items[0].upload_date).toISOString().slice(0, 10) : '0000-00-00'}] ${
                 item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
             } - Season ${item.items[0].season_number} - ${item.items[0].title}
-                \t- Dubs: ${item.items.map((a, index) => {return `${a.is_premium_only ? '☆ ' : ''}${item.langs?.[index]?.name ?? 'Unknown'}`;}).join(', ')}
-                \t- Subs: ${[...new Set(item.items.flatMap(a => a.subtitle_locales ?? 'None'))].join(', ')}`
+            \r\t- Dubs: ${item.items.map((a, index) => {return `${a.is_premium_only ? '☆ ' : ''}${item.langs?.[index]?.name ?? 'Unknown'}`;}).join(', ')}
+            \r\t- Subs: ${[...new Set(item.items.flatMap(a => a.subtitle_locales ?? 'None'))].join(', ')}`
             );
         }
-
-        // new re-written version with new feature
-        for (const key of Object.keys(sortedEpisodes)) {
-            const item = sortedEpisodes[key];
-            const epNum = key.startsWith('E') ? (`E${data?.absolute ? (item.items[0].episode_number?.toString() || item.items[0].episode) : key.slice(1)}`) : key;
-            const dateStr = item.items[0].upload_date ? new Date(item.items[0].upload_date).toISOString().slice(0, 10) : '0000-00-00';
-            const seasonTitle = (
-                item.items.find(a => !a.season_title.match(/\(\w+ Dub\)/))?.season_title
-                ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
-            );
-            const dubs = item.items.map((a, index) => {
-                return `${a.is_premium_only ? '☆ ' : ''}${item.langs?.[index]?.name ?? 'Unknown'}`;
-            }).join(', ');
-            const subs = [...new Set(item.items.flatMap(a => a.subtitle_locales ?? 'None'))].join(', ');
-            const header = `[${data?.absolute ? epNum : key}] [${dateStr}] ${seasonTitle} - Season ${item.items[0].season_number} - ${item.items[0].title}`;
-
-            console.info([
-                header,
-                `\t- Dubs: ${dubs}`,
-                `\t- Subs: ${subs}`
-            ].join('\n'));
-        }
-
-
-
 
         if (!serieshasversions) {
             console.warn('Couldn\'t find versions on some episodes, fell back to old method.');
