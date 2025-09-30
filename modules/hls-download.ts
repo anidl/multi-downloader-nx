@@ -132,7 +132,9 @@ class hlsDownload {
 					try {
 						await fs.unlink(fn);
 						await fs.unlink(`${fn}.resume`);
-					} catch (e) {}
+					} catch (e) {
+						console.error(e);
+					}
 				}
 			} catch (e) {
 				console.error('Resume failed, downloading will be not resumed!');
