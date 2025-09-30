@@ -14,9 +14,6 @@ export type DataType = {
 	hidive: {
 		s: ItemType;
 	};
-	ao: {
-		s: ItemType;
-	};
 	adn: {
 		s: ItemType;
 	};
@@ -34,10 +31,6 @@ const addToArchive = (
 		  }
 		| {
 				service: 'hidive';
-				type: 's';
-		  }
-		| {
-				service: 'ao';
 				type: 's';
 		  }
 		| {
@@ -59,16 +52,7 @@ const addToArchive = (
 		});
 		(data as any)[kind.service][kind.type] = items;
 	} else {
-		if (kind.service === 'ao') {
-			data['ao'] = {
-				s: [
-					{
-						id: ID,
-						already: []
-					}
-				]
-			};
-		} else if (kind.service === 'crunchy') {
+		if (kind.service === 'crunchy') {
 			data['crunchy'] = {
 				s: ([] as ItemType).concat(
 					kind.type === 's'
@@ -121,10 +105,6 @@ const downloaded = (
 				type: 's';
 		  }
 		| {
-				service: 'ao';
-				type: 's';
-		  }
-		| {
 				service: 'adn';
 				type: 's';
 		  },
@@ -150,7 +130,7 @@ const downloaded = (
 	fs.writeFileSync(archiveFile, JSON.stringify(data, null, 4));
 };
 
-const makeCommand = (service: 'crunchy' | 'hidive' | 'ao' | 'adn'): Partial<ArgvType>[] => {
+const makeCommand = (service: 'crunchy' | 'hidive' | 'adn'): Partial<ArgvType>[] => {
 	const data = loadData();
 	const ret: Partial<ArgvType>[] = [];
 	const kind = data[service];

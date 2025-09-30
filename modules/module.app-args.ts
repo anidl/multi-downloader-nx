@@ -75,7 +75,7 @@ let argvC: {
 	rawoutput: string;
 	nocleanup: boolean;
 	help: boolean | undefined;
-	service: 'crunchy' | 'hidive' | 'ao' | 'adn';
+	service: 'crunchy' | 'hidive' | 'adn';
 	update: boolean;
 	fontName: string | undefined;
 	_: (string | number)[];

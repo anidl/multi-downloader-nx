@@ -80,11 +80,6 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
 				const options: RequestInit = {
 					method: 'head'
 				};
-				if (playlist.sidx.uri.includes('animecdn'))
-					options.headers = {
-						origin: 'https://www.animeonegai.com',
-						referer: 'https://www.animeonegai.com/'
-					};
 				const item = await fetch(playlist.sidx.uri, options);
 				if (!item.ok)
 					console.warn(`${item.status}: ${item.statusText}, Unable to fetch byteLength for audio stream ${Math.round(playlist.attributes.BANDWIDTH / 1024)}KiB/s`);
@@ -164,11 +159,6 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
 			const options: RequestInit = {
 				method: 'head'
 			};
-			if (playlist.sidx.uri.includes('animecdn'))
-				options.headers = {
-					origin: 'https://www.animeonegai.com',
-					referer: 'https://www.animeonegai.com/'
-				};
 			const item = await fetch(playlist.sidx.uri, options);
 			if (!item.ok)
 				console.warn(

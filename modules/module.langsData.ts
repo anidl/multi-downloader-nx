@@ -5,7 +5,6 @@ export type LanguageItem = {
 	hd_locale?: string;
 	adn_locale?: string;
 	new_hd_locale?: string;
-	ao_locale?: string;
 	locale: string;
 	code: string;
 	name: string;
@@ -13,13 +12,13 @@ export type LanguageItem = {
 };
 
 const languages: LanguageItem[] = [
-	{ locale: 'un', code: 'und', name: 'Undetermined', language: 'Undetermined', new_hd_locale: 'und', cr_locale: 'und', adn_locale: 'und', ao_locale: 'und' },
+	{ locale: 'un', code: 'und', name: 'Undetermined', language: 'Undetermined', new_hd_locale: 'und', cr_locale: 'und', adn_locale: 'und' },
 	{ cr_locale: 'en-US', new_hd_locale: 'en-US', hd_locale: 'English', locale: 'en', code: 'eng', name: 'English' },
 	{ cr_locale: 'en-IN', locale: 'en-IN', code: 'eng', name: 'English (India)' },
 	{ cr_locale: 'es-LA', new_hd_locale: 'es-MX', hd_locale: 'Spanish LatAm', locale: 'es-419', code: 'spa', name: 'Spanish', language: 'Latin American Spanish' },
-	{ cr_locale: 'es-419', ao_locale: 'es', hd_locale: 'Spanish', locale: 'es-419', code: 'spa-419', name: 'Spanish', language: 'Latin American Spanish' },
+	{ cr_locale: 'es-419', hd_locale: 'Spanish', locale: 'es-419', code: 'spa-419', name: 'Spanish', language: 'Latin American Spanish' },
 	{ cr_locale: 'es-ES', new_hd_locale: 'es-ES', hd_locale: 'Spanish Europe', locale: 'es-ES', code: 'spa-ES', name: 'Castilian', language: 'European Spanish' },
-	{ cr_locale: 'pt-BR', ao_locale: 'pt', new_hd_locale: 'pt-BR', hd_locale: 'Portuguese', locale: 'pt-BR', code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese' },
+	{ cr_locale: 'pt-BR', new_hd_locale: 'pt-BR', hd_locale: 'Portuguese', locale: 'pt-BR', code: 'por', name: 'Portuguese', language: 'Brazilian Portuguese' },
 	{ cr_locale: 'pt-PT', locale: 'pt-PT', code: 'por', name: 'Portuguese (Portugal)', language: 'Portugues (Portugal)' },
 	{ cr_locale: 'fr-FR', adn_locale: 'fr', hd_locale: 'French', locale: 'fr', code: 'fra', name: 'French' },
 	{ cr_locale: 'de-DE', adn_locale: 'de', hd_locale: 'German', locale: 'de', code: 'deu', name: 'German' },
@@ -42,7 +41,7 @@ const languages: LanguageItem[] = [
 	{ cr_locale: 'vi-VN', locale: 'vi-VN', code: 'vie', name: 'Vietnamese', language: 'Tiếng Việt' },
 	{ cr_locale: 'id-ID', locale: 'id-ID', code: 'ind', name: 'Indonesian', language: 'Bahasa Indonesia' },
 	{ cr_locale: 'te-IN', locale: 'te-IN', code: 'tel', name: 'Telugu (India)', language: 'తెలుగు' },
-	{ cr_locale: 'ja-JP', adn_locale: 'ja', ao_locale: 'ja', hd_locale: 'Japanese', locale: 'ja', code: 'jpn', name: 'Japanese' }
+	{ cr_locale: 'ja-JP', adn_locale: 'ja', hd_locale: 'Japanese', locale: 'ja', code: 'jpn', name: 'Japanese' }
 ];
 
 // add en language names
@@ -90,19 +89,6 @@ const searchLocales = (() => {
 			languages
 				.map((l) => {
 					return l.adn_locale;
-				})
-				.slice(0, -1)
-		)
-	];
-})();
-
-export const aoSearchLocales = (() => {
-	return [
-		'',
-		...new Set(
-			languages
-				.map((l) => {
-					return l.ao_locale;
 				})
 				.slice(0, -1)
 		)

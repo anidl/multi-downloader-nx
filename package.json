@@ -2,7 +2,7 @@
 	"name": "multi-downloader-nx",
 	"short_name": "aniDL",
 	"version": "5.5.7",
-	"description": "Downloader for Crunchyroll, Hidive, AnimeOnegai, and AnimationDigitalNetwork with CLI and GUI",
+	"description": "Downloader for Crunchyroll, Hidive, and AnimationDigitalNetwork with CLI and GUI",
 	"keywords": [
 		"download",
 		"downloader",
@@ -90,7 +90,7 @@
 		"protoc": "^1.1.3",
 		"removeNPMAbsolutePaths": "^3.0.1",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.9.2",
+		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.45.0"
 	},
 	"scripts": {

@@ -32,7 +32,7 @@ function hasDisplay(): boolean {
 // req
 export class Req {
 	private sessCfg: string;
-	private service: 'cr' | 'hd' | 'ao' | 'adn';
+	private service: 'cr' | 'hd' | 'adn';
 	private session: Record<
 		string,
 		{
@@ -51,7 +51,7 @@ export class Req {
 		private domain: Record<string, unknown>,
 		private debug: boolean,
 		private nosess = false,
-		private type: 'cr' | 'hd' | 'ao' | 'adn'
+		private type: 'cr' | 'hd' | 'adn'
 	) {
 		this.sessCfg = yamlCfg.sessCfgFile[type];
 		this.service = type;

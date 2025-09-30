@@ -1,4 +1,4 @@
-import { aoSearchLocales, dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
+import { dubLanguageCodes, languages, searchLocales, subtitleLanguagesFilter } from './module.langsData';
 import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from '../@types/enums';
 
 const groups = {
@@ -35,7 +35,7 @@ export type TAppArg<T extends boolean | string | number | unknown[], K = any> = 
 				default: T | undefined;
 				name?: string;
 		  };
-	service: Array<'crunchy' | 'hidive' | 'ao' | 'adn' | 'all'>;
+	service: Array<'crunchy' | 'hidive' | 'adn' | 'all'>;
 	usage: string; // -(-)${name} will be added for each command,
 	demandOption?: true;
 	transformer?: (value: T) => K;
@@ -110,12 +110,12 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		describe: 'Set the service locale',
 		docDescribe: 'Set the local that will be used for the API.',
 		group: 'search',
-		choices: [...searchLocales.filter((a) => a !== undefined), ...aoSearchLocales.filter((a) => a !== undefined)] as string[],
+		choices: [...searchLocales.filter((a) => a !== undefined)] as string[],
 		default: {
 			default: 'en-US'
 		},
 		type: 'string',
-		service: ['crunchy', 'ao', 'adn'],
+		service: ['crunchy', 'adn'],
 		usage: '${locale}'
 	},
 	{
@@ -226,7 +226,7 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		describe: 'Download only once the video with the best selected quality',
 		type: 'boolean',
 		group: 'dl',
-		service: ['crunchy', 'ao'],
+		service: ['crunchy'],
 		docDescribe:
 			'If selected, the best selected quality will be downloaded only for the first language,' +
 			'\nthen the worst video quality with the same audio quality will be downloaded for every other language.' +
@@ -689,7 +689,7 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		group: 'util',
 		service: ['all'],
 		type: 'string',
-		choices: ['crunchy', 'hidive', 'ao', 'adn'],
+		choices: ['crunchy', 'hidive', 'adn'],
 		usage: '${service}',
 		default: {
 			default: ''
@@ -806,7 +806,7 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		describe: 'Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)',
 		docDescribe: true,
 		group: 'auth',
-		service: ['crunchy', 'ao'],
+		service: ['crunchy'],
 		type: 'string',
 		usage: '${token}',
 		default: {

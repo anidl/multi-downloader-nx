@@ -26,7 +26,6 @@ const hdPflCfgFile = path.join(workingDir, 'config', 'hd_profile');
 const sessCfgFile = {
 	cr: path.join(workingDir, 'config', 'cr_sess'),
 	hd: path.join(workingDir, 'config', 'hd_sess'),
-	ao: path.join(workingDir, 'config', 'ao_sess'),
 	adn: path.join(workingDir, 'config', 'adn_sess')
 };
 const stateFile = path.join(workingDir, 'config', 'guistate');
@@ -34,7 +33,6 @@ const tokenFile = {
 	cr: path.join(workingDir, 'config', 'cr_token'),
 	hd: path.join(workingDir, 'config', 'hd_token'),
 	hdNew: path.join(workingDir, 'config', 'hd_new_token'),
-	ao: path.join(workingDir, 'config', 'ao_token'),
 	adn: path.join(workingDir, 'config', 'adn_token')
 };
 
@@ -237,24 +235,6 @@ const saveADNToken = (data: Record<string, unknown>) => {
 	}
 };
 
-const loadAOToken = () => {
-	let token = loadYamlCfgFile(tokenFile.ao, true);
-	if (typeof token !== 'object' || token === null || Array.isArray(token)) {
-		token = {};
-	}
-	return token;
-};
-
-const saveAOToken = (data: Record<string, unknown>) => {
-	const cfgFolder = path.dirname(tokenFile.ao);
-	try {
-		fs.ensureDirSync(cfgFolder);
-		fs.writeFileSync(`${tokenFile.ao}.yml`, yaml.stringify(data));
-	} catch (e) {
-		console.error("Can't save token file to disk!");
-	}
-};
-
 const loadHDSession = () => {
 	let session = loadYamlCfgFile(sessCfgFile.hd, true);
 	if (typeof session !== 'object' || session === null || Array.isArray(session)) {
@@ -392,8 +372,6 @@ export {
 	loadNewHDToken,
 	saveHDProfile,
 	loadHDProfile,
-	saveAOToken,
-	loadAOToken,
 	getState,
 	setState,
 	writeYamlCfgFile,
