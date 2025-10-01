@@ -89,6 +89,7 @@ let argvC: {
 	syncTiming: boolean;
 	callbackMaker?: (data: DownloadInfo) => HLSCallback;
 	// Subtitle Fix Options
+	noASSConv: boolean;
 	noSubFix: boolean;
 	srtAssFix: boolean;
 	layoutResFix: boolean;

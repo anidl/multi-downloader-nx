@@ -1075,15 +1075,23 @@ export default class Hidive implements ServiceClass {
 					}
 					sxData.language = subLang;
 					if (options.dlsubs.includes('all') || options.dlsubs.includes(subLang.locale)) {
-						const getVttContent = await this.req.getData(sub.url);
+						let getVttContent = await this.req.getData(sub.url);
 						if (getVttContent.ok && getVttContent.res) {
+							let sBody = await getVttContent.res.text();
+
 							console.info(`Subtitle Downloaded: ${sub.url}`);
-							//vttConvert(getVttContent.res.body, false, subLang.name, fontSize);
-							const sBody = vtt2ass(undefined, chosenFontSize, await getVttContent.res.text(), '', subsMargin, options.fontName, options.combineLines);
-							sxData.title = `${subLang.language} / ${sxData.title}`;
-							sxData.fonts = fontsData.assFonts(sBody) as Font[];
+
+							if (!options.noASSConv) {
+								sBody = vtt2ass(undefined, chosenFontSize, await getVttContent.res.text(), '', subsMargin, options.fontName, options.combineLines);
+								sxData.title = `${subLang.language} / ${sxData.title}`;
+								sxData.fonts = fontsData.assFonts(sBody) as Font[];
+								console.info(`Subtitle converted: ${sxData.file}`);
+							} else {
+								// Yeah, whatever
+								sxData.fonts = [];
+							}
+
 							fs.writeFileSync(sxData.path, sBody);
-							console.info(`Subtitle converted: ${sxData.file}`);
 							files.push({
 								type: 'Subtitle',
 								...(sxData as sxItem),

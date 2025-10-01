@@ -373,6 +373,18 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		usage: '${sub1} ${sub2}'
 	},
 	{
+		name: 'noASSConv',
+		group: 'dl',
+		describe: 'Disables VTT conversion to ASS.',
+		docDescribe: true,
+		service: ['crunchy', 'hidive'],
+		type: 'boolean',
+		usage: '',
+		default: {
+			default: false
+		}
+	},
+	{
 		name: 'noSubFix',
 		group: 'dl',
 		describe: 'Disables all subtitle fixes and downloads raw subtitles.',
