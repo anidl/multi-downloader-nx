@@ -1082,7 +1082,7 @@ export default class Hidive implements ServiceClass {
 							console.info(`Subtitle Downloaded: ${sub.url}`);
 
 							if (!options.noASSConv) {
-								sBody = vtt2ass(undefined, chosenFontSize, await getVttContent.res.text(), '', subsMargin, options.fontName, options.combineLines);
+								sBody = vtt2ass(undefined, chosenFontSize, sBody, '', subsMargin, options.fontName, options.combineLines);
 								sxData.title = `${subLang.language} / ${sxData.title}`;
 								sxData.fonts = fontsData.assFonts(sBody) as Font[];
 								console.info(`Subtitle converted: ${sxData.file}`);
