@@ -1075,7 +1075,7 @@ export default class Hidive implements ServiceClass {
 					}
 					sxData.language = subLang;
 					if (options.dlsubs.includes('all') || options.dlsubs.includes(subLang.locale)) {
-						let getVttContent = await this.req.getData(sub.url);
+						const getVttContent = await this.req.getData(sub.url);
 						if (getVttContent.ok && getVttContent.res) {
 							let sBody = await getVttContent.res.text();
 
