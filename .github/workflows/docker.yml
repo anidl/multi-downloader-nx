@@ -3,8 +3,8 @@
 name: build and push docker image
 
 on:
-    push:
-        branches: [master]
+    release:
+        types: [published]
     workflow_dispatch:
 
 jobs:
