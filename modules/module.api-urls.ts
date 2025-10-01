@@ -49,7 +49,7 @@ const api: APIType = {
 	bundlejs: 'https://static.crunchyroll.com/vilos-v2/web/vilos/js/bundle.js',
 	//
 	// Crunchyroll API
-	basic_auth_token: 'YW55ZGF6d2F4Y2xyb2NhbndobzM6ODhnbklzdWNWLVE3c1lyWTI5dU9XX0pHbE1xeDFtQk4=',
+	basic_auth_token: 'ZGsxYndzemRyc3lkeTR1N2xvenE6bDl0SU1BdTlzTGc4ZjA4ajlfQkQ4eWZmQmZTSms0R0o=',
 	auth: `${domain.cr_www}/auth/v1/token`,
 	me: `${domain.cr_www}/accounts/v1/me`,
 	profile: `${domain.cr_www}/accounts/v1/me/profile`,
@@ -66,7 +66,7 @@ const api: APIType = {
 	cms_auth: `${domain.cr_www}/index/v2`,
 	//
 	// Crunchyroll Headers
-	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.46.0_22275 (Android 12; en-US; SHIELD Android TV Build/SR1A.211012.001)',
+	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.47.0_22277 (Android 12; en-US; SHIELD Android TV Build/SR1A.211012.001)',
 	crunchyDefHeader: {},
 	crunchyAuthHeader: {},
 	//
