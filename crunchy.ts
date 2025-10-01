@@ -2687,6 +2687,21 @@ export default class Crunchy implements ServiceClass {
 													return `Style: ${name},Arial,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
 												});
 												break;
+											case 'hi-IN':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Mangal,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
+												});
+												break;
+											case 'ta-IN':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Noto Sans Tamil,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
+												});
+												break;
+											case 'te-IN':
+												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+													return `Style: ${name},Noto Sans Telugu,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
+												});
+												break;
 											case 'vi-VN':
 												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
 													return `Style: ${name},Arial Unicode MS,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
