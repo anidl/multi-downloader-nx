@@ -15,7 +15,7 @@ export default class Helper {
 		const days = Math.floor(t / 86400);
 		const hours = Math.floor((t % 86400) / 3600);
 		const minutes = Math.floor(((t % 86400) % 3600) / 60);
-		const seconds = t % 60;
+		const seconds = +(t % 60).toFixed(0);
 		const daysS = days > 0 ? `${days}d` : '';
 		const hoursS = daysS || hours ? `${daysS}${daysS && hours < 10 ? '0' : ''}${hours}h` : '';
 		const minutesS = minutes || hoursS ? `${hoursS}${hoursS && minutes < 10 ? '0' : ''}${minutes}m` : '';
