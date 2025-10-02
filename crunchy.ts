@@ -895,12 +895,12 @@ export default class Crunchy implements ServiceClass {
 		}
 		// commented out for new per-episode sub listing
 		// instead of the series/season level sub listing
-		// if (item.versions && audio_languages.length > 0) {
-		// 	console.info('%s- Versions: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(audio_languages));
-		// }
-		// if (iMetadata.subtitle_locales && iMetadata.subtitle_locales.length > 0) {
-		// 	console.info('%s- Subtitles: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(iMetadata.subtitle_locales));
-		// }
+		if (item.versions && audio_languages.length > 0) {
+			console.info('%s- Versions: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(audio_languages));
+		}
+		if (iMetadata.subtitle_locales && iMetadata.subtitle_locales.length > 0) {
+			console.info('%s- Subtitles: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(iMetadata.subtitle_locales));
+		}
 		if (item.availability_notes) {
 			console.info('%s- Availability notes: %s', ''.padStart(pad + 2, ' '), item.availability_notes.replace(/\[[^\]]*]?/gm, ''));
 		}
