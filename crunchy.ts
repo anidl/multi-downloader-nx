@@ -3005,12 +3005,12 @@ export default class Crunchy implements ServiceClass {
 			console.info(`[${data?.absolute ? epNum : key}] [${item.items[0].upload_date ? new Date(item.items[0].upload_date).toISOString().slice(0, 10) : '0000-00-00'}] ${
 				item.items.find((a) => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? item.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd()
 			} - Season ${item.items[0].season_number} - ${item.items[0].title}
-            \r\t- Dubs: ${item.items
+            \r\t- Versions: ${item.items
 				.map((a, index) => {
 					return `${a.is_premium_only ? '☆ ' : ''}${item.langs?.[index]?.name ?? 'Unknown'}`;
 				})
 				.join(', ')}
-            \r\t- Subs: ${[...new Set(item.items.flatMap((a) => a.subtitle_locales ?? 'None'))].join(', ')}`);
+            \r\t- Subtitles: ${[...new Set(item.items.flatMap((a) => a.subtitle_locales ?? 'None'))].join(', ')}`);
 		}
 
 		if (!serieshasversions) {
