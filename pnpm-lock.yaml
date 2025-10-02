@@ -115,8 +115,8 @@ importers:
         specifier: ^11.0.4
         version: 11.0.4
       '@types/node':
-        specifier: ^24.6.1
-        version: 24.6.1
+        specifier: ^24.6.2
+        version: 24.6.2
       '@types/node-forge':
         specifier: ^1.3.14
         version: 1.3.14
@@ -152,7 +152,7 @@ importers:
         version: 3.0.1
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@24.6.1)(typescript@5.9.3)
+        version: 10.9.2(@types/node@24.6.2)(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -600,8 +600,8 @@ packages:
   '@types/node-forge@1.3.14':
     resolution: {integrity: sha512-mhVF2BnD4BO+jtOp7z1CdzaK4mbuK0LLQYAvdOLqHTavxFNq4zA1EmYkpnFjP8HOUzedfQkRnp0E2ulSAYSzAw==}
 
-  '@types/node@24.6.1':
-    resolution: {integrity: sha512-ljvjjs3DNXummeIaooB4cLBKg2U6SPI6Hjra/9rRIy7CpM0HpLtG9HptkMKAb4HYWy5S7HUvJEuWgr/y0U8SHw==}
+  '@types/node@24.6.2':
+    resolution: {integrity: sha512-d2L25Y4j+W3ZlNAeMKcy7yDsK425ibcAOO2t7aPTz6gNMH0z2GThtwENCDc0d/Pw9wgyRqE5Px1wkV7naz8ang==}
 
   '@types/qs@6.14.0':
     resolution: {integrity: sha512-eOunJqu0K1923aExK6y8p6fsihYEn/BYuQ4g0CxAAgFc4b/ZLN4CrsRZ55srTdqoiLzU2B2evC+apEIxprEzkQ==}
@@ -2566,20 +2566,20 @@ snapshots:
 
   '@types/bn.js@5.2.0':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/debug@4.1.12':
     dependencies:
@@ -2593,7 +2593,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.0.7':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.5
@@ -2609,7 +2609,7 @@ snapshots:
   '@types/fs-extra@11.0.4':
     dependencies:
       '@types/jsonfile': 6.1.4
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/http-errors@2.0.5': {}
 
@@ -2617,7 +2617,7 @@ snapshots:
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/mime@1.3.5': {}
 
@@ -2625,9 +2625,9 @@ snapshots:
 
   '@types/node-forge@1.3.14':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
-  '@types/node@24.6.1':
+  '@types/node@24.6.2':
     dependencies:
       undici-types: 7.13.0
 
@@ -2638,17 +2638,17 @@ snapshots:
   '@types/send@0.17.5':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/serve-static@1.15.8':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
       '@types/send': 0.17.5
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -2658,7 +2658,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
     optional: true
 
   '@typescript-eslint/eslint-plugin@8.45.0(@typescript-eslint/parser@8.45.0(eslint@9.36.0)(typescript@5.9.3))(eslint@9.36.0)(typescript@5.9.3)':
@@ -2998,7 +2998,7 @@ snapshots:
 
   chrome-launcher@1.2.1:
     dependencies:
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 2.0.2
@@ -3920,7 +3920,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
       long: 5.3.2
 
   protoc@1.1.3:
@@ -4308,14 +4308,14 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  ts-node@10.9.2(@types/node@24.6.1)(typescript@5.9.3):
+  ts-node@10.9.2(@types/node@24.6.2)(typescript@5.9.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 24.6.1
+      '@types/node': 24.6.2
       acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
