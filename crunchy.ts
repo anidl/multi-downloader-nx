@@ -893,8 +893,6 @@ export default class Crunchy implements ServiceClass {
 		if (item.subtitle_locales) {
 			iMetadata.subtitle_locales = item.subtitle_locales;
 		}
-		// commented out for new per-episode sub listing
-		// instead of the series/season level sub listing
 		if (item.versions && audio_languages.length > 0) {
 			console.info('%s- Versions: %s', ''.padStart(pad + 2, ' '), langsData.parseSubtitlesArray(audio_languages));
 		}
