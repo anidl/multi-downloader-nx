@@ -2757,21 +2757,21 @@ export default class Crunchy implements ServiceClass {
 
 										// Add PlayResX, PlayResY, Timer and WrapStyle
 										const idx = lines.findIndex((l) => l.trim() === '[Script Info]');
-                                        if (idx !== -1) {
-                                            const hasPlayResX = lines.some(l => l.match(/^PlayResX:/));
-                                            const hasPlayResY = lines.some(l => l.match(/^PlayResY:/));
-                                            const hasTimer = lines.some(l => l.match(/^Timer:/));
-                                            const hasWrapStyle = lines.some(l => l.match(/^WrapStyle:/));
+										if (idx !== -1) {
+											const hasPlayResX = lines.some((l) => l.match(/^PlayResX:/));
+											const hasPlayResY = lines.some((l) => l.match(/^PlayResY:/));
+											const hasTimer = lines.some((l) => l.match(/^Timer:/));
+											const hasWrapStyle = lines.some((l) => l.match(/^WrapStyle:/));
 
-                                            const toInsert = [`SubtitleLanguage: ${langItem.name}`];
+											const toInsert = [`SubtitleLanguage: ${langItem.name}`];
 
-                                            if (!hasPlayResX) toInsert.push(`PlayResX: ${playResX}`);
-                                            if (!hasPlayResY) toInsert.push(`PlayResY: ${playResY}`);
-                                            if (!hasTimer) toInsert.push('Timer: 0.0000');
-                                            if (!hasWrapStyle) toInsert.push('WrapStyle: 0');
+											if (!hasPlayResX) toInsert.push(`PlayResX: ${playResX}`);
+											if (!hasPlayResY) toInsert.push(`PlayResY: ${playResY}`);
+											if (!hasTimer) toInsert.push('Timer: 0.0000');
+											if (!hasWrapStyle) toInsert.push('WrapStyle: 0');
 
-                                            lines.splice(idx + 3, 0, ...toInsert);
-                                        }
+											lines.splice(idx + 3, 0, ...toInsert);
+										}
 
 										sBody = lines.join('\n');
 									}
@@ -3319,7 +3319,3 @@ export default class Crunchy implements ServiceClass {
 		return episodeList;
 	}
 }
-
-
-
-
