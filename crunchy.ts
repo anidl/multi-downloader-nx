@@ -2748,7 +2748,7 @@ export default class Crunchy implements ServiceClass {
                                                 break;
                                             default:
                                                 sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+,\d+,.+$/gm, (match, name, align) => {
-                                                    return `Style: ${name},Trebuchet MS,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
+                                                    return `Style: ${name},Trebuchet MS,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,2,0010,0010,0018,0`;
                                                 });
                                                 break;
                                         }
@@ -3319,5 +3319,6 @@ export default class Crunchy implements ServiceClass {
 		return episodeList;
 	}
 }
+
 
 
