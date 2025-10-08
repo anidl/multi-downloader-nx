@@ -133,8 +133,8 @@ importers:
         specifier: ^8.45.0
         version: 8.45.0(eslint@9.37.0)(typescript@5.9.3)
       '@yao-pkg/pkg':
-        specifier: ^6.7.0
-        version: 6.7.0
+        specifier: ^6.8.0
+        version: 6.8.0
       eslint:
         specifier: ^9.37.0
         version: 9.37.0
@@ -706,12 +706,12 @@ packages:
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
 
-  '@yao-pkg/pkg-fetch@3.5.25':
-    resolution: {integrity: sha512-6deLQjwn5EJVCGRb9Rsy5c8TZixRgiBHMu3cIFVakwZR6ebidE16/Oc7WDBvhQg9N3B3ExgDi7QA19w7Z2GZkA==}
+  '@yao-pkg/pkg-fetch@3.5.28':
+    resolution: {integrity: sha512-0dTu0yFgAuOp3OJBiwSZVkTMuGmvExwmG9mHKQhHkaNate5BWh6rBTzfQ0WId9DHXmg7GiT/kIyejEV0G3EHUQ==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.7.0':
-    resolution: {integrity: sha512-Q06diprlqZrZ0SFefUUhvVj06QboHsBOLyml2CpzWvMUdV7fleSZ8wq5tBrVfmjWu2/ka4bDWHwlocHuYD7HOQ==}
+  '@yao-pkg/pkg@6.8.0':
+    resolution: {integrity: sha512-QQcMbQHlaw7dFy3Nk7XQ7Gm8DlczTBcgSQB1V068L5/2rSZ3TO4CMc7rU7DeIOOR0Pm+mb5TDR3yH4jT6nfkpw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -1919,6 +1919,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.7.3:
+    resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@1.2.0:
     resolution: {integrity: sha512-uaW0WwXKpL9blXE2o0bRhoL2EGXIrZxQ2ZQ4mgcfoBxdFmQold+qWsD2jLrfZ0trjKL6vOw0j//eAwcALFjKSw==}
     engines: {node: '>= 18'}
@@ -2548,7 +2553,7 @@ snapshots:
       extract-zip: 2.0.1
       progress: 2.0.3
       proxy-agent: 6.5.0
-      semver: 7.7.2
+      semver: 7.7.3
       tar-fs: 3.1.1
       unbzip2-stream: 1.4.3
       yargs: 17.7.2
@@ -2783,25 +2788,27 @@ snapshots:
 
   '@xmldom/xmldom@0.8.11': {}
 
-  '@yao-pkg/pkg-fetch@3.5.25':
+  '@yao-pkg/pkg-fetch@3.5.28':
     dependencies:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
       picocolors: 1.1.1
       progress: 2.0.3
-      semver: 7.7.2
-      tar-fs: 2.1.4
+      semver: 7.7.3
+      tar-fs: 3.1.1
       yargs: 16.2.0
     transitivePeerDependencies:
+      - bare-buffer
       - encoding
+      - react-native-b4a
       - supports-color
 
-  '@yao-pkg/pkg@6.7.0':
+  '@yao-pkg/pkg@6.8.0':
     dependencies:
       '@babel/generator': 7.28.3
       '@babel/parser': 7.28.4
       '@babel/types': 7.28.4
-      '@yao-pkg/pkg-fetch': 3.5.25
+      '@yao-pkg/pkg-fetch': 3.5.28
       into-stream: 6.0.0
       minimist: 1.2.8
       multistream: 4.1.0
@@ -2814,7 +2821,9 @@ snapshots:
       tinyglobby: 0.2.15
       unzipper: 0.12.3
     transitivePeerDependencies:
+      - bare-buffer
       - encoding
+      - react-native-b4a
       - supports-color
 
   JSONStream@1.3.5:
@@ -3787,7 +3796,7 @@ snapshots:
 
   node-abi@3.78.0:
     dependencies:
-      semver: 7.7.2
+      semver: 7.7.3
 
   node-domexception@1.0.0: {}
 
@@ -4097,6 +4106,8 @@ snapshots:
   safer-buffer@2.1.2: {}
 
   semver@7.7.2: {}
+
+  semver@7.7.3: {}
 
   send@1.2.0:
     dependencies:
