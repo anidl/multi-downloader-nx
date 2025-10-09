@@ -118,6 +118,7 @@
 		"prettier": "npx prettier . --check",
 		"prettier-fix": "npx prettier . --write",
 		"pretest": "pnpm run tsc",
-		"test": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build linuxstatic-x64 && node modules/build macos-x64"
+		"test-x64": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build linuxstatic-x64 && node modules/build macos-x64",
+		"test-arm64": "pnpm run pretest && cd lib && node modules/build windows-arm64 && node modules/build linux-arm64 && node modules/build macos-arm64"
 	}
 }

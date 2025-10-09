@@ -51,7 +51,22 @@ jobs:
                   check-latest: true
             - run: pnpm i
             - run: pnpm run prettier
-    build-test:
+    build-test-arm64:
+        needs: [eslint, prettier, tsc]
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+                  check-latest: true
+            - run: pnpm i
+            - run: pnpm run test-arm64
+    build-test-x64:
         needs: [eslint, prettier, tsc]
         runs-on: ubuntu-latest
         steps:
@@ -65,4 +80,4 @@ jobs:
                   node-version: 22
                   check-latest: true
             - run: pnpm i
-            - run: pnpm run test
+            - run: pnpm run test-x64
