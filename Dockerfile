@@ -15,7 +15,7 @@ RUN echo 'ffmpeg: "./bin/ffmpeg/ffmpeg"\nmkvmerge: "./bin/mkvtoolnix/mkvmerge"' 
 
 RUN npm install -g pnpm
 RUN pnpm i
-RUN pnpm run build-linux-gui
+RUN pnpm run build-linux-x64-gui
 
 # Move build to new Clean Image
 
