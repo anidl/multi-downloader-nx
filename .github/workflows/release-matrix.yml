@@ -53,7 +53,7 @@ jobs:
                       build_arch: arm64
                       gui: cli
                     - os: ubuntu-latest
-                      build_type: linux
+                      build_type: android
                       build_arch: armv7
                       gui: cli
                     - os: ubuntu-latest
@@ -65,7 +65,7 @@ jobs:
                       build_arch: arm64
                       gui: gui
                     - os: ubuntu-latest
-                      build_type: linux
+                      build_type: android
                       build_arch: armv7
                       gui: gui
                     # ALPINE

@@ -124,7 +124,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 
 function getFriendlyName(buildString: string): string {
 	if (buildString.includes('armv7')) {
-		return 'android';
+		return buildString.replace('linuxstatic', 'android');
 	}
 	if (buildString.includes('linuxstatic')) {
 		buildString = buildString.replace('linuxstatic', 'linux');
