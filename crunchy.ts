@@ -2710,7 +2710,7 @@ export default class Crunchy implements ServiceClass {
 							)
 						)
 							continue;
-						if (options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)) {
+						if ((options.dlsubs.includes('all') || options.dlsubs.includes(langItem.locale)) && subsItem?.url) {
 							const subsAssReq = await this.req.getData(subsItem.url, {
 								headers: api.crunchyDefHeader
 							});
