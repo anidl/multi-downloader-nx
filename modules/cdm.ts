@@ -46,8 +46,8 @@ try {
 			if (stats.size < 1024 * 8 && stats.isFile()) {
 				const fileContents = fs.readFileSync(file, { encoding: 'utf8' });
 				if (
-					(fileContents.startsWith('-----BEGIN RSA PRIVATE KEY-----') && fileContents.endsWith('-----END RSA PRIVATE KEY-----')) ||
-					(fileContents.startsWith('-----BEGIN PRIVATE KEY-----') && fileContents.endsWith('-----END PRIVATE KEY-----'))
+					(fileContents.includes('-----BEGIN RSA PRIVATE KEY-----') && fileContents.includes('-----END RSA PRIVATE KEY-----')) ||
+					(fileContents.includes('-----BEGIN PRIVATE KEY-----') && fileContents.includes('-----END PRIVATE KEY-----'))
 				) {
 					privateKey = fs.readFileSync(file);
 				}

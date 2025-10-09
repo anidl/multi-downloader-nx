@@ -212,21 +212,23 @@ export class Session {
 
 		const license = fromBinary(LicenseSchema, signedLicense.msg);
 
-		const keyContainers = license.key.map((keyContainer) => {
-			if (keyContainer.type && keyContainer.key && keyContainer.iv) {
-				const keyId = keyContainer.id ? Buffer.from(keyContainer.id).toString('hex') : '00000000000000000000000000000000';
-				const decipher = forge.cipher.createDecipher('AES-CBC', encKey.toString('binary'));
-				decipher.start({ iv: Buffer.from(keyContainer.iv).toString('binary') });
-				decipher.update(forge.util.createBuffer(new Uint8Array(keyContainer.key)));
-				decipher.finish();
-				const decryptedKey = Buffer.from(decipher.output.data, 'binary');
-				const key: KeyContainer = {
-					kid: keyId,
-					key: decryptedKey.toString('hex')
-				};
-				return key;
-			}
-		});
+		const keyContainers = license.key
+			.filter((k) => k.id)
+			.map((keyContainer) => {
+				if (keyContainer.type && keyContainer.key && keyContainer.iv) {
+					const keyId = Buffer.from(keyContainer.id!).toString('hex');
+					const decipher = forge.cipher.createDecipher('AES-CBC', encKey.toString('binary'));
+					decipher.start({ iv: Buffer.from(keyContainer.iv).toString('binary') });
+					decipher.update(forge.util.createBuffer(new Uint8Array(keyContainer.key)));
+					decipher.finish();
+					const decryptedKey = Buffer.from(decipher.output.data, 'binary');
+					const key: KeyContainer = {
+						kid: keyId,
+						key: decryptedKey.toString('hex')
+					};
+					return key;
+				}
+			});
 		if (keyContainers.filter((container) => !!container).length < 1) {
 			throw new Error('there was not a single valid key in the response');
 		}
