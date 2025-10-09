@@ -2676,78 +2676,78 @@ export default class Crunchy implements ServiceClass {
 										// Fix fonts
 										switch (langItem.cr_locale) {
 											case 'de-DE':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Arial,23,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,2,0,${align},0,0,20,1`;
 												});
 												break;
 											case 'id-ID':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Arial,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
 												});
 												break;
 											case 'hi-IN':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Mangal,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
 												});
 												break;
 											case 'ta-IN':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Noto Sans Tamil,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
 												});
 												break;
 											case 'te-IN':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Noto Sans Telugu,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
 												});
 												break;
 											case 'vi-VN':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Arial Unicode MS,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
 												});
 												break;
 											case 'ms-MY':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Arial,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
 												});
 												break;
 											case 'th-TH':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Noto Sans Thai,30,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
 												});
 												break;
 											case 'zh-CN':
 											case 'zh-HK':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Arial Unicode MS,20,&H00FFFFFF,&H0000FFFF,&H00000000,&H7F404040,-1,0,0,0,100,100,0,0,1,2,1,${align},0020,0020,0022,0`;
 												});
 												break;
 											case 'ru-RU':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Tahoma,22,&H00FFFFFF,&H000000FF,&H00000000,&H96000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0025,204`;
 												});
 												break;
 											case 'it-IT':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Trebuchet MS,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,${align},0010,0010,0015,1`;
 												});
 												break;
 											case 'ar-SA':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Adobe Arabic,26,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1,0,${align},0010,0010,0018,0`;
 												});
 												break;
 											case 'fr-FR':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Trebuchet MS,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1,1,${align},0002,0002,0025,1`;
 												});
 												break;
 											case 'pt-BR':
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Trebuchet MS,22,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,2,1,${align},0040,0040,0015,0`;
 												});
 												break;
 											default:
-												sBody = sBody.replace(/^Style:\s*([^,]+),.*?,(\d+),0,0,0,0$/gm, (match, name, align) => {
+												sBody = sBody.replace(/^Style:\s*([^,]+),[^,]+\s*,\s*[\d.]+(?:,[^,]+){15},(\d+)(?:,[^,]+){3},(\d+)$/gm, (match, name, align) => {
 													return `Style: ${name},Trebuchet MS,24,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,1,${align},0010,0010,0018,0`;
 												});
 												break;
@@ -2758,7 +2758,19 @@ export default class Crunchy implements ServiceClass {
 										// Add PlayResX, PlayResY, Timer and WrapStyle
 										const idx = lines.findIndex((l) => l.trim() === '[Script Info]');
 										if (idx !== -1) {
-											lines.splice(idx + 3, 0, `PlayResX: ${playResX}`, `PlayResY: ${playResY}`, 'Timer: 0.0000', 'WrapStyle: 0');
+											const hasPlayResX = lines.some((l) => l.match(/^PlayResX:/));
+											const hasPlayResY = lines.some((l) => l.match(/^PlayResY:/));
+											const hasTimer = lines.some((l) => l.match(/^Timer:/));
+											const hasWrapStyle = lines.some((l) => l.match(/^WrapStyle:/));
+
+											const toInsert = [`SubtitleLanguage: ${langItem.name}`];
+
+											if (!hasPlayResX) toInsert.push(`PlayResX: ${playResX}`);
+											if (!hasPlayResY) toInsert.push(`PlayResY: ${playResY}`);
+											if (!hasTimer) toInsert.push('Timer: 0.0000');
+											if (!hasWrapStyle) toInsert.push('WrapStyle: 0');
+
+											lines.splice(idx + 3, 0, ...toInsert);
 										}
 
 										sBody = lines.join('\n');
