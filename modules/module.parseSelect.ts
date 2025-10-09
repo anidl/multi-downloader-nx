@@ -12,7 +12,7 @@ const parseSelect = (
 			values: [],
 			isSelected: () => but
 		};
-	const parts = selectString.split(',');
+	const parts = selectString.includes(',') ? selectString.split(',') : selectString.split(' ');
 	const select: string[] = [];
 
 	parts.forEach((part) => {

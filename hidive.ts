@@ -904,7 +904,7 @@ export default class Hidive implements ServiceClass {
 						return undefined;
 					}
 					if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
-						let commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
+						let commandBase = `--show-progress --key ${encryptionKeys[0].kid}:${encryptionKeys[0].key} `;
 						let commandVideo = commandBase + `"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
 
 						if (this.cfg.bin.shaka) {
@@ -999,7 +999,7 @@ export default class Hidive implements ServiceClass {
 						return undefined;
 					}
 					if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
-						let commandBase = `--show-progress --key ${encryptionKeys[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeys[cdm === 'playready' ? 0 : 1].key} `;
+						let commandBase = `--show-progress --key ${encryptionKeys[0].kid}:${encryptionKeys[0].key} `;
 						let commandAudio = commandBase + `"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
 						if (this.cfg.bin.shaka) {

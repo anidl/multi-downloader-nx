@@ -1,5 +1,64 @@
 import { ImageType, Images, Image } from './objectInfo';
 
+export interface CrunchyMVObject {
+	id: string;
+	images: {
+		thumbnail: {
+			height: number;
+			source: string;
+			type: string;
+			width: number;
+		}[];
+	};
+	licensor: string;
+	originalRelease: string;
+	durationMs: number;
+	genres: {
+		displayValue: string;
+		id: string;
+	}[];
+	isPremiumOnly: boolean;
+	availability: {
+		endDate: string;
+		startDate: string;
+	};
+	matureBlocked: boolean;
+	displayArtistName: string;
+	sequenceNumber: number;
+	createdAt: string;
+	isPublic: boolean;
+	publishDate: string;
+	title: string;
+	artists: {
+		MainArtist: {
+			connector: string;
+			id: string;
+			name: string;
+			roles: string[];
+			sequenceNumber: number;
+			slug: string;
+		}[];
+	};
+	artist: {
+		id: string;
+		name: string;
+		slug: string;
+	};
+	isMature: boolean;
+	slug: string;
+	type: string;
+	streams_link: string;
+	playback?: string;
+	animeIds: string[];
+	displayArtistNameRequired: boolean;
+	readyToPublish: boolean;
+	updatedAt: string;
+	description: string;
+	hash: string;
+	copyright: string;
+	isSelected?: boolean;
+}
+
 export interface CrunchyAndroidObject {
 	__class__: string;
 	__href__: string;

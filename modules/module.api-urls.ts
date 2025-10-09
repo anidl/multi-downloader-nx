@@ -17,6 +17,7 @@ export type APIType = {
 	profile: string;
 	search: string;
 	content_cms: string;
+	content_music: string;
 	browse: string;
 	browse_all_series: string;
 	streaming_sessions: string;
@@ -55,6 +56,7 @@ const api: APIType = {
 	profile: `${domain.cr_www}/accounts/v1/me/profile`,
 	search: `${domain.cr_www}/content/v2/discover/search`,
 	content_cms: `${domain.cr_www}/content/v2/cms`,
+	content_music: `${domain.cr_www}/content/v2/music`,
 	browse: `${domain.cr_www}/content/v1/browse`,
 	browse_all_series: `${domain.cr_www}/content/v2/discover/browse`,
 	streaming_sessions: `${domain.cr_www}/playback/v1/sessions/streaming`,

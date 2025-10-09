@@ -35,7 +35,7 @@ import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchRespon
 import { ServiceClass } from './@types/serviceClassInterface';
 import { CrunchyAndroidEpisodes } from './@types/crunchyAndroidEpisodes';
 import { parse } from './modules/module.transform-mpd';
-import { CrunchyAndroidObject } from './@types/crunchyAndroidObject';
+import { AndroidObject, CrunchyAndroidObject, CrunchyMVObject } from './@types/crunchyAndroidObject';
 import { CrunchyChapters, CrunchyChapter, CrunchyOldChapter } from './@types/crunchyChapters';
 import vtt2ass from './modules/module.vtt2ass';
 import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
@@ -760,6 +760,8 @@ export default class Crunchy implements ServiceClass {
 				iType = 'movie';
 			} else if (item.movie_release_year) {
 				iType = 'movie_listing';
+			} else if (item.type && item.type === 'musicVideo') {
+				iType = 'music_video';
 			} else {
 				if (item.identifier !== '') {
 					const iTypeCheck = item.identifier?.split('|');
@@ -786,7 +788,8 @@ export default class Crunchy implements ServiceClass {
 			season: 'S', // VOL
 			episode: 'E', // EPI
 			movie_listing: 'F', // FLM
-			movie: 'M' // MED
+			movie: 'M', // MED
+			musicVideo: 'MV' // MVD
 		};
 		// check title
 		item.title = item.title != '' ? item.title : 'NO_TITLE';
@@ -1306,46 +1309,83 @@ export default class Crunchy implements ServiceClass {
 
 		// reqs
 		let objectInfo: ObjectInfo = { total: 0, data: [], meta: {} };
-		const objectReqOpts = [
-			api.cms_bucket,
-			this.cmsToken.cms_web.bucket,
-			'/objects/',
-			doEpsFilter.values.join(','),
-			'?',
-			new URLSearchParams({
-				force_locale: '',
-				preferred_audio_language: 'ja-JP',
-				locale: this.locale,
-				Policy: this.cmsToken.cms_web.policy,
-				Signature: this.cmsToken.cms_web.signature,
-				'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
-			})
-		].join('');
-		const objectReq = await this.req.getData(objectReqOpts, AuthHeaders);
-		if (!objectReq.ok || !objectReq.res) {
-			console.error('Objects Request FAILED!');
-			if (objectReq.error && objectReq.error.res && objectReq.error.res.body) {
-				const objectInfo = await objectReq.error.res.json();
-				console.info('Body:', JSON.stringify(objectInfo, null, '\t'));
-				objectInfo.error = true;
-				return objectInfo;
+
+		// Music Videos handling
+		if (doEpsFilter.values.filter((e) => e.startsWith('MV')).length > 0) {
+			const toFetch = doEpsFilter.values.filter((e) => e.startsWith('MV'));
+			const AuthHeaders = {
+				headers: {
+					Authorization: `Bearer ${this.token.access_token}`,
+					...api.crunchyDefHeader
+				},
+				useProxy: true
+			};
+
+			const mvInfoReq = await this.req.getData(
+				`${api.content_music}/music_videos/${toFetch.join(',')}?force_locale=&preferred_audio_language=ja-JP&locale=${this.locale}`,
+				AuthHeaders
+			);
+			if (!mvInfoReq.ok || !mvInfoReq.res) {
+				console.error('Music Video Request FAILED!');
+				return [];
 			}
-			return [];
+
+			const mvInfo = (await mvInfoReq.res.json()) as { data: CrunchyMVObject[]; total: number };
+			if (mvInfo.data.length === 0) return [];
+
+			objectInfo = {
+				total: objectInfo.total + mvInfo.total,
+				data: [...objectInfo.data, ...mvInfo.data],
+				meta: {}
+			};
+
+			doEpsFilter.values = doEpsFilter.values.filter((e) => !e.startsWith('MV'));
 		}
-		const objectInfoAndroid = (await objectReq.res.json()) as CrunchyAndroidObject;
-		objectInfo = {
-			total: objectInfoAndroid.total,
-			data: objectInfoAndroid.items,
-			meta: {}
-		};
+
+		// Media ID handling
+		if (doEpsFilter.values.length > 0) {
+			const objectReqOpts = [
+				api.cms_bucket,
+				this.cmsToken.cms_web.bucket,
+				'/objects/',
+				doEpsFilter.values.join(','),
+				'?',
+				new URLSearchParams({
+					force_locale: '',
+					preferred_audio_language: 'ja-JP',
+					locale: this.locale,
+					Policy: this.cmsToken.cms_web.policy,
+					Signature: this.cmsToken.cms_web.signature,
+					'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
+				})
+			].join('');
+			const objectReq = await this.req.getData(objectReqOpts, AuthHeaders);
+			if (!objectReq.ok || !objectReq.res) {
+				console.error('Objects Request FAILED!');
+				if (objectReq.error && objectReq.error.res && objectReq.error.res.body) {
+					const objectInfo = await objectReq.error.res.json();
+					console.info('Body:', JSON.stringify(objectInfo, null, '\t'));
+					objectInfo.error = true;
+					return objectInfo;
+				}
+				return [];
+			}
+			const objectInfoAndroid = (await objectReq.res.json()) as CrunchyAndroidObject;
+
+			objectInfo = {
+				total: objectInfo.total + objectInfoAndroid.total,
+				data: [...objectInfo.data, ...objectInfoAndroid.items],
+				meta: {}
+			};
+		}
 
 		if (earlyReturn) {
 			return objectInfo;
 		}
 
 		const selectedMedia: Partial<CrunchyEpMeta>[] = [];
-
-		for (const item of objectInfo.data) {
+		// Non MV handling
+		for (const item of objectInfo.data.filter((i) => i.type !== 'musicVideo') as AndroidObject[]) {
 			if (item.type != 'episode' && item.type != 'movie') {
 				await this.logObject(item, 2, true, false);
 				continue;
@@ -1411,6 +1451,35 @@ export default class Crunchy implements ServiceClass {
 				selectedMedia.push(epMeta);
 				item.isSelected = true;
 			}
+			await this.logObject(item, 2);
+		}
+
+		// MV handling
+		for (const item of objectInfo.data.filter((i) => i.type === 'musicVideo') as CrunchyMVObject[]) {
+			const epMeta: Partial<CrunchyEpMeta> = {};
+
+			epMeta.data = [
+				{
+					mediaId: 'V:' + item.id,
+					isSubbed: false,
+					isDubbed: false
+				}
+			];
+			epMeta.season = 0;
+			epMeta.seriesTitle = item.title;
+			epMeta.seasonTitle = item.title;
+			epMeta.episodeNumber = 'Music Video';
+			epMeta.episodeTitle = item.title;
+
+			if (item.streams_link) {
+				epMeta.data[0].playback = item.streams_link;
+				if (!item.playback) {
+					item.playback = item.streams_link;
+				}
+				selectedMedia.push(epMeta);
+				item.isSelected = true;
+			}
+
 			await this.logObject(item, 2);
 		}
 		console.info('');
@@ -2263,8 +2332,8 @@ export default class Crunchy implements ServiceClass {
 						) {
 							console.info('Decryption Needed, attempting to decrypt');
 							if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
-								let commandBaseVideo = `--show-progress --key ${encryptionKeysVideo?.[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeysVideo?.[cdm === 'playready' ? 0 : 1].key} `;
-								let commandBaseAudio = `--show-progress --key ${encryptionKeysAudio?.[cdm === 'playready' ? 0 : 1].kid}:${encryptionKeysAudio?.[cdm === 'playready' ? 0 : 1].key} `;
+								let commandBaseVideo = `--show-progress --key ${encryptionKeysVideo?.[0].kid}:${encryptionKeysVideo?.[0].key} `;
+								let commandBaseAudio = `--show-progress --key ${encryptionKeysAudio?.[0].kid}:${encryptionKeysAudio?.[0].key} `;
 								let commandVideo = commandBaseVideo + `"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
 								let commandAudio = commandBaseAudio + `"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
