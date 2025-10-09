@@ -8,6 +8,127 @@ jobs:
     build:
         strategy:
             matrix:
+                include:
+                    # WINDOWS
+                    - os: ubuntu-latest
+                      build_type: windows
+                      build_arch: x64
+                      gui: cli
+                    - os: macos-latest
+                      build_type: windows
+                      build_arch: arm64
+                      gui: cli
+                    - os: ubuntu-latest
+                      build_type: windows
+                      build_arch: x64
+                      gui: gui
+                    - os: macos-latest
+                      build_type: windows
+                      build_arch: arm64
+                      gui: gui
+                    # MACOS
+                    - os: ubuntu-latest
+                      build_type: macos
+                      build_arch: x64
+                      gui: cli
+                    - os: macos-latest
+                      build_type: macos
+                      build_arch: arm64
+                      gui: cli
+                    - os: ubuntu-latest
+                      build_type: macos
+                      build_arch: x64
+                      gui: gui
+                    - os: macos-latest
+                      build_type: macos
+                      build_arch: arm64
+                      gui: gui
+                    # LINUX
+                    - os: ubuntu-latest
+                      build_type: linux
+                      build_arch: x64
+                      gui: cli
+                    - os: macos-latest
+                      build_type: linux
+                      build_arch: arm64
+                      gui: cli
+                    - os: ubuntu-latest
+                      build_type: android
+                      build_arch: armv7
+                      gui: cli
+                    - os: ubuntu-latest
+                      build_type: linux
+                      build_arch: x64
+                      gui: gui
+                    - os: macos-latest
+                      build_type: linux
+                      build_arch: arm64
+                      gui: gui
+                    - os: ubuntu-latest
+                      build_type: android
+                      build_arch: armv7
+                      gui: gui
+                    # ALPINE
+                    - os: ubuntu-latest
+                      build_type: alpine
+                      build_arch: x64
+                      gui: cli
+                    - os: macos-latest
+                      build_type: alpine
+                      build_arch: arm64
+                      gui: cli
+                    - os: ubuntu-latest
+                      build_type: alpine
+                      build_arch: x64
+                      gui: gui
+                    - os: macos-latest
+                      build_type: alpine
+                      build_arch: arm64
+                      gui: gui
+        runs-on: ${{ matrix.os }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+                  check-latest: true
+            - name: Install Node modules
+              run: |
+                  pnpm install
+            - name: Get name and version from package.json
+              run: |
+                  test -n $(node -p -e "require('./package.json').name") &&
+                  test -n $(node -p -e "require('./package.json').version") &&
+                  echo PACKAGE_NAME=$(node -p -e "require('./package.json').name") >> $GITHUB_ENV &&
+                  echo PACKAGE_VERSION=$(node -p -e "require('./package.json').version") >> $GITHUB_ENV || exit 1
+            - name: Make build
+              run: pnpm run build-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}
+            - name: Upload release
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ github.event.release.upload_url }}
+                  asset_name: multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}.7z
+                  asset_path: ./lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}.7z
+                  asset_content_type: application/x-7z-compressed
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Upload SHA256 checksum
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ github.event.release.upload_url }}
+                  asset_name: multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}.7z.sha256
+                  asset_path: ./lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}.7z.sha256
+                  asset_content_type: text/plain
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    build-arm64:
+        strategy:
+            matrix:
                 build_type: [linux, macos, windows]
                 build_arch: [x64]
                 gui: [gui, cli]
@@ -33,7 +154,7 @@ jobs:
                   echo PACKAGE_NAME=$(node -p -e "require('./package.json').name") >> $GITHUB_ENV &&
                   echo PACKAGE_VERSION=$(node -p -e "require('./package.json').version") >> $GITHUB_ENV || exit 1
             - name: Make build
-              run: pnpm run build-${{ matrix.build_type }}-${{ matrix.gui }}
+              run: pnpm run build-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}
             - name: Upload release
               uses: actions/upload-release-asset@v1
               with:

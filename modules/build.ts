@@ -1,4 +1,5 @@
 // build requirements
+import crypto from 'crypto';
 import fs from 'fs-extra';
 import pkg from '../package.json';
 import modulesCleanup from 'removeNPMAbsolutePaths';
@@ -67,6 +68,7 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 	if (build.errors?.length > 0) console.error(build.errors);
 	if (build.warnings?.length > 0) console.warn(build.warnings);
 
+	// Compiling single executable
 	const buildConfig = [`${buildsDir}/index.cjs`, '--target', nodeVer + buildType, '--output', `${buildDir}/${pkg.short_name}`, '--public', '--compress', 'GZip'];
 	console.info(`[Build] Build configuration: ${buildFull}`);
 	try {
@@ -75,6 +77,8 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 		console.info(e);
 		process.exit(1);
 	}
+
+	// Moving required default files/folders into build dir
 	fs.mkdirSync(`${buildDir}/config`);
 	fs.mkdirSync(`${buildDir}/videos`);
 	fs.mkdirSync(`${buildDir}/widevine`);
@@ -95,7 +99,27 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 	if (fs.existsSync(`${buildsDir}/${buildFull}.7z`)) {
 		fs.removeSync(`${buildsDir}/${buildFull}.7z`);
 	}
+	console.info(`[Build] Build completed`);
+
+	// Zipping
+	console.info(`[Zip] Zipping build...`);
 	execSync(`7z a -t7z "${buildsDir}/${buildFull}.7z" "${buildDir}"`, { stdio: [0, 1, 2] });
+	console.info(`[Zip] Zipping completed`);
+
+	// Checksum
+	const zipPath = path.join(buildsDir, `${buildFull}.7z`);
+	const hashPath = path.join(buildsDir, `${buildFull}.7z.sha256`);
+	console.info(`[Checksum] Generating SHA256 checksum...`);
+	const hash = crypto.createHash('sha256');
+	const stream = fs.createReadStream(zipPath);
+	const checksum = await new Promise<string>((resolve, reject) => {
+		stream.on('data', (chunk) => hash.update(chunk));
+		stream.on('end', () => resolve(hash.digest('hex')));
+		stream.on('error', reject);
+	});
+	fs.writeFileSync(hashPath, `${checksum} ${path.basename(zipPath)}\n`);
+	console.info(`[Checksum] Checksum created: ${hashPath}`);
+	console.info(`[Checksum] SHA256: ${checksum}`);
 }
 
 function getFriendlyName(buildString: string): string {
