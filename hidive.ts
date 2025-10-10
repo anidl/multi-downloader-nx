@@ -503,9 +503,10 @@ export default class Hidive implements ServiceClass {
 				selMark = '✓ ';
 			}
 			console.info(
-				'%s[%s] %s',
+				'%s[%s] [%s] %s',
 				selMark,
 				'S' + parseFloat(showData[i].episodeInformation.seasonNumber + '') + 'E' + parseFloat(showData[i].episodeInformation.episodeNumber + ''),
+				'E.' + (showData[i].id ?? 0),
 				showData[i].title
 			);
 		}
