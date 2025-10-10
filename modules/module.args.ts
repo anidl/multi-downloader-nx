@@ -373,6 +373,18 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		usage: '${sub1} ${sub2}'
 	},
 	{
+		name: 'skipMuxOnSubFail',
+		group: 'dl',
+		describe: 'Skips muxing when a subtitle download fails.',
+		docDescribe: true,
+		service: ['all'],
+		type: 'boolean',
+		usage: '',
+		default: {
+			default: false
+		}
+	},
+	{
 		name: 'noASSConv',
 		group: 'dl',
 		describe: 'Disables VTT conversion to ASS.',

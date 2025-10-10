@@ -329,6 +329,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		this.cfg.bin = await yamlCfg.loadBinCfg();
 		let hasAudioStreams = false;
 		if (options.novids || data.filter((a) => a.type === 'Video').length === 0) return console.info('Skip muxing since no vids are downloaded');
+		if (options.subdlfailed && options.skipMuxOnSubFail) return console.info('Skip muxing since some subtitles failed to download');
 		if (data.some((a) => a.type === 'Audio')) {
 			hasAudioStreams = true;
 		}
@@ -820,12 +821,14 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				const subtitlesUrlReq = await this.req.getData(streams.links.subtitles.all);
 				if (!subtitlesUrlReq.ok || !subtitlesUrlReq.res) {
 					console.error('Subtitle location request failed!');
+					options.subdlfailed = true;
 					return undefined;
 				}
 				const subtitleUrl = (await subtitlesUrlReq.res.json()) as { location: string };
 				const encryptedSubtitlesReq = await this.req.getData(subtitleUrl.location);
 				if (!encryptedSubtitlesReq.ok || !encryptedSubtitlesReq.res) {
 					console.error('Subtitle request failed!');
+					options.subdlfailed = true;
 					return undefined;
 				}
 				const encryptedSubtitles = await encryptedSubtitlesReq.res.text();
@@ -839,6 +842,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				const subtitles = JSON.parse(decryptedData) as ADNSubtitles;
 				if (Object.keys(subtitles).length === 0) {
 					console.warn('No subtitles found.');
+					options.subdlfailed = true;
 				}
 				for (const subName in subtitles) {
 					let subLang: langsData.LanguageItem;
@@ -930,6 +934,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				}
 			} else {
 				console.warn("Couldn't find subtitles.");
+				options.subdlfailed = true;
 			}
 		} else {
 			console.info('Subtitles downloading skipped!');

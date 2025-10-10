@@ -6,7 +6,6 @@ import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from './enums';
 
 export type CrunchyDownloadOptions = {
 	hslang: string;
-	// kstream: number,
 	cstream: keyof typeof CrunchyVideoPlayStreams;
 	vstream: keyof typeof CrunchyVideoPlayStreams;
 	astream: keyof typeof CrunchyAudioPlayStreams;
@@ -23,6 +22,8 @@ export type CrunchyDownloadOptions = {
 	waittime: number;
 	fsRetryTime: number;
 	dlsubs: string[];
+	subdlfailed?: boolean;
+	skipMuxOnSubFail: boolean;
 	skipsubs: boolean;
 	nosubs?: boolean;
 	mp4: boolean;
@@ -77,7 +78,7 @@ export type CrunchyMuxOptions = {
 	defaultAudio: LanguageItem;
 	ccTag: string;
 	syncTiming: boolean;
-};
+} & CrunchyDownloadOptions;
 
 export type CrunchyEpMeta = {
 	data: {

@@ -1103,12 +1103,14 @@ export default class Hidive implements ServiceClass {
 							});
 						} else {
 							console.warn(`Failed to download subtitle: ${sxData.file}`);
+							options.subdlfailed = true;
 						}
 					}
 					subIndex++;
 				}
 			} else {
 				console.warn("Can't find urls for subtitles!");
+				options.subdlfailed = true;
 			}
 		} else {
 			console.info('Subtitles downloading skipped!');
@@ -1125,6 +1127,7 @@ export default class Hidive implements ServiceClass {
 		this.cfg.bin = await yamlCfg.loadBinCfg();
 		let hasAudioStreams = false;
 		if (options.novids || data.filter((a) => a.type === 'Video').length === 0) return console.info('Skip muxing since no vids are downloaded');
+		if (options.subdlfailed && options.skipMuxOnSubFail) return console.info('Skip muxing since some subtitles failed to download');
 		if (data.some((a) => a.type === 'Audio')) {
 			hasAudioStreams = true;
 		}

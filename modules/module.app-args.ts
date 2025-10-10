@@ -46,7 +46,6 @@ export let argvC: {
 	extid: string | undefined;
 	q: number;
 	x: number;
-	// kstream: number;
 	cstream: keyof typeof CrunchyVideoPlayStreams;
 	vstream: keyof typeof CrunchyVideoPlayStreams;
 	astream: keyof typeof CrunchyAudioPlayStreams;
@@ -54,6 +53,7 @@ export let argvC: {
 	partsize: number;
 	hslang: string;
 	dlsubs: string[];
+	skipMuxOnSubFail: boolean;
 	novids: boolean | undefined;
 	noaudio: boolean | undefined;
 	nosubs: boolean | undefined;
@@ -82,7 +82,6 @@ export let argvC: {
 	$0: string;
 	dlVideoOnce: boolean;
 	chapters: boolean;
-	// crapi: 'android' | 'web';
 	removeBumpers: boolean;
 	originalFontSize: boolean;
 	keepAllVideos: boolean;
