@@ -17,11 +17,11 @@ This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive* o
 
 By default this application uses the following paths to programs (main executables):
 
-* `ffmpeg.exe` (From PATH)
-* `ffprobe.exe` (From PATH)
-* `mkvmerge.exe` (From PATH)
-* `mp4decrypt.exe` (From PATH) (or shaka-packager)
-* `shaka-packager.exe` (v2.6.1 or older) (From PATH) (or mp4decrypt)
+* `ffmpeg.exe` (Windows) or `ffmpeg` (other) (From PATH)
+* `ffprobe.exe` (Windows) or `ffprobe` (other) (From PATH)
+* `mkvmerge.exe` (Windows) or `mkvmerge` (other) (From PATH)
+* `mp4decrypt.exe` (Windows) or `mp4decrypt` (other) (From PATH) (or shaka-packager)
+* `shaka-packager.exe` (Windows) or `shaka-packager` (other) (v2.6.1 or older) (From PATH) (or mp4decrypt)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
