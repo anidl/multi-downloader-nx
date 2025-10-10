@@ -83,7 +83,6 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 	fs.mkdirSync(`${buildDir}/videos`);
 	fs.mkdirSync(`${buildDir}/widevine`);
 	fs.mkdirSync(`${buildDir}/playready`);
-	fs.copySync('./config/bin-path.yml', `${buildDir}/config/bin-path.yml`);
 	fs.copySync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);
 	fs.copySync('./config/dir-path.yml', `${buildDir}/config/dir-path.yml`);
 	fs.copySync('./config/gui.yml', `${buildDir}/config/gui.yml`);
@@ -99,6 +98,25 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 	if (fs.existsSync(`${buildsDir}/${buildFull}.7z`)) {
 		fs.removeSync(`${buildsDir}/${buildFull}.7z`);
 	}
+
+	// Generate bin-path.yml
+	const ext = buildType.startsWith('windows') ? '.exe' : '';
+
+	const binConf = {
+		ffmpeg: `ffmpeg${ext}`,
+		mkvmerge: `mkvmerge${ext}`,
+		ffprobe: `ffprobe${ext}`,
+		mp4decrypt: `mp4decrypt${ext}`,
+		shaka: `shaka-packager${ext}`
+	};
+
+	fs.writeFileSync(
+		`${buildDir}/config/bin-path.yml`,
+		Object.entries(binConf)
+			.map(([key, value]) => `${key}: '${value}'`)
+			.join('\n') + '\n'
+	);
+
 	console.info(`[Build] Build completed`);
 
 	// Zipping
