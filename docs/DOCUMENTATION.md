@@ -525,6 +525,18 @@ If true, the tool will output the raw data from the API (Where applicable, the f
 | All | `--rawoutput ` | `string` | `No`| `NaN` | ``| `rawoutput: ` |
 
 Provide a path to output the raw data from the API into a file (Where applicable, the feature is a WIP)
+#### `--proxy`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--proxy ${proxy_url}` | `string` | `No`| `NaN` | ``| `proxy: ` |
+
+Uses Proxy on geo-restricted or geo-defining endpoints (e.g. socks5://127.0.0.1:1080 or http://127.0.0.1:1080)
+#### `--proxyAll`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--proxyAll ` | `boolean` | `No`| `NaN` | `false`| `proxyAll: ` |
+
+Proxies everything, not recommended. Proxy needs to be defined.
 ### Help
 #### `--help`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
