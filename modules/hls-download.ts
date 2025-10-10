@@ -6,8 +6,10 @@ import url from 'url';
 
 import { console } from './log';
 import { ProgressData } from '../@types/messageHandler';
-import { ofetch } from 'ofetch';
 import Helper from './module.helper';
+import * as reqModule from './module.fetch';
+
+const req = new reqModule.Req();
 
 export type HLSCallback = (data: ProgressData) => unknown;
 
@@ -343,6 +345,7 @@ class hlsDownload {
 				segOffset,
 				false
 			);
+			if (!part) throw Error();
 			// if (this.data.checkPartLength) {
 			//   this.data.checkPartLength = false;
 			//   console.warn(`Part ${segIndex + segOffset + 1}: can't check parts size!`);
@@ -419,18 +422,20 @@ const extFn = {
 			const buffer = await fs.readFile(url.fileURLToPath(uri));
 			return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 		}
-		// do request
-		return await ofetch(uri, {
+
+		const partReq = await req.getData(uri, {
 			method: 'GET',
-			headers: headers,
-			responseType: 'arrayBuffer',
-			retry: 0,
-			async onRequestError({ error }) {
-				const partType = isKey ? 'Key' : 'Part';
-				const partIndx = partIndex + 1 + segOffset;
-				console.warn(`%s %s: ${error.message}`, partType, partIndx);
-			}
+			headers: headers
 		});
+
+		if (!partReq.res || !partReq.ok) {
+			const partType = isKey ? 'Key' : 'Part';
+			const partIndx = partIndex + 1 + segOffset;
+			console.warn(`%s %s: ${partReq.error?.res?.statusText}`, partType, partIndx);
+			return;
+		}
+
+		return await partReq.res.arrayBuffer();
 	}
 };
 

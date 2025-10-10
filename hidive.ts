@@ -37,6 +37,7 @@ import { NewHidivePlayback, Subtitle } from './@types/newHidivePlayback';
 import { MPDParsed, parse } from './modules/module.transform-mpd';
 import { canDecrypt, getKeysWVD, cdm, getKeysPRD } from './modules/cdm';
 import { KeyContainer } from './modules/widevine/license';
+import { FetchParams } from './modules/module.fetch';
 
 export default class Hidive implements ServiceClass {
 	public cfg: yamlCfg.ConfigObject;
@@ -46,7 +47,7 @@ export default class Hidive implements ServiceClass {
 	constructor(private debug = false) {
 		this.cfg = yamlCfg.loadCfg();
 		this.token = yamlCfg.loadNewHDToken();
-		this.req = new reqModule.Req(domain, debug, false, 'hd');
+		this.req = new reqModule.Req();
 	}
 
 	public async cli() {
@@ -127,7 +128,7 @@ export default class Hidive implements ServiceClass {
 			method: method as 'GET' | 'POST',
 			url: (api.hd_new_api + endpoint) as string,
 			body: body,
-			useProxy: true
+			useProxy: false
 		};
 		// get request type
 		const isGet = method == 'GET';
@@ -139,8 +140,10 @@ export default class Hidive implements ServiceClass {
 			options.headers['Authorization'] = authHeader;
 		} else if (authType == 'auth') {
 			options.headers['Authorization'] = `Bearer ${this.token.authorisationToken}`;
+			options.useProxy = true;
 		} else if (authType == 'refresh') {
 			options.headers['Authorization'] = `Bearer ${this.token.refreshToken}`;
+			options.useProxy = true;
 		} else if (authType == 'both') {
 			options.headers['Authorization'] = `Mixed ${this.token.authorisationToken} ${this.token.refreshToken}`;
 		}
@@ -148,10 +151,11 @@ export default class Hidive implements ServiceClass {
 			console.debug('[DEBUG] Request params:');
 			console.debug(options);
 		}
-		const apiReqOpts: reqModule.Params = {
+		const apiReqOpts: FetchParams = {
 			method: options.method,
 			headers: options.headers as Record<string, string>,
-			body: options.body as string
+			body: options.body as string,
+			useProxy: options.useProxy
 		};
 		let apiReq = await this.req.getData(options.url, apiReqOpts);
 		if (!apiReq.ok || !apiReq.res) {

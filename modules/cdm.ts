@@ -6,7 +6,9 @@ import { Device } from './playready/device';
 import Cdm from './playready/cdm';
 import { PSSH } from './playready/pssh';
 import { KeyContainer, Session } from './widevine/license';
-import { ofetch } from 'ofetch';
+import * as reqModule from './module.fetch';
+
+const req = new reqModule.Req();
 
 //read cdm files located in the same directory
 let privateKey: Buffer = Buffer.from([]),
@@ -97,44 +99,25 @@ export async function getKeysWVD(pssh: string | undefined, licenseServer: string
 	//Create a new widevine session
 	const session = new Session({ privateKey, identifierBlob }, psshBuffer);
 
-	//Generate license
-	const data = await ofetch(licenseServer, {
+	// Request License
+	const licReq = await req.getData(licenseServer, {
 		method: 'POST',
 		body: session.createLicenseRequest(),
-		headers: authData,
-		responseType: 'arrayBuffer'
-	}).catch((error) => {
-		if (error.status && error.statusText) {
-			console.error(`${error.name} ${error.status}: ${error.statusText}`);
-		} else {
-			console.error(`${error.name}: ${error.message}`);
-		}
-
-		if (!error.data) return;
-		const data = error.data instanceof ArrayBuffer ? new TextDecoder().decode(error.data) : error.data;
-		if (data) {
-			const docTitle = data.match(/<title>(.*)<\/title>/);
-			if (docTitle) {
-				console.error(docTitle[1]);
-			}
-			if (error.status && error.status != 404 && error.status != 403) {
-				console.error('Body:', data);
-			}
-		}
+		headers: authData
 	});
 
-	if (data) {
-		//Parse License and return keys
-		const text = new TextDecoder().decode(data);
-		try {
-			const json = JSON.parse(text);
-			return session.parseLicense(Buffer.from(json['license'], 'base64')) as KeyContainer[];
-		} catch {
-			return session.parseLicense(Buffer.from(new Uint8Array(data))) as KeyContainer[];
-		}
-	} else {
-		console.error('License request failed');
+	if (!licReq.ok || !licReq.res) {
+		console.error('License fetch Failed!');
 		return [];
+	}
+
+	const lic = await licReq.res.arrayBuffer();
+	const lictext = new TextDecoder().decode(lic);
+	try {
+		const json = JSON.parse(lictext);
+		return session.parseLicense(Buffer.from(json['license'], 'base64')) as KeyContainer[];
+	} catch {
+		return session.parseLicense(Buffer.from(new Uint8Array(lic))) as KeyContainer[];
 	}
 }
 
@@ -146,45 +129,29 @@ export async function getKeysPRD(pssh: string | undefined, licenseServer: string
 	const session = prd_cdm.getLicenseChallenge(pssh_parsed.get_wrm_headers(true)[0]);
 
 	//Generate license
-	const data = await ofetch(licenseServer, {
+	const licReq = await req.getData(licenseServer, {
 		method: 'POST',
 		body: session,
-		headers: authData,
-		responseType: 'text'
-	}).catch((error) => {
-		if (error && error.status && error.statusText) {
-			console.error(`${error.name} ${error.status}: ${error.statusText}`);
-		} else {
-			console.error(`${error.name}: ${error.message}`);
-		}
-
-		if (!error.data) return;
-		const docTitle = error.data.match(/<title>(.*)<\/title>/);
-		if (docTitle) {
-			console.error(docTitle[1]);
-		}
-		if (error.status && error.status != 404 && error.status != 403) {
-			console.error('Body:', error.data);
-		}
+		headers: authData
 	});
 
-	if (data) {
-		//Parse License and return keys
-		try {
-			const keys = prd_cdm.parseLicense(data);
+	if (!licReq.ok || !licReq.res) {
+		console.error('License fetch Failed!');
+		return [];
+	}
 
-			return keys.map((k) => {
-				return {
-					kid: k.key_id,
-					key: k.key
-				};
-			});
-		} catch {
-			console.error('License parsing failed');
-			return [];
-		}
-	} else {
-		console.error('License request failed');
+	//Parse License and return keys
+	try {
+		const keys = prd_cdm.parseLicense(await licReq.res.text());
+
+		return keys.map((k) => {
+			return {
+				kid: k.key_id,
+				key: k.key
+			};
+		});
+	} catch {
+		console.error('License parsing failed');
 		return [];
 	}
 }

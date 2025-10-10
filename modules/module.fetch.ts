@@ -1,6 +1,11 @@
 import * as yamlCfg from './module.cfg-loader';
+import * as yargs from './module.app-args';
 import { console } from './log';
 import { connect } from 'puppeteer-real-browser';
+import { argvC } from './module.app-args';
+import { ProxyAgent, fetch, RequestInit } from 'undici';
+
+export type FetchParams = Partial<RequestInit & CustomParams>;
 
 export type Params = {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -8,6 +13,10 @@ export type Params = {
 	body?: BodyInit | undefined;
 	binary?: boolean;
 	followRedirect?: 'follow' | 'error' | 'manual';
+};
+
+type CustomParams = {
+	useProxy: boolean;
 };
 
 type GetDataResponse = {
@@ -31,39 +40,19 @@ function hasDisplay(): boolean {
 
 // req
 export class Req {
-	private sessCfg: string;
-	private service: 'cr' | 'hd' | 'adn';
-	private session: Record<
-		string,
-		{
-			value: string;
-			expires: Date;
-			path: string;
-			domain: string;
-			secure: boolean;
-			'Max-Age'?: string;
-		}
-	> = {};
-	private cfgDir = yamlCfg.cfgDir;
-	private curl: boolean | string = false;
+	private debug: boolean;
+	public argv: typeof argvC;
 
-	constructor(
-		private domain: Record<string, unknown>,
-		private debug: boolean,
-		private nosess = false,
-		private type: 'cr' | 'hd' | 'adn'
-	) {
-		this.sessCfg = yamlCfg.sessCfgFile[type];
-		this.service = type;
+	constructor() {
+		const cfg = yamlCfg.loadCfg();
+		this.argv = yargs.appArgv(cfg.cli, process.env.isGUI ? true : false);
+		this.debug = this.argv.debug ?? false;
 	}
 
-	async getData(durl: string, params?: RequestInit): Promise<GetDataResponse> {
-		params = params || {};
-		// options
+	async getData(durl: string, params: Partial<RequestInit & CustomParams> = {}): Promise<GetDataResponse> {
 		const options: RequestInit = {
 			method: params.method ? params.method : 'GET'
 		};
-		// additional params
 		if (params.headers) {
 			options.headers = params.headers;
 		}
@@ -73,14 +62,24 @@ export class Req {
 		if (typeof params.redirect == 'string') {
 			options.redirect = params.redirect;
 		}
-		// debug
+
+		// Proxy Handler
+		let dispatcher: ProxyAgent | undefined;
+		const validProxy = this.argv.proxy ? this.isValidProxyUrl(this.argv.proxy) : false;
+		if ((params.useProxy || this.argv.proxyAll) && this.argv.proxy && validProxy) {
+			dispatcher = new ProxyAgent(this.argv.proxy);
+		} else if ((params.useProxy || this.argv.proxyAll) && this.argv.proxy && !validProxy) {
+			console.warn('[Fetch] Provided invalid Proxy URL, not proxying traffic.');
+		}
+
+		// Debug
 		if (this.debug) {
 			console.debug('[DEBUG] FETCH OPTIONS:');
 			console.debug(options);
 		}
-		// try do request
+
 		try {
-			const res = await fetch(durl, options);
+			const res = await fetch(durl, { ...options, dispatcher: dispatcher });
 			if (!res.ok) {
 				console.error(`${res.status}: ${res.statusText}`);
 				const body = await res.text();
@@ -122,7 +121,7 @@ export class Req {
 			}
 			return {
 				ok: res.ok,
-				res,
+				res: res as any,
 				headers: params.headers as Record<string, string>
 			};
 		} catch (_error) {
@@ -149,33 +148,28 @@ export class Req {
 			};
 		}
 	}
-}
 
-export function buildProxy(proxyBaseUrl: string, proxyAuth: string) {
-	if (!proxyBaseUrl.match(/^(https?|socks4|socks5):/)) {
-		proxyBaseUrl = 'http://' + proxyBaseUrl;
+	private isValidProxyUrl(proxyUrl: string): boolean {
+		try {
+			if (!proxyUrl.match(/^(https?|socks4|socks5):\/\//)) {
+				return false;
+			}
+
+			const url = new URL(proxyUrl);
+
+			if (!url.hostname) return false;
+
+			if (!['http:', 'https:', 'socks4:', 'socks5:'].includes(url.protocol)) {
+				return false;
+			}
+
+			if (url.port && (!/^\d+$/.test(url.port) || Number(url.port) < 1 || Number(url.port) > 65535)) {
+				return false;
+			}
+
+			return true;
+		} catch {
+			return false;
+		}
 	}
-
-	const proxyCfg = new URL(proxyBaseUrl);
-	let proxyStr = `${proxyCfg.protocol}//`;
-
-	if (typeof proxyCfg.hostname != 'string' || proxyCfg.hostname == '') {
-		throw new Error('[ERROR] Hostname and port required for proxy!');
-	}
-
-	if (proxyAuth && typeof proxyAuth == 'string' && proxyAuth.match(':')) {
-		proxyCfg.username = proxyAuth.split(':')[0];
-		proxyCfg.password = proxyAuth.split(':')[1];
-		proxyStr += `${proxyCfg.username}:${proxyCfg.password}@`;
-	}
-
-	proxyStr += proxyCfg.hostname;
-
-	if (!proxyCfg.port && proxyCfg.protocol == 'http:') {
-		proxyStr += ':80';
-	} else if (!proxyCfg.port && proxyCfg.protocol == 'https:') {
-		proxyStr += ':443';
-	}
-
-	return proxyStr;
 }

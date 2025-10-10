@@ -35,6 +35,7 @@ import { ADNVideo, ADNVideos } from './@types/adnVideos';
 import { ADNPlayerConfig } from './@types/adnPlayerConfig';
 import { ADNStreams } from './@types/adnStreams';
 import { ADNSubtitles } from './@types/adnSubtitles';
+import { FetchParams } from './modules/module.fetch';
 
 export default class AnimationDigitalNetwork implements ServiceClass {
 	public cfg: yamlCfg.ConfigObject;
@@ -58,7 +59,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 	constructor(private debug = false) {
 		this.cfg = yamlCfg.loadCfg();
 		this.token = yamlCfg.loadADNToken();
-		this.req = new reqModule.Req(domain, debug, false, 'adn');
+		this.req = new reqModule.Req();
 		this.locale = 'fr';
 	}
 
@@ -184,13 +185,14 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 			password: data.password,
 			source: 'Web'
 		});
-		const authReqOpts: reqModule.Params = {
+		const authReqOpts: FetchParams = {
 			method: 'POST',
 			body: authData,
 			headers: {
 				'content-type': 'application/json',
 				'x-target-distribution': this.locale
-			}
+			},
+			useProxy: true
 		};
 		const authReq = await this.req.getData('https://gw.api.animationdigitalnetwork.com/authentication/login', authReqOpts);
 		if (!authReq.ok || !authReq.res) {
@@ -212,7 +214,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				'content-type': 'application/json',
 				'x-target-distribution': this.locale
 			},
-			body: JSON.stringify({ refreshToken: this.token.refreshToken })
+			body: JSON.stringify({ refreshToken: this.token.refreshToken }),
+			useProxy: true
 		});
 		if (!authReq.ok || !authReq.res) {
 			console.error('Token refresh failed!');

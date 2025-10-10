@@ -1,6 +1,10 @@
 import { parse as mpdParse } from 'mpd-parser';
 import { LanguageItem, findLang, languages } from './module.langsData';
 import { console } from './log';
+import * as reqModule from './module.fetch';
+import { FetchParams } from './module.fetch';
+
+const req = new reqModule.Req();
 
 type Segment = {
 	uri: string;
@@ -77,13 +81,15 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
 			if (!Object.prototype.hasOwnProperty.call(ret, host)) ret[host] = { audio: [], video: [] };
 
 			if (playlist.sidx && playlist.segments.length == 0) {
-				const options: RequestInit = {
+				const options: FetchParams = {
 					method: 'head'
 				};
-				const item = await fetch(playlist.sidx.uri, options);
-				if (!item.ok)
-					console.warn(`${item.status}: ${item.statusText}, Unable to fetch byteLength for audio stream ${Math.round(playlist.attributes.BANDWIDTH / 1024)}KiB/s`);
-				const byteLength = parseInt(item.headers.get('content-length') as string);
+				const itemReq = await req.getData(playlist.sidx.uri, options);
+				if (!itemReq.res || !itemReq.ok)
+					console.warn(
+						`${itemReq.error?.res?.status}: ${itemReq.error?.res?.statusText}, Unable to fetch byteLength for audio stream ${Math.round(playlist.attributes.BANDWIDTH / 1024)}KiB/s`
+					);
+				const byteLength = parseInt(itemReq.res?.headers?.get('content-length') as string);
 				let currentByte = playlist.sidx.map.byterange.length;
 				while (currentByte <= byteLength) {
 					playlist.segments.push({
@@ -156,15 +162,15 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
 		if (!Object.prototype.hasOwnProperty.call(ret, host)) ret[host] = { audio: [], video: [] };
 
 		if (playlist.sidx && playlist.segments.length == 0) {
-			const options: RequestInit = {
+			const options: FetchParams = {
 				method: 'head'
 			};
-			const item = await fetch(playlist.sidx.uri, options);
-			if (!item.ok)
+			const itemReq = await req.getData(playlist.sidx.uri, options);
+			if (!itemReq.res || !itemReq.ok)
 				console.warn(
-					`${item.status}: ${item.statusText}, Unable to fetch byteLength for video stream ${playlist.attributes.RESOLUTION?.height}x${playlist.attributes.RESOLUTION?.width}@${Math.round(playlist.attributes.BANDWIDTH / 1024)}KiB/s`
+					`${itemReq.error?.res?.status}: ${itemReq.error?.res?.statusText}, Unable to fetch byteLength for video stream ${playlist.attributes.RESOLUTION?.height}x${playlist.attributes.RESOLUTION?.width}@${Math.round(playlist.attributes.BANDWIDTH / 1024)}KiB/s`
 				);
-			const byteLength = parseInt(item.headers.get('content-length') as string);
+			const byteLength = parseInt(itemReq.res?.headers?.get('content-length') as string);
 			let currentByte = playlist.sidx.map.byterange.length;
 			while (currentByte <= byteLength) {
 				playlist.segments.push({

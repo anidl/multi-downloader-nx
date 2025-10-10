@@ -8,7 +8,7 @@ import { console } from './log';
 import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from '../@types/enums';
 import pj from '../package.json';
 
-let argvC: {
+export let argvC: {
 	[x: string]: unknown;
 	ccTag: string;
 	defaultAudio: LanguageItem;
@@ -96,6 +96,9 @@ let argvC: {
 	scaledBorderAndShadowFix: boolean;
 	scaledBorderAndShadow: 'yes' | 'no';
 	originalScriptFix: boolean;
+	// Proxy
+	proxy: string;
+	proxyAll: boolean;
 };
 
 export type ArgvType = typeof argvC;

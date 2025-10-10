@@ -41,6 +41,7 @@ import vtt2ass from './modules/module.vtt2ass';
 import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
 import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from './@types/enums';
 import { randomUUID } from 'node:crypto';
+import { FetchParams } from './modules/module.fetch';
 
 export type sxItem = {
 	language: langsData.LanguageItem;
@@ -64,7 +65,7 @@ export default class Crunchy implements ServiceClass {
 	constructor(private debug = false) {
 		this.cfg = yamlCfg.loadCfg();
 		this.token = yamlCfg.loadCRToken();
-		this.req = new reqModule.Req(domain, debug, false, 'cr');
+		this.req = new reqModule.Req();
 		this.locale = 'en-US';
 	}
 
@@ -193,8 +194,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 		// seasons list
 		const seriesSeasonListReq = await this.req.getData(
@@ -224,8 +224,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 		// seasons list
 		let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
@@ -277,8 +276,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 
 		const allShows: any[] = [];
@@ -402,10 +400,11 @@ export default class Crunchy implements ServiceClass {
 			device_name: 'iPhone',
 			device_type: 'iPhone 13'
 		}).toString();
-		const authReqOpts: reqModule.Params = {
+		const authReqOpts: FetchParams = {
 			method: 'POST',
 			headers: { ...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid },
-			body: authData
+			body: authData,
+			useProxy: true
 		};
 		const authReq = await this.req.getData(api.auth, authReqOpts);
 		if (!authReq.ok || !authReq.res) {
@@ -441,10 +440,11 @@ export default class Crunchy implements ServiceClass {
 			device_name: 'iPhone',
 			device_type: 'iPhone 13'
 		}).toString();
-		const authReqOpts: reqModule.Params = {
+		const authReqOpts: FetchParams = {
 			method: 'POST',
 			headers: { ...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid },
-			body: authData
+			body: authData,
+			useProxy: true
 		};
 		const authReq = await this.req.getData(api.auth, authReqOpts);
 		if (!authReq.ok || !authReq.res) {
@@ -477,8 +477,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				...api.crunchyDefHeader,
 				Authorization: `Bearer ${this.token.access_token}`
-			},
-			useProxy: true
+			}
 		};
 		const profileReq = await this.req.getData(api.profile, profileReqOptions);
 		if (!profileReq.ok || !profileReq.res) {
@@ -509,10 +508,11 @@ export default class Crunchy implements ServiceClass {
 			device_name: 'iPhone',
 			device_type: 'iPhone 13'
 		}).toString();
-		const authReqOpts: reqModule.Params = {
+		const authReqOpts: FetchParams = {
 			method: 'POST',
 			headers: { ...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid, Cookie: `etp_rt=${refreshToken}` },
-			body: authData
+			body: authData,
+			useProxy: true
 		};
 		const authReq = await this.req.getData(api.auth, authReqOpts);
 		if (!authReq.ok || !authReq.res) {
@@ -560,10 +560,11 @@ export default class Crunchy implements ServiceClass {
 				device_name: 'iPhone',
 				device_type: 'iPhone 13'
 			}).toString();
-			const authReqOpts: reqModule.Params = {
+			const authReqOpts: FetchParams = {
 				method: 'POST',
 				headers: { ...api.crunchyAuthHeader, 'ETP-Anonymous-ID': uuid },
-				body: authData
+				body: authData,
+				useProxy: true
 			};
 			const authReq = await this.req.getData(api.auth, authReqOpts);
 			if (!authReq.ok || !authReq.res) {
@@ -613,8 +614,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 		const cmsTokenReq = await this.req.getData(api.cms_auth, cmsTokenReqOpts);
 		if (!cmsTokenReq.ok || !cmsTokenReq.res) {
@@ -666,8 +666,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 		const searchStart = data.page ? (data.page - 1) * 5 : 0;
 		const searchParams = new URLSearchParams({
@@ -929,8 +928,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 		// reqs
 		if (!hideSeriesTitle) {
@@ -974,8 +972,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 
 		//Movie Listing
@@ -1017,8 +1014,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 		const newlyAddedParams = new URLSearchParams({
 			sort_by: 'newly_added',
@@ -1070,8 +1066,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 
 		//get show info
@@ -1303,8 +1298,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 
 		// reqs
@@ -1317,8 +1311,7 @@ export default class Crunchy implements ServiceClass {
 				headers: {
 					Authorization: `Bearer ${this.token.access_token}`,
 					...api.crunchyDefHeader
-				},
-				useProxy: true
+				}
 			};
 
 			const mvInfoReq = await this.req.getData(
@@ -1545,7 +1538,7 @@ export default class Crunchy implements ServiceClass {
 			await this.refreshToken(true, true);
 			let currentVersion;
 			let isPrimary = mMeta.isSubbed;
-			const AuthHeaders: RequestInit = {
+			const AuthHeaders: FetchParams = {
 				headers: {
 					Authorization: `Bearer ${this.token.access_token}`,
 					...api.crunchyDefHeader
@@ -3302,8 +3295,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 
 		// seasons list
@@ -3334,8 +3326,7 @@ export default class Crunchy implements ServiceClass {
 			headers: {
 				Authorization: `Bearer ${this.token.access_token}`,
 				...api.crunchyDefHeader
-			},
-			useProxy: true
+			}
 		};
 
 		//get show info

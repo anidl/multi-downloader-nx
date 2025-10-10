@@ -1002,6 +1002,30 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		default: {
 			default: 'cc'
 		}
+	},
+	{
+		name: 'proxy',
+		describe: 'Uses Proxy on geo-restricted or geo-defining endpoints (e.g. socks5://127.0.0.1:1080 or http://127.0.0.1:1080)',
+		docDescribe: true,
+		group: 'util',
+		service: ['all'],
+		type: 'string',
+		usage: '${proxy_url}',
+		default: {
+			default: ''
+		}
+	},
+	{
+		name: 'proxyAll',
+		describe: 'Proxies everything, not recommended. Proxy needs to be defined.',
+		docDescribe: true,
+		group: 'util',
+		service: ['all'],
+		type: 'boolean',
+		usage: '',
+		default: {
+			default: false
+		}
 	}
 ];
 
