@@ -227,6 +227,12 @@ Download video with specific hardsubs
 
 Download subtitles by language tag (space-separated)
 Crunchy Only: un, en, en-IN, es-419, es-419, es-ES, pt-BR, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, zh-TW, zh-HK, ko, ca-ES, pl-PL, th-TH, ta-IN, ms-MY, vi-VN, id-ID, te-IN, ja
+#### `--skipMuxOnSubFail`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--skipMuxOnSubFail ` | `boolean` | `No`| `NaN` | `false`| `skipMuxOnSubFail: ` |
+
+Skips muxing when a subtitle download fails.
 #### `--noASSConv`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
