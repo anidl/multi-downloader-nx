@@ -25,18 +25,26 @@ export default class Helper {
 
 	static cleanupFilename(n: string) {
 		/* eslint-disable no-useless-escape, no-control-regex */
-		const fixingChar = '_';
-		const illegalRe = /[\/\?<>\\:\*\|":]/g;
+		// Smart Replacer
+		const rep: Record<string, string> = {
+			'/': '⧸',
+			'\\': '⧹',
+			':': '：',
+			'*': '∗',
+			'?': '？',
+			'"': "'",
+			'<': '‹',
+			'>': '›'
+		};
+		n = n.replace(/[\/\\:\*\?"<>\|]/g, (ch) => rep[ch] || '_');
+
+		// Old Replacer
 		const controlRe = /[\x00-\x1f\x80-\x9f]/g;
 		const reservedRe = /^\.+$/;
 		const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
 		const windowsTrailingRe = /[\. ]+$/;
-		return n
-			.replace(illegalRe, fixingChar)
-			.replace(controlRe, fixingChar)
-			.replace(reservedRe, fixingChar)
-			.replace(windowsReservedRe, fixingChar)
-			.replace(windowsTrailingRe, fixingChar);
+
+		return n.replace(controlRe, '_').replace(reservedRe, '_').replace(windowsReservedRe, '_').replace(windowsTrailingRe, '_');
 	}
 
 	static exec(
