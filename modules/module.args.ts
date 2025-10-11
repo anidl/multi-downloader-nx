@@ -1017,7 +1017,7 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 	},
 	{
 		name: 'proxy',
-		describe: 'Uses Proxy on geo-restricted or geo-defining endpoints (e.g. socks5://127.0.0.1:1080 or http://127.0.0.1:1080)',
+		describe: 'Uses Proxy on geo-restricted or geo-defining endpoints (e.g. https://127.0.0.1:1080 or http://127.0.0.1:1080)',
 		docDescribe: true,
 		group: 'util',
 		service: ['all'],
