@@ -536,7 +536,7 @@ Provide a path to output the raw data from the API into a file (Where applicable
 | --- | --- | --- | --- | --- | --- | ---| 
 | All | `--proxy ${proxy_url}` | `string` | `No`| `NaN` | ``| `proxy: ` |
 
-Uses Proxy on geo-restricted or geo-defining endpoints (e.g. socks5://127.0.0.1:1080 or http://127.0.0.1:1080)
+Uses Proxy on geo-restricted or geo-defining endpoints (e.g. https://127.0.0.1:1080 or http://127.0.0.1:1080)
 #### `--proxyAll`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
