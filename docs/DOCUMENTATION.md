@@ -1,10 +1,10 @@
-# multi-downloader-nx (v5.3.7)
+# multi-downloader-nx (v5.6.1)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive*, *AnimeOnegai*, or *AnimationDigitalNetwork*.
+This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive* or *AnimationDigitalNetwork*.
 This application enables you to download videos for offline viewing which may be forbidden by law in your country.
 The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider.
 This tool is not responsible for your actions; please make an informed decision before using this application.
@@ -44,7 +44,7 @@ Authenticate every time the script runs. Use at your own risk.
 #### `--token`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, AnimeOnegai | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
+| Crunchyroll | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
 
 Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)
 ### Fonts
@@ -83,7 +83,7 @@ The output is organized in pages. Use this command to output the items for the g
 #### `--locale`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, AnimeOnegai, AnimationDigitalNetwork | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `zh-HK`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `fr`, `de`, `''`, `es`, `pt`] | `en-US`| `locale: ` |
+| Crunchyroll, AnimationDigitalNetwork | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `und`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `zh-HK`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `und`, `fr`, `de`] | `en-US`| `locale: ` |
 
 Set the local that will be used for the API.
 #### `--new`
@@ -93,12 +93,36 @@ Set the local that will be used for the API.
 
 Get last updated series list
 ### Downloading
+#### `--absolute`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--absolute ` | `boolean` | `No`| `NaN` | `NaN` |
+
+Use absolute numbers for the episode. If not set, it will use the default index numbers
 #### `--movie-listing`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
 | Crunchyroll | `--movie-listing ${ID}` | `string` | `No`| `--flm` | `NaN` |
 
 Get video list by Movie Listing ID
+#### `--show-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--show-raw ${ID}` | `string` | `No`| `--sraw` | `NaN` |
+
+Get Raw Show data
+#### `--season-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--season-raw ${ID}` | `string` | `No`| `--seraw` | `NaN` |
+
+Get Raw Season data
+#### `--show-list-raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
+| --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--show-list-raw ` | `boolean` | `No`| `--slraw` | `NaN` |
+
+Get Raw Show list data
 #### `--series`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -135,7 +159,7 @@ Set the quality level. Use 0 to use the maximum quality.
 #### `--dlVideoOnce`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, AnimeOnegai | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `false`| `dlVideoOnce: ` |
+| Crunchyroll | `--dlVideoOnce ` | `boolean` | `No`| `NaN` | `false`| `dlVideoOnce: ` |
 
 If selected, the best selected quality will be downloaded only for the first language,
 then the worst video quality with the same audio quality will be downloaded for every other language.
@@ -147,14 +171,6 @@ This will speed up the download speed, if multiple languages are selected.
 | Crunchyroll, AnimationDigitalNetwork | `--chapters ` | `boolean` | `No`| `NaN` | `true`| `chapters: ` |
 
 Will fetch the chapters and add them into the final video.
-Currently only works with mkvmerge.
-#### `--crapi`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
-| --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--crapi ` | `string` | `No`| `NaN` | [`android`, `web`] | `web`| `crapi: ` |
-
-If set to Android, it has lower quality, but Non-DRM streams,
-If set to Web, it has a higher quality adaptive stream, but everything is DRM.
 #### `--removeBumpers`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -171,34 +187,94 @@ If selected, it will prefer to keep the original Font Size defined by the servic
 #### `-x`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `-x ${server}` | `number` | `No`| `--server` | [`1`, `2`, `3`, `4`] | `1`| `x: ` |
+| All | `-x ${server}` | `number` | `No`| `--server` | [`1`, `2`, `3`, `4`] | `1`| `x: ` |
 
 Select the server to use
-#### `--kstream`
-| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
-| --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--kstream ${stream}` | `number` | `No`| `-k` | [`1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`] | `1`| `kstream: ` |
-
-Select specific stream
 #### `--cstream`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`androidtv`, `android`, `androidtab`, `none`] | `NaN` |
+
+(Please use --vstream and --astream instead, this will deprecate soon) Select a specific Crunchyroll playback endpoint by device. Since Crunchyroll has started rolling out their new VBR encodes, we highly recommend using a TV endpoint (e.g. vidaa, samsungtv, lgtv, rokutv, chromecast, firetv, androidtv) to access the old CBR encodes. Please note: The older encodes do not include the new 192 kbps audio, the new audio is only available with the new VBR encodes.
+#### `--vstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`chrome`, `firefox`, `safari`, `edge`, `fallback`, `ps4`, `ps5`, `switch`, `samsungtv`, `lgtv`, `rokutv`, `android`, `iphone`, `ipad`, `none`] | `chrome`| `cstream: ` |
+| Crunchyroll | `--vstream ${device}` | `string` | `No`| `--vs` | [`androidtv`, `android`, `androidtab`, `none`] | `androidtv`| `vstream: ` |
 
-Select specific crunchy play stream by device, or disable stream with "none"
+Select a specific Crunchyroll video playback endpoint by device.
+#### `--astream`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--astream ${device}` | `string` | `No`| `--as` | [`androidtv`, `android`, `androidtab`, `none`] | `android`| `astream: ` |
+
+Select a specific Crunchyroll audio playback endpoint by device.
+#### `--tsd`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--tsd ` | `boolean` | `No`| `NaN` | `false`| `tsd: ` |
+
+(Total Session Death) Kills all active Crunchyroll Streaming Sessions to prevent getting the "TOO_MANY_ACTIVE_STREAMS" error.
 #### `--hslang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--hslang ${hslang}` | `string` | `No`| `NaN` | [`none`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `zh-TW`, `zh-HK`, `ko`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `ja`] | `none`| `hslang: ` |
+| Crunchyroll | `--hslang ${hslang}` | `string` | `No`| `NaN` | [`none`, `un`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `zh-TW`, `zh-HK`, `ko`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `ja`] | `none`| `hslang: ` |
 
 Download video with specific hardsubs
 #### `--dlsubs`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--dlsubs ${sub1} ${sub2}` | `array` | `No`| `NaN` | [`all`, `none`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `zh-TW`, `zh-HK`, `ko`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `ja`] | `all`| `dlsubs: ` |
+| All | `--dlsubs ${sub1} ${sub2}` | `array` | `No`| `NaN` | [`all`, `none`, `un`, `en`, `en-IN`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr`, `de`, `ar`, `it`, `ru`, `tr`, `hi`, `zh`, `zh-CN`, `zh-TW`, `zh-HK`, `ko`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `ja`] | `all`| `dlsubs: ` |
 
 Download subtitles by language tag (space-separated)
-Crunchy Only: en, en-IN, es-419, es-419, es-ES, pt-BR, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, zh-TW, zh-HK, ko, ca-ES, pl-PL, th-TH, ta-IN, ms-MY, vi-VN, id-ID, te-IN, ja
+Crunchy Only: un, en, en-IN, es-419, es-419, es-ES, pt-BR, pt-PT, fr, de, ar, ar, it, ru, tr, hi, zh-CN, zh-TW, zh-HK, ko, ca-ES, pl-PL, th-TH, ta-IN, ms-MY, vi-VN, id-ID, te-IN, ja
+#### `--skipMuxOnSubFail`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--skipMuxOnSubFail ` | `boolean` | `No`| `NaN` | `false`| `skipMuxOnSubFail: ` |
+
+Skips muxing when a subtitle download fails.
+#### `--noASSConv`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll, Hidive | `--noASSConv ` | `boolean` | `No`| `NaN` | `false`| `noASSConv: ` |
+
+Disables VTT conversion to ASS.
+#### `--noSubFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--noSubFix ` | `boolean` | `No`| `NaN` | `false`| `noSubFix: ` |
+
+Disables all subtitle fixes and downloads raw subtitles.
+#### `--srtAssFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--srtAssFix ` | `boolean` | `No`| `NaN` | `true`| `srtAssFix: ` |
+
+Fixes the recently changed Crunchyroll subtitles provided by Closed Caption Converter.
+#### `--layoutResFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--layoutResFix ` | `boolean` | `No`| `NaN` | `true`| `layoutResFix: ` |
+
+Applies the LayoutRes Fix to all ASS subtitles.
+#### `--scaledBorderAndShadowFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--scaledBorderAndShadowFix ` | `boolean` | `No`| `NaN` | `true`| `scaledBorderAndShadowFix: ` |
+
+Applies the ScaledBorderAndShadow Fix to all ASS subtitles.
+#### `--scaledBorderAndShadow`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--scaledBorderAndShadow ${yes/no}` | `string` | `No`| `NaN` | [`yes`, `no`] | `yes`| `scaledBorderAndShadow: ` |
+
+Select if ScaledBorderAndShadow should be set to "yes" or "no".
+#### `--originalScriptFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--originalScriptFix ` | `boolean` | `No`| `NaN` | `true`| `originalScriptFix: ` |
+
+Removes the URL in the Original Script line of the ASS subtitles, it prevents from bricking the subs in VLC (Fonts not loading when url not returning 200).
 #### `--novids`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
@@ -220,10 +296,10 @@ Skip downloading subtitles
 #### `--dubLang`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`eng`, `spa`, `spa-419`, `spa-ES`, `por`, `fra`, `deu`, `ara-ME`, `ara`, `ita`, `rus`, `tur`, `hin`, `cmn`, `zho`, `chi`, `zh-HK`, `kor`, `cat`, `pol`, `tha`, `tam`, `may`, `vie`, `ind`, `tel`, `jpn`] | `jpn`| `dubLang: ` |
+| All | `--dubLang ${dub1} ${dub2}` | `array` | `No`| `NaN` | [`und`, `eng`, `spa`, `spa-419`, `spa-ES`, `por`, `fra`, `deu`, `ara-ME`, `ara`, `ita`, `rus`, `tur`, `hin`, `cmn`, `zho`, `chi`, `zh-HK`, `kor`, `cat`, `pol`, `tha`, `tam`, `may`, `vie`, `ind`, `tel`, `jpn`] | `jpn`| `dubLang: ` |
 
 Set the language to download: 
-Crunchy Only: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
+Crunchy Only: und, eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
 #### `--all`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
@@ -373,14 +449,14 @@ Set the options given to ffmpeg
 | All | `--defaultAudio ${args}` | `string` | `No`| `NaN` | `eng`| `defaultAudio: ` |
 
 Set the default audio track by language code
-Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
+Possible Values: und, eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
 #### `--defaultSub`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
 | All | `--defaultSub ${args}` | `string` | `No`| `NaN` | `eng`| `defaultSub: ` |
 
 Set the default subtitle track by language code
-Possible Values: eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
+Possible Values: und, eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME, ara, ita, rus, tur, hin, cmn, zho, chi, zh-HK, kor, cat, pol, tha, tam, may, vie, ind, tel, jpn
 ### Filename Template
 #### `--fileName`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
@@ -428,7 +504,7 @@ Debug mode (tokens may be revealed in the console output)
 #### `--service`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| All | `--service ${service}` | `string` | `Yes`| `NaN` | [`crunchy`, `hidive`, `ao`, `adn`] | ``| `service: ` |
+| All | `--service ${service}` | `string` | `Yes`| `NaN` | [`crunchy`, `hidive`, `adn`] | ``| `service: ` |
 
 Set the service you want to use
 #### `--update`
@@ -443,6 +519,30 @@ Force the tool to check for updates (code version only)
 | All | `--skipUpdate ` | `boolean` | `No`| `NaN` | `false`| `skipUpdate: ` |
 
 If true, the tool won't check for updates
+#### `--raw`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--raw ` | `boolean` | `No`| `NaN` | `false`| `raw: ` |
+
+If true, the tool will output the raw data from the API (Where applicable, the feature is a WIP)
+#### `--rawoutput`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--rawoutput ` | `string` | `No`| `NaN` | ``| `rawoutput: ` |
+
+Provide a path to output the raw data from the API into a file (Where applicable, the feature is a WIP)
+#### `--proxy`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--proxy ${proxy_url}` | `string` | `No`| `NaN` | ``| `proxy: ` |
+
+Uses Proxy on geo-restricted or geo-defining endpoints (e.g. https://127.0.0.1:1080 or http://127.0.0.1:1080)
+#### `--proxyAll`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| All | `--proxyAll ` | `boolean` | `No`| `NaN` | `false`| `proxyAll: ` |
+
+Proxies everything, not recommended. Proxy needs to be defined.
 ### Help
 #### `--help`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**

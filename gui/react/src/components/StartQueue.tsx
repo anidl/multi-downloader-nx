@@ -5,38 +5,30 @@ import { messageChannelContext } from '../provider/MessageChannel';
 import Require from './Require';
 
 const StartQueueButton: React.FC = () => {
-  const messageChannel = React.useContext(messageChannelContext);
-  const [start, setStart] = React.useState(false);
-  const msg = React.useContext(messageChannelContext);
+	const messageChannel = React.useContext(messageChannelContext);
+	const [start, setStart] = React.useState(false);
+	const msg = React.useContext(messageChannelContext);
 
-  React.useEffect(() => {
-    (async () => {
-      if (!msg)
-        return alert('Invalid state: msg not found');
-      setStart(await msg.getDownloadQueue());
-    })();
-  }, []);
+	React.useEffect(() => {
+		(async () => {
+			if (!msg) return alert('Invalid state: msg not found');
+			setStart(await msg.getDownloadQueue());
+		})();
+	}, []);
 
-  const change = async () => {
-    if (await messageChannel?.isDownloading())
-      alert('The current download will be finished before the queue stops');
-    msg?.setDownloadQueue(!start);
-    setStart(!start);
-  };
+	const change = async () => {
+		if (await messageChannel?.isDownloading()) alert('The current download will be finished before the queue stops');
+		msg?.setDownloadQueue(!start);
+		setStart(!start);
+	};
 
-  return <Require value={messageChannel}>
-    <Button
-      startIcon={start ? <PauseCircleFilled /> : <PlayCircleFilled /> }
-      variant='contained'
-      onClick={change}
-      sx={{ maxHeight: '2.3rem' }}
-    >
-      {
-        start ? 'Stop Queue' : 'Start Queue'
-      }
-    </Button>
-  </Require>;
-
+	return (
+		<Require value={messageChannel}>
+			<Button startIcon={start ? <PauseCircleFilled /> : <PlayCircleFilled />} variant="contained" onClick={change} sx={{ maxHeight: '2.3rem' }}>
+				{start ? 'Stop Queue' : 'Start Queue'}
+			</Button>
+		</Require>
+	);
 };
 
 export default StartQueueButton;

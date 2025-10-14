@@ -2,11 +2,11 @@
 
 [![Discord Shield](https://discord.com/api/guilds/884479461997805568/widget.png?style=banner2)](https://discord.gg/qEpbWen5vq)
 
-This downloader can download anime from different sites. Currently supported are *Crunchyroll*, *Hidive*, *AnimeOnegai*, and *AnimationDigitalNetwork*.
+This downloader can download anime from different sites. Currently supported are *Crunchyroll*, *Hidive* and *AnimationDigitalNetwork*.
 
 ## Legal Warning
 
-This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive*, *AnimeOnegai*, or *AnimationDigitalNetwork*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
+This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive* or *AnimationDigitalNetwork*. This application enables you to download videos for offline viewing which may be forbidden by law in your country. The usage of this application may also cause a violation of the *Terms of Service* between you and the stream provider. This tool is not responsible for your actions; please make an informed decision before using this application.
 
 ## Dependencies
 
@@ -17,11 +17,11 @@ This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive*, 
 
 By default this application uses the following paths to programs (main executables):
 
-* `ffmpeg.exe` (From PATH)
-* `ffprobe.exe` (From PATH)
-* `mkvmerge.exe` (From PATH)
-* `mp4decrypt.exe` (From PATH) (or shaka-packager)
-* `shaka-packager.exe` (From PATH) (or mp4decrypt)
+* `ffmpeg.exe` (Windows) or `ffmpeg` (other) (From PATH)
+* `ffprobe.exe` (Windows) or `ffprobe` (other) (From PATH)
+* `mkvmerge.exe` (Windows) or `mkvmerge` (other) (From PATH)
+* `mp4decrypt.exe` (Windows) or `mp4decrypt` (other) (From PATH) (or shaka-packager)
+* `shaka-packager.exe` (Windows) or `shaka-packager` (other) (v2.6.1 or older) (From PATH) (or mp4decrypt)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
@@ -106,7 +106,7 @@ If you want to package the application, run pnpm run build-`{platform}`-`{type}`
 
 ### Instructions (Widevine)
 
-In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (`device_client_id_blob` and `device_private_key`) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.
+In order to decrypt DRM content, you will need to have a dumped CDM, after that you will need to place the CDM files (`device_client_id_blob` and `device_private_key` or `client_id.bin` and `private_key.pem`) into the `./widevine/` directory. For legal reasons we do not include the CDM with the software, and you will have to source one yourself.
 
 ### Instructions (Playready)
 

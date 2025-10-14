@@ -1,39 +1,83 @@
 name: Style and build test
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    push:
+        branches: [master]
+    pull_request:
+        branches: [master]
 
 jobs:
-  eslint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 8.6.6
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
-        check-latest: true
-    - run: pnpm i 
-    - run: npx eslint .
-  test: 
-    needs: eslint
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 8.6.6
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
-        check-latest: true
-    - run: pnpm i 
-    - run: pnpm run test
-
+    tsc:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+                  check-latest: true
+            - run: pnpm i
+            - run: npx tsc
+    eslint:
+        needs: tsc
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+                  check-latest: true
+            - run: pnpm i
+            - run: pnpm run eslint
+    prettier:
+        needs: tsc
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+                  check-latest: true
+            - run: pnpm i
+            - run: pnpm run prettier
+    build-test-arm64:
+        needs: [eslint, prettier, tsc]
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+                  check-latest: true
+            - run: pnpm i
+            - run: pnpm run test-arm64
+    build-test-x64:
+        needs: [eslint, prettier, tsc]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 22
+                  check-latest: true
+            - run: pnpm i
+            - run: pnpm run test-x64

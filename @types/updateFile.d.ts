@@ -1,4 +1,4 @@
 export type UpdateFile = {
-  lastCheck: number,
-  nextCheck: number
-}
+	lastCheck: number;
+	nextCheck: number;
+};

@@ -1,3 +1,3 @@
 declare module 'pkg' {
-  export async function exec(config: string[]);
-} 
+	export async function exec(config: string[]);
+}

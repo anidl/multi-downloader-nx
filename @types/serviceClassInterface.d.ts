@@ -1,3 +1,3 @@
 export interface ServiceClass {
-  cli: () => Promise<boolean|undefined|void>
+	cli: () => Promise<boolean | undefined | void>;
 }

@@ -16,36 +16,35 @@ document.body.style.display = 'flex';
 document.body.style.justifyContent = 'center';
 
 const notistackRef = React.createRef<SnackbarProvider>();
-const onClickDismiss = (key: SnackbarKey | undefined) => () => { 
-  if (notistackRef.current)
-    notistackRef.current.closeSnackbar(key);
+const onClickDismiss = (key: SnackbarKey | undefined) => () => {
+	if (notistackRef.current) notistackRef.current.closeSnackbar(key);
 };
 
 const container = document.getElementById('root');
 const root = createRoot(container as HTMLElement);
 root.render(
-  <ErrorHandler>
-    <Store>
-      <SnackbarProvider
-        ref={notistackRef}
-        action={(key) => (
-          <IconButton onClick={onClickDismiss(key)} color="inherit">
-            <CloseOutlined />
-          </IconButton>
-        )}
-      >
-        <Style>
-          <MessageChannel>
-            <ServiceProvider>
-              <QueueProvider>
-                <Box>
-                  <App />
-                </Box>
-              </QueueProvider>
-            </ServiceProvider>
-          </MessageChannel>
-        </Style>
-      </SnackbarProvider>
-    </Store>
-  </ErrorHandler>
+	<ErrorHandler>
+		<Store>
+			<SnackbarProvider
+				ref={notistackRef}
+				action={(key) => (
+					<IconButton onClick={onClickDismiss(key)} color="inherit">
+						<CloseOutlined />
+					</IconButton>
+				)}
+			>
+				<Style>
+					<MessageChannel>
+						<ServiceProvider>
+							<QueueProvider>
+								<Box>
+									<App />
+								</Box>
+							</QueueProvider>
+						</ServiceProvider>
+					</MessageChannel>
+				</Style>
+			</SnackbarProvider>
+		</Store>
+	</ErrorHandler>
 );

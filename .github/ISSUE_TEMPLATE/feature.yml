@@ -1,29 +1,29 @@
 name: Enhancement
 description: Suggest a enhancement or feature
 labels:
-  - enhancement
-title: "[Feedback]: "
+    - enhancement
+title: '[Feedback]: '
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thank you for giving feedback with this program. 
-        This template will guide you through all the information we need. 
-  - type: dropdown
-    id: programversion
-    attributes:
-      label: Type
-      description: "Is this suggestion for the CLI, GUI, or Both?"
-      options:
-        - CLI
-        - GUI
-        - Both
-    validations:
-      required: true    
-  - type: textarea
-    id: suggestion
-    attributes:
-      label: Suggestion
-      description: "What is your suggestion?"
-    validations:
-      required: true
+    - type: markdown
+      attributes:
+          value: |
+              Thank you for giving feedback with this program. 
+              This template will guide you through all the information we need.
+    - type: dropdown
+      id: programversion
+      attributes:
+          label: Type
+          description: 'Is this suggestion for the CLI, GUI, or Both?'
+          options:
+              - CLI
+              - GUI
+              - Both
+      validations:
+          required: true
+    - type: textarea
+      id: suggestion
+      attributes:
+          label: Suggestion
+          description: 'What is your suggestion?'
+      validations:
+          required: true

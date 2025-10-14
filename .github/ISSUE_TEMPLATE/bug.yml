@@ -1,93 +1,92 @@
 name: Bug
 description: File a bug report
-assignees: 
-  - AnimeDL
-  - AnidlSupport
+assignees:
+    - AnimeDL
+    - AnidlSupport
 labels:
-  - bug
-title: "[BUG]: "
+    - bug
+title: '[BUG]: '
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thank you for reporting the issues you found and have with this program. 
-        This template will guide you through all the information we need. 
-  - type: input
-    id: version
-    attributes:
-      label: Program version
-      description: "Which version of the program do you use?"
-      placeholder: "1.0.0"
-    validations:
-      required: true
-  - type: dropdown
-    id: opsystem
-    attributes:
-      label: Operating System
-      description: "Please tell us what OS you are using."
-      options:
-        - Windows
-        - Linux
-        - MacOS
-    validations:
-      required: true
-  - type: dropdown
-    id: gui
-    attributes:
-      label: Type
-      description: "Please tell us if you are using the gui or the cli version."
-      options:
-        - CLI
-        - GUI
-    validations:
-      required: true    
-  - type: dropdown
-    id: service
-    attributes:
-      label: Service
-      description: "Please tell us what service the bug occured in."
-      options:
-        - Crunchyroll
-        - Hidive
-        - AnimationDigitalNetwork
-        - AnimeOnegai
-        - All
-        - Irrelevant
-    validations:
-      required: true
-  - type: input
-    id: command
-    attributes:
-      label: Command used
-      description: "Please tell us what command you used."
-    validations:
-      required: true
-  - type: input
-    id: ShowID
-    attributes:
-      label: Show ID
-      description: "Please provide the ID of an example show."
-      placeholder: "1234"
-    validations:
-      required: true
-  - type: input
-    id: Episode
-    attributes:
-      label: Episode
-      description: "Please provide the episode ID you used as an example."
-      placeholder: "1"
-    validations:
-      required: true
-  - type: textarea
-    id: output
-    attributes:
-      label: Console Output
-      description: "Please paste the console output from the beginning till termination here. If you are using the gui open the log folder under 'Debug > Open Log Folder' in the Menu. Please copy the content of latest.log here."
-      render: Shell
-    validations:
-      required: true
-  - type: textarea
-    id: additionalInfos
-    attributes:
-      label: Additional Information
-      description: "Do you have any additional information you can provide?"
+    - type: markdown
+      attributes:
+          value: |
+              Thank you for reporting the issues you found and have with this program. 
+              This template will guide you through all the information we need.
+    - type: input
+      id: version
+      attributes:
+          label: Program version
+          description: 'Which version of the program do you use?'
+          placeholder: '1.0.0'
+      validations:
+          required: true
+    - type: dropdown
+      id: opsystem
+      attributes:
+          label: Operating System
+          description: 'Please tell us what OS you are using.'
+          options:
+              - Windows
+              - Linux
+              - MacOS
+      validations:
+          required: true
+    - type: dropdown
+      id: gui
+      attributes:
+          label: Type
+          description: 'Please tell us if you are using the gui or the cli version.'
+          options:
+              - CLI
+              - GUI
+      validations:
+          required: true
+    - type: dropdown
+      id: service
+      attributes:
+          label: Service
+          description: 'Please tell us what service the bug occured in.'
+          options:
+              - Crunchyroll
+              - Hidive
+              - AnimationDigitalNetwork
+              - All
+              - Irrelevant
+      validations:
+          required: true
+    - type: input
+      id: command
+      attributes:
+          label: Command used
+          description: 'Please tell us what command you used.'
+      validations:
+          required: true
+    - type: input
+      id: ShowID
+      attributes:
+          label: Show ID
+          description: 'Please provide the ID of an example show.'
+          placeholder: '1234'
+      validations:
+          required: true
+    - type: input
+      id: Episode
+      attributes:
+          label: Episode
+          description: 'Please provide the episode ID you used as an example.'
+          placeholder: '1'
+      validations:
+          required: true
+    - type: textarea
+      id: output
+      attributes:
+          label: Console Output
+          description: "Please paste the console output from the beginning till termination here. If you are using the gui open the log folder under 'Debug > Open Log Folder' in the Menu. Please copy the content of latest.log here."
+          render: Shell
+      validations:
+          required: true
+    - type: textarea
+      id: additionalInfos
+      attributes:
+          label: Additional Information
+          description: 'Do you have any additional information you can provide?'
