@@ -1794,6 +1794,8 @@ export default class Crunchy implements ServiceClass {
 				} else {
 					audioStream = (await audioPlaybackReq.res.json()) as CrunchyPlayStream;
 					const derivedPlaystreams = {} as CrunchyStreams;
+					// Give Audiostream the Videostream hardsubs if undefined or empty array
+					if (!audioStream.hardSubs || Object.values(audioStream.hardSubs).length === 0) audioStream.hardSubs = videoStream.hardSubs;
 					for (const hardsub in audioStream.hardSubs) {
 						const stream = audioStream.hardSubs[hardsub];
 						derivedPlaystreams[hardsub] = {
