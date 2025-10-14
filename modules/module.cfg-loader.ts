@@ -38,12 +38,12 @@ const tokenFile = {
 };
 
 const getTokenFile = (service: 'cr' | 'hd' | 'hdNew' | 'adn', proxyUrl?: string): string => {
-    const baseFile = tokenFile[service];
-    if (!proxyUrl) {
-        return baseFile;
-    }
-    const hash = crypto.createHash('md5').update(proxyUrl).digest('hex').substring(0, 8);
-    return `${baseFile}_${hash}`;
+	const baseFile = tokenFile[service];
+	if (!proxyUrl) {
+		return baseFile;
+	}
+	const hash = crypto.createHash('md5').update(proxyUrl).digest('hex').substring(0, 8);
+	return `${baseFile}_${hash}`;
 };
 
 export const ensureConfig = () => {
@@ -210,43 +210,43 @@ const saveCRSession = (data: Record<string, unknown>) => {
 };
 
 const loadCRToken = (proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('cr', proxyUrl);
-    let token = loadYamlCfgFile(tokenFilePath, true);
-    if (typeof token !== 'object' || token === null || Array.isArray(token)) {
-        token = {};
-    }
-    return token;
+	const tokenFilePath = getTokenFile('cr', proxyUrl);
+	let token = loadYamlCfgFile(tokenFilePath, true);
+	if (typeof token !== 'object' || token === null || Array.isArray(token)) {
+		token = {};
+	}
+	return token;
 };
 
 const saveCRToken = (data: Record<string, unknown>, proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('cr', proxyUrl);
-    const cfgFolder = path.dirname(tokenFilePath);
-    try {
-        fs.ensureDirSync(cfgFolder);
-        fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
-    } catch (e) {
-        console.error("Can't save token file to disk!");
-    }
+	const tokenFilePath = getTokenFile('cr', proxyUrl);
+	const cfgFolder = path.dirname(tokenFilePath);
+	try {
+		fs.ensureDirSync(cfgFolder);
+		fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
+	} catch (e) {
+		console.error("Can't save token file to disk!");
+	}
 };
 
 const loadADNToken = (proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('adn', proxyUrl);
-    let token = loadYamlCfgFile(tokenFilePath, true);
-    if (typeof token !== 'object' || token === null || Array.isArray(token)) {
-        token = {};
-    }
-    return token;
+	const tokenFilePath = getTokenFile('adn', proxyUrl);
+	let token = loadYamlCfgFile(tokenFilePath, true);
+	if (typeof token !== 'object' || token === null || Array.isArray(token)) {
+		token = {};
+	}
+	return token;
 };
 
 const saveADNToken = (data: Record<string, unknown>, proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('adn', proxyUrl);
-    const cfgFolder = path.dirname(tokenFilePath);
-    try {
-        fs.ensureDirSync(cfgFolder);
-        fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
-    } catch (e) {
-        console.error("Can't save token file to disk!");
-    }
+	const tokenFilePath = getTokenFile('adn', proxyUrl);
+	const cfgFolder = path.dirname(tokenFilePath);
+	try {
+		fs.ensureDirSync(cfgFolder);
+		fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
+	} catch (e) {
+		console.error("Can't save token file to disk!");
+	}
 };
 
 const loadHDSession = () => {
@@ -273,23 +273,23 @@ const saveHDSession = (data: Record<string, unknown>) => {
 };
 
 const loadHDToken = (proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('hd', proxyUrl);
-    let token = loadYamlCfgFile(tokenFilePath, true);
-    if (typeof token !== 'object' || token === null || Array.isArray(token)) {
-        token = {};
-    }
-    return token;
+	const tokenFilePath = getTokenFile('hd', proxyUrl);
+	let token = loadYamlCfgFile(tokenFilePath, true);
+	if (typeof token !== 'object' || token === null || Array.isArray(token)) {
+		token = {};
+	}
+	return token;
 };
 
 const saveHDToken = (data: Record<string, unknown>, proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('hd', proxyUrl);
-    const cfgFolder = path.dirname(tokenFilePath);
-    try {
-        fs.ensureDirSync(cfgFolder);
-        fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
-    } catch (e) {
-        console.error("Can't save token file to disk!");
-    }
+	const tokenFilePath = getTokenFile('hd', proxyUrl);
+	const cfgFolder = path.dirname(tokenFilePath);
+	try {
+		fs.ensureDirSync(cfgFolder);
+		fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
+	} catch (e) {
+		console.error("Can't save token file to disk!");
+	}
 };
 
 const saveHDProfile = (data: Record<string, unknown>) => {
@@ -324,23 +324,23 @@ const loadHDProfile = () => {
 };
 
 const loadNewHDToken = (proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('hdNew', proxyUrl);
-    let token = loadYamlCfgFile(tokenFilePath, true);
-    if (typeof token !== 'object' || token === null || Array.isArray(token)) {
-        token = {};
-    }
-    return token;
+	const tokenFilePath = getTokenFile('hdNew', proxyUrl);
+	let token = loadYamlCfgFile(tokenFilePath, true);
+	if (typeof token !== 'object' || token === null || Array.isArray(token)) {
+		token = {};
+	}
+	return token;
 };
 
 const saveNewHDToken = (data: Record<string, unknown>, proxyUrl?: string) => {
-    const tokenFilePath = getTokenFile('hdNew', proxyUrl);
-    const cfgFolder = path.dirname(tokenFilePath);
-    try {
-        fs.ensureDirSync(cfgFolder);
-        fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
-    } catch (e) {
-        console.error("Can't save token file to disk!");
-    }
+	const tokenFilePath = getTokenFile('hdNew', proxyUrl);
+	const cfgFolder = path.dirname(tokenFilePath);
+	try {
+		fs.ensureDirSync(cfgFolder);
+		fs.writeFileSync(`${tokenFilePath}.yml`, yaml.stringify(data));
+	} catch (e) {
+		console.error("Can't save token file to disk!");
+	}
 };
 
 const cfgDir = path.join(workingDir, 'config');

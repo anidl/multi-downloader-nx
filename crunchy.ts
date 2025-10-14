@@ -76,7 +76,7 @@ export default class Crunchy implements ServiceClass {
 	public async cli() {
 		console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
 		const argv = yargs.appArgv(this.cfg.cli);
-        this.token = yamlCfg.loadCRToken(argv.proxy);
+		this.token = yamlCfg.loadCRToken(argv.proxy);
 		this.locale = argv.locale;
 		if (argv.debug) this.debug = true;
 
@@ -426,7 +426,7 @@ export default class Crunchy implements ServiceClass {
 		this.token = await authReq.res.json();
 		this.token.device_id = uuid;
 		this.token.expires = new Date(Date.now() + this.token.expires_in * 1000);
-        const argv = yargs.appArgv(this.cfg.cli);
+		const argv = yargs.appArgv(this.cfg.cli);
 		yamlCfg.saveCRToken(this.token, argv.proxy);
 		await this.getProfile();
 		console.info('Your Country: %s', this.token.country);
@@ -467,7 +467,7 @@ export default class Crunchy implements ServiceClass {
 		this.token = await authReq.res.json();
 		this.token.device_id = uuid;
 		this.token.expires = new Date(Date.now() + this.token.expires_in * 1000);
-        const argv = yargs.appArgv(this.cfg.cli);
+		const argv = yargs.appArgv(this.cfg.cli);
 		yamlCfg.saveCRToken(this.token, argv.proxy);
 	}
 
@@ -539,7 +539,7 @@ export default class Crunchy implements ServiceClass {
 		this.token = await authReq.res.json();
 		this.token.device_id = uuid;
 		this.token.expires = new Date(Date.now() + this.token.expires_in * 1000);
-        const argv = yargs.appArgv(this.cfg.cli);
+		const argv = yargs.appArgv(this.cfg.cli);
 		yamlCfg.saveCRToken(this.token, argv.proxy);
 		await this.getProfile(false);
 		await this.getCMStoken(true);
@@ -592,7 +592,7 @@ export default class Crunchy implements ServiceClass {
 			this.token = await authReq.res.json();
 			this.token.device_id = uuid;
 			this.token.expires = new Date(Date.now() + this.token.expires_in * 1000);
-            const argv = yargs.appArgv(this.cfg.cli);
+			const argv = yargs.appArgv(this.cfg.cli);
 			yamlCfg.saveCRToken(this.token, argv.proxy);
 		}
 		if (this.token.refresh_token) {

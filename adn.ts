@@ -66,7 +66,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 	public async cli() {
 		console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
 		const argv = yargs.appArgv(this.cfg.cli);
-        this.token = yamlCfg.loadADNToken(argv.proxy);
+		this.token = yamlCfg.loadADNToken(argv.proxy);
 		if (['fr', 'de'].includes(argv.locale)) this.locale = argv.locale;
 		if (argv.debug) this.debug = true;
 
@@ -201,7 +201,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 			return { isOk: false, reason: new Error('Authentication failed') };
 		}
 		this.token = await authReq.res.json();
-        const argv = yargs.appArgv(this.cfg.cli);
+		const argv = yargs.appArgv(this.cfg.cli);
 		yamlCfg.saveADNToken(this.token, argv.proxy);
 		console.info('Authentication Success');
 		return { isOk: true, value: undefined };
@@ -224,7 +224,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 			return { isOk: false, reason: new Error('Token refresh failed') };
 		}
 		this.token = await authReq.res.json();
-        const argv = yargs.appArgv(this.cfg.cli);
+		const argv = yargs.appArgv(this.cfg.cli);
 		yamlCfg.saveADNToken(this.token, argv.proxy);
 		return { isOk: true, value: undefined };
 	}
