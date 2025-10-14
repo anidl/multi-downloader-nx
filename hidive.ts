@@ -53,6 +53,7 @@ export default class Hidive implements ServiceClass {
 	public async cli() {
 		console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
 		const argv = yargs.appArgv(this.cfg.cli);
+        this.token = yamlCfg.loadNewHDToken(argv.proxy);
 		if (argv.debug) this.debug = true;
 
 		//below is for quickly testing API calls
@@ -224,7 +225,8 @@ export default class Hidive implements ServiceClass {
 			this.token[token] = tokens[token];
 		}
 		this.token.guest = false;
-		yamlCfg.saveNewHDToken(this.token);
+        const argv = yargs.appArgv(this.cfg.cli);
+		yamlCfg.saveNewHDToken(this.token, argv.proxy);
 		console.info('Auth complete!');
 		return { isOk: true, value: undefined };
 	}
@@ -241,7 +243,8 @@ export default class Hidive implements ServiceClass {
 		}
 		//this.token.expires = new Date(Date.now() + 300);
 		this.token.guest = true;
-		yamlCfg.saveNewHDToken(this.token);
+        const argv = yargs.appArgv(this.cfg.cli);
+		yamlCfg.saveNewHDToken(this.token, argv.proxy);
 		return true;
 	}
 
@@ -264,7 +267,8 @@ export default class Hidive implements ServiceClass {
 			for (const token in tokens) {
 				this.token[token] = tokens[token];
 			}
-			yamlCfg.saveNewHDToken(this.token);
+            const argv = yargs.appArgv(this.cfg.cli);
+			yamlCfg.saveNewHDToken(this.token, argv.proxy);
 			return true;
 		}
 	}
@@ -279,7 +283,8 @@ export default class Hidive implements ServiceClass {
 		for (const token in tokens) {
 			this.token[token] = tokens[token];
 		}
-		yamlCfg.saveNewHDToken(this.token);
+        const argv = yargs.appArgv(this.cfg.cli);
+		yamlCfg.saveNewHDToken(this.token, argv.proxy);
 		return true;
 	}
 
