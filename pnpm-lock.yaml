@@ -133,8 +133,8 @@ importers:
         specifier: ^8.46.1
         version: 8.46.1(eslint@9.37.0)(typescript@5.9.3)
       '@yao-pkg/pkg':
-        specifier: ^6.8.0
-        version: 6.8.0
+        specifier: ^6.9.0
+        version: 6.9.0
       eslint:
         specifier: ^9.37.0
         version: 9.37.0
@@ -703,12 +703,12 @@ packages:
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
 
-  '@yao-pkg/pkg-fetch@3.5.28':
-    resolution: {integrity: sha512-0dTu0yFgAuOp3OJBiwSZVkTMuGmvExwmG9mHKQhHkaNate5BWh6rBTzfQ0WId9DHXmg7GiT/kIyejEV0G3EHUQ==}
+  '@yao-pkg/pkg-fetch@3.5.29':
+    resolution: {integrity: sha512-Kpfpx9/XBkOZ/Nb41ybBGO+IaD9lu9svFxwqNt2xN0zwkxIQbaWU2gS5kOzkKPFlk2WUHoqtTkaDyYRARSOkkg==}
     hasBin: true
 
-  '@yao-pkg/pkg@6.8.0':
-    resolution: {integrity: sha512-QQcMbQHlaw7dFy3Nk7XQ7Gm8DlczTBcgSQB1V068L5/2rSZ3TO4CMc7rU7DeIOOR0Pm+mb5TDR3yH4jT6nfkpw==}
+  '@yao-pkg/pkg@6.9.0':
+    resolution: {integrity: sha512-8K4P5ZRPtOIneylzmCgTWTNwxOuzju+ds/wSDli8EokmAYCG/Flr/NliFjfZ8I9t//FcG1Di7rBldyjEhPtKvQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -782,8 +782,8 @@ packages:
       bare-abort-controller:
         optional: true
 
-  bare-fs@4.4.10:
-    resolution: {integrity: sha512-arqVF+xX/rJHwrONZaSPhlzleT2gXwVs9rsAe1p1mIVwWZI2A76/raio+KwwxfWMO8oV9Wo90EaUkS2QwVmy4w==}
+  bare-fs@4.4.11:
+    resolution: {integrity: sha512-Bejmm9zRMvMTRoHS+2adgmXw1ANZnCNx+B5dgZpGwlP1E3x6Yuxea8RToddHUbWtVV0iUMWqsgZr8+jcgUI2SA==}
     engines: {bare: '>=1.16.0'}
     peerDependencies:
       bare-buffer: '*'
@@ -2653,7 +2653,7 @@ snapshots:
 
   '@xmldom/xmldom@0.8.11': {}
 
-  '@yao-pkg/pkg-fetch@3.5.28':
+  '@yao-pkg/pkg-fetch@3.5.29':
     dependencies:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
@@ -2669,12 +2669,12 @@ snapshots:
       - react-native-b4a
       - supports-color
 
-  '@yao-pkg/pkg@6.8.0':
+  '@yao-pkg/pkg@6.9.0':
     dependencies:
       '@babel/generator': 7.28.3
       '@babel/parser': 7.28.4
       '@babel/types': 7.28.4
-      '@yao-pkg/pkg-fetch': 3.5.28
+      '@yao-pkg/pkg-fetch': 3.5.29
       into-stream: 6.0.0
       minimist: 1.2.8
       multistream: 4.1.0
@@ -2748,7 +2748,7 @@ snapshots:
 
   bare-events@2.8.0: {}
 
-  bare-fs@4.4.10:
+  bare-fs@4.4.11:
     dependencies:
       bare-events: 2.8.0
       bare-path: 3.0.0
@@ -4028,7 +4028,7 @@ snapshots:
       pump: 3.0.3
       tar-stream: 3.1.7
     optionalDependencies:
-      bare-fs: 4.4.10
+      bare-fs: 4.4.11
       bare-path: 3.0.0
     transitivePeerDependencies:
       - bare-abort-controller
