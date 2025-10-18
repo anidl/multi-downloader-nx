@@ -21,7 +21,7 @@ By default this application uses the following paths to programs (main executabl
 * `ffprobe.exe` (Windows) or `ffprobe` (other) (From PATH)
 * `mkvmerge.exe` (Windows) or `mkvmerge` (other) (From PATH)
 * `mp4decrypt.exe` (Windows) or `mp4decrypt` (other) (From PATH) (or shaka-packager)
-* `shaka-packager.exe` (Windows) or `shaka-packager` (other) (v2.6.1 or older) (From PATH) (or mp4decrypt)
+* `shaka-packager.exe` (Windows) or `shaka-packager` (other) (From PATH) (or mp4decrypt)
 
 To change these paths you need to edit `bin-path.yml` in `./config/` directory.
 
@@ -102,7 +102,7 @@ If you want to package the application, run pnpm run build-`{platform}`-`{type}`
 ### Decryption Requirements
 
 * mp4decrypt >= Any (http://www.bento4.com/) - Only required for decrypting (or shaka-packager)
-* shaka-packager >= Any (https://github.com/shaka-project/shaka-packager/releases) - Only required for decrypting (or mp4decrypt)
+* shaka-packager >= Any (https://github.com/stratumadev/shaka-packager/releases) - Only required for decrypting (or mp4decrypt)
 
 ### Instructions (Widevine)
 
