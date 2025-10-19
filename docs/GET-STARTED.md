@@ -220,15 +220,19 @@ tsd: true
 This section explains what each endpoint is capable of, and what subscription level is required to use it. \
 If you are new to the project, please use the defaults found in the [`cli-defaults.yml`](https://github.com/HyperNylium/multi-downloader-nx/blob/master/config/cli-defaults.yml) file, as those are the recommended settings.
 
-| Endpoint     | Video quality         | Audio quality | Subscription level required |
-|--------------|-----------------------|---------------|-----------------------------|
-| `android`    | 4-6k variable bitrate | 192kbps       | "Mega Fan" or higher        |
-| `androidtab` | 4-6k variable bitrate | 128kbps       | "Fan" or higher             |
-| `androidtv`  | 8k constent bitrate   | 128kbps       | "Fan" or higher             |
+| Endpoint     | Video quality               | Audio quality | Subscription level required |
+|--------------|-----------------------------|---------------|-----------------------------|
+| `android`    | 4-6k variable bitrate (VBR) | 192kbps       | "Mega Fan" or higher        |
+| `androidtab` | 4-6k variable bitrate (VBR) | 128kbps       | "Fan" or higher             |
+| `androidtv`  | 8k constent bitrate (CBR)   | 128kbps       | "Fan" or higher             |
 
 > [!NOTE]
-> When using the `android` endpoint as `--astream`, if you do not have the "Mega Fan" or higher subscription, \
-> It will fallback to the 128kbps audio.
+> If you pick 192kbps audio (`--astream android`) with 8k CBR video (`--vstream androidtv`) but don’t have "Mega Fan" sub or higher,
+> the audio will fall back to 128 kbps, which will download the CBR video with 128 kbps audio.
+
+> [!NOTE]
+> 192 kbps audio comes from the `android` endpoint. CBR video comes from `androidtv` endpoint. \
+> Using both means you are using **two streams**, which needs the "Mega Fan" tier or higher.
 
 ## Usage
 
