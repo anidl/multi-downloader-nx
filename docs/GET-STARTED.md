@@ -222,7 +222,7 @@ If you are new to the project, please use the defaults found in the [`cli-defaul
 
 | Endpoint     | Video quality               | Audio quality | Subscription level required |
 |--------------|-----------------------------|---------------|-----------------------------|
-| `android`    | 4-6k variable bitrate (VBR) | 192kbps       | "Mega Fan" or higher        |
+| `android`    | 4-6k variable bitrate (VBR) | 192kbps       | "Fan" or higher             |
 | `androidtab` | 4-6k variable bitrate (VBR) | 128kbps       | "Fan" or higher             |
 | `androidtv`  | 8k constent bitrate (CBR)   | 128kbps       | "Fan" or higher             |
 
