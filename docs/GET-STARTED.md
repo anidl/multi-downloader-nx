@@ -23,6 +23,7 @@ This tool is not responsible for your actions; please make an informed decision 
     - [Playready CDM](#playready)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Endpoint Notes](#endpoint-notes)
 - [Usage](#usage)
     - [Authentication](#authentication)
     - [Output Directory](#output-directory)
@@ -213,6 +214,21 @@ If you wanted to set `--tsd` to `true`, you would do it like this:
 ```yaml
 tsd: true
 ```
+
+## Endpoint Notes
+
+This section explains what each endpoint is capable of, and what subscription level is required to use it. \
+If you are new to the project, please use the defaults found in the [`cli-defaults.yml`](https://github.com/HyperNylium/multi-downloader-nx/blob/master/config/cli-defaults.yml) file, as those are the recommended settings.
+
+| Endpoint     | Video quality         | Audio quality | Subscription level required |
+|--------------|-----------------------|---------------|-----------------------------|
+| `android`    | 4-6k variable bitrate | 192kbps       | "Mega Fan" or higher        |
+| `androidtab` | 4-6k variable bitrate | 128kbps       | "Fan" or higher             |
+| `androidtv`  | 8k constent bitrate   | 128kbps       | "Fan" or higher             |
+
+> [!NOTE]
+> When using the `android` endpoint as `--astream`, if you do not have the "Mega Fan" or higher subscription, \
+> It will fallback to the 128kbps audio.
 
 ## Usage
 
