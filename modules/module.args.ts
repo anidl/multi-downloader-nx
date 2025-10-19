@@ -295,8 +295,7 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 		alias: 'cs',
 		service: ['crunchy'],
 		type: 'string',
-		describe:
-			'(Please use --vstream and --astream instead, this will deprecate soon)',
+		describe: '(Please use --vstream and --astream instead, this will deprecate soon)',
 		choices: [...Object.keys(CrunchyVideoPlayStreams), 'none'],
 		docDescribe: true,
 		usage: '${device}'
