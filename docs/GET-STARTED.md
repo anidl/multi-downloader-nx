@@ -1,4 +1,4 @@
-# multi-downloader-nx (v5.5.3)
+# multi-downloader-nx (v5.6.1)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -23,6 +23,7 @@ This tool is not responsible for your actions; please make an informed decision 
     - [Playready CDM](#playready)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Endpoint Notes](#endpoint-notes)
 - [Usage](#usage)
     - [Authentication](#authentication)
     - [Output Directory](#output-directory)
@@ -213,6 +214,25 @@ If you wanted to set `--tsd` to `true`, you would do it like this:
 ```yaml
 tsd: true
 ```
+
+## Endpoint Notes
+
+This section explains what each endpoint is capable of, and what subscription level is required to use it. \
+If you are new to the project, please use the defaults found in the [`cli-defaults.yml`](https://github.com/HyperNylium/multi-downloader-nx/blob/master/config/cli-defaults.yml) file, as those are the recommended settings.
+
+| Endpoint     | Video quality               | Audio quality | Subscription level required |
+|--------------|-----------------------------|---------------|-----------------------------|
+| `android`    | 4-6k variable bitrate (VBR) | 192kbps       | "Fan" or higher             |
+| `androidtab` | 4-6k variable bitrate (VBR) | 128kbps       | "Fan" or higher             |
+| `androidtv`  | 8k constent bitrate (CBR)   | 128kbps       | "Fan" or higher             |
+
+> [!NOTE]
+> If you pick 192kbps audio (`--astream android`) with 8k CBR video (`--vstream androidtv`) but don’t have "Mega Fan" sub or higher,
+> the audio will fall back to 128 kbps, which will download the CBR video with 128 kbps audio.
+
+> [!NOTE]
+> 192 kbps audio comes from the `android` endpoint. CBR video comes from `androidtv` endpoint. \
+> Using both means you are using **two streams**, which needs the "Mega Fan" tier or higher.
 
 ## Usage
 
