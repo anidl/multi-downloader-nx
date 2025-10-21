@@ -40,7 +40,7 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@bufbuild/protobuf": "^2.9.0",
+		"@bufbuild/protobuf": "^2.10.0",
 		"binary-parser": "^2.2.1",
 		"binary-parser-encoder": "^1.5.3",
 		"bn.js": "^5.2.2",
@@ -69,7 +69,7 @@
 	},
 	"devDependencies": {
 		"@bufbuild/buf": "^1.58.0",
-		"@bufbuild/protoc-gen-es": "^2.9.0",
+		"@bufbuild/protoc-gen-es": "^2.10.0",
 		"@eslint/js": "^9.38.0",
 		"@types/bn.js": "^5.2.0",
 		"@types/cors": "^2.8.19",
