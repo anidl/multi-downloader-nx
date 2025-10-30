@@ -83,7 +83,7 @@
 		"@types/yargs": "^17.0.34",
 		"@typescript-eslint/eslint-plugin": "^8.46.2",
 		"@typescript-eslint/parser": "^8.46.2",
-		"@yao-pkg/pkg": "^6.9.0",
+		"@yao-pkg/pkg": "^6.10.0",
 		"eslint": "^9.38.0",
 		"eslint-config-prettier": "^10.1.8",
 		"prettier": "^3.6.2",
