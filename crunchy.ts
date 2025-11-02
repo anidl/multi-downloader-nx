@@ -2869,6 +2869,11 @@ export default class Crunchy implements ServiceClass {
 
 										// Remove YCbCr
 										sBody = sBody.replace(/^[ \t]*YCbCr Matrix:\s*.*\r?\n?/m, '');
+
+										// Force outline thickness for ru-RU: if the 17th field (Outline) equals 2.6 → 2
+										if (langItem.cr_locale === 'ru-RU') {
+											sBody = sBody.replace(/^[ \t]*(Style:\s*[^,\n]*(?:,[^,\n]*){15}),\s*2(?:[.,]6(?:0+)?)?(\s*,)/gm, '$1,2$2');
+										}
 									}
 
 									sxData.title = langItem.language;
