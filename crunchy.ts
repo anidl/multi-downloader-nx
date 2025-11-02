@@ -2846,6 +2846,13 @@ export default class Crunchy implements ServiceClass {
 									}
 
 									if (!options.noSubFix) {
+										// Force outline thickness for RU: if the 17th field (Outline) equals 2.6 → 2
+										if (langItem.cr_locale === 'ru-RU') {
+										  sBody = sBody.replace(
+										    /^[ \t]*(Style:\s*[^,\n]*(?:,[^,\n]*){15}),\s*2(?:[.,]6(?:0+)?)?(\s*,)/gm,
+										    '$1,2$2'
+										  );
+										}
 										// LayoutRes Fix
 										if (options.layoutResFix && !sBody.includes('LayoutResX') && !sBody.includes('LayoutResY')) {
 											sBody = sBody.replace(/^(PlayResY:\s*\d+)/m, `$1\nLayoutResX: ${playResX}\nLayoutResY: ${playResY}`);
@@ -3389,3 +3396,4 @@ export default class Crunchy implements ServiceClass {
 		return episodeList;
 	}
 }
+
