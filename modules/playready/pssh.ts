@@ -64,11 +64,8 @@ export class PSSH {
 			if (wrmHeaderMatch && wrmHeaderMatch.length > 0) {
 				return wrmHeaderMatch[0];
 			}
-
-			console.warn('No valid WRMHEADER found in PSSH data');
 			return null;
 		} catch (e) {
-			console.error('Failed to extract PlayReady header:', e);
 			return null;
 		}
 	}
