@@ -14,52 +14,9 @@ const PSSHBox = new Parser()
 		length: 'data_length'
 	});
 
-const PlayreadyObject = new Parser()
-	.useContextVars()
-	.uint16('type')
-	.uint16('length')
-	.choice('data', {
-		tag: 'type',
-		choices: {
-			1: new Parser().string('data', {
-				length: function () {
-					return (this as any).$parent.length;
-				},
-				encoding: 'utf16le'
-			})
-		},
-		defaultChoice: new Parser().buffer('data', {
-			length: function () {
-				return (this as any).$parent.length;
-			}
-		})
-	});
-
-const PlayreadyHeader = new Parser().uint32('length').uint16('record_count').array('records', {
-	length: 'record_count',
-	type: PlayreadyObject
-});
-
-function isPlayreadyPsshBox(data: Buffer): boolean {
+export function isPlayreadyPsshBox(data: Buffer): boolean {
 	if (data.length < 28) return false;
 	return data.subarray(12, 28).equals(SYSTEM_ID);
-}
-
-function isUtf16(data: Buffer): boolean {
-	for (let i = 1; i < data.length; i += 2) {
-		if (data[i] !== 0) {
-			return false;
-		}
-	}
-	return true;
-}
-
-function* getWrmHeaders(wrm_header: any): IterableIterator<string> {
-	for (const record of wrm_header.records) {
-		if (record.type === 1 && typeof record.data === 'string') {
-			yield record.data;
-		}
-	}
 }
 
 export class PSSH {
@@ -80,37 +37,42 @@ export class PSSH {
 
 		try {
 			if (isPlayreadyPsshBox(data)) {
-				const pssh_box = PSSHBox.parse(data);
-				const psshData = pssh_box.data;
-
-				if (isUtf16(psshData)) {
-					this.wrm_headers = [psshData.toString('utf16le')];
-				} else if (isUtf16(psshData.subarray(6))) {
-					this.wrm_headers = [psshData.subarray(6).toString('utf16le')];
-				} else if (isUtf16(psshData.subarray(10))) {
-					this.wrm_headers = [psshData.subarray(10).toString('utf16le')];
+				const header = this.extractPlayreadyHeader(data);
+				if (header) {
+					this.wrm_headers = [header];
 				} else {
-					const playready_header = PlayreadyHeader.parse(psshData);
-					this.wrm_headers = Array.from(getWrmHeaders(playready_header));
+					throw new Error('Invalid PlayReady Header');
 				}
 			} else {
-				if (isUtf16(data)) {
-					this.wrm_headers = [data.toString('utf16le')];
-				} else if (isUtf16(data.subarray(6))) {
-					this.wrm_headers = [data.subarray(6).toString('utf16le')];
-				} else if (isUtf16(data.subarray(10))) {
-					this.wrm_headers = [data.subarray(10).toString('utf16le')];
+				const repairedHeader = this.extractPlayreadyHeader(data);
+				if (repairedHeader) {
+					this.wrm_headers = [repairedHeader];
 				} else {
-					const playready_header = PlayreadyHeader.parse(data);
-					this.wrm_headers = Array.from(getWrmHeaders(playready_header));
+					throw new Error('Could not extract PlayReady header from repaired data');
 				}
 			}
 		} catch (e) {
-			throw new Error('Could not parse data as a PSSH Box nor a PlayReadyHeader');
+			throw new Error(`Could not parse or repair PSSH data: ${e}`);
 		}
 	}
 
-	// Header downgrade
+	private extractPlayreadyHeader(data: Buffer): string | null {
+		try {
+			const utf16Data = data.toString('utf16le');
+
+			const wrmHeaderMatch = utf16Data.match(/<WRMHEADER[^>]*>.*<\/WRMHEADER>/i);
+			if (wrmHeaderMatch && wrmHeaderMatch.length > 0) {
+				return wrmHeaderMatch[0];
+			}
+
+			console.warn('No valid WRMHEADER found in PSSH data');
+			return null;
+		} catch (e) {
+			console.error('Failed to extract PlayReady header:', e);
+			return null;
+		}
+	}
+
 	public get_wrm_headers(downgrade_to_v4: boolean = false): string[] {
 		return this.wrm_headers.map(downgrade_to_v4 ? this.downgradePSSH : (_) => _);
 	}
