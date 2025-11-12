@@ -1079,8 +1079,8 @@ export default class Crunchy implements ServiceClass {
 		await this.logObject(showInfo.data[0], 0);
 
 		let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
-		//get episode info
-		const reqEpsListOpts = [
+		//get episode info CMS
+		const reqEpsCMSListOpts = [
 			api.cms_bucket,
 			this.cmsToken.cms_web.bucket,
 			'/episodes?',
@@ -1094,18 +1094,48 @@ export default class Crunchy implements ServiceClass {
 				'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
 			})
 		].join('');
+		const reqEpsCMSList = await this.req.getData(reqEpsCMSListOpts, AuthHeaders);
+		if (!reqEpsCMSList.ok || !reqEpsCMSList.res) {
+			console.error('Episode List Request FAILED!');
+			return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
+		}
+		//CrunchyEpisodeList
+		const episodeListAndroid = (await reqEpsCMSList.res.json()) as CrunchyAndroidEpisodes;
+
+		//get episode info API
+		const reqEpsListOpts = [
+			domain.cr_www,
+			'/content/v2/cms/seasons/',
+			id,
+			'/episodes?',
+			new URLSearchParams({
+				force_locale: '',
+				preferred_audio_language: 'ja-JP',
+				locale: this.locale
+			})
+		].join('');
 		const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
 		if (!reqEpsList.ok || !reqEpsList.res) {
 			console.error('Episode List Request FAILED!');
 			return { isOk: false, reason: new Error('Episode List request failed. No more information provided.') };
 		}
 		//CrunchyEpisodeList
-		const episodeListAndroid = (await reqEpsList.res.json()) as CrunchyAndroidEpisodes;
-		episodeList = {
-			total: episodeListAndroid.total,
-			data: episodeListAndroid.items,
-			meta: {}
-		};
+		const episodeListAPI = (await reqEpsList.res.json()) as CrunchyEpisodeList;
+
+		// if API has more items than CMS use API episodes
+		if (episodeListAPI.total > episodeListAndroid.total) {
+			episodeList = {
+				total: episodeListAPI.total,
+				data: episodeListAPI.data,
+				meta: {}
+			};
+		} else {
+			episodeList = {
+				total: episodeListAndroid.total,
+				data: episodeListAndroid.items,
+				meta: {}
+			};
+		}
 
 		const epNumList: {
 			ep: number[];
@@ -3359,7 +3389,8 @@ export default class Crunchy implements ServiceClass {
 			const original_id = s.versions?.find((v: { original: boolean }) => v.original)?.guid;
 			const id = original_id ? original_id : s.id;
 
-			const reqEpsListOpts = [
+			//get episode info CMS
+			const reqEpsCMSListOpts = [
 				api.cms_bucket,
 				this.cmsToken.cms_web.bucket,
 				'/episodes?',
@@ -3373,18 +3404,48 @@ export default class Crunchy implements ServiceClass {
 					'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
 				})
 			].join('');
+			const reqEpsCMSList = await this.req.getData(reqEpsCMSListOpts, AuthHeaders);
+			if (!reqEpsCMSList.ok || !reqEpsCMSList.res) {
+				console.error('Episode List Request FAILED!');
+				return;
+			}
+			//CrunchyEpisodeList
+			const episodeListAndroid = (await reqEpsCMSList.res.json()) as CrunchyAndroidEpisodes;
+
+			//get episode info API
+			const reqEpsListOpts = [
+				domain.cr_www,
+				'/content/v2/cms/seasons/',
+				id,
+				'/episodes?',
+				new URLSearchParams({
+					force_locale: '',
+					preferred_audio_language: 'ja-JP',
+					locale: this.locale
+				})
+			].join('');
 			const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
 			if (!reqEpsList.ok || !reqEpsList.res) {
 				console.error('Episode List Request FAILED!');
 				return;
 			}
+			//CrunchyEpisodeList
+			const episodeListAPI = (await reqEpsList.res.json()) as CrunchyEpisodeList;
 
-			const episodeListAndroid = (await reqEpsList.res.json()) as CrunchyAndroidEpisodes;
-			episodeList = {
-				total: episodeList.total + episodeListAndroid.total,
-				data: [...episodeList.data, ...episodeListAndroid.items],
-				meta: {}
-			};
+			// if API has more items than CMS use API episodes
+			if (episodeListAPI.total > episodeListAndroid.total) {
+				episodeList = {
+					total: episodeList.total + episodeListAPI.total,
+					data: [...episodeList.data, ...episodeListAPI.data],
+					meta: {}
+				};
+			} else {
+				episodeList = {
+					total: episodeList.total + episodeListAndroid.total,
+					data: [...episodeList.data, ...episodeListAndroid.items],
+					meta: {}
+				};
+			}
 		}
 
 		if (episodeList.total < 1) {
