@@ -719,7 +719,7 @@ export default class Crunchy implements ServiceClass {
 			value: toSend
 				.map((a) => {
 					return a.items.map((a): SearchResponseItem => {
-						const images = (a.images.poster_tall ?? [[{ source: '/notFound.png' }]])[0];
+						const images = (a.images?.poster_tall ?? [[{ source: '/notFound.png' }]])[0];
 						return {
 							id: a.id,
 							image: images[Math.floor(images.length / 2)].source,
@@ -3145,7 +3145,7 @@ export default class Crunchy implements ServiceClass {
 		return {
 			data: sortedEpisodes,
 			list: Object.entries(sortedEpisodes).map(([key, value]) => {
-				const images = (value.items[0].images.thumbnail ?? [[{ source: '/notFound.png' }]])[0];
+				const images = (value.items[0].images?.thumbnail ?? [[{ source: '/notFound.png' }]])[0];
 				const seconds = Math.floor(value.items[0].duration_ms / 1000);
 				let epNum;
 				if (data?.absolute) {
@@ -3244,7 +3244,7 @@ export default class Crunchy implements ServiceClass {
 				}
 
 				// set data
-				const images = (item.images.thumbnail ?? [[{ source: '/notFound.png' }]])[0];
+				const images = (item.images?.thumbnail ?? [[{ source: '/notFound.png' }]])[0];
 				const epMeta: CrunchyEpMeta = {
 					data: [
 						{
