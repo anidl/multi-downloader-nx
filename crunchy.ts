@@ -1173,7 +1173,7 @@ export default class Crunchy implements ServiceClass {
 			}
 			const selEpId = isSpecial ? 'S' + epNumList.sp.toString().padStart(epNumLen, '0') : '' + parseInt(epNum, 10).toString().padStart(epNumLen, '0');
 			// set data
-			const images = (item.images.thumbnail ?? [[{ source: '/notFound.png' }]])[0];
+			const images = (item.images?.thumbnail ?? [[{ source: '/notFound.png' }]])[0];
 			const epMeta: CrunchyEpMeta = {
 				data: [
 					{
