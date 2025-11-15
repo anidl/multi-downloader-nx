@@ -33,8 +33,8 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
       fast-xml-parser:
-        specifier: ^5.3.1
-        version: 5.3.1
+        specifier: ^5.3.2
+        version: 5.3.2
       ffprobe:
         specifier: ^1.1.2
         version: 1.1.2
@@ -88,8 +88,8 @@ importers:
         version: 17.7.2
     devDependencies:
       '@bufbuild/buf':
-        specifier: ^1.59.0
-        version: 1.59.0
+        specifier: ^1.60.0
+        version: 1.60.0
       '@bufbuild/protoc-gen-es':
         specifier: ^2.10.1
         version: 2.10.1(@bufbuild/protobuf@2.10.1)
@@ -124,8 +124,8 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
       '@types/yargs':
-        specifier: ^17.0.34
-        version: 17.0.34
+        specifier: ^17.0.35
+        version: 17.0.35
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.46.4
         version: 8.46.4(@typescript-eslint/parser@8.46.4(eslint@9.39.1)(typescript@5.9.3))(eslint@9.39.1)(typescript@5.9.3)
@@ -184,50 +184,50 @@ packages:
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
 
-  '@bufbuild/buf-darwin-arm64@1.59.0':
-    resolution: {integrity: sha512-d3JTxBCibC+C94JU0jwLMgo/WBhaAHBIRzZXaZ3Y8KREjTj3jhzAlelGZmCtQJyyE0l6DFSm3lQgMblJ5qlq/w==}
+  '@bufbuild/buf-darwin-arm64@1.60.0':
+    resolution: {integrity: sha512-3C/+EVyHnTGEl0DQ2GISab86IyE0jI4A65m059/BT0LFOF4vPbJU7bHO3Zzz+sFDWer+Ddi+93Tph+pWoxGI9A==}
     engines: {node: '>=12'}
     cpu: [arm64]
     os: [darwin]
 
-  '@bufbuild/buf-darwin-x64@1.59.0':
-    resolution: {integrity: sha512-eFnFB96GM6KjP5S8QFqjufjlMF41CVnXjkR8cIfR5jUXdwl1vf5S82Zv+cK1+Uogqhmt7AVBntd5Z+xmz4NKaw==}
+  '@bufbuild/buf-darwin-x64@1.60.0':
+    resolution: {integrity: sha512-hS6BLLJGJj1FfA0m/pGI/ihv2i4/kin7pQlY1x1rE/FOwzpDFveLVKht+o6dt38cz2HSjLcItOrnke7D4hLBsg==}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [darwin]
 
-  '@bufbuild/buf-linux-aarch64@1.59.0':
-    resolution: {integrity: sha512-g6DxTcJM29SBvqe42ll7HpkmTfecuG+PZYTysaxON9Y59fwtflhuLDpNqGhxWehHMkH11bFfpNeCGKjpGbVvkw==}
+  '@bufbuild/buf-linux-aarch64@1.60.0':
+    resolution: {integrity: sha512-arpgQZ3YZ6RQ6xwCAfKaBHS7wlQBxBDeWSEb+KXOkCGu6fcJX+4b80vUWIVJPE+j2tfpIv02ncWLCwU1tyWeuA==}
     engines: {node: '>=12'}
     cpu: [arm64]
     os: [linux]
 
-  '@bufbuild/buf-linux-armv7@1.59.0':
-    resolution: {integrity: sha512-C92s+gmKnAyCzN7MdbtukRXOiW7e0hkeQrOie17vF6qWXPk2r9ix0WXZvg5gZr9R4zD8pOYwRVwYiB9zFXZOaA==}
+  '@bufbuild/buf-linux-armv7@1.60.0':
+    resolution: {integrity: sha512-4vDsFgo1m5+J/kY8L58tbnPlpbt6FUO5ngKSIporCTZ+VfpiMiK8R6kh0Tp7PDOO3nAyTqzY/V6h+APnewsuOQ==}
     engines: {node: '>=12'}
     cpu: [arm]
     os: [linux]
 
-  '@bufbuild/buf-linux-x64@1.59.0':
-    resolution: {integrity: sha512-Pzc3TFm1t2fZ5uT7jkYBjyuLNKo5ji/wRl/lLLvOlTFRyqsSZBkFNQcJGHoHSej1yDWau16VMrAh0GN1rZfvAg==}
+  '@bufbuild/buf-linux-x64@1.60.0':
+    resolution: {integrity: sha512-E3p1o1VLUxiPnTvOUXU5A37CeF3zbvNZYZQzZT2KZvMCbjch1ZG2zFBmgRtuGsid2aQ260O5NXurh+abDg3boA==}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [linux]
 
-  '@bufbuild/buf-win32-arm64@1.59.0':
-    resolution: {integrity: sha512-hS5VThgYNqbMFgY9SibDA/RXBdegw12jgrT2H+Tzaa2rvlSADck9ZAq9rwf2H0IvFJOqtR75Lejb+5Fx2rThpQ==}
+  '@bufbuild/buf-win32-arm64@1.60.0':
+    resolution: {integrity: sha512-c3udQuwdCOZk5ijeQKT64rbXvzRvJzXqOLjOn+2loM/Yhx6csoOKzCRPxlGKP8qLy45woSoH/tfiBPzuvFKeLA==}
     engines: {node: '>=12'}
     cpu: [arm64]
     os: [win32]
 
-  '@bufbuild/buf-win32-x64@1.59.0':
-    resolution: {integrity: sha512-JAGSF3oaKC2L/TelqvjB1N7oB5pTiviVr8mxiaxHyv4HpvcxCVdiO+iw0goRhZb4QHhYYswk2gLMezWHBxtR/g==}
+  '@bufbuild/buf-win32-x64@1.60.0':
+    resolution: {integrity: sha512-xu/o0wJHK+KL/kvfbV/3UvcelJ+DAwxMwhjrGG0mCq91MY+wKXaQHwv28MDjHtSC71+aV81A/YgJDcQjpQtZkg==}
     engines: {node: '>=12'}
     cpu: [x64]
     os: [win32]
 
-  '@bufbuild/buf@1.59.0':
-    resolution: {integrity: sha512-VdLuGnFp1OKJaiMevlLow6Jcvv9omOyM02Qa1zexl8dBB4Ac2ggz6bpT3Zb06tmCnqd8tFrI/Im1fbom3CznlQ==}
+  '@bufbuild/buf@1.60.0':
+    resolution: {integrity: sha512-RF7EcwHF9wGUs4EBSweHtXZHfVL7bqkSPD1zwgJmG/ejo/I7KXS8+mT56fjw4r6MNgyNTV9F9gVfTsx4D6vhhA==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -531,8 +531,8 @@ packages:
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
-  '@tsconfig/node10@1.0.11':
-    resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
+  '@tsconfig/node10@1.0.12':
+    resolution: {integrity: sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ==}
 
   '@tsconfig/node12@1.0.11':
     resolution: {integrity: sha512-cqefuRsh12pWyGsIoBKJA9luFu3mRxCA+ORZvA4ktLSzIuCUtWVxGIuXigEwO5/ywWFMZ2QEGKWvkZG1zDMTag==}
@@ -621,8 +621,8 @@ packages:
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
 
-  '@types/yargs@17.0.34':
-    resolution: {integrity: sha512-KExbHVa92aJpw9WDQvzBaGVE2/Pz+pLZQloT2hjL8IqsZnV62rlPOYvNnLmf/L2dyllfVUOVBj64M0z/46eR2A==}
+  '@types/yargs@17.0.35':
+    resolution: {integrity: sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg==}
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -1155,8 +1155,8 @@ packages:
   fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
 
-  fast-xml-parser@5.3.1:
-    resolution: {integrity: sha512-jbNkWiv2Ec1A7wuuxk0br0d0aTMUtQ4IkL+l/i1r9PRf6pLXjDgsBsWwO+UyczmQlnehi4Tbc8/KIvxGQe+I/A==}
+  fast-xml-parser@5.3.2:
+    resolution: {integrity: sha512-n8v8b6p4Z1sMgqRmqLJm3awW4NX7NkaKPfb3uJIBTSH7Pdvufi3PQ3/lJLQrvxcMYl7JI2jnDO90siPEpD8JBA==}
     hasBin: true
 
   fastq@1.19.1:
@@ -1568,8 +1568,8 @@ packages:
     resolution: {integrity: sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==}
     engines: {node: '>= 0.4.0'}
 
-  node-abi@3.80.0:
-    resolution: {integrity: sha512-LyPuZJcI9HVwzXK1GPxWNzrr+vr8Hp/3UqlmWxxh8p54U1ZbclOqbSog9lWHaCX+dBaiGi6n/hIX+mKu74GmPA==}
+  node-abi@3.85.0:
+    resolution: {integrity: sha512-zsFhmbkAzwhTft6nd3VxcG0cvJsT70rL+BIGHWVq5fi6MwGrHwzqKaxXE+Hl2GmnGItnDKPPkO5/LQqjVkIdFg==}
     engines: {node: '>=10'}
 
   node-fetch@2.7.0:
@@ -2165,36 +2165,36 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@bufbuild/buf-darwin-arm64@1.59.0':
+  '@bufbuild/buf-darwin-arm64@1.60.0':
     optional: true
 
-  '@bufbuild/buf-darwin-x64@1.59.0':
+  '@bufbuild/buf-darwin-x64@1.60.0':
     optional: true
 
-  '@bufbuild/buf-linux-aarch64@1.59.0':
+  '@bufbuild/buf-linux-aarch64@1.60.0':
     optional: true
 
-  '@bufbuild/buf-linux-armv7@1.59.0':
+  '@bufbuild/buf-linux-armv7@1.60.0':
     optional: true
 
-  '@bufbuild/buf-linux-x64@1.59.0':
+  '@bufbuild/buf-linux-x64@1.60.0':
     optional: true
 
-  '@bufbuild/buf-win32-arm64@1.59.0':
+  '@bufbuild/buf-win32-arm64@1.60.0':
     optional: true
 
-  '@bufbuild/buf-win32-x64@1.59.0':
+  '@bufbuild/buf-win32-x64@1.60.0':
     optional: true
 
-  '@bufbuild/buf@1.59.0':
+  '@bufbuild/buf@1.60.0':
     optionalDependencies:
-      '@bufbuild/buf-darwin-arm64': 1.59.0
-      '@bufbuild/buf-darwin-x64': 1.59.0
-      '@bufbuild/buf-linux-aarch64': 1.59.0
-      '@bufbuild/buf-linux-armv7': 1.59.0
-      '@bufbuild/buf-linux-x64': 1.59.0
-      '@bufbuild/buf-win32-arm64': 1.59.0
-      '@bufbuild/buf-win32-x64': 1.59.0
+      '@bufbuild/buf-darwin-arm64': 1.60.0
+      '@bufbuild/buf-darwin-x64': 1.60.0
+      '@bufbuild/buf-linux-aarch64': 1.60.0
+      '@bufbuild/buf-linux-armv7': 1.60.0
+      '@bufbuild/buf-linux-x64': 1.60.0
+      '@bufbuild/buf-win32-arm64': 1.60.0
+      '@bufbuild/buf-win32-x64': 1.60.0
 
   '@bufbuild/protobuf@2.10.1': {}
 
@@ -2429,7 +2429,7 @@ snapshots:
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
-  '@tsconfig/node10@1.0.11': {}
+  '@tsconfig/node10@1.0.12': {}
 
   '@tsconfig/node12@1.0.11': {}
 
@@ -2531,7 +2531,7 @@ snapshots:
 
   '@types/yargs-parser@21.0.3': {}
 
-  '@types/yargs@17.0.34':
+  '@types/yargs@17.0.35':
     dependencies:
       '@types/yargs-parser': 21.0.3
 
@@ -3188,7 +3188,7 @@ snapshots:
 
   fast-levenshtein@2.0.6: {}
 
-  fast-xml-parser@5.3.1:
+  fast-xml-parser@5.3.2:
     dependencies:
       strnum: 2.1.1
 
@@ -3593,7 +3593,7 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  node-abi@3.80.0:
+  node-abi@3.85.0:
     dependencies:
       semver: 7.7.3
 
@@ -3690,7 +3690,7 @@ snapshots:
       minimist: 1.2.8
       mkdirp-classic: 0.5.3
       napi-build-utils: 2.0.0
-      node-abi: 3.80.0
+      node-abi: 3.85.0
       pump: 3.0.3
       rc: 1.2.8
       simple-get: 4.0.1
@@ -4089,7 +4089,7 @@ snapshots:
   ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node10': 1.0.12
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
