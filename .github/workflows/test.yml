@@ -17,7 +17,7 @@ jobs:
             - name: Set up Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 22
+                  node-version: 24
                   check-latest: true
             - run: pnpm i
             - run: npx tsc
@@ -32,7 +32,7 @@ jobs:
             - name: Set up Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 22
+                  node-version: 24
                   check-latest: true
             - run: pnpm i
             - run: pnpm run eslint
@@ -47,7 +47,7 @@ jobs:
             - name: Set up Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 22
+                  node-version: 24
                   check-latest: true
             - run: pnpm i
             - run: pnpm run prettier
@@ -62,7 +62,7 @@ jobs:
             - name: Set up Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 22
+                  node-version: 24
                   check-latest: true
             - run: pnpm i
             - run: pnpm run test-arm64
@@ -77,7 +77,7 @@ jobs:
             - name: Set up Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 22
+                  node-version: 24
                   check-latest: true
             - run: pnpm i
             - run: pnpm run test-x64
