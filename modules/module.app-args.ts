@@ -1,4 +1,4 @@
-import yargs, { Choices } from 'yargs';
+import { Command } from 'commander';
 import { args, AvailableMuxer, groups } from './module.args';
 import { LanguageItem } from './module.langsData';
 import { DownloadInfo } from '../@types/messageHandler';
@@ -102,6 +102,23 @@ export let argvC: {
 
 export type ArgvType = typeof argvC;
 
+// This functions manages slight mismatches like -srz and returns it as --srz
+const processArgv = () => {
+	const argv = [];
+	for (const arg of process.argv) {
+		if (/^-[a-zA-Z]{2,}$/.test(arg)) {
+			const name = args.find((a) => a.name === arg.substring(1) || a.alias === arg.substring(1));
+			if (name) {
+				argv.push(`--${name.name ?? name.alias}`);
+				continue;
+			}
+		}
+		argv.push(arg);
+	}
+
+	return argv;
+};
+
 const appArgv = (
 	cfg: {
 		[key: string]: unknown;
@@ -109,41 +126,93 @@ const appArgv = (
 	isGUI = false
 ) => {
 	if (argvC) return argvC;
-	yargs(process.argv.slice(2));
-	const argv = getArgv(cfg, isGUI).parseSync();
-	argvC = argv;
-	return argv;
+	const argv = getCommander(cfg, isGUI).parse(processArgv());
+	const parsed = argv.opts() as ArgvType;
+
+	// Be sure that both vars (name and alias) are defined
+	for (const item of args) {
+		const name = item.name;
+		const alias = item.alias;
+
+		if (!alias) continue;
+
+		if (parsed[name] !== undefined) {
+			parsed[alias] = parsed[name];
+		}
+
+		if (parsed[alias] !== undefined) {
+			parsed[name] = parsed[alias];
+		}
+	}
+
+	if (!isGUI && (process.argv.length <= 2 || parsed.help)) {
+		argv.outputHelp();
+		process.exit(0);
+	}
+
+	argvC = parsed;
+	return parsed;
 };
 
 const overrideArguments = (cfg: { [key: string]: unknown }, override: Partial<typeof argvC>, isGUI = false) => {
-	const argv = getArgv(cfg, isGUI)
-		.middleware((ar) => {
-			for (const key of Object.keys(override)) {
-				ar[key] = override[key];
-			}
-		})
-		.parseSync();
-	argvC = argv;
+	const argv = getCommander(cfg, isGUI);
+	const baseArgv = [...processArgv()];
+
+	for (const [key, val] of Object.entries(override)) {
+		if (val === undefined) continue;
+		if (typeof val === 'boolean') {
+			if (val) baseArgv.push(`--${key}`);
+		} else {
+			baseArgv.push(`--${key}`, String(val));
+		}
+	}
+
+	const data = argv.parse(baseArgv);
+	const parsed = data.opts() as ArgvType;
+
+	// Be sure that both vars (name and alias) are defined
+	for (const item of args) {
+		const name = item.name;
+		const alias = item.alias;
+
+		if (!alias) continue;
+
+		if (parsed[name] !== undefined) {
+			parsed[alias] = parsed[name];
+		}
+
+		if (parsed[alias] !== undefined) {
+			parsed[name] = parsed[alias];
+		}
+	}
+
+	if (!isGUI && (process.argv.length <= 2 || parsed.help)) {
+		argv.outputHelp();
+		process.exit(0);
+	}
+
+	argvC = parsed;
 };
 
 export { appArgv, overrideArguments };
 
-const getArgv = (cfg: { [key: string]: unknown }, isGUI: boolean) => {
+const getCommander = (cfg: Record<string, unknown>, isGUI: boolean) => {
+	const program = new Command();
+	program
+		.name(process.platform === 'win32' ? 'aniDL.exe' : 'aniDL')
+		.description(pj.description)
+		.version(pj.version, '-v, --version', 'Show version')
+		.allowUnknownOption(false)
+		.allowExcessArguments(true);
+
+	program.action(() => {});
+
 	const parseDefault = <T = unknown>(key: string, _default: T): T => {
 		if (Object.prototype.hasOwnProperty.call(cfg, key)) {
 			return cfg[key] as T;
 		} else return _default;
 	};
-	const argv = yargs
-		.parserConfiguration({
-			'duplicate-arguments-array': false,
-			'camel-case-expansion': false
-		})
-		.wrap(yargs.terminalWidth())
-		.usage('Usage: $0 [options]')
-		.version(pj.version)
-		.help(true);
-	//.strictOptions()
+
 	const data = args.map((a) => {
 		return {
 			...a,
@@ -152,40 +221,73 @@ const getArgv = (cfg: { [key: string]: unknown }, isGUI: boolean) => {
 			default: typeof a.default === 'object' && !Array.isArray(a.default) ? parseDefault((a.default as any).name || a.name, (a.default as any).default) : a.default
 		};
 	});
-	for (const item of data)
-		argv.option(item.name, {
-			...item,
-			coerce: (value) => {
-				if (item.transformer) {
-					return item.transformer(value);
-				} else {
-					return value;
+
+	for (const item of data) {
+		const option = program.createOption(
+			(item.alias
+				? `${item.alias.length === 1 ? `-${item.alias}` : `--${item.alias}`}, ${item.name.length === 1 ? `-${item.name}` : `--${item.name}`}`
+				: item.name.length === 1
+					? `-${item.name}`
+					: `--${item.name}`) + (item.type === 'boolean' ? '' : ` <value>`),
+			item.describe ?? ''
+		);
+		if (item.default !== undefined) option.default(item.default);
+
+		option.argParser((value) => {
+			if (item.type === 'boolean') {
+				if (value === undefined) return true;
+				if (value === 'true') return true;
+				if (value === 'false') return false;
+				return Boolean(value);
+			}
+
+			if (item.type === 'array') {
+				if (typeof value === 'string') {
+					return value.split(',').map((v) => v.trim());
 				}
-			},
-			choices: item.name === 'service' && isGUI ? undefined : (item.choices as unknown as Choices)
+				return Array.isArray(value) ? value : [value];
+			}
+
+			if (item.choices && !(isGUI && item.name === 'service')) {
+				if (!item.choices.includes(value)) {
+					console.error(`Invalid value '${value}' for --${item.name}. Allowed: ${item.choices.join(', ')}`);
+					process.exit(1);
+				}
+			}
+
+			if (item.transformer) return item.transformer(value);
+			return value;
 		});
 
-	// Custom logic for suggesting corrections for misspelled options
-	argv.middleware((argv: Record<string, any>) => {
-		// List of valid options
-		const validOptions = [...args.map((a) => a.name), ...(args.map((a) => a.alias).filter((alias) => alias !== undefined) as string[])];
-		const unknownOptions = Object.keys(argv).filter((key) => !validOptions.includes(key) && key !== '_' && key !== '$0'); // Filter out known options
+		program.addOption(option);
+	}
 
-		const suggestedOptions: Record<string, boolean> = {};
-		unknownOptions.forEach((actualOption) => {
-			const closestOption = validOptions.find((option) => {
-				const levenVal = leven(option, actualOption);
-				return levenVal <= 2 && levenVal > 0;
+	// Custom logic for suggesting corrections for misspelled options
+	program.hook('preAction', (_, command) => {
+		const used = command.parent?.args || [];
+
+		const validOptions = [...args.map((a) => a.name), ...args.map((a) => a.alias).filter((a): a is string => a !== undefined)];
+
+		const unknownOptions = used.filter((arg) => arg.startsWith('-'));
+		const suggestions: Record<string, boolean> = {};
+
+		unknownOptions.forEach((opt) => {
+			const cleaned = opt.replace(/^-+/, '');
+
+			const closest = validOptions.find((vo) => {
+				const dist = leven(vo, cleaned);
+				return dist <= 2 && dist > 0;
 			});
 
-			if (closestOption && !suggestedOptions[closestOption]) {
-				suggestedOptions[closestOption] = true;
-				console.info(`Unknown option ${actualOption}, did you mean ${closestOption}?`);
-			} else if (!suggestedOptions[actualOption]) {
-				suggestedOptions[actualOption] = true;
-				console.info(`Unknown option ${actualOption}`);
+			if (closest && !suggestions[closest]) {
+				console.info(`Unknown option ${opt}, did you mean --${closest}?`);
+				suggestions[closest] = true;
+			} else if (!suggestions[cleaned]) {
+				console.info(`Unknown option ${opt}`);
+				suggestions[cleaned] = true;
 			}
 		});
 	});
-	return argv as unknown as yargs.Argv<typeof argvC>;
+
+	return program;
 };

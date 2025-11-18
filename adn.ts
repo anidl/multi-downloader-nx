@@ -18,7 +18,6 @@ import * as reqModule from './modules/module.fetch';
 import Merger, { Font, MergerInput, SubtitleInput } from './modules/module.merger';
 import streamdl from './modules/hls-download';
 import { console } from './modules/log';
-import { domain } from './modules/module.api-urls';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import parseFileName, { Variable } from './modules/module.filename';

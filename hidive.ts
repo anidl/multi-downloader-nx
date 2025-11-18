@@ -19,7 +19,7 @@ import vtt2ass from './modules/module.vtt2ass';
 import Helper from './modules/module.helper';
 
 // load req
-import { domain, api } from './modules/module.api-urls';
+import { api } from './modules/module.api-urls';
 import * as reqModule from './modules/module.fetch';
 import { DownloadedMedia } from './@types/hidiveTypes';
 import parseFileName, { Variable } from './modules/module.filename';

@@ -1,10 +1,18 @@
 import { console } from './modules/log';
-import { ServiceClass } from './@types/serviceClassInterface';
 import { appArgv, overrideArguments } from './modules/module.app-args';
 import * as yamlCfg from './modules/module.cfg-loader';
 import { makeCommand, addToArchive } from './modules/module.downloadArchive';
+import Crunchy from './crunchy';
+import Hidive from './hidive';
+import ADN from './adn';
 
 import update from './modules/module.updater';
+
+const SERVICES: Record<string, any> = {
+	crunchy: Crunchy,
+	hidive: Hidive,
+	adn: ADN
+};
 
 (async () => {
 	const cfg = yamlCfg.loadCfg();
@@ -40,47 +48,31 @@ import update from './modules/module.updater';
 			);
 			console.info('Added %s to the downloadArchive list', argv.s === undefined ? argv.series : argv.s);
 		}
-	} else if (argv.downloadArchive) {
+	} else if (argv.downloadArchive && argv.service) {
 		const ids = makeCommand(argv.service);
 		for (const id of ids) {
 			overrideArguments(cfg.cli, id);
 			/* Reimport module to override appArgv */
-			Object.keys(require.cache).forEach((key) => {
-				if (key.endsWith('crunchy.js') || key.endsWith('hidive.js')) delete require.cache[key];
-			});
-			let service: ServiceClass;
-			switch (argv.service) {
-				case 'crunchy':
-					service = new (await import('./crunchy')).default();
-					break;
-				case 'hidive':
-					service = new (await import('./hidive')).default();
-					break;
-				case 'adn':
-					service = new (await import('./adn')).default();
-					break;
-				default:
-					service = new (await import(`./${argv.service}`)).default();
-					break;
+			// Object.keys(require.cache).forEach((key) => {
+			// 	if (key.endsWith('crunchy.js') || key.endsWith('hidive.js')) delete require.cache[key];
+			// });
+			const Service = SERVICES[argv.service];
+			if (!Service) {
+				console.error('Unknown service:', argv.service);
+				process.exit(1);
 			}
+
+			const service = new Service();
 			await service.cli();
 		}
-	} else {
-		let service: ServiceClass;
-		switch (argv.service) {
-			case 'crunchy':
-				service = new (await import('./crunchy')).default();
-				break;
-			case 'hidive':
-				service = new (await import('./hidive')).default();
-				break;
-			case 'adn':
-				service = new (await import('./adn')).default();
-				break;
-			default:
-				service = new (await import(`./${argv.service}`)).default();
-				break;
+	} else if (argv.service) {
+		const Service = SERVICES[argv.service];
+		if (!Service) {
+			console.error('Unknown service:', argv.service);
+			process.exit(1);
 		}
+
+		const service = new Service();
 		await service.cli();
 	}
 })();

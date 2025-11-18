@@ -27,7 +27,7 @@ import { CrunchyEpisodeList, CrunchyEpisode } from './@types/crunchyEpisodeList'
 import { CrunchyDownloadOptions, CrunchyEpMeta, CrunchyMuxOptions, CrunchyMultiDownload, DownloadedMedia, ParseItem, SeriesSearch, SeriesSearchItem } from './@types/crunchyTypes';
 import { ObjectInfo } from './@types/objectInfo';
 import parseFileName, { Variable } from './modules/module.filename';
-import { CrunchyStreams, PlaybackData, Subtitles } from './@types/playbackData';
+import { CrunchyStreams, PlaybackData } from './@types/playbackData';
 import { downloaded } from './modules/module.downloadArchive';
 import parseSelect from './modules/module.parseSelect';
 import { AvailableFilenameVars, getDefault } from './modules/module.args';
@@ -1747,6 +1747,14 @@ export default class Crunchy implements ServiceClass {
 				console.warn(
 					'192 kb/s audio downloads are not available on your current Crunchyroll plan. Please upgrade to the "Mega Fan" plan to enable this feature. Falling back to 128 kb/s CBR stream.'
 				);
+			}
+
+			// Disable CBR bypass for Music Videos since it does not work
+			if ((currentVersion ? currentVersion.guid : currentMediaId).startsWith('MV')) {
+				isDLVideoBypass = false;
+				isDLAudioBypass = false;
+				options.vstream = 'androidtv';
+				options.astream = 'androidtv';
 			}
 
 			if (options.tsd) {
