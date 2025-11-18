@@ -15,8 +15,8 @@
 		"gui"
 	],
 	"engines": {
-		"node": ">=18",
-		"pnpm": ">=7"
+		"node": ">=22",
+		"pnpm": ">=10"
 	},
 	"author": "AnimeDL <AnimeDL@users.noreply.github.com>",
 	"contributors": [
