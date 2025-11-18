@@ -123,7 +123,11 @@
 		"build-macos-arm64-gui": "pnpm run prebuild-gui && cd lib && node modules/build macos-arm64 true",
 		"build-alpine-x64-gui": "pnpm run prebuild-gui && cd lib && node modules/build alpine-x64 true",
 		"build-alpine-arm64-gui": "pnpm run prebuild-gui && cd lib && node modules/build alpine-arm64 true",
-		"test-x64": "pnpm run pretest && cd lib && node modules/build windows-x64 && node modules/build macos-x64 && node modules/build linuxstatic-x64 && node modules/build alpine-x64 && node modules/build linuxstatic-armv7",
-		"test-arm64": "pnpm run pretest && cd lib && node modules/build windows-arm64 && node modules/build macos-arm64 && node modules/build linuxstatic-arm64 && node modules/build alpine-x64"
+		"test-windows-x64": "pnpm run pretest && cd lib && node modules/build windows-x64",
+		"test-linux-x64": "pnpm run pretest && cd lib && node modules/build linuxstatic-x64 && node modules/build alpine-x64 && node modules/build linuxstatic-armv7",
+		"test-macos-x64": "pnpm run pretest && cd lib && node modules/build macos-x64",
+		"test-windows-arm64": "pnpm run pretest && cd lib && node modules/build windows-arm64",
+		"test-linux-arm64": "pnpm run pretest && cd lib && node modules/build linuxstatic-arm64 && node modules/build alpine-x64",
+		"test-macos-arm64": "pnpm run pretest && cd lib && node modules/build macos-arm64"
 	}
 }
