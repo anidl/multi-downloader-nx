@@ -205,8 +205,6 @@ const getCommander = (cfg: Record<string, unknown>, isGUI: boolean) => {
 		.allowUnknownOption(false)
 		.allowExcessArguments(true);
 
-	program.action(() => {});
-
 	const parseDefault = <T = unknown>(key: string, _default: T): T => {
 		if (Object.prototype.hasOwnProperty.call(cfg, key)) {
 			return cfg[key] as T;
