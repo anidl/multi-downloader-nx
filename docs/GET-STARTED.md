@@ -39,7 +39,7 @@ This tool is not responsible for your actions; please make an informed decision 
 The dependencies for this application are:
 - [ffmpeg](https://www.videohelp.com/software/ffmpeg)
 - [MKVToolNix](https://www.videohelp.com/software/MKVToolNix)
-- Either [Bento4-SDK (mp4decrypt)](https://www.bento4.com/downloads/) or [shaka-packager](https://github.com/shaka-project/shaka-packager/releases)
+- Either [Bento4-SDK (mp4decrypt)](https://www.bento4.com/downloads/) or [shaka-packager](https://github.com/stratumadev/shaka-packager/releases/latest)
 
 For ffmpeg, i chose this option from the website: \
 ![ffmpeg download](./imgs/ffmpeg.png)
