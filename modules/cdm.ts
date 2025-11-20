@@ -2,42 +2,40 @@ import fs from 'fs';
 import { console } from './log';
 import { workingDir } from './module.cfg-loader';
 import path from 'path';
-import { Device } from './playready/device';
-import Cdm from './playready/cdm';
-import { PSSH } from './playready/pssh';
 import { KeyContainer, Session } from './widevine/license';
 import * as reqModule from './module.fetch';
+import Playready from 'node-playready';
 
 const req = new reqModule.Req();
 
 //read cdm files located in the same directory
 let privateKey: Buffer = Buffer.from([]),
 	identifierBlob: Buffer = Buffer.from([]),
-	prd: Buffer = Buffer.from([]),
-	prd_cdm: Cdm | undefined;
+	prd_cdm: Playready | undefined;
 export let cdm: 'widevine' | 'playready';
 export let canDecrypt: boolean;
 try {
 	const files_prd = fs.readdirSync(path.join(workingDir, 'playready'));
-	const prd_file_found = files_prd.find((f) => f.includes('.prd'));
+	const bgroup_file_found = files_prd.find((f) => f === 'bgroupcert.dat');
+	const zgpriv_file_found = files_prd.find((f) => f === 'zgpriv.dat');
 	try {
-		if (prd_file_found) {
-			const file_prd = path.join(workingDir, 'playready', prd_file_found);
-			const stats = fs.statSync(file_prd);
-			if (stats.size < 1024 * 8 && stats.isFile()) {
-				const fileContents = fs.readFileSync(file_prd, {
-					encoding: 'utf8'
-				});
-				if (fileContents.includes('CERT')) {
-					prd = fs.readFileSync(file_prd);
-					const device = Device.loads(prd);
-					prd_cdm = Cdm.fromDevice(device);
-				}
+		if (bgroup_file_found && zgpriv_file_found) {
+			const file_bgroup = path.join(workingDir, 'playready', bgroup_file_found);
+			const file_zgpriv = path.join(workingDir, 'playready', zgpriv_file_found);
+
+			const bgroup_stats = fs.statSync(file_bgroup);
+			const zgpriv_stats = fs.statSync(file_zgpriv);
+			// Zgpriv is always 32 bytes long
+			if (bgroup_stats.isFile() && zgpriv_stats.isFile() && zgpriv_stats.size === 32) {
+				const bgroup = fs.readFileSync(file_bgroup);
+				const zgpriv = fs.readFileSync(file_zgpriv);
+				// Init Playready Client
+				prd_cdm = Playready.init(bgroup, zgpriv);
 			}
 		}
 	} catch (e) {
-		console.error('Error loading Playready CDM, ensure the CDM is provisioned as a V3 Device and not malformed. For more informations read the readme.');
-		prd = Buffer.from([]);
+		console.error('Error loading Playready CDM. For more informations read the readme.');
+		console.error(e);
 	}
 
 	const files_wvd = fs.readdirSync(path.join(workingDir, 'widevine'));
@@ -72,7 +70,7 @@ try {
 	if (privateKey.length !== 0 && identifierBlob.length !== 0) {
 		cdm = 'widevine';
 		canDecrypt = true;
-	} else if (prd.length !== 0) {
+	} else if (prd_cdm) {
 		cdm = 'playready';
 		canDecrypt = true;
 	} else if (privateKey.length === 0 && identifierBlob.length !== 0) {
@@ -80,8 +78,6 @@ try {
 		canDecrypt = false;
 	} else if (identifierBlob.length === 0 && privateKey.length !== 0) {
 		console.warn('Identifier blob missing');
-		canDecrypt = false;
-	} else if (prd.length == 0) {
 		canDecrypt = false;
 	} else {
 		canDecrypt = false;
@@ -93,10 +89,10 @@ try {
 
 export async function getKeysWVD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>): Promise<KeyContainer[]> {
 	if (!pssh || !canDecrypt) return [];
-	//pssh found in the mpd manifest
+	// pssh found in the mpd manifest
 	const psshBuffer = Buffer.from(pssh, 'base64');
 
-	//Create a new widevine session
+	// Create a new widevine session
 	const session = new Session({ privateKey, identifierBlob }, psshBuffer);
 
 	// Request License
@@ -123,12 +119,11 @@ export async function getKeysWVD(pssh: string | undefined, licenseServer: string
 
 export async function getKeysPRD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>): Promise<KeyContainer[]> {
 	if (!pssh || !canDecrypt || !prd_cdm) return [];
-	const pssh_parsed = new PSSH(pssh);
 
-	//Create a new playready session
-	const session = prd_cdm.getLicenseChallenge(pssh_parsed.get_wrm_headers(true)[0]);
+	// Generate Playready challenge
+	const session = await prd_cdm.generateChallenge(pssh);
 
-	//Generate license
+	// Fetch license
 	const licReq = await req.getData(licenseServer, {
 		method: 'POST',
 		body: session,
@@ -140,13 +135,12 @@ export async function getKeysPRD(pssh: string | undefined, licenseServer: string
 		return [];
 	}
 
-	//Parse License and return keys
+	// Parse License and return keys
 	try {
-		const keys = prd_cdm.parseLicense(await licReq.res.text());
-
+		const keys = await prd_cdm.parseLicense(Buffer.from(await licReq.res.text(), 'utf-8'));
 		return keys.map((k) => {
 			return {
-				kid: k.key_id,
+				kid: k.kid,
 				key: k.key
 			};
 		});
