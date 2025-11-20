@@ -159,7 +159,13 @@ If you have a Playready CDM key dump, you just need to make sure:
 3. Make sure you are using the latest version of shaka-packager from Stratuma, as he has patched it to work with multi-downloader-nx.\
    You can find his releases [here](https://github.com/stratumadev/shaka-packager/releases/latest)
 
-After you have confirmed the above, place the file(s) in the `playready` folder, which is in the same directory you opened `aniDL.exe` from.
+If you have a `.prd` file, you will have to convert it to blobs, which will be 2 files: a `bgroupcert.dat` and `zgpriv.dat` file.
+
+1. Go to https://emarsden.github.io/pssh-box-wasm/convert/ and at the top, click on the "Playready" tab.
+2. Scroll down to the "PRD to blobs" section and click on "Choose File". Select your `.prd` file.
+3. Click on the "Convert" button.
+
+It will download a `device_blobs.zip` file. Extract that, rename the `zprivsig.dat` file to `zgpriv.dat`, and copy both `bgroupcert.dat` and `zgpriv.dat` to the `playready` folder.
 
 ## Installation
 
