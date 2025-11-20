@@ -1,4 +1,4 @@
-# multi-downloader-nx (v5.6.1)
+# multi-downloader-nx (v5.6.5)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -159,7 +159,9 @@ If you have a Playready CDM key dump, you just need to make sure:
 3. Make sure you are using the latest version of shaka-packager from Stratuma, as he has patched it to work with multi-downloader-nx.\
    You can find his releases [here](https://github.com/stratumadev/shaka-packager/releases/latest)
 
-After you have confirmed the above, place the file(s) in the `playready` folder, which is in the same directory you opened `aniDL.exe` from.
+> [!NOTE]
+> As of version v5.6.5, multi-downloader-nx now needs the CDM blobs in the form of `bgroupcert.dat` and `zgpriv.dat` files instead of the `.prd` device file. \
+> If you have a `.prd` file as your CDM, multi-downloader-nx will convert that to the required blobs on the fly. No action required ;)
 
 ## Installation
 
