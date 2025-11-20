@@ -18,20 +18,44 @@ try {
 	const files_prd = fs.readdirSync(path.join(workingDir, 'playready'));
 	const bgroup_file_found = files_prd.find((f) => f === 'bgroupcert.dat');
 	const zgpriv_file_found = files_prd.find((f) => f === 'zgpriv.dat');
+	const prd_file_found = files_prd.find((f) => f.endsWith('.prd'));
 	try {
-		if (bgroup_file_found && zgpriv_file_found) {
-			const file_bgroup = path.join(workingDir, 'playready', bgroup_file_found);
-			const file_zgpriv = path.join(workingDir, 'playready', zgpriv_file_found);
+		const file_bgroup = path.join(workingDir, 'playready', 'bgroupcert.dat');
+		const file_zgpriv = path.join(workingDir, 'playready', 'zgpriv.dat');
 
+		if (bgroup_file_found && zgpriv_file_found) {
 			const bgroup_stats = fs.statSync(file_bgroup);
 			const zgpriv_stats = fs.statSync(file_zgpriv);
+
 			// Zgpriv is always 32 bytes long
 			if (bgroup_stats.isFile() && zgpriv_stats.isFile() && zgpriv_stats.size === 32) {
 				const bgroup = fs.readFileSync(file_bgroup);
 				const zgpriv = fs.readFileSync(file_zgpriv);
+
 				// Init Playready Client
 				prd_cdm = Playready.init(bgroup, zgpriv);
 			}
+		} else if ((!bgroup_file_found || !zgpriv_file_found) && prd_file_found) {
+			const file_prd = path.join(workingDir, 'playready', prd_file_found);
+
+			// Parse PRD file
+			const parsed = Playready.unpackV3PRD(fs.readFileSync(file_prd));
+
+			// Write bgroupcert.dat
+			fs.writeFileSync(file_bgroup, parsed.bgroupcert);
+			// Write zgpriv.dat
+			fs.writeFileSync(file_zgpriv, parsed.zgpriv);
+
+			// Delete PRD file
+			try {
+				fs.rmSync(file_prd, { recursive: true, force: true });
+			} catch (e) {
+				console.warn('Failed to delete unused .prd file.');
+			}
+
+			console.warn('Converted deprecated .prd file into bgroupcert.dat and zgpriv.dat.');
+
+			prd_cdm = Playready.init(parsed.bgroupcert, parsed.zgpriv);
 		}
 	} catch (e) {
 		console.error('Error loading Playready CDM. For more informations read the readme.');
