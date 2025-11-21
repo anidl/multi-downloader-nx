@@ -48,8 +48,8 @@ importers:
         specifier: ^1.3.1
         version: 1.3.1
       node-playready:
-        specifier: ^1.0.5
-        version: 1.0.5
+        specifier: ^1.0.6
+        version: 1.0.6
       open:
         specifier: ^11.0.0
         version: 11.0.0
@@ -1570,8 +1570,8 @@ packages:
   node-int64@0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
 
-  node-playready@1.0.5:
-    resolution: {integrity: sha512-nWCalL/cxwLl3oCUaZvQf0Vk6YIjKQVn67kU5jE7pJko3N0Q0FplJJOLDHt/82ZYGaHw8Wi7QxwryYd/lUyEKQ==}
+  node-playready@1.0.6:
+    resolution: {integrity: sha512-lfBquV/g08snEAsGm+5YcOOeWU0VwDYRB+a4greErTZ1oVuN5DNVDKHr+iNVnFlCXtDED5iNzJR3MbaIlYWzGg==}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -3590,7 +3590,7 @@ snapshots:
 
   node-int64@0.4.0: {}
 
-  node-playready@1.0.5:
+  node-playready@1.0.6:
     dependencies:
       '@noble/curves': 2.0.1
       aes-cmac: 4.0.0
