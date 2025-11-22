@@ -2,16 +2,14 @@ import fs from 'fs';
 import { console } from './log';
 import { workingDir } from './module.cfg-loader';
 import path from 'path';
-import { KeyContainer, Session } from './widevine/license';
 import * as reqModule from './module.fetch';
 import Playready from 'node-playready';
+import Widevine, { KeyContainer, LicenseType } from 'widevine';
 
 const req = new reqModule.Req();
 
 //read cdm files located in the same directory
-let privateKey: Buffer = Buffer.from([]),
-	identifierBlob: Buffer = Buffer.from([]),
-	prd_cdm: Playready | undefined;
+let widevine: Widevine | undefined, playready: Playready | undefined;
 export let cdm: 'widevine' | 'playready';
 export let canDecrypt: boolean;
 try {
@@ -33,7 +31,7 @@ try {
 				const zgpriv = fs.readFileSync(file_zgpriv);
 
 				// Init Playready Client
-				prd_cdm = Playready.init(bgroup, zgpriv);
+				playready = Playready.init(bgroup, zgpriv);
 			}
 		} else if ((!bgroup_file_found || !zgpriv_file_found) && prd_file_found) {
 			const file_prd = path.join(workingDir, 'playready', prd_file_found);
@@ -55,12 +53,15 @@ try {
 
 			console.warn('Converted deprecated .prd file into bgroupcert.dat and zgpriv.dat.');
 
-			prd_cdm = Playready.init(parsed.bgroupcert, parsed.zgpriv);
+			playready = Playready.init(parsed.bgroupcert, parsed.zgpriv);
 		}
 	} catch (e) {
 		console.error('Error loading Playready CDM. For more informations read the readme.');
 		console.error(e);
 	}
+
+	let identifierBlob: Buffer = Buffer.from([]);
+	let privateKey: Buffer = Buffer.from([]);
 
 	const files_wvd = fs.readdirSync(path.join(workingDir, 'widevine'));
 	try {
@@ -69,14 +70,14 @@ try {
 			const stats = fs.statSync(file);
 			if (stats.size < 1024 * 8 && stats.isFile()) {
 				const fileContents = fs.readFileSync(file, { encoding: 'utf8' });
+				if (fileContents.includes('widevine_cdm_version') && fileContents.includes('oem_crypto_security_patch_level') && !fileContents.startsWith('WVD')) {
+					identifierBlob = fs.readFileSync(file);
+				}
 				if (
 					(fileContents.includes('-----BEGIN RSA PRIVATE KEY-----') && fileContents.includes('-----END RSA PRIVATE KEY-----')) ||
 					(fileContents.includes('-----BEGIN PRIVATE KEY-----') && fileContents.includes('-----END PRIVATE KEY-----'))
 				) {
 					privateKey = fs.readFileSync(file);
-				}
-				if (fileContents.includes('widevine_cdm_version') && fileContents.includes('oem_crypto_security_patch_level') && !fileContents.startsWith('WVD')) {
-					identifierBlob = fs.readFileSync(file);
 				}
 				if (fileContents.startsWith('WVD')) {
 					console.warn(
@@ -87,14 +88,15 @@ try {
 		});
 	} catch (e) {
 		console.error('Error loading Widevine CDM, malformed client blob or private key.');
-		privateKey = Buffer.from([]);
 		identifierBlob = Buffer.from([]);
+		privateKey = Buffer.from([]);
 	}
 
 	if (privateKey.length !== 0 && identifierBlob.length !== 0) {
 		cdm = 'widevine';
+		widevine = Widevine.init(identifierBlob, privateKey);
 		canDecrypt = true;
-	} else if (prd_cdm) {
+	} else if (playready) {
 		cdm = 'playready';
 		canDecrypt = true;
 	} else if (privateKey.length === 0 && identifierBlob.length !== 0) {
@@ -112,17 +114,17 @@ try {
 }
 
 export async function getKeysWVD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>): Promise<KeyContainer[]> {
-	if (!pssh || !canDecrypt) return [];
+	if (!pssh || !canDecrypt || !widevine) return [];
 	// pssh found in the mpd manifest
 	const psshBuffer = Buffer.from(pssh, 'base64');
 
 	// Create a new widevine session
-	const session = new Session({ privateKey, identifierBlob }, psshBuffer);
+	const session = widevine.createSession(psshBuffer, LicenseType.STREAMING);
 
 	// Request License
 	const licReq = await req.getData(licenseServer, {
 		method: 'POST',
-		body: session.createLicenseRequest(),
+		body: session.generateChallenge(),
 		headers: authData
 	});
 
@@ -142,10 +144,10 @@ export async function getKeysWVD(pssh: string | undefined, licenseServer: string
 }
 
 export async function getKeysPRD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>): Promise<KeyContainer[]> {
-	if (!pssh || !canDecrypt || !prd_cdm) return [];
+	if (!pssh || !canDecrypt || !playready) return [];
 
 	// Generate Playready challenge
-	const session = await prd_cdm.generateChallenge(pssh);
+	const session = playready.generateChallenge(pssh);
 
 	// Fetch license
 	const licReq = await req.getData(licenseServer, {
@@ -161,7 +163,7 @@ export async function getKeysPRD(pssh: string | undefined, licenseServer: string
 
 	// Parse License and return keys
 	try {
-		const keys = await prd_cdm.parseLicense(Buffer.from(await licReq.res.text(), 'utf-8'));
+		const keys = playready.parseLicense(Buffer.from(await licReq.res.text(), 'utf-8'));
 		return keys.map((k) => {
 			return {
 				kid: k.kid,
