@@ -14,8 +14,8 @@ export let cdm: 'widevine' | 'playready';
 export let canDecrypt: boolean;
 try {
 	const files_prd = fs.readdirSync(path.join(workingDir, 'playready'));
-	const bgroup_file_found = files_prd.find((f) => f === 'bgroupcert.dat');
-	const zgpriv_file_found = files_prd.find((f) => f === 'zgpriv.dat');
+	const bgroup_file_found = files_prd.find((f) => f.includes('bgroupcert'));
+	const zgpriv_file_found = files_prd.find((f) => f.includes('zgpriv'));
 	const prd_file_found = files_prd.find((f) => f.endsWith('.prd'));
 	try {
 		const file_bgroup = path.join(workingDir, 'playready', 'bgroupcert.dat');
@@ -33,78 +33,74 @@ try {
 				// Init Playready Client
 				playready = Playready.init(bgroup, zgpriv);
 			}
-		} else if ((!bgroup_file_found || !zgpriv_file_found) && prd_file_found) {
+		} else if (prd_file_found) {
 			const file_prd = path.join(workingDir, 'playready', prd_file_found);
+			const prd = fs.readFileSync(file_prd);
 
-			// Parse PRD file
-			const parsed = Playready.unpackV3PRD(fs.readFileSync(file_prd));
-
-			// Write bgroupcert.dat
-			fs.writeFileSync(file_bgroup, parsed.bgroupcert);
-			// Write zgpriv.dat
-			fs.writeFileSync(file_zgpriv, parsed.zgpriv);
-
-			// Delete PRD file
-			try {
-				fs.rmSync(file_prd, { recursive: true, force: true });
-			} catch (e) {
-				console.warn('Failed to delete unused .prd file.');
-			}
-
-			console.warn('Converted deprecated .prd file into bgroupcert.dat and zgpriv.dat.');
-
-			playready = Playready.init(parsed.bgroupcert, parsed.zgpriv);
+			// Init Playready Client with PRD file
+			playready = Playready.initPRD(prd);
 		}
 	} catch (e) {
 		console.error('Error loading Playready CDM. For more informations read the readme.');
 		console.error(e);
 	}
 
-	let identifierBlob: Buffer = Buffer.from([]);
-	let privateKey: Buffer = Buffer.from([]);
-
 	const files_wvd = fs.readdirSync(path.join(workingDir, 'widevine'));
 	try {
+		let identifierBlob: Buffer = Buffer.from([]);
+		let privateKey: Buffer = Buffer.from([]);
+		let wvd: Buffer = Buffer.from([]);
+
+		// Searching files for client id blob and private key
 		files_wvd.forEach(function (file) {
 			file = path.join(workingDir, 'widevine', file);
 			const stats = fs.statSync(file);
 			if (stats.size < 1024 * 8 && stats.isFile()) {
 				const fileContents = fs.readFileSync(file, { encoding: 'utf8' });
+				// Handle client id blob
 				if (fileContents.includes('widevine_cdm_version') && fileContents.includes('oem_crypto_security_patch_level') && !fileContents.startsWith('WVD')) {
 					identifierBlob = fs.readFileSync(file);
 				}
+				// Handle private key
 				if (
 					(fileContents.includes('-----BEGIN RSA PRIVATE KEY-----') && fileContents.includes('-----END RSA PRIVATE KEY-----')) ||
 					(fileContents.includes('-----BEGIN PRIVATE KEY-----') && fileContents.includes('-----END PRIVATE KEY-----'))
 				) {
 					privateKey = fs.readFileSync(file);
 				}
+				// Handle WVD file
 				if (fileContents.startsWith('WVD')) {
-					console.warn(
-						'Found WVD file in folder, AniDL currently only supports device_client_id_blob and device_private_key, make sure to have them in the widevine folder.'
-					);
+					wvd = fs.readFileSync(file);
 				}
 			}
 		});
+
+		// Error if no client blob but private key
+		if (identifierBlob.length === 0 && privateKey.length !== 0 && wvd.length === 0) {
+			console.error('Widevine initialization failed, found private key but not the client id blob!');
+		}
+
+		// Error if no private key but client blob
+		if (identifierBlob.length !== 0 && privateKey.length === 0 && wvd.length === 0) {
+			console.error('Widevine initialization failed, found client id blob but not the private key!');
+		}
+
+		// Init Widevine Client
+		if (identifierBlob.length !== 0 && privateKey.length !== 0) {
+			widevine = Widevine.init(identifierBlob, privateKey);
+		} else if (wvd.length !== 0) {
+			widevine = Widevine.initWVD(wvd);
+		}
 	} catch (e) {
 		console.error('Error loading Widevine CDM, malformed client blob or private key.');
-		identifierBlob = Buffer.from([]);
-		privateKey = Buffer.from([]);
 	}
 
-	if (privateKey.length !== 0 && identifierBlob.length !== 0) {
+	if (widevine) {
 		cdm = 'widevine';
-		widevine = Widevine.init(identifierBlob, privateKey);
 		canDecrypt = true;
 	} else if (playready) {
 		cdm = 'playready';
 		canDecrypt = true;
-	} else if (privateKey.length === 0 && identifierBlob.length !== 0) {
-		console.warn('Private key missing');
-		canDecrypt = false;
-	} else if (identifierBlob.length === 0 && privateKey.length !== 0) {
-		console.warn('Identifier blob missing');
-		canDecrypt = false;
 	} else {
 		canDecrypt = false;
 	}

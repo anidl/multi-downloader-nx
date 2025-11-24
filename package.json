@@ -57,7 +57,7 @@
 		"protobufjs": "^7.5.4",
 		"puppeteer-real-browser": "^1.4.4",
 		"undici": "^7.16.0",
-		"widevine": "^1.0.1",
+		"widevine": "^1.0.3",
 		"ws": "^8.18.3",
 		"yaml": "^2.8.1"
 	},
