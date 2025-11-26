@@ -1,7 +1,9 @@
 // api domains
 const domain = {
 	cr_www: 'https://www.crunchyroll.com',
-	cr_api: 'https://api.crunchyroll.com',
+	cr_api: 'https://beta-api.crunchyroll.com',
+	cr_playback: 'https://cr-play-service.prd.crunchyrollsvc.com',
+	cr_license: 'https://cr-license-proxy.prd.crunchyrollsvc.com',
 	hd_www: 'https://www.hidive.com',
 	hd_api: 'https://api.hidive.com',
 	hd_new: 'https://dce-frontoffice.imggaming.com'
@@ -28,8 +30,9 @@ export type APIType = {
 	cms_auth: string;
 	// Crunchyroll Headers
 	crunchyDefUserAgent: string;
-	crunchyDefHeader: Record<string, string>;
+	crunchyDefHeader: Record<string, any>;
 	crunchyAuthHeader: Record<string, string>;
+	crunchyAuthRefreshHeader: Record<string, string>;
 	// Hidive
 	hd_apikey: string;
 	hd_devName: string;
@@ -50,27 +53,28 @@ const api: APIType = {
 	bundlejs: 'https://static.crunchyroll.com/vilos-v2/web/vilos/js/bundle.js',
 	//
 	// Crunchyroll API
-	basic_auth_token: 'bGtlc2k3c25zeTlvb2ptaTJyOWg6LWFHRFhGRk5UbHVaTUxZWEVSbmdOWW5FanZnSDVvZHY=',
-	auth: `${domain.cr_www}/auth/v1/token`,
-	me: `${domain.cr_www}/accounts/v1/me`,
-	profile: `${domain.cr_www}/accounts/v1/me/profile`,
-	search: `${domain.cr_www}/content/v2/discover/search`,
-	content_cms: `${domain.cr_www}/content/v2/cms`,
-	content_music: `${domain.cr_www}/content/v2/music`,
-	browse: `${domain.cr_www}/content/v1/browse`,
-	browse_all_series: `${domain.cr_www}/content/v2/discover/browse`,
-	streaming_sessions: `${domain.cr_www}/playback/v1/sessions/streaming`,
-	drm_widevine: `${domain.cr_www}/license/v1/license/widevine`,
-	drm_playready: `${domain.cr_www}/license/v1/license/playReady`,
+	basic_auth_token: 'bmR0aTZicXlqcm9wNXZnZjF0dnU6elpIcS00SEJJVDlDb2FMcnBPREJjRVRCTUNHai1QNlg=',
+	auth: `${domain.cr_api}/auth/v1/token`,
+	me: `${domain.cr_api}/accounts/v1/me`,
+	profile: `${domain.cr_api}/accounts/v1/me/profile`,
+	search: `${domain.cr_api}/content/v2/discover/search`,
+	content_cms: `${domain.cr_api}/content/v2/cms`,
+	content_music: `${domain.cr_api}/content/v2/music`,
+	browse: `${domain.cr_api}/content/v1/browse`,
+	browse_all_series: `${domain.cr_api}/content/v2/discover/browse`,
+	streaming_sessions: `${domain.cr_playback}/v1/sessions/streaming`,
+	drm_widevine: `https://cr-license-proxy.prd.crunchyrollsvc.com/v1/license/widevine`,
+	drm_playready: `https://cr-license-proxy.prd.crunchyrollsvc.com/v1/license/playReady`,
 	//
 	// Crunchyroll Bucket
-	cms_bucket: `${domain.cr_www}/cms/v2`,
-	cms_auth: `${domain.cr_www}/index/v2`,
+	cms_bucket: `${domain.cr_api}/cms/v2`,
+	cms_auth: `${domain.cr_api}/index/v2`,
 	//
 	// Crunchyroll Headers
-	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.49.1_22281 (Android 12; en-US; SHIELD Android TV Build/SR1A.211012.001)',
+	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.50.0_22282 (Android 16; en-US; sdk_gphone64_x86_64)',
 	crunchyDefHeader: {},
 	crunchyAuthHeader: {},
+	crunchyAuthRefreshHeader: {},
 	//
 	//
 	// Hidive
@@ -89,7 +93,6 @@ const api: APIType = {
 
 api.crunchyDefHeader = {
 	'User-Agent': api.crunchyDefUserAgent,
-	Accept: '*/*',
 	'Accept-Encoding': 'gzip',
 	Connection: 'Keep-Alive',
 	Host: 'www.crunchyroll.com'
@@ -97,9 +100,18 @@ api.crunchyDefHeader = {
 
 // set header
 api.crunchyAuthHeader = {
-	Authorization: `Basic ${api.basic_auth_token}`,
-	'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+	Accept: 'application/json',
+	'Accept-Charset': 'UTF-8',
+	'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 	'Request-Type': 'SignIn',
+	...api.crunchyDefHeader
+};
+
+// set header
+api.crunchyAuthRefreshHeader = {
+	Accept: 'application/json',
+	'Accept-Charset': 'UTF-8',
+	'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 	...api.crunchyDefHeader
 };
 
