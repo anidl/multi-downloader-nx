@@ -55,7 +55,6 @@
 		"node-playready": "^1.1.1",
 		"open": "^11.0.0",
 		"protobufjs": "^7.5.4",
-		"puppeteer-real-browser": "^1.4.4",
 		"undici": "^7.16.0",
 		"widevine": "^1.0.3",
 		"ws": "^8.18.3",
@@ -69,8 +68,8 @@
 		"@types/fs-extra": "^11.0.4",
 		"@types/node": "^24.10.1",
 		"@types/ws": "^8.18.1",
-		"@typescript-eslint/eslint-plugin": "^8.47.0",
-		"@typescript-eslint/parser": "^8.47.0",
+		"@typescript-eslint/eslint-plugin": "^8.48.0",
+		"@typescript-eslint/parser": "^8.48.0",
 		"@yao-pkg/pkg": "^6.10.1",
 		"esbuild": "0.26.0",
 		"eslint": "^9.39.1",
@@ -79,7 +78,7 @@
 		"removeNPMAbsolutePaths": "^3.0.1",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.47.0"
+		"typescript-eslint": "^8.48.0"
 	},
 	"scripts": {
 		"prestart": "pnpm run tsc test",

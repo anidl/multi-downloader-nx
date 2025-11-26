@@ -9,6 +9,7 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"downlevelIteration": true,
+		"removeComments": true,
 		"jsx": "react"
 	},
 	"exclude": ["./videos", "./tsc.ts", "lib/**/*", "gui/react/**/*"]

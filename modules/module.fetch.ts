@@ -1,7 +1,6 @@
 import * as yamlCfg from './module.cfg-loader';
 import * as yargs from './module.app-args';
 import { console } from './log';
-import { connect } from 'puppeteer-real-browser';
 import { argvC } from './module.app-args';
 import { ProxyAgent, fetch, RequestInit } from 'undici';
 
@@ -30,13 +29,13 @@ type GetDataResponse = {
 		};
 };
 
-function hasDisplay(): boolean {
-	if (process.platform === 'linux') {
-		return !!process.env.DISPLAY || !!process.env.WAYLAND_DISPLAY;
-	}
-	// Win and Mac true by default
-	return true;
-}
+// function hasDisplay(): boolean {
+// 	if (process.platform === 'linux') {
+// 		return !!process.env.DISPLAY || !!process.env.WAYLAND_DISPLAY;
+// 	}
+// 	// Win and Mac true by default
+// 	return true;
+// }
 
 // req
 export class Req {
@@ -85,36 +84,38 @@ export class Req {
 				const body = await res.text();
 				const docTitle = body.match(/<title>(.*)<\/title>/);
 				if (body && docTitle) {
-					if (docTitle[1] === 'Just a moment...' && durl.includes('crunchyroll') && hasDisplay()) {
-						console.warn('Cloudflare triggered, trying to get cookies...');
+					// if (docTitle[1] === 'Just a moment...' && durl.includes('crunchyroll') && hasDisplay()) {
+					// 	console.warn('Cloudflare triggered, trying to get cookies...');
 
-						const { page } = await connect({
-							headless: false,
-							turnstile: true
-						});
+					// 	const { page } = await connect({
+					// 		headless: false,
+					// 		turnstile: true
+					// 	});
 
-						await page.goto('https://www.crunchyroll.com/', {
-							waitUntil: 'networkidle2'
-						});
+					// 	await page.goto('https://www.crunchyroll.com/', {
+					// 		waitUntil: 'networkidle2'
+					// 	});
 
-						await page.waitForRequest('https://www.crunchyroll.com/auth/v1/token');
+					// 	await page.waitForRequest('https://www.crunchyroll.com/auth/v1/token');
 
-						const cookies = await page.cookies();
+					// 	const cookies = await page.cookies();
 
-						await page.close();
+					// 	await page.close();
 
-						params.headers = {
-							...params.headers,
-							Cookie: cookies.map((c) => `${c.name}=${c.value}`).join('; '),
-							'Set-Cookie': cookies.map((c) => `${c.name}=${c.value}`).join('; ')
-						};
+					// 	params.headers = {
+					// 		...params.headers,
+					// 		Cookie: cookies.map((c) => `${c.name}=${c.value}`).join('; '),
+					// 		'Set-Cookie': cookies.map((c) => `${c.name}=${c.value}`).join('; ')
+					// 	};
 
-						(params as any).headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36';
+					// 	(params as any).headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36';
 
-						return await this.getData(durl, params);
-					} else {
-						console.error(docTitle[1]);
-					}
+					// 	return await this.getData(durl, params);
+					// } else {
+					// 	console.error(docTitle[1]);
+					// }
+
+					console.error(docTitle[1]);
 				} else {
 					console.error(body);
 				}
