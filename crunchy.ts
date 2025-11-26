@@ -70,7 +70,7 @@ export default class Crunchy implements ServiceClass {
 	}
 
 	public checkToken(): boolean {
-		return Object.keys(this.cmsToken.cms_web ?? {}).length > 0;
+		return Object.keys(this.cmsToken.cms ?? {}).length > 0;
 	}
 
 	public async cli() {
@@ -185,7 +185,7 @@ export default class Crunchy implements ServiceClass {
 
 	public async logShowRawById(id: string) {
 		// check token
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -215,7 +215,7 @@ export default class Crunchy implements ServiceClass {
 
 	public async logSeasonRawById(id: string) {
 		// check token
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -231,16 +231,16 @@ export default class Crunchy implements ServiceClass {
 		//get episode info
 		const reqEpsListOpts = [
 			api.cms_bucket,
-			this.cmsToken.cms_web.bucket,
+			this.cmsToken.cms.bucket,
 			'/episodes?',
 			new URLSearchParams({
 				force_locale: '',
 				preferred_audio_language: 'ja-JP',
 				locale: this.locale,
 				season_id: id,
-				Policy: this.cmsToken.cms_web.policy,
-				Signature: this.cmsToken.cms_web.signature,
-				'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
+				Policy: this.cmsToken.cms.policy,
+				Signature: this.cmsToken.cms.signature,
+				'Key-Pair-Id': this.cmsToken.cms.key_pair_id
 			})
 		].join('');
 		const reqEpsList = await this.req.getData(reqEpsListOpts, AuthHeaders);
@@ -266,7 +266,7 @@ export default class Crunchy implements ServiceClass {
 
 	public async logShowListRaw() {
 		// check token
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -632,8 +632,8 @@ export default class Crunchy implements ServiceClass {
 			return;
 		}
 
-		if (ifNeeded && this.cmsToken.cms_web) {
-			if (!(Date.now() >= new Date(this.cmsToken.cms_web.expires).getTime())) {
+		if (ifNeeded && this.cmsToken.cms) {
+			if (!(Date.now() >= new Date(this.cmsToken.cms.expires).getTime())) {
 				return;
 			}
 		}
@@ -650,27 +650,27 @@ export default class Crunchy implements ServiceClass {
 			return;
 		}
 		this.cmsToken = await cmsTokenReq.res.json();
-		console.info('Your Country: %s\n', this.cmsToken.cms_web?.bucket.split('/')[1]);
+		console.info('Your Country: %s\n', this.cmsToken.cms?.bucket.split('/')[1]);
 	}
 
 	public async getCmsData() {
 		// check token
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
 		// opts
 		const indexReqOpts = [
 			api.cms_bucket,
-			this.cmsToken.cms_web.bucket,
+			this.cmsToken.cms.bucket,
 			'/index?',
 			new URLSearchParams({
 				force_locale: '',
 				preferred_audio_language: 'ja-JP',
 				locale: this.locale,
-				Policy: this.cmsToken.cms_web.policy,
-				Signature: this.cmsToken.cms_web.signature,
-				'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
+				Policy: this.cmsToken.cms.policy,
+				Signature: this.cmsToken.cms.signature,
+				'Key-Pair-Id': this.cmsToken.cms.key_pair_id
 			})
 		].join('');
 		const indexReq = await this.req.getData(indexReqOpts, {
@@ -947,7 +947,7 @@ export default class Crunchy implements ServiceClass {
 		pad = pad || 0;
 		hideSeriesTitle = hideSeriesTitle !== undefined ? hideSeriesTitle : false;
 		// check token
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -990,7 +990,7 @@ export default class Crunchy implements ServiceClass {
 
 	public async logMovieListingById(id: string, pad?: number) {
 		pad = pad || 2;
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -1078,14 +1078,14 @@ export default class Crunchy implements ServiceClass {
 			await this.logObject(i, 2);
 		}
 		// calculate pages
-		const itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.cr_www).searchParams.get('start') as string);
+		const itemPad = parseInt(new URL(newlyAddedResults.__href__, domain.cr_api).searchParams.get('start') as string);
 		const pageCur = itemPad > 0 ? Math.ceil(itemPad / 25) + 1 : 1;
 		const pageMax = Math.ceil(newlyAddedResults.total / 25);
 		console.info(`  Total results: ${newlyAddedResults.total} (Page: ${pageCur}/${pageMax})`);
 	}
 
 	public async getSeasonById(id: string, numbers: number, e: string | undefined, but: boolean, all: boolean): Promise<ResponseBase<CrunchyEpMeta[]>> {
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return { isOk: false, reason: new Error('Authentication required') };
 		}
@@ -1110,16 +1110,16 @@ export default class Crunchy implements ServiceClass {
 		//get episode info CMS
 		const reqEpsCMSListOpts = [
 			api.cms_bucket,
-			this.cmsToken.cms_web.bucket,
+			this.cmsToken.cms.bucket,
 			'/episodes?',
 			new URLSearchParams({
 				force_locale: '',
 				preferred_audio_language: 'ja-JP',
 				locale: this.locale,
 				season_id: id,
-				Policy: this.cmsToken.cms_web.policy,
-				Signature: this.cmsToken.cms_web.signature,
-				'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
+				Policy: this.cmsToken.cms.policy,
+				Signature: this.cmsToken.cms.signature,
+				'Key-Pair-Id': this.cmsToken.cms.key_pair_id
 			})
 		].join('');
 		const reqEpsCMSList = await this.req.getData(reqEpsCMSListOpts, AuthHeaders);
@@ -1132,7 +1132,7 @@ export default class Crunchy implements ServiceClass {
 
 		//get episode info API
 		const reqEpsListOpts = [
-			domain.cr_www,
+			domain.cr_api,
 			'/content/v2/cms/seasons/',
 			id,
 			'/episodes?',
@@ -1295,7 +1295,7 @@ export default class Crunchy implements ServiceClass {
 	}
 
 	public async getObjectById(e?: string, earlyReturn?: boolean, external_id?: boolean): Promise<ObjectInfo | Partial<CrunchyEpMeta>[] | undefined> {
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return [];
 		}
@@ -1307,7 +1307,7 @@ export default class Crunchy implements ServiceClass {
 			for (const ob of epFilter.values) {
 				const extIdReqOpts = [
 					api.cms_bucket,
-					this.cmsToken.cms_web.bucket,
+					this.cmsToken.cms.bucket,
 					'/channels/crunchyroll/objects',
 					'?',
 					new URLSearchParams({
@@ -1315,9 +1315,9 @@ export default class Crunchy implements ServiceClass {
 						preferred_audio_language: 'ja-JP',
 						locale: this.locale,
 						external_id: ob,
-						Policy: this.cmsToken.cms_web.policy,
-						Signature: this.cmsToken.cms_web.signature,
-						'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
+						Policy: this.cmsToken.cms.policy,
+						Signature: this.cmsToken.cms.signature,
+						'Key-Pair-Id': this.cmsToken.cms.key_pair_id
 					})
 				].join('');
 
@@ -1397,7 +1397,7 @@ export default class Crunchy implements ServiceClass {
 		if (doEpsFilter.values.length > 0) {
 			const objectReqOpts = [
 				api.cms_bucket,
-				this.cmsToken.cms_web.bucket,
+				this.cmsToken.cms.bucket,
 				'/objects/',
 				doEpsFilter.values.join(','),
 				'?',
@@ -1405,9 +1405,9 @@ export default class Crunchy implements ServiceClass {
 					force_locale: '',
 					preferred_audio_language: 'ja-JP',
 					locale: this.locale,
-					Policy: this.cmsToken.cms_web.policy,
-					Signature: this.cmsToken.cms_web.signature,
-					'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
+					Policy: this.cmsToken.cms.policy,
+					Signature: this.cmsToken.cms.signature,
+					'Key-Pair-Id': this.cmsToken.cms.key_pair_id
 				})
 			].join('');
 			const objectReq = await this.req.getData(objectReqOpts, AuthHeaders);
@@ -1562,7 +1562,7 @@ export default class Crunchy implements ServiceClass {
 		  }
 		| undefined
 	> {
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -3387,7 +3387,7 @@ export default class Crunchy implements ServiceClass {
 	}
 
 	public async parseSeriesById(id: string) {
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -3418,7 +3418,7 @@ export default class Crunchy implements ServiceClass {
 	}
 
 	public async getSeasonDataById(item: SeriesSearchItem, log = false) {
-		if (!this.cmsToken.cms_web) {
+		if (!this.cmsToken.cms) {
 			console.error('Authentication required!');
 			return;
 		}
@@ -3448,16 +3448,16 @@ export default class Crunchy implements ServiceClass {
 			//get episode info CMS
 			const reqEpsCMSListOpts = [
 				api.cms_bucket,
-				this.cmsToken.cms_web.bucket,
+				this.cmsToken.cms.bucket,
 				'/episodes?',
 				new URLSearchParams({
 					force_locale: '',
 					preferred_audio_language: 'ja-JP',
 					locale: this.locale,
 					season_id: id,
-					Policy: this.cmsToken.cms_web.policy,
-					Signature: this.cmsToken.cms_web.signature,
-					'Key-Pair-Id': this.cmsToken.cms_web.key_pair_id
+					Policy: this.cmsToken.cms.policy,
+					Signature: this.cmsToken.cms.signature,
+					'Key-Pair-Id': this.cmsToken.cms.key_pair_id
 				})
 			].join('');
 			const reqEpsCMSList = await this.req.getData(reqEpsCMSListOpts, AuthHeaders);
@@ -3470,7 +3470,7 @@ export default class Crunchy implements ServiceClass {
 
 			//get episode info API
 			const reqEpsListOpts = [
-				domain.cr_www,
+				domain.cr_api,
 				'/content/v2/cms/seasons/',
 				id,
 				'/episodes?',
