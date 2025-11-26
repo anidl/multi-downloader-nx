@@ -71,7 +71,7 @@ const api: APIType = {
 	cms_auth: `${domain.cr_api}/index/v2`,
 	//
 	// Crunchyroll Headers
-	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.50.0_22282 (Android 16; en-US; sdk_gphone64_x86_64)',
+	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.50.0_22282 (Android 12; en-US; SHIELD Android TV Build/SR1A.211012.001)',
 	crunchyDefHeader: {},
 	crunchyAuthHeader: {},
 	crunchyAuthRefreshHeader: {},
