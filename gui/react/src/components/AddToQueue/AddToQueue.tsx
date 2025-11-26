@@ -1,5 +1,5 @@
 import { Add } from '@mui/icons-material';
-import { Box, Button, Dialog, Divider, Typography } from '@mui/material';
+import { Box, Button, Dialog, Divider } from '@mui/material';
 import React from 'react';
 import DownloadSelector from './DownloadSelector/DownloadSelector';
 import EpisodeListing from './DownloadSelector/Listing/EpisodeListing';

@@ -1,4 +1,4 @@
-import { Badge, Box, Button, CircularProgress, Divider, IconButton, LinearProgress, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, CircularProgress, IconButton, LinearProgress, Skeleton, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 import { messageChannelContext } from '../../../provider/MessageChannel';
 import { queueContext } from '../../../provider/QueueProvider';

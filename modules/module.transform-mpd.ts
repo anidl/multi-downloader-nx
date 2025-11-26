@@ -229,7 +229,3 @@ export async function parse(manifest: string, language?: LanguageItem, url?: str
 
 	return ret;
 }
-
-function arrayBufferToBase64(buffer: Uint8Array): string {
-	return Buffer.from(buffer).toString('base64');
-}

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Container, Box, ThemeProvider, createTheme, Theme } from '@mui/material';
+import { Box, ThemeProvider, createTheme, Theme } from '@mui/material';
 
 const makeTheme = (mode: 'dark' | 'light'): Partial<Theme> => {
 	return createTheme({

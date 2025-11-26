@@ -410,7 +410,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);
 		// collect fonts info
 		// mergers
-		let isMuxed = false;
+		let isMuxed: boolean = false;
 		if (options.syncTiming) {
 			await merger.createDelays();
 		}

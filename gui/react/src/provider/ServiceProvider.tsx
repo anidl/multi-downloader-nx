@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Box, Button, Typography, Avatar } from '@mui/material';
+import { Box, Button, Typography, Avatar } from '@mui/material';
 import useStore from '../hooks/useStore';
 import { StoreState } from './Store';
 
