@@ -105,7 +105,7 @@ export default class Crunchy implements ServiceClass {
 			await this.getCmsData();
 		} else if (argv.new) {
 			await this.refreshToken();
-			await this.getNewlyAdded(argv.page, argv['search-type'], argv.raw, argv.rawoutput);
+			await this.getNewlyAdded(argv.page, argv.searchType, argv.raw, argv.rawoutput);
 		} else if (argv.search && argv.search.length > 2) {
 			await this.refreshToken();
 			await this.doSearch({ ...argv, search: argv.search as string });
@@ -122,16 +122,16 @@ export default class Crunchy implements ServiceClass {
 				}
 			}
 			return true;
-		} else if (argv['movie-listing'] && argv['movie-listing'].match(/^[0-9A-Z]{9,}$/)) {
+		} else if (argv.movieListing && argv.movieListing.match(/^[0-9A-Z]{9,}$/)) {
 			await this.refreshToken();
-			await this.logMovieListingById(argv['movie-listing'] as string);
-		} else if (argv['show-raw'] && argv['show-raw'].match(/^[0-9A-Z]{9,}$/)) {
+			await this.logMovieListingById(argv.movieListing as string);
+		} else if (argv.showRaw && argv.showRaw.match(/^[0-9A-Z]{9,}$/)) {
 			await this.refreshToken();
-			await this.logShowRawById(argv['show-raw'] as string);
-		} else if (argv['season-raw'] && argv['season-raw'].match(/^[0-9A-Z]{9,}$/)) {
+			await this.logShowRawById(argv.showRaw as string);
+		} else if (argv.seasonRaw && argv.seasonRaw.match(/^[0-9A-Z]{9,}$/)) {
 			await this.refreshToken();
-			await this.logSeasonRawById(argv['season-raw'] as string);
-		} else if (argv['show-list-raw']) {
+			await this.logSeasonRawById(argv.seasonRaw as string);
+		} else if (argv.showListRaw) {
 			await this.refreshToken();
 			await this.logShowListRaw();
 		} else if (argv.s && argv.s.match(/^[0-9A-Z]{9,}$/)) {

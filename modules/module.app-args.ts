@@ -32,13 +32,13 @@ export let argvC: {
 	auth: boolean | undefined;
 	dlFonts: boolean | undefined;
 	search: string | undefined;
-	'search-type': string;
+	searchType: string;
 	page: number | undefined;
 	locale: string;
 	new: boolean | undefined;
-	'movie-listing': string | undefined;
-	'show-raw': string | undefined;
-	'season-raw': string | undefined;
+	movieListing: string | undefined;
+	showRaw: string | undefined;
+	seasonRaw: string | undefined;
 	series: string | undefined;
 	s: string | undefined;
 	srz: string | undefined;
