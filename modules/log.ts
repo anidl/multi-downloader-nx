@@ -7,7 +7,7 @@ const logFolder = path.join(workingDir, 'logs');
 const latest = path.join(logFolder, 'latest.log');
 
 const makeLogFolder = () => {
-	if (!fs.existsSync(logFolder)) fs.mkdirSync(logFolder);
+	if (!fs.existsSync(logFolder)) fs.mkdirSync(logFolder, { recursive: true });
 	if (fs.existsSync(latest)) {
 		const stats = fs.statSync(latest);
 		fs.renameSync(latest, path.join(logFolder, `${stats.mtimeMs}.log`));

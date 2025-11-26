@@ -1,15 +1,15 @@
 // build-in
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'fs';
 
 // package program
 import packageJson from './package.json';
 
 // plugins
 import { console } from './modules/log';
-import m3u8 from 'm3u8-parsed';
 import streamdl, { M3U8Json } from './modules/hls-download';
 import Helper from './modules/module.helper';
+import m3u8 from 'm3u8-parser';
 
 // custom modules
 import * as fontsData from './modules/module.fontsData';
@@ -347,10 +347,10 @@ export default class Crunchy implements ServiceClass {
 			} else {
 				const fontFolder = path.dirname(fontLoc);
 				if (fs.existsSync(fontLoc) && fs.statSync(fontLoc).size == 0) {
-					fs.unlinkSync(fontLoc);
+					fs.rmSync(fontLoc, { recursive: true, force: true });
 				}
 				try {
-					fs.ensureDirSync(fontFolder);
+					fs.existsSync(fontFolder);
 				} catch (e) {
 					console.info('');
 				}
@@ -2400,7 +2400,7 @@ export default class Crunchy implements ServiceClass {
 									} else {
 										console.info('Decryption done for video');
 										if (!options.nocleanup) {
-											fs.removeSync(`${tempTsFile}.video.enc.m4s`);
+											fs.unlinkSync(`${tempTsFile}.video.enc.m4s`);
 										}
 										fs.copyFileSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
 										fs.unlinkSync(`${tempTsFile}.video.m4s`);
@@ -2430,7 +2430,7 @@ export default class Crunchy implements ServiceClass {
 										return undefined;
 									} else {
 										if (!options.nocleanup) {
-											fs.removeSync(`${tempTsFile}.audio.enc.m4s`);
+											fs.unlinkSync(`${tempTsFile}.audio.enc.m4s`);
 										}
 										fs.copyFileSync(`${tempTsFile}.audio.m4s`, `${tsFile}.audio.m4s`);
 										fs.unlinkSync(`${tempTsFile}.audio.m4s`);
@@ -2467,22 +2467,31 @@ export default class Crunchy implements ServiceClass {
 							}
 						}
 					} else if (!options.novids) {
-						const streamPlaylists = m3u8(vstreamPlaylistBody);
+						// Init parser
+						const parser = new m3u8.Parser();
+
+						// Parse M3U8
+						parser.push(vstreamPlaylistBody);
+						parser.end();
+
+						const streamPlaylists = parser.manifest;
+						if (!streamPlaylists) throw Error('Failed to parse M3U8');
+
 						const plServerList: string[] = [],
 							plStreams: Record<string, Record<string, string>> = {},
 							plQuality: {
 								str: string;
 								dim: string;
-								CODECS: string;
-								RESOLUTION: {
-									width: number;
-									height: number;
+								CODECS?: string;
+								RESOLUTION?: {
+									width?: number;
+									height?: number;
 								};
 							}[] = [];
-						for (const pl of streamPlaylists.playlists) {
+						for (const pl of streamPlaylists.playlists ?? []) {
 							// set quality
 							const plResolution = pl.attributes.RESOLUTION;
-							const plResolutionText = `${plResolution.width}x${plResolution.height}`;
+							const plResolutionText = `${plResolution?.width}x${plResolution?.height}`;
 							// set codecs
 							const plCodecs = pl.attributes.CODECS;
 							// parse uri
@@ -2509,7 +2518,7 @@ export default class Crunchy implements ServiceClass {
 								plStreams[plServer][plResolutionText] = pl.uri;
 							}
 							// set plQualityStr
-							const plBandwidth = Math.round(pl.attributes.BANDWIDTH / 1024);
+							const plBandwidth = Math.round((pl.attributes?.BANDWIDTH ?? 0) / 1024);
 							const qualityStrAdd = `${plResolutionText} (${plBandwidth}KiB/s)`;
 							const qualityStrRegx = new RegExp(qualityStrAdd.replace(/([:()/])/g, '\\$1'), 'm');
 							const qualityStrMatch = !plQuality
@@ -2556,12 +2565,14 @@ export default class Crunchy implements ServiceClass {
 								{
 									name: 'height',
 									type: 'number',
-									replaceWith: quality === 0 ? (plQuality[plQuality.length - 1].RESOLUTION.height as number) : plQuality[quality - 1].RESOLUTION.height
+									replaceWith:
+										quality === 0 ? (plQuality[plQuality.length - 1].RESOLUTION?.height as number) : (plQuality[quality - 1].RESOLUTION?.height as number)
 								},
 								{
 									name: 'width',
 									type: 'number',
-									replaceWith: quality === 0 ? (plQuality[plQuality.length - 1].RESOLUTION.width as number) : plQuality[quality - 1].RESOLUTION.width
+									replaceWith:
+										quality === 0 ? (plQuality[plQuality.length - 1].RESOLUTION?.width as number) : (plQuality[quality - 1].RESOLUTION?.width as number)
 								}
 							);
 							const lang = langsData.languages.find((a) => a.code === vcurStream?.audio_lang);
@@ -2598,7 +2609,16 @@ export default class Crunchy implements ServiceClass {
 								}
 
 								const chunkPageBody = await chunkPage.res.text();
-								const chunkPlaylist = m3u8(chunkPageBody);
+								// Init parser
+								const parser = new m3u8.Parser();
+
+								// Parse M3U8
+								parser.push(chunkPageBody);
+								parser.end();
+
+								const chunkPlaylist = parser.manifest;
+								if (!chunkPlaylist) throw Error('Failed to parse M3U8');
+
 								const totalParts = chunkPlaylist.segments.length;
 								const mathParts = Math.ceil(totalParts / options.partsize);
 								const mathMsg = `(${mathParts}*${options.partsize})`;

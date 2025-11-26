@@ -8,6 +8,7 @@ import { console } from './log';
 import { ProgressData } from '../@types/messageHandler';
 import Helper from './module.helper';
 import * as reqModule from './module.fetch';
+import { Manifest } from 'm3u8-parser';
 
 const req = new reqModule.Req();
 
@@ -33,7 +34,7 @@ type Key = {
 };
 
 export type HLSOptions = {
-	m3u8json: M3U8Json;
+	m3u8json: M3U8Json | Partial<Manifest>;
 	output?: string;
 	threads?: number;
 	retries?: number;
@@ -52,7 +53,7 @@ type Data = {
 		total: number;
 		completed: number;
 	};
-	m3u8json: M3U8Json;
+	m3u8json: M3U8Json | Partial<Manifest>;
 	outputFile: string;
 	threads: number;
 	retries: number;
@@ -118,7 +119,7 @@ class hlsDownload {
 				if (age < 24 * 60 * 60 * 1000) {
 					console.info('Resume data found! Trying to resume...');
 					const resumeData = JSON.parse(await fs.readFile(`${fn}.resume`, 'utf-8'));
-					if (resumeData.total == this.data.m3u8json.segments.length && resumeData.completed != resumeData.total && !isNaN(resumeData.completed)) {
+					if (resumeData.total == this.data.m3u8json.segments?.length && resumeData.completed != resumeData.total && !isNaN(resumeData.completed)) {
 						console.info('Resume data is ok!');
 						this.data.offset = resumeData.completed;
 						this.data.isResume = true;
@@ -126,7 +127,7 @@ class hlsDownload {
 						console.warn(' Resume data is wrong!');
 						console.warn({
 							resume: { total: resumeData.total, dled: resumeData.completed },
-							current: { total: this.data.m3u8json.segments.length }
+							current: { total: this.data.m3u8json.segments?.length }
 						});
 					}
 				} else {
@@ -166,7 +167,7 @@ class hlsDownload {
 		this.data.dateStart = Date.now();
 		let segments = this.data.m3u8json.segments;
 		// download init part
-		if (segments[0].map && this.data.offset === 0 && !this.data.skipInit) {
+		if (segments?.[0].map && this.data.offset === 0 && !this.data.skipInit) {
 			console.info('Download and save init part...');
 			const initSeg = segments[0].map as Segment;
 			if (segments[0].key) {
@@ -179,7 +180,7 @@ class hlsDownload {
 					`${fn}.resume`,
 					JSON.stringify({
 						completed: 0,
-						total: this.data.m3u8json.segments.length
+						total: this.data.m3u8json.segments?.length
 					})
 				);
 				console.info('Init part downloaded.');
@@ -187,17 +188,17 @@ class hlsDownload {
 				console.error(`Part init download error:\n\t${e.message}`);
 				return { ok: false, parts: this.data.parts };
 			}
-		} else if (segments[0].map && this.data.offset === 0 && this.data.skipInit) {
+		} else if (segments?.[0].map && this.data.offset === 0 && this.data.skipInit) {
 			console.warn('Skipping init part can lead to broken video!');
 		}
 		// resuming ...
 		if (this.data.offset > 0) {
-			segments = segments.slice(this.data.offset);
+			segments = segments?.slice(this.data.offset);
 			console.info(`Resuming download from part ${this.data.offset + 1}...`);
 			this.data.parts.completed = this.data.offset;
 		}
 		// dl process
-		for (let p = 0; p < segments.length / this.data.threads; p++) {
+		for (let p = 0; p < (segments?.length ?? 0) / this.data.threads; p++) {
 			// set offsets
 			const offset = p * this.data.threads;
 			const dlOffset = offset + this.data.threads;
@@ -206,9 +207,9 @@ class hlsDownload {
 				prq = new Map();
 			const res: any[] = [];
 			let errcnt = 0;
-			for (let px = offset; px < dlOffset && px < segments.length; px++) {
-				const curp = segments[px];
-				const key = curp.key as Key;
+			for (let px = offset; px < dlOffset && px < (segments?.length ?? 0); px++) {
+				const curp = segments?.[px];
+				const key = curp?.key as Key;
 				if (key && !krq.has(key.uri) && !this.data.keys[key.uri as string]) {
 					krq.set(key.uri, this.downloadKey(key, px, this.data.offset));
 				}
@@ -219,8 +220,8 @@ class hlsDownload {
 				console.error(`Key ${er.p + 1} download error:\n\t${er.message}`);
 				return { ok: false, parts: this.data.parts };
 			}
-			for (let px = offset; px < dlOffset && px < segments.length; px++) {
-				const curp = segments[px] as Segment;
+			for (let px = offset; px < dlOffset && px < (segments?.length ?? 0); px++) {
+				const curp = segments?.[px] as Segment;
 				prq.set(px, () => this.downloadPart(curp, px, this.data.offset));
 			}
 			// Parallelized part download with retry logic and optional concurrency limit
@@ -286,7 +287,7 @@ class hlsDownload {
 				}
 			}
 			// log downloaded
-			const totalSeg = segments.length + this.data.offset; // Add the sliced lenght back so the resume data will be correct even if an resumed download fails
+			const totalSeg = (segments?.length ?? 0) + this.data.offset; // Add the sliced lenght back so the resume data will be correct even if an resumed download fails
 			const downloadedSeg = dlOffset < totalSeg ? dlOffset : totalSeg;
 			this.data.parts.completed = downloadedSeg + this.data.offset;
 			const data = extFn.getDownloadInfo(this.data.dateStart, downloadedSeg, totalSeg, this.data.bytesDownloaded);

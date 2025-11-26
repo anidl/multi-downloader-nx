@@ -1,7 +1,6 @@
 import { ChildProcess, exec } from 'child_process';
-import fs from 'fs-extra';
 import path from 'path';
-import { removeSync, copyFileSync } from 'fs-extra';
+import fs from 'fs';
 
 const argv = process.argv.slice(2);
 let buildIgnore: string[] = [];
@@ -57,15 +56,14 @@ export { ignore };
 	};
 
 	process.stdout.write('Removing lib dir... ');
-	removeSync('lib');
+	fs.rmSync('lib', { recursive: true, force: true });
 	process.stdout.write('✓\nRunning tsc... ');
 	const tsc = exec('npx tsc');
 
 	await waitForProcess(tsc);
 
 	if (!isGUI) {
-		fs.emptyDirSync(path.join('lib', 'gui'));
-		fs.rmdirSync(path.join('lib', 'gui'));
+		fs.rmSync(path.join('lib', 'gui'), { recursive: true, force: true });
 	}
 
 	if (!isTest && isGUI) {
@@ -97,9 +95,9 @@ export { ignore };
 	files.forEach((item) => {
 		const itemPath = path.join(__dirname, 'lib', item.path.replace(__dirname, ''));
 		if (item.stats.isDirectory()) {
-			if (!fs.existsSync(itemPath)) fs.mkdirSync(itemPath);
+			if (!fs.existsSync(itemPath)) fs.mkdirSync(itemPath, { recursive: true });
 		} else {
-			copyFileSync(item.path, itemPath);
+			fs.cpSync(item.path, itemPath, { recursive: true });
 		}
 	});
 

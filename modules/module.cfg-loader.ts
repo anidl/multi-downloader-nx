@@ -1,6 +1,6 @@
 import path from 'path';
 import yaml from 'yaml';
-import fs from 'fs-extra';
+import fs from 'fs';
 import { lookpath } from 'lookpath';
 import { console } from './log';
 import { GuiState } from '../@types/messageHandler';
@@ -37,7 +37,7 @@ const tokenFile = {
 };
 
 export const ensureConfig = () => {
-	if (!fs.existsSync(path.join(workingDir, 'config'))) fs.mkdirSync(path.join(workingDir, 'config'));
+	if (!fs.existsSync(path.join(workingDir, 'config'))) fs.mkdirSync(path.join(workingDir, 'config'), { recursive: true });
 	if (process.env.contentDirectory)
 		[binCfgFile, dirCfgFile, cliCfgFile, guiCfgFile].forEach((a) => {
 			if (!fs.existsSync(`${a}.yml`)) fs.copyFileSync(path.join(__dirname, '..', 'config', `${path.basename(a)}.yml`), `${a}.yml`);
@@ -66,7 +66,7 @@ export type WriteObjects = {
 
 const writeYamlCfgFile = <T extends keyof WriteObjects>(file: T, data: WriteObjects[T]) => {
 	const fn = path.join(workingDir, 'config', `${file}.yml`);
-	if (fs.existsSync(fn)) fs.removeSync(fn);
+	if (fs.existsSync(fn)) fs.unlinkSync(fn);
 	fs.writeFileSync(fn, yaml.stringify(data));
 };
 
@@ -131,7 +131,7 @@ const loadCfg = (): ConfigObject => {
 	}
 	if (!fs.existsSync(defaultCfg.dir.content)) {
 		try {
-			fs.ensureDirSync(defaultCfg.dir.content);
+			fs.mkdirSync(defaultCfg.dir.content, { recursive: true });
 		} catch (e) {
 			console.error('Content directory not accessible!');
 			return defaultCfg;
@@ -192,7 +192,7 @@ const loadCRSession = () => {
 const saveCRSession = (data: Record<string, unknown>) => {
 	const cfgFolder = path.dirname(sessCfgFile.cr);
 	try {
-		fs.ensureDirSync(cfgFolder);
+		fs.mkdirSync(cfgFolder, { recursive: true });
 		fs.writeFileSync(`${sessCfgFile.cr}.yml`, yaml.stringify(data));
 	} catch (e) {
 		console.error("Can't save session file to disk!");
@@ -210,7 +210,7 @@ const loadCRToken = () => {
 const saveCRToken = (data: Record<string, unknown>) => {
 	const cfgFolder = path.dirname(tokenFile.cr);
 	try {
-		fs.ensureDirSync(cfgFolder);
+		fs.mkdirSync(cfgFolder, { recursive: true });
 		fs.writeFileSync(`${tokenFile.cr}.yml`, yaml.stringify(data));
 	} catch (e) {
 		console.error("Can't save token file to disk!");
@@ -228,7 +228,7 @@ const loadADNToken = () => {
 const saveADNToken = (data: Record<string, unknown>) => {
 	const cfgFolder = path.dirname(tokenFile.adn);
 	try {
-		fs.ensureDirSync(cfgFolder);
+		fs.mkdirSync(cfgFolder, { recursive: true });
 		fs.writeFileSync(`${tokenFile.adn}.yml`, yaml.stringify(data));
 	} catch (e) {
 		console.error("Can't save token file to disk!");
@@ -251,7 +251,7 @@ const loadHDSession = () => {
 const saveHDSession = (data: Record<string, unknown>) => {
 	const cfgFolder = path.dirname(sessCfgFile.hd);
 	try {
-		fs.ensureDirSync(cfgFolder);
+		fs.mkdirSync(cfgFolder, { recursive: true });
 		fs.writeFileSync(`${sessCfgFile.hd}.yml`, yaml.stringify(data));
 	} catch (e) {
 		console.error("Can't save session file to disk!");
@@ -269,7 +269,7 @@ const loadHDToken = () => {
 const saveHDToken = (data: Record<string, unknown>) => {
 	const cfgFolder = path.dirname(tokenFile.hd);
 	try {
-		fs.ensureDirSync(cfgFolder);
+		fs.mkdirSync(cfgFolder, { recursive: true });
 		fs.writeFileSync(`${tokenFile.hd}.yml`, yaml.stringify(data));
 	} catch (e) {
 		console.error("Can't save token file to disk!");
@@ -279,7 +279,7 @@ const saveHDToken = (data: Record<string, unknown>) => {
 const saveHDProfile = (data: Record<string, unknown>) => {
 	const cfgFolder = path.dirname(hdPflCfgFile);
 	try {
-		fs.ensureDirSync(cfgFolder);
+		fs.mkdirSync(cfgFolder, { recursive: true });
 		fs.writeFileSync(`${hdPflCfgFile}.yml`, yaml.stringify(data));
 	} catch (e) {
 		console.error("Can't save profile file to disk!");
@@ -318,7 +318,7 @@ const loadNewHDToken = () => {
 const saveNewHDToken = (data: Record<string, unknown>) => {
 	const cfgFolder = path.dirname(tokenFile.hdNew);
 	try {
-		fs.ensureDirSync(cfgFolder);
+		fs.mkdirSync(cfgFolder, { recursive: true });
 		fs.writeFileSync(`${tokenFile.hdNew}.yml`, yaml.stringify(data));
 	} catch (e) {
 		console.error("Can't save token file to disk!");

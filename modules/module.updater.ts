@@ -1,11 +1,10 @@
-import fs from 'fs';
 import { GithubTag, TagCompare } from '../@types/github';
 import path from 'path';
 import { UpdateFile } from '../@types/updateFile';
 import packageJson from '../package.json';
 import { CompilerOptions, transpileModule } from 'typescript';
 import tsConfig from '../tsconfig.json';
-import fsextra from 'fs-extra';
+import fs from 'fs';
 import { workingDir } from './module.cfg-loader';
 import { console } from './log';
 import Helper from './module.helper';
@@ -142,7 +141,7 @@ export default async (force = false) => {
 
 		changesToApply.forEach((a) => {
 			try {
-				fsextra.ensureDirSync(path.dirname(a.path));
+				fs.mkdirSync(path.dirname(a.path), { recursive: true });
 				fs.writeFileSync(path.join(__dirname, '..', a.path), a.content);
 				console.info('✓ Written %s', a.path);
 			} catch (er) {

@@ -1,6 +1,6 @@
 // build requirements
 import crypto from 'crypto';
-import fs from 'fs-extra';
+import fs from 'fs';
 import pkg from '../package.json';
 import modulesCleanup from 'removeNPMAbsolutePaths';
 import { exec } from '@yao-pkg/pkg';
@@ -38,14 +38,14 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 	}
 	await modulesCleanup('.');
 	if (!fs.existsSync(buildsDir)) {
-		fs.mkdirSync(buildsDir);
+		fs.mkdirSync(buildsDir, { recursive: true });
 	}
 	const buildFull = `${buildStr}-${getFriendlyName(buildType)}-${gui ? 'gui' : 'cli'}`;
 	const buildDir = `${buildsDir}/${buildFull}`;
 	if (fs.existsSync(buildDir)) {
-		fs.removeSync(buildDir);
+		fs.rmSync(buildDir, { recursive: true, force: true });
 	}
-	fs.mkdirSync(buildDir);
+	fs.mkdirSync(buildDir, { recursive: true });
 	console.info('Running esbuild');
 
 	const build = await esbuild.build({
@@ -79,24 +79,24 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 	}
 
 	// Moving required default files/folders into build dir
-	fs.mkdirSync(`${buildDir}/config`);
-	fs.mkdirSync(`${buildDir}/videos`);
-	fs.mkdirSync(`${buildDir}/widevine`);
-	fs.mkdirSync(`${buildDir}/playready`);
-	fs.copySync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);
-	fs.copySync('./config/dir-path.yml', `${buildDir}/config/dir-path.yml`);
-	fs.copySync('./config/gui.yml', `${buildDir}/config/gui.yml`);
-	fs.copySync('./modules/cmd-here.bat', `${buildDir}/cmd-here.bat`);
-	fs.copySync('./modules/NotoSans-Regular.ttf', `${buildDir}/NotoSans-Regular.ttf`);
-	fs.copySync('./package.json', `${buildDir}/package.json`);
-	fs.copySync('./docs/', `${buildDir}/docs/`);
-	fs.copySync('./LICENSE.md', `${buildDir}/docs/LICENSE.md`);
+	fs.mkdirSync(`${buildDir}/config`, { recursive: true });
+	fs.mkdirSync(`${buildDir}/videos`, { recursive: true });
+	fs.mkdirSync(`${buildDir}/widevine`, { recursive: true });
+	fs.mkdirSync(`${buildDir}/playready`, { recursive: true });
+	fs.copyFileSync('./config/cli-defaults.yml', `${buildDir}/config/cli-defaults.yml`);
+	fs.copyFileSync('./config/dir-path.yml', `${buildDir}/config/dir-path.yml`);
+	fs.copyFileSync('./config/gui.yml', `${buildDir}/config/gui.yml`);
+	fs.copyFileSync('./modules/cmd-here.bat', `${buildDir}/cmd-here.bat`);
+	fs.copyFileSync('./modules/NotoSans-Regular.ttf', `${buildDir}/NotoSans-Regular.ttf`);
+	fs.copyFileSync('./package.json', `${buildDir}/package.json`);
+	fs.cpSync('./docs/', `${buildDir}/docs/`, { recursive: true });
+	fs.copyFileSync('./LICENSE.md', `${buildDir}/docs/LICENSE.md`);
 	if (gui) {
-		fs.copySync('./gui', `${buildDir}/gui`);
-		fs.copySync('./node_modules/open/xdg-open', `${buildDir}/xdg-open`);
+		fs.cpSync('./gui', `${buildDir}/gui`, { recursive: true });
+		fs.cpSync('./node_modules/open/xdg-open', `${buildDir}/xdg-open`, { recursive: true });
 	}
 	if (fs.existsSync(`${buildsDir}/${buildFull}.7z`)) {
-		fs.removeSync(`${buildsDir}/${buildFull}.7z`);
+		fs.unlinkSync(`${buildsDir}/${buildFull}.7z`);
 	}
 
 	// Generate bin-path.yml

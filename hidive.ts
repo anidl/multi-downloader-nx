@@ -1,6 +1,6 @@
 // build-in
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'fs';
 
 // package program
 import packageJson from './package.json';
@@ -934,7 +934,7 @@ export default class Hidive implements ServiceClass {
 						} else {
 							console.info('Decryption done for video');
 							if (!options.nocleanup) {
-								fs.removeSync(`${tempTsFile}.video.enc.m4s`);
+								fs.unlinkSync(`${tempTsFile}.video.enc.m4s`);
 							}
 							fs.copyFileSync(`${tempTsFile}.video.m4s`, `${tsFile}.video.m4s`);
 							fs.unlinkSync(`${tempTsFile}.video.m4s`);
@@ -1028,7 +1028,7 @@ export default class Hidive implements ServiceClass {
 							return undefined;
 						} else {
 							if (!options.nocleanup) {
-								fs.removeSync(`${tempTsFile}.audio.enc.m4s`);
+								fs.unlinkSync(`${tempTsFile}.audio.enc.m4s`);
 							}
 							fs.copyFileSync(`${tempTsFile}.audio.m4s`, `${tsFile}.audio.m4s`);
 							fs.unlinkSync(`${tempTsFile}.audio.m4s`);
