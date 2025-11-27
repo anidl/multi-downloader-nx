@@ -144,8 +144,6 @@ You have now completed the dependencies installation!
 If you have a Widevine CDM key dump, its either going to be a single `.wvd` file or a pair of `.bin` and `.pem` files. \
 In any case, multi-downloader-nx supports both formats. Place them in the `widevine` folder and you are good to go.
 
-The only requirement is that the CDM is a L3 CDM. File type/name does not matter.
-
 ### Playready
 
 If you have a Playready CDM key dump, you just need to make sure:
