@@ -147,9 +147,8 @@ In any case, multi-downloader-nx supports both formats. Place them in the `widev
 ### Playready
 
 If you have a Playready CDM key dump, you just need to make sure:
-1. Its provisioned as a V3 Device by [pyplayready](https://github.com/ready-dl/pyplayready).
-2. Security level is either SL2000 or SL3000
-3. Make sure you are using the latest version of shaka-packager from Stratuma, as he has patched it to work with multi-downloader-nx.\
+1. Security level is either SL2000 or SL3000
+2. Make sure you are using the latest version of shaka-packager from Stratuma, as he has patched it to work with multi-downloader-nx.\
    You can find his releases [here](https://github.com/stratumadev/shaka-packager/releases/latest)
 
 File type does not matter, as multi-downloader-nx supports both `.prd` device files and the `bgroupcert.dat` and `zgpriv.dat` blobs. \
