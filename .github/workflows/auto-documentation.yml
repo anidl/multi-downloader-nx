@@ -26,4 +26,4 @@ jobs:
             - run: pnpm run docs
             - uses: stefanzweifel/git-auto-commit-action@v4
               with:
-                  commit_message: ${{ github.event.head_commit.message }} + Documentation
+                  commit_message: 'docs(main): bump version'
