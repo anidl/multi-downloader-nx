@@ -58,6 +58,8 @@
 		"yaml": "^2.8.1"
 	},
 	"devDependencies": {
+		"@commitlint/cli": "^20.1.0",
+		"@commitlint/config-conventional": "^20.0.0",
 		"@eslint/js": "^9.39.1",
 		"@types/express": "^5.0.5",
 		"@types/ffprobe": "^1.1.8",
@@ -70,6 +72,7 @@
 		"esbuild": "0.26.0",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
+		"husky": "^9.1.7",
 		"prettier": "^3.7.1",
 		"removeNPMAbsolutePaths": "^3.0.1",
 		"ts-node": "^10.9.2",
@@ -112,6 +115,7 @@
 		"test-macos-x64": "pnpm run pretest && cd lib && node modules/build macos-x64",
 		"test-windows-arm64": "pnpm run pretest && cd lib && node modules/build windows-arm64",
 		"test-linux-arm64": "pnpm run pretest && cd lib && node modules/build linuxstatic-arm64 && node modules/build alpine-x64",
-		"test-macos-arm64": "pnpm run pretest && cd lib && node modules/build macos-arm64"
+		"test-macos-arm64": "pnpm run pretest && cd lib && node modules/build macos-arm64",
+		"prepare": "husky"
 	}
 }
