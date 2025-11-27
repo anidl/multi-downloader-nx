@@ -95,6 +95,7 @@ export let argvC: {
 	scaledBorderAndShadowFix: boolean;
 	scaledBorderAndShadow: 'yes' | 'no';
 	originalScriptFix: boolean;
+	subtitleTimestampFix: boolean;
 	// Proxy
 	proxy: string;
 	proxyAll: boolean;

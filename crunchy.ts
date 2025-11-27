@@ -1209,7 +1209,8 @@ export default class Crunchy implements ServiceClass {
 						versions: null,
 						lang: langsData.languages.find((a) => a.code == yargs.appArgv(this.cfg.cli).dubLang[0]),
 						isSubbed: item.is_subbed,
-						isDubbed: item.is_dubbed
+						isDubbed: item.is_dubbed,
+						durationMs: item.duration_ms ?? 0
 					}
 				],
 				seriesTitle: item.series_title,
@@ -1451,7 +1452,8 @@ export default class Crunchy implements ServiceClass {
 						mediaId: 'E:' + item.id,
 						versions: item.episode_metadata.versions,
 						isSubbed: item.episode_metadata.is_subbed,
-						isDubbed: item.episode_metadata.is_dubbed
+						isDubbed: item.episode_metadata.is_dubbed,
+						durationMs: item.episode_metadata.duration_ms ?? 0
 					}
 				];
 				epMeta.seriesTitle = item.episode_metadata.series_title;
@@ -1465,7 +1467,8 @@ export default class Crunchy implements ServiceClass {
 					{
 						mediaId: 'M:' + item.id,
 						isSubbed: item.movie_listing_metadata.is_subbed,
-						isDubbed: item.movie_listing_metadata.is_dubbed
+						isDubbed: item.movie_listing_metadata.is_dubbed,
+						durationMs: item.movie_listing_metadata.duration_ms ?? 0
 					}
 				];
 				epMeta.seriesTitle = item.title;
@@ -1478,7 +1481,8 @@ export default class Crunchy implements ServiceClass {
 					{
 						mediaId: 'M:' + item.id,
 						isSubbed: item.movie_metadata.is_subbed,
-						isDubbed: item.movie_metadata.is_dubbed
+						isDubbed: item.movie_metadata.is_dubbed,
+						durationMs: item.movie_metadata.duration_ms ?? 0
 					}
 				];
 				epMeta.season = 0;
@@ -1513,7 +1517,8 @@ export default class Crunchy implements ServiceClass {
 				{
 					mediaId: 'V:' + item.id,
 					isSubbed: false,
-					isDubbed: false
+					isDubbed: false,
+					durationMs: item.durationMs ?? 0
 				}
 			];
 			epMeta.season = 0;
@@ -2814,18 +2819,20 @@ export default class Crunchy implements ServiceClass {
 							});
 							if (subsAssReq.ok && subsAssReq.res) {
 								let sBody = await subsAssReq.res.text();
-								if (subsItem.format == 'vtt') {
+
+								if (subsItem.format === 'vtt') {
 									if (!options.noASSConv) {
 										const chosenFontSize = options.originalFontSize ? undefined : options.fontSize;
 										if (!options.originalFontSize) sBody = sBody.replace(/( font-size:.+?;)/g, '').replace(/(font-size:.+?;)/g, '');
 										sBody = vtt2ass(undefined, chosenFontSize, sBody, '', undefined, options.fontName);
-										sxData.fonts = fontsData.assFonts(sBody) as Font[];
 										sxData.file = sxData.file.replace('.vtt', '.ass');
 									} else {
 										// Yeah, whatever
 										sxData.fonts = [];
 									}
-								} else {
+								}
+
+								if (!options.noASSConv || subsItem.format !== 'vtt') {
 									// Extract PlayRes
 									const mX = sBody.match(/^PlayResX:\s*(\d+)/m);
 									const mY = sBody.match(/^PlayResY:\s*(\d+)/m);
@@ -2967,6 +2974,45 @@ export default class Crunchy implements ServiceClass {
 
 										// Remove YCbCr
 										sBody = sBody.replace(/^[ \t]*YCbCr Matrix:\s*.*\r?\n?/m, '');
+
+										// Make sure no Dialogue timestamp goes over video length
+										if (options.subtitleTimestampFix && mMeta?.durationMs && mMeta.durationMs > 15000) {
+											const lines = sBody.split('\n');
+											const newLines: string[] = [];
+											const durationS = mMeta.durationMs / 1000;
+
+											const toSec = (t: string) => {
+												const [h, m, s] = t.replace(',', '.').split(/[:.]/).map(Number);
+												return h * 3600 + m * 60 + s;
+											};
+
+											for (let line of lines) {
+												if (line.startsWith('Dialogue:')) {
+													const parts = line.split(',');
+													const start = parts[1];
+													const end = parts[2];
+
+													const s = toSec(start);
+													const e = toSec(end);
+
+													// If start time is longer than durationS skip the subtitle line completely
+													if (s > durationS) continue;
+
+													// If only end time is longer than durationS short it down
+													if (e > durationS) {
+														const h = String(Math.floor(durationS / 3600));
+														const m = String(Math.floor((durationS % 3600) / 60)).padStart(2, '0');
+														const sec = (durationS % 60).toFixed(2).padStart(5, '0');
+														parts[2] = `${h}:${m}:${sec}`;
+														line = parts.join(',');
+													}
+												}
+
+												newLines.push(line);
+											}
+
+											sBody = newLines.join('\n');
+										}
 
 										// Force outline thickness for ru-RU: if the 17th field (Outline) equals 2.6 → 2
 										if (langItem.cr_locale === 'ru-RU') {
@@ -3319,7 +3365,8 @@ export default class Crunchy implements ServiceClass {
 							mediaId: item.id,
 							versions: item.versions,
 							isSubbed: item.is_subbed,
-							isDubbed: item.is_dubbed
+							isDubbed: item.is_dubbed,
+							durationMs: item.duration_ms ?? 0
 						}
 					],
 					seriesTitle: itemE.items.find((a) => !a.series_title.match(/\(\w+ Dub\)/))?.series_title ?? itemE.items[0].series_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
