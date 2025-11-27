@@ -91,7 +91,7 @@ class hlsDownload {
 			m3u8json: options.m3u8json,
 			outputFile: options.output || 'stream.ts',
 			threads: options.threads || 5,
-			retries: options.retries || 4,
+			retries: options.retries || 10,
 			offset: options.offset || 0,
 			baseurl: options.baseurl,
 			skipInit: options.skipInit,
