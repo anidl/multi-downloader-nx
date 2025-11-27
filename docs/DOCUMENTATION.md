@@ -275,6 +275,12 @@ Select if ScaledBorderAndShadow should be set to "yes" or "no".
 | Crunchyroll | `--originalScriptFix ` | `boolean` | `No`| `NaN` | `true`| `originalScriptFix: ` |
 
 Removes the URL in the Original Script line of the ASS subtitles, it prevents from bricking the subs in VLC (Fonts not loading when url not returning 200).
+#### `--subtitleTimestampFix`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
+| --- | --- | --- | --- | --- | --- | ---| 
+| Crunchyroll | `--subtitleTimestampFix ` | `boolean` | `No`| `NaN` | `false`| `subtitleTimestampFix: ` |
+
+Fixes subtitle dialogues that go over the video length (deletes dialogues where start is over video length and updates the end timestamp when end is over video length).
 #### `--novids`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
 | --- | --- | --- | --- | --- | ---| 
