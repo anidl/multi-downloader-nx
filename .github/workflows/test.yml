@@ -6,11 +6,14 @@ on:
     pull_request:
         branches: [master]
 
+permissions:
+    contents: read
+
 jobs:
     tsc:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -25,7 +28,7 @@ jobs:
         needs: tsc
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -40,7 +43,7 @@ jobs:
         needs: tsc
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -55,7 +58,7 @@ jobs:
         needs: [eslint, prettier, tsc]
         runs-on: windows-11-arm
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -70,7 +73,7 @@ jobs:
         needs: [eslint, prettier, tsc]
         runs-on: ubuntu-24.04-arm
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -85,7 +88,7 @@ jobs:
         needs: [eslint, prettier, tsc]
         runs-on: macos-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -100,7 +103,7 @@ jobs:
         needs: [eslint, prettier, tsc]
         runs-on: windows-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -115,7 +118,7 @@ jobs:
         needs: [eslint, prettier, tsc]
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
@@ -130,7 +133,7 @@ jobs:
         needs: [eslint, prettier, tsc]
         runs-on: macos-15-intel
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: pnpm/action-setup@v2
               with:
                   version: latest
