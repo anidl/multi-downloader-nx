@@ -9,7 +9,7 @@ import packageJson from './package.json';
 import { console } from './modules/log';
 import streamdl, { M3U8Json } from './modules/hls-download';
 import Helper from './modules/module.helper';
-import m3u8 from 'm3u8-parser';
+import { Parser } from 'm3u8-parser';
 
 // custom modules
 import * as fontsData from './modules/module.fontsData';
@@ -2508,7 +2508,7 @@ export default class Crunchy implements ServiceClass {
 						}
 					} else if (!options.novids) {
 						// Init parser
-						const parser = new m3u8.Parser();
+						const parser = new Parser();
 
 						// Parse M3U8
 						parser.push(vstreamPlaylistBody);
@@ -2650,7 +2650,7 @@ export default class Crunchy implements ServiceClass {
 
 								const chunkPageBody = await chunkPage.res.text();
 								// Init parser
-								const parser = new m3u8.Parser();
+								const parser = new Parser();
 
 								// Parse M3U8
 								parser.push(chunkPageBody);

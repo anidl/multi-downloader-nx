@@ -7,7 +7,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 
 // Plugins
-import m3u8 from 'm3u8-parser';
+import { Parser } from 'm3u8-parser';
 
 // Modules
 import * as fontsData from './modules/module.fontsData';
@@ -602,7 +602,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 					const streamPlaylistBody = await streamPlaylistsReq.res.text();
 
 					// Init parser
-					const parser = new m3u8.Parser();
+					const parser = new Parser();
 
 					// Parse M3U8
 					parser.push(streamPlaylistBody);
@@ -724,7 +724,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 							const chunkPageBody = await chunkPage.res.text();
 
 							// Init parser
-							const parser = new m3u8.Parser();
+							const parser = new Parser();
 
 							// Parse M3U8
 							parser.push(chunkPageBody);
