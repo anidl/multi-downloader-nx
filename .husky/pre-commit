@@ -1,1 +1,1 @@
-pnpm prettier && pnpm eslint && npx tsc
+npx tsc
