@@ -33,7 +33,7 @@ export default tseslint.config(
 		}
 	},
 	{
-		ignores: ['**/lib', '**/videos', '**/build', 'dev.js', 'tsc.ts']
+		ignores: ['**/lib', '**/videos', '**/build', 'tsc.ts']
 	},
 	{
 		files: ['gui/react/**/*'],

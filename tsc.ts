@@ -28,7 +28,6 @@ const ignore = [
 	'*/*\\.tsx?$',
 	'./fonts*',
 	'./gui/react*',
-	'./dev.js$',
 	'*/node_modules/*',
 	'./widevine/*',
 	'./playready/*',
