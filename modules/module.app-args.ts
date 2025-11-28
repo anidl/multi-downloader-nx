@@ -252,7 +252,12 @@ const getCommander = (cfg: Record<string, unknown>, isGUI: boolean) => {
 		);
 		if (item.default !== undefined) option.default(item.default);
 
+		const optionNames = [...args.map((a) => `--${a.name}`), ...args.map((a) => (a.alias ? `-${a.alias}` : null)).filter(Boolean)];
+
 		option.argParser((value) => {
+			// Prevent from passing other options als value for option
+			if (value && typeof value === 'string' && value.startsWith('-') && optionNames.includes(value)) return undefined;
+
 			if (item.type === 'boolean') {
 				if (value === undefined) return true;
 				if (value === 'true') return true;
@@ -275,6 +280,11 @@ const getCommander = (cfg: Record<string, unknown>, isGUI: boolean) => {
 			if (item.type === 'number') {
 				const num = Number(value);
 				return Number.isFinite(num) ? num : 0;
+			}
+
+			if (item.type === 'string') {
+				if (value === undefined) return undefined;
+				return value;
 			}
 
 			if (item.choices && !(isGUI && item.name === 'service')) {
