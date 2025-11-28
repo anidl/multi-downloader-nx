@@ -182,9 +182,9 @@ const overrideArguments = (cfg: { [key: string]: unknown }, override: Partial<ty
 	for (const [key, val] of Object.entries(override)) {
 		if (val === undefined) continue;
 		if (typeof val === 'boolean') {
-			if (val) baseArgv.push(`--${key}`);
+			if (val) baseArgv.push(key.length > 1 ? `--${key}` : `-${key}`);
 		} else {
-			baseArgv.push(`--${key}`, String(val));
+			baseArgv.push(key.length > 1 ? `--${key}` : `-${key}`, String(val));
 		}
 	}
 

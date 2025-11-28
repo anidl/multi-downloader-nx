@@ -52,10 +52,6 @@ const SERVICES: Record<string, any> = {
 		const ids = makeCommand(argv.service);
 		for (const id of ids) {
 			overrideArguments(cfg.cli, id);
-			/* Reimport module to override appArgv */
-			// Object.keys(require.cache).forEach((key) => {
-			// 	if (key.endsWith('crunchy.js') || key.endsWith('hidive.js')) delete require.cache[key];
-			// });
 			const Service = SERVICES[argv.service];
 			if (!Service) {
 				console.error('Unknown service:', argv.service);
