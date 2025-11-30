@@ -171,8 +171,6 @@ const appArgv = (
 		process.exit(0);
 	}
 
-	console.log(parsed as any);
-
 	argvC = parsed;
 	return parsed;
 };
