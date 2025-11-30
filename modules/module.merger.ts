@@ -1,5 +1,4 @@
 import * as iso639 from 'iso-639';
-import * as yamlCfg from './module.cfg-loader';
 import { fontFamilies, fontMime } from './module.fontsData';
 import path from 'path';
 import fs from 'fs';
@@ -68,7 +67,6 @@ class Merger {
 	public async createDelays() {
 		//Don't bother scanning it if there is only 1 vna stream
 		if (this.options.videoAndAudio.length > 1) {
-			const bin = await yamlCfg.loadBinCfg();
 			const vnas = this.options.videoAndAudio;
 			//get and set durations on each videoAndAudio Stream
 			for (const [vnaIndex, vna] of vnas.entries()) {
