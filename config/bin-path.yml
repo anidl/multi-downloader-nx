@@ -1,5 +1,4 @@
 ffmpeg: 'ffmpeg.exe'
 mkvmerge: 'mkvmerge.exe'
-ffprobe: 'ffprobe.exe'
 mp4decrypt: 'mp4decrypt.exe'
 shaka: 'shaka-packager.exe'

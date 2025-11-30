@@ -105,7 +105,6 @@ async function buildBinary(buildType: BuildTypes, gui: boolean) {
 	const binConf = {
 		ffmpeg: `ffmpeg${ext}`,
 		mkvmerge: `mkvmerge${ext}`,
-		ffprobe: `ffprobe${ext}`,
 		mp4decrypt: `mp4decrypt${ext}`,
 		shaka: `shaka-packager${ext}`
 	};

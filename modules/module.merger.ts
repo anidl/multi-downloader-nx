@@ -3,12 +3,13 @@ import * as yamlCfg from './module.cfg-loader';
 import { fontFamilies, fontMime } from './module.fontsData';
 import path from 'path';
 import fs from 'fs';
+import fsp from 'fs/promises';
 import { LanguageItem } from './module.langsData';
 import { AvailableMuxer } from './module.args';
 import { console } from './log';
-import ffprobe from 'ffprobe';
 import Helper from './module.helper';
 import { convertChaptersToFFmpegFormat } from './module.ffmpegChapter';
+import { mediaInfoFactory } from 'mediainfo.js';
 
 export type MergerInput = {
 	path: string;
@@ -71,9 +72,23 @@ class Merger {
 			const vnas = this.options.videoAndAudio;
 			//get and set durations on each videoAndAudio Stream
 			for (const [vnaIndex, vna] of vnas.entries()) {
-				const streamInfo = await ffprobe(vna.path, { path: bin.ffprobe as string });
-				const videoInfo = streamInfo.streams.filter((stream) => stream.codec_type == 'video');
-				vnas[vnaIndex].duration = parseInt(videoInfo[0].duration as string);
+				const file = await fsp.open(vna.path);
+				const { size } = await fsp.stat(vna.path);
+
+				// Mediainfo
+				const mediaInfo = await mediaInfoFactory();
+				const result = await mediaInfo.analyzeData(
+					() => size,
+					async (size, offset) => {
+						const buf = Buffer.alloc(size);
+						const { bytesRead } = await file.read(buf, 0, size, offset);
+						return buf.subarray(0, bytesRead);
+					}
+				);
+				await file.close();
+
+				const videoInfo = result?.media?.track?.filter((stream) => stream['@type'] == 'Video');
+				vnas[vnaIndex].duration = videoInfo?.[0].Duration;
 			}
 			//Sort videoAndAudio streams by duration (shortest first)
 			vnas.sort((a, b) => {

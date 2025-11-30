@@ -18,7 +18,6 @@ This application is not endorsed by or affiliated with *Crunchyroll*, *Hidive* o
 By default this application uses the following paths to programs (main executables):
 
 * `ffmpeg.exe` (Windows) or `ffmpeg` (other) (From PATH)
-* `ffprobe.exe` (Windows) or `ffprobe` (other) (From PATH)
 * `mkvmerge.exe` (Windows) or `mkvmerge` (other) (From PATH)
 * `mp4decrypt.exe` (Windows) or `mp4decrypt` (other) (From PATH) (or shaka-packager)
 * `shaka-packager.exe` (Windows) or `shaka-packager` (other) (From PATH) (or mp4decrypt)

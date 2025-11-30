@@ -126,7 +126,6 @@ C:.
 12. Great! Now we have all dependencies installed and available in our PATH. To confirm that everything is working, open a new Command Prompt window and run the following commands:
 ```
 ffmpeg
-ffprobe
 mkvmerge
 mp4decrypt (or shaka-packager's .exe name, if you chose that instead)
 ```
