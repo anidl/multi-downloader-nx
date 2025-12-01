@@ -55,7 +55,7 @@
 		"undici": "^7.16.0",
 		"widevine": "^1.0.3",
 		"ws": "^8.18.3",
-		"yaml": "^2.8.1"
+		"yaml": "^2.8.2"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.1.0",
