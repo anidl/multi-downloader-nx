@@ -42,7 +42,7 @@
 	"dependencies": {
 		"@bufbuild/protobuf": "^2.10.1",
 		"commander": "^14.0.2",
-		"express": "^5.1.0",
+		"express": "^5.2.0",
 		"iso-639": "^0.2.2",
 		"leven": "^4.1.0",
 		"log4js": "^6.9.1",
