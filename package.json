@@ -73,7 +73,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"husky": "^9.1.7",
 		"jiti": "^2.6.1",
-		"prettier": "^3.7.3",
+		"prettier": "^3.7.4",
 		"removeNPMAbsolutePaths": "^3.0.1",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
