@@ -63,7 +63,7 @@
 		"@eslint/js": "^9.39.1",
 		"@types/express": "^5.0.6",
 		"@types/m3u8-parser": "^7.2.5",
-		"@types/node": "^24.10.1",
+		"@types/node": "^25.0.0",
 		"@types/ws": "^8.18.1",
 		"@typescript-eslint/eslint-plugin": "^8.48.1",
 		"@typescript-eslint/parser": "^8.48.1",
