@@ -27,17 +27,15 @@ const EpisodeListing: React.FC = () => {
 	}, [store.episodeListing]);
 
 	const close = () => {
-		dispatch({
-			type: 'episodeListing',
-			payload: []
-		});
+		const mergedEpisodes = [...parseEpisodes(store.downloadOptions.e), ...selected];
 		dispatch({
 			type: 'downloadOptions',
 			payload: {
 				...store.downloadOptions,
-				e: `${[...new Set([...parseSelect(store.downloadOptions.e), ...selected])].join(',')}`
+				e: serializeEpisodes(mergedEpisodes)
 			}
 		});
+		dispatch({ type: 'episodeListing', payload: [] });
 	};
 
 	const getEpisodesForSeason = (season: string | 'all') => {
@@ -167,6 +165,16 @@ const EpisodeListing: React.FC = () => {
 			</List>
 		</Dialog>
 	);
+};
+const parseEpisodes = (e: string): string[] => {
+	if (!e) return [];
+	return e
+		.split(',')
+		.map((s) => s.trim())
+		.filter((s) => s.length > 0);
+};
+const serializeEpisodes = (episodes: string[]): string => {
+	return [...new Set(episodes)].join(',');
 };
 
 const parseSelect = (s: string): string[] => {
