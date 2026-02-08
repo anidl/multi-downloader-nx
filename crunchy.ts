@@ -1675,7 +1675,7 @@ export default class Crunchy implements ServiceClass {
 
 					//Make a format more usable for the crunchy chapters
 					for (const chapter in chapterData) {
-						if (typeof chapterData[chapter] == 'object') {
+						if (chapterData[chapter] && typeof chapterData[chapter] == 'object') {
 							chapters.push(chapterData[chapter]);
 						}
 					}
@@ -3570,3 +3570,4 @@ export default class Crunchy implements ServiceClass {
 		return episodeList;
 	}
 }
+
