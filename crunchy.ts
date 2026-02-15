@@ -2956,9 +2956,14 @@ export default class Crunchy implements ServiceClass {
 											sBody = sBody.replace(/^(PlayResY:\s*\d+)/m, `$1\nLayoutResX: ${playResX}\nLayoutResY: ${playResY}`);
 										}
 
-										// ScaleBorderAndShadow Fix
+										// ScaleBorderAndShadow Fix (True and doesn't exist)
 										if (options.scaledBorderAndShadowFix && !sBody.includes('ScaledBorderAndShadow')) {
 											sBody = sBody.replace(/^(WrapStyle:.*)$/m, `$1\nScaledBorderAndShadow: ${options.scaledBorderAndShadow}`);
+										}
+
+										// ScaleBorderAndShadow Fix (True and exists)
+										if (options.scaledBorderAndShadowFix && sBody.includes('ScaledBorderAndShadow')) {
+											sBody = sBody.replace(/ScaledBorderAndShadow:\s*(yes|no)/, `ScaledBorderAndShadow: ${options.scaledBorderAndShadow}`);
 										}
 
 										// Fix VLC wrong parsing if URL not avaiable
