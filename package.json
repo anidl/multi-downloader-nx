@@ -67,7 +67,7 @@
 		"@types/ws": "^8.18.1",
 		"@typescript-eslint/eslint-plugin": "^8.55.0",
 		"@typescript-eslint/parser": "^8.55.0",
-		"@yao-pkg/pkg": "^6.13.1",
+		"@yao-pkg/pkg": "^6.14.0",
 		"esbuild": "0.26.0",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
