@@ -6,14 +6,14 @@ import { console } from './log';
 import { GuiState } from '../@types/messageHandler';
 
 // new-cfg
-const workingDir = (
-	process as NodeJS.Process & {
-		pkg?: unknown;
-	}
-).pkg
-	? path.dirname(process.execPath)
-	: process.env.contentDirectory
-		? process.env.contentDirectory
+const workingDir = process.env.contentDirectory
+	? process.env.contentDirectory
+	: (
+				process as NodeJS.Process & {
+					pkg?: unknown;
+				}
+		  ).pkg
+		? path.dirname(process.execPath)
 		: path.join(__dirname, '/..');
 
 export { workingDir };
