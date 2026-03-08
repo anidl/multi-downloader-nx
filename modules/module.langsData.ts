@@ -41,7 +41,7 @@ const languages: LanguageItem[] = [
 	{ cr_locale: 'vi-VN', locale: 'vi-VN', code: 'vie', name: 'Vietnamese', language: 'Tiếng Việt' },
 	{ cr_locale: 'id-ID', locale: 'id-ID', code: 'ind', name: 'Indonesian', language: 'Bahasa Indonesia' },
 	{ cr_locale: 'te-IN', locale: 'te-IN', code: 'tel', name: 'Telugu (India)', language: 'తెలుగు' },
-	{ cr_locale: 'ja-JP', adn_locale: 'ja', hd_locale: 'Japanese', locale: 'ja', code: 'jpn', name: 'Japanese' }
+	{ cr_locale: 'ja-JP', new_hd_locale: 'ja-JP', adn_locale: 'ja', hd_locale: 'Japanese', locale: 'ja', code: 'jpn', name: 'Japanese' }
 ];
 
 // add en language names
