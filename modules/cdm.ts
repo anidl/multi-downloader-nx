@@ -52,7 +52,7 @@ try {
 	const widevine_dir = path.join(workingDir, 'widevine');
 
 	if (fs.existsSync(widevine_dir)) {
-		const files_wvd = fs.readdirSync(path.join(workingDir, 'widevine'));
+		const files_wvd = fs.readdirSync(widevine_dir);
 		try {
 			let identifierBlob: Buffer = Buffer.from([]);
 			let privateKey: Buffer = Buffer.from([]);
