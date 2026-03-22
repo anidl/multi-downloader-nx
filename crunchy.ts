@@ -3555,4 +3555,3 @@ export default class Crunchy implements ServiceClass {
 		return episodeList;
 	}
 }
-
