@@ -4,7 +4,7 @@ import { workingDir } from './module.cfg-loader';
 import path from 'path';
 import * as reqModule from './module.fetch';
 import Playready from 'node-playready';
-import Widevine, { KeyContainer, LicenseType } from 'widevine';
+import { Widevine, KeyContainer, LicenseType } from 'widevine';
 
 const req = new reqModule.Req();
 

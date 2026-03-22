@@ -369,26 +369,6 @@ export default class Crunchy implements ServiceClass {
 		console.info('All required fonts downloaded!');
 	}
 
-	// private async productionToken() {
-	//   const tokenReq = await this.req.getData(api.bundlejs);
-
-	//   if (!tokenReq.ok || !tokenReq.res) {
-	//     console.error('Failed to get Production Token!');
-	//     return { isOk: false, reason: new Error('Failed to get Production Token') };
-	//   }
-
-	//   const rawjs = await tokenReq.res.text();
-
-	//   const tokens = rawjs.match(/prod="([\w-]+:[\w-]+)"/);
-
-	//   if (!tokens) {
-	//     console.error('Failed to find Production Token in js!');
-	//     return { isOk: false, reason: new Error('Failed to find Production Token in js') };
-	//   }
-
-	//   return Buffer.from(tokens[1], 'latin1').toString('base64');
-	// }
-
 	public async doAuth(data: AuthData): Promise<AuthResponse> {
 		const basic = atob(api.basic_auth_token);
 		const client = basic.split(':');
