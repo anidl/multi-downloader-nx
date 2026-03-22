@@ -3356,7 +3356,7 @@ export default class Crunchy implements ServiceClass {
 					],
 					seriesTitle: itemE.items.find((a) => !a.series_title.match(/\(\w+ Dub\)/))?.series_title ?? itemE.items[0].series_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
 					seasonTitle: itemE.items.find((a) => !a.season_title.match(/\(\w+ Dub\)/))?.season_title ?? itemE.items[0].season_title.replace(/\(\w+ Dub\)/g, '').trimEnd(),
-					episodeNumber: item.episode,
+					episodeNumber: epNum,
 					episodeTitle: item.title,
 					seasonID: item.season_id,
 					season: item.season_number,
@@ -3555,3 +3555,4 @@ export default class Crunchy implements ServiceClass {
 		return episodeList;
 	}
 }
+
