@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import path from 'path';
 import yaml from 'yaml';
 import fs from 'fs';

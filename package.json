@@ -42,6 +42,7 @@
 	"dependencies": {
 		"@bufbuild/protobuf": "^2.11.0",
 		"commander": "^14.0.3",
+		"dotenv": "^17.3.1",
 		"express": "^5.2.1",
 		"iso-639": "^0.2.2",
 		"leven": "^4.1.0",
