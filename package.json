@@ -1,7 +1,7 @@
 {
 	"name": "multi-downloader-nx",
 	"short_name": "aniDL",
-	"version": "5.7.0",
+	"version": "5.7.1",
 	"description": "Downloader for Crunchyroll, Hidive, and AnimationDigitalNetwork with CLI and GUI",
 	"keywords": [
 		"download",
@@ -66,8 +66,8 @@
 		"@types/m3u8-parser": "^7.2.6",
 		"@types/node": "^25.5.0",
 		"@types/ws": "^8.18.1",
-		"@typescript-eslint/eslint-plugin": "^8.57.1",
-		"@typescript-eslint/parser": "^8.57.1",
+		"@typescript-eslint/eslint-plugin": "^8.57.2",
+		"@typescript-eslint/parser": "^8.57.2",
 		"@yao-pkg/pkg": "^6.14.1",
 		"esbuild": "0.26.0",
 		"eslint": "^9.39.4",
@@ -78,7 +78,7 @@
 		"removeNPMAbsolutePaths": "^3.0.1",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.57.1"
+		"typescript-eslint": "^8.57.2"
 	},
 	"scripts": {
 		"prestart": "pnpm run tsc test",
