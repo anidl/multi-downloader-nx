@@ -666,6 +666,18 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 			default: '[${service}] ${showTitle} - S${season}E${episode} [${height}p]'
 		}
 	},
+	{   
+        name: 'outputDir',
+        group: 'fileName',
+        describe: 'Set a custom directory for the final muxed file (supports template variables). Temporary files remain in the default content folder.',
+        docDescribe: true,
+        service: ['all'],
+        type: 'string',
+        usage: '${outputDir}',
+        default: {
+            default: ''
+       }
+    },
 	{
 		name: 'numbers',
 		group: 'fileName',
