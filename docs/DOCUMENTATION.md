@@ -472,6 +472,18 @@ Possible Values: und, eng, eng, spa, spa-419, spa-ES, por, por, fra, deu, ara-ME
 Set the filename template. Use ${variable_name} to insert variables.
 You can also create folders by inserting a path seperator in the filename
 You may use 'title', 'episode', 'showTitle', 'seriesTitle', 'season', 'width', 'height', 'service' as variables.
+
+### Output Directory
+#### `--outputDir`
+| **Service** | **Usage** | **Type** | **Required** | **Alias** | **Default** | **cli-default Entry** |
+| --- | --- | --- | --- | --- | --- | --- |
+| All | `--outputDir ${outputDir}` | `string` | `No` | `NaN` | Final output is written to the default content directory when not set | `outputDir: ` |
+
+
+Sets the output directory for the final muxed file. Use `${variable_name}` to insert variables.  
+You can also create subfolders by including path separators in the directory path. You may use `title`, `episode`, `showTitle`, `seriesTitle`, `season`, `width`, `height`, and `service` as variables.
+example `--outputDir '/home/Anime/${seriesTitle}/S${season}/'`
+
 #### `--numbers`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
