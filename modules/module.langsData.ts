@@ -34,7 +34,7 @@ const languages: LanguageItem[] = [
 	{ cr_locale: 'zh-HK', locale: 'zh-HK', code: 'zh-HK', name: 'Chinese (Hong-Kong)', language: '中文 (粵語)' },
 	{ cr_locale: 'ko-KR', hd_locale: 'Korean', locale: 'ko', code: 'kor', name: 'Korean' },
 	{ cr_locale: 'ca-ES', locale: 'ca-ES', code: 'cat', name: 'Catalan' },
-	{ cr_locale: 'pl-PL', locale: 'pl-PL', code: 'pol', name: 'Polish' },
+	{ cr_locale: 'pl-PL', adn_locale: 'pl', locale: 'pl-PL', code: 'pol', name: 'Polish' },
 	{ cr_locale: 'th-TH', locale: 'th-TH', code: 'tha', name: 'Thai', language: 'ไทย' },
 	{ cr_locale: 'ta-IN', locale: 'ta-IN', code: 'tam', name: 'Tamil (India)', language: 'தமிழ்' },
 	{ cr_locale: 'ms-MY', locale: 'ms-MY', code: 'may', name: 'Malay (Malaysia)', language: 'Bahasa Melayu' },
