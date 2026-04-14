@@ -15,6 +15,7 @@ export type CrunchyDownloadOptions = {
 	x: number;
 	q: number;
 	fileName: string;
+	outputDir?: string;
 	numbers: number;
 	partsize: number;
 	callbackMaker?: (data: DownloadInfo) => HLSCallback;
