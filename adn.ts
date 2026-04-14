@@ -49,9 +49,11 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		middle: 8,
 		end: 4
 	};
-	private jpnStrings: string[] = ['vostf', 'vostde'];
+	private jpnStrings: string[] = ['vostf', 'vostde', 'vostpl'];
+	private polStrings: string[] = ['vpl'];
 	private deuStrings: string[] = ['vde'];
 	private fraStrings: string[] = ['vf'];
+	private polSubStrings: string[] = ['vpl', 'vostpl'];
 	private deuSubStrings: string[] = ['vde', 'vostde'];
 	private fraSubStrings: string[] = ['vf', 'vostf'];
 
@@ -65,7 +67,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 	public async cli() {
 		console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
 		const argv = yargs.appArgv(this.cfg.cli);
-		if (['fr', 'de'].includes(argv.locale)) this.locale = argv.locale;
+		if (['fr', 'de', 'pl'].includes(argv.locale)) this.locale = argv.locale;
 		if (argv.debug) this.debug = true;
 
 		// load binaries
@@ -548,6 +550,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 			let audDub: langsData.LanguageItem;
 			if (this.jpnStrings.includes(streamName)) {
 				audDub = langsData.languages.find((a) => a.code == 'jpn') as langsData.LanguageItem;
+			} else if (this.polStrings.includes(streamName)) {
+				audDub = langsData.languages.find((a) => a.code == 'pol') as langsData.LanguageItem;
 			} else if (this.deuStrings.includes(streamName)) {
 				audDub = langsData.languages.find((a) => a.code == 'deu') as langsData.LanguageItem;
 			} else if (this.fraStrings.includes(streamName)) {
@@ -865,7 +869,9 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				}
 				for (const subName in subtitles) {
 					let subLang: langsData.LanguageItem;
-					if (this.deuSubStrings.includes(subName)) {
+					if (this.polSubStrings.includes(subName)) {
+						subLang = langsData.languages.find((a) => a.code == 'pol') as langsData.LanguageItem;
+					} else if (this.deuSubStrings.includes(subName)) {
 						subLang = langsData.languages.find((a) => a.code == 'deu') as langsData.LanguageItem;
 					} else if (this.fraSubStrings.includes(subName)) {
 						subLang = langsData.languages.find((a) => a.code == 'fra') as langsData.LanguageItem;
