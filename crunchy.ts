@@ -51,6 +51,41 @@ export type sxItem = {
 	fonts: Font[];
 };
 
+const defaultRussianAssStyle = 'Style: Default,Tahoma,22,&H00FFFFFF,&H000000FF,&H00000000,&H96000000,0,0,0,0,100,100,0,0,1,2,1,2,0010,0010,0025,204';
+
+function normalizeRussianBrokenAssDialogue(text: string) {
+	return text
+		.replace(/[ \t]*\\N[ \t]*/g, '\\N')
+		.split('\\N')
+		.map((line) => {
+			const speakerLineMatch = line.match(/^\s*((?:\{[^}]*\}\s*)*)-\s*(.*)$/u);
+			if (!speakerLineMatch) return line;
+
+			const prefix = speakerLineMatch[1].replace(/\s+$/u, '');
+			const content = speakerLineMatch[2].replace(/(\S)\s*—\s*(?=\S)/gu, '$1 – ');
+			return `${prefix}— ${content}`;
+		})
+		.join('\\N');
+}
+
+function normalizeRussianBrokenAss(ass: string) {
+	const hasLegacyCenterStyle = /^Style:\s*style\.center\s*,\s*Arial\s*,/im.test(ass);
+	if (!hasLegacyCenterStyle) return ass;
+
+	const hasDefaultStyle = /^Style:\s*Default\s*,/im.test(ass);
+
+	ass = hasDefaultStyle
+		? ass.replace(/^Style:\s*style\.center\s*,\s*Arial\s*,.*\r?\n?/gim, '')
+		: ass.replace(/^Style:\s*style\.center\s*,\s*Arial\s*,.*$/gim, defaultRussianAssStyle);
+
+	ass = ass.replace(/^((?:Dialogue|Comment):\s*[^,\n]*,[^,\n]*,[^,\n]*),\s*style\.center(\s*,.*)$/gim, '$1,Default$2');
+	ass = ass.replace(/^(Dialogue:\s*(?:[^,\n]*,){9})(.*)$/gm, (_line, prefix, text) => {
+		return `${prefix}${normalizeRussianBrokenAssDialogue(text)}`;
+	});
+
+	return ass;
+}
+
 export default class Crunchy implements ServiceClass {
 	public cfg: yamlCfg.ConfigObject;
 	public locale: string;
@@ -3001,6 +3036,7 @@ export default class Crunchy implements ServiceClass {
 
 										// Force outline thickness for ru-RU: if the 17th field (Outline) equals 2.6 → 2
 										if (langItem.cr_locale === 'ru-RU') {
+											sBody = normalizeRussianBrokenAss(sBody);
 											sBody = sBody.replace(/^[ \t]*(Style:\s*[^,\n]*(?:,[^,\n]*){15}),\s*2(?:[.,]6(?:0+)?)?(\s*,)/gm, '$1,2$2');
 										}
 									}
