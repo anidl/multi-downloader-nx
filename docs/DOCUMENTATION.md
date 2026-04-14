@@ -83,7 +83,7 @@ The output is organized in pages. Use this command to output the items for the g
 #### `--locale`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll, AnimationDigitalNetwork | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `und`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `zh-HK`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `und`, `fr`, `de`] | `en-US`| `locale: ` |
+| Crunchyroll, AnimationDigitalNetwork | `--locale ${locale}` | `string` | `No`| `NaN` | [`''`, `und`, `en-US`, `en-IN`, `es-LA`, `es-419`, `es-ES`, `pt-BR`, `pt-PT`, `fr-FR`, `de-DE`, `ar-ME`, `ar-SA`, `it-IT`, `ru-RU`, `tr-TR`, `hi-IN`, `zh-CN`, `zh-TW`, `zh-HK`, `ko-KR`, `ca-ES`, `pl-PL`, `th-TH`, `ta-IN`, `ms-MY`, `vi-VN`, `id-ID`, `te-IN`, `und`, `fr`, `de`, `pl`] | `en-US`| `locale: ` |
 
 Set the local that will be used for the API.
 #### `--new`
