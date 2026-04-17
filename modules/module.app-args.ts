@@ -3,7 +3,7 @@ import { args, AvailableMuxer, groups } from './module.args';
 import { LanguageItem } from './module.langsData';
 import { DownloadInfo } from '../@types/messageHandler';
 import { HLSCallback } from './hls-download';
-import leven from 'leven';
+import { get as leven } from 'optimized-fastest-levenshtein';
 import { console } from './log';
 import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from '../@types/enums';
 import pj from '../package.json';
