@@ -11,7 +11,7 @@
 		"notistack": "^3.0.2",
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4",
-		"uuid": "^11.1.0",
+		"uuid": "^14.0.0",
 		"ws": "^8.19.0"
 	},
 	"devDependencies": {
