@@ -778,6 +778,7 @@ packages:
   '@xmldom/xmldom@0.8.12':
     resolution: {integrity: sha512-9k/gHF6n/pAi/9tqr3m3aqkuiNosYTurLLUtc7xQ9sxB/wm7WPygCv8GYa6mS0fLJEHhqMC1ATYhz++U/lRHqg==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@yao-pkg/pkg-fetch@3.5.32':
     resolution: {integrity: sha512-hS8zzze5VVyVAciZoNX4q3ZmCdn0gi34P2SElk4PFbzkA4LPs7qBJ3LhUKb4d4KGw1HVkFJJOMgGomH7cMqQ5Q==}
