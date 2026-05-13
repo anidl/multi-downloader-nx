@@ -292,7 +292,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				const langs = episode.languages ?? [];
 				const audios: string[] = [];
 				const subs: string[] = [];
-				if (this.regions.some((r) => langs.includes(r.vost))) audios.push('ja');
+				if (this.regions.some((r) => langs.includes(r.vost))) audios.push((episode.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zh' : 'ja');
 				for (const r of this.regions) {
 					if (langs.includes(r.dub)) audios.push(r.code);
 					if (langs.includes(r.vost) || langs.includes(r.dub)) subs.push(r.code);
@@ -307,7 +307,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 			const langs = special.languages ?? [];
 			const audios: string[] = [];
 			const subs: string[] = [];
-			if (this.regions.some((r) => langs.includes(r.vost))) audios.push('ja');
+			if (this.regions.some((r) => langs.includes(r.vost))) audios.push((special.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zh' : 'ja');
 			for (const r of this.regions) {
 				if (langs.includes(r.dub)) audios.push(r.code);
 				if (langs.includes(r.vost) || langs.includes(r.dub)) subs.push(r.code);
@@ -324,7 +324,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 			const langs = nc.languages ?? [];
 			const audios: string[] = [];
 			const subs: string[] = [];
-			if (this.regions.some((r) => langs.includes(r.vost))) audios.push('ja');
+			if (this.regions.some((r) => langs.includes(r.vost))) audios.push((nc.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zh' : 'ja');
 			for (const r of this.regions) {
 				if (langs.includes(r.dub)) audios.push(r.code);
 				if (langs.includes(r.vost) || langs.includes(r.dub)) subs.push(r.code);
@@ -584,7 +584,8 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		for (const streamName in streams.links.streaming) {
 			let audDub: langsData.LanguageItem;
 			if (this.jpnStrings.includes(streamName)) {
-				audDub = langsData.languages.find((a) => a.code == 'jpn') as langsData.LanguageItem;
+				const originCode = (data.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zho' : 'jpn';
+				audDub = langsData.languages.find((a) => a.code == originCode) as langsData.LanguageItem;
 			} else if (this.polStrings.includes(streamName)) {
 				audDub = langsData.languages.find((a) => a.code == 'pol') as langsData.LanguageItem;
 			} else if (this.deuStrings.includes(streamName)) {
@@ -856,7 +857,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 					fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
 					files.push({
 						path: `${tsFile}.txt`,
-						lang: langsData.languages.find((a) => a.code == 'jpn'),
+						lang: langsData.languages.find((a) => a.code == ((data.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zho' : 'jpn')),
 						type: 'Chapters'
 					});
 				} catch {
