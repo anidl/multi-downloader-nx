@@ -69,7 +69,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.59.4",
 		"@typescript-eslint/parser": "^8.59.4",
 		"@yao-pkg/pkg": "^6.19.0",
-		"esbuild": "0.26.0",
+		"esbuild": "0.28.0",
 		"eslint": "^9.39.4",
 		"eslint-config-prettier": "^10.1.8",
 		"husky": "^9.1.7",
