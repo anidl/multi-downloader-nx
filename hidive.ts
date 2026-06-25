@@ -415,6 +415,26 @@ export default class Hidive implements ServiceClass {
 				season.value.paging.lastSeen = seasonPage.value.paging.lastSeen;
 				season.value.paging.moreDataAvailable = seasonPage.value.paging.moreDataAvailable;
 			}
+			let subLocales: string[] = [];
+			const sampleEp = season.value.episodes[0];
+			if (sampleEp) {
+				const epReq = await this.apiReq(`/v4/vod/${sampleEp.id}?includePlaybackDetails=URL`, '', 'auth', 'GET');
+				const epData = epReq.ok && epReq.res ? (JSON.parse(await epReq.res.text()) as NewHidiveEpisode) : undefined;
+				const pbReq = epData?.playerUrlCallback ? await this.req.getData(epData.playerUrlCallback) : undefined;
+				if (pbReq?.ok && pbReq.res) {
+					const pbData = JSON.parse(await pbReq.res.text()) as NewHidivePlayback;
+					subLocales = [
+						...new Set(
+							(pbData.dash?.[0]?.subtitles ?? [])
+								.filter((s) => s.format === 'vtt')
+								.map((s) => langsData.languages.find((l) => l.new_hd_locale == s.language)?.hd_locale)
+								.filter((l): l is string => typeof l === 'string')
+						)
+					];
+				} else {
+					console.warn(`Failed to sample subtitles for season ${season.value.id}`);
+				}
+			}
 			for (const episode of season.value.episodes) {
 				const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
 				if (episode.title.includes(' - ')) {
@@ -426,6 +446,15 @@ export default class Hidive implements ServiceClass {
 					episodes.push(episode);
 				}
 				console.info(`    [E.${episode.id}] ${episode.title}`);
+				const audioLocales = (episode.offlinePlaybackLanguages ?? [])
+					.map((c) => langsData.languages.find((l) => l.code == c)?.hd_locale)
+					.filter((l): l is string => typeof l === 'string');
+				if (audioLocales.length > 0) {
+					console.info(`      - Versions: ${audioLocales.join(', ')}`);
+				}
+				if (subLocales.length > 0) {
+					console.info(`      - Subtitles: ${subLocales.join(', ')}`);
+				}
 			}
 		}
 		return { isOk: true, value: episodes, series: series.value };
@@ -445,6 +474,26 @@ export default class Hidive implements ServiceClass {
 			season.value.paging.lastSeen = seasonPage.value.paging.lastSeen;
 			season.value.paging.moreDataAvailable = seasonPage.value.paging.moreDataAvailable;
 		}
+		let subLocales: string[] = [];
+		const sampleEp = season.value.episodes[0];
+		if (sampleEp) {
+			const epReq = await this.apiReq(`/v4/vod/${sampleEp.id}?includePlaybackDetails=URL`, '', 'auth', 'GET');
+			const epData = epReq.ok && epReq.res ? (JSON.parse(await epReq.res.text()) as NewHidiveEpisode) : undefined;
+			const pbReq = epData?.playerUrlCallback ? await this.req.getData(epData.playerUrlCallback) : undefined;
+			if (pbReq?.ok && pbReq.res) {
+				const pbData = JSON.parse(await pbReq.res.text()) as NewHidivePlayback;
+				subLocales = [
+					...new Set(
+						(pbData.dash?.[0]?.subtitles ?? [])
+							.filter((s) => s.format === 'vtt')
+							.map((s) => langsData.languages.find((l) => l.new_hd_locale == s.language)?.hd_locale)
+							.filter((l): l is string => typeof l === 'string')
+					)
+				];
+			} else {
+				console.warn(`Failed to sample subtitles for season ${season.value.id}`);
+			}
+		}
 		const episodes: Episode[] = [];
 		for (const episode of season.value.episodes) {
 			const datePattern = /\d{1,2}\/\d{1,2}\/\d{2,4} \d{1,2}:\d{2} UTC/;
@@ -457,6 +506,15 @@ export default class Hidive implements ServiceClass {
 				episodes.push(episode);
 			}
 			console.info(`    [E.${episode.id}] ${episode.title}`);
+			const audioLocales = (episode.offlinePlaybackLanguages ?? [])
+				.map((c) => langsData.languages.find((l) => l.code == c)?.hd_locale)
+				.filter((l): l is string => typeof l === 'string');
+			if (audioLocales.length > 0) {
+				console.info(`      - Versions: ${audioLocales.join(', ')}`);
+			}
+			if (subLocales.length > 0) {
+				console.info(`      - Subtitles: ${subLocales.join(', ')}`);
+			}
 		}
 		const series: NewHidiveSeriesExtra = { ...season.value.series, season: season.value };
 		return { isOk: true, value: episodes, series: series };

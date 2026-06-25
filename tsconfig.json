@@ -8,7 +8,6 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"downlevelIteration": true,
 		"removeComments": true,
 		"jsx": "react"
 	},

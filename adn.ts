@@ -49,11 +49,18 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		middle: 8,
 		end: 4
 	};
-	private jpnStrings: string[] = ['vostf', 'vostde'];
+	private jpnStrings: string[] = ['vostf', 'vostde', 'vostpl'];
+	private polStrings: string[] = ['vpl'];
 	private deuStrings: string[] = ['vde'];
 	private fraStrings: string[] = ['vf'];
+	private polSubStrings: string[] = ['vpl', 'vostpl'];
 	private deuSubStrings: string[] = ['vde', 'vostde'];
 	private fraSubStrings: string[] = ['vf', 'vostf'];
+	private regions = [
+		{ code: 'de', vost: 'vostde', dub: 'vde' },
+		{ code: 'fr', vost: 'vostf', dub: 'vf' },
+		{ code: 'pl', vost: 'vostpl', dub: 'vpl' }
+	] as const;
 
 	constructor(private debug = false) {
 		this.cfg = yamlCfg.loadCfg();
@@ -65,7 +72,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 	public async cli() {
 		console.info(`\n=== Multi Downloader NX ${packageJson.version} ===\n`);
 		const argv = yargs.appArgv(this.cfg.cli);
-		if (['fr', 'de'].includes(argv.locale)) this.locale = argv.locale;
+		if (['fr', 'de', 'pl'].includes(argv.locale)) this.locale = argv.locale;
 		if (argv.debug) this.debug = true;
 
 		// load binaries
@@ -282,11 +289,31 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				episodeIndex--;
 			} else {
 				console.info(`  (${episode.id}) [E${episode.shortNumber}] ${episode.number} - ${episode.name}`);
+				const langs = episode.languages ?? [];
+				const audios: string[] = [];
+				const subs: string[] = [];
+				if (this.regions.some((r) => langs.includes(r.vost))) audios.push((episode.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zh' : 'ja');
+				for (const r of this.regions) {
+					if (langs.includes(r.dub)) audios.push(r.code);
+					if (langs.includes(r.vost) || langs.includes(r.dub)) subs.push(r.code);
+				}
+				if (audios.length > 0) console.info(`    - Versions: ${audios.join(', ')}`);
+				if (subs.length > 0) console.info(`    - Subtitles: ${subs.join(', ')}`);
 			}
 			episodeIndex++;
 		}
 		for (const special of specials) {
 			console.info(` (Special) (${special.id}) [${special.shortNumber}] ${special.number} - ${special.name}`);
+			const langs = special.languages ?? [];
+			const audios: string[] = [];
+			const subs: string[] = [];
+			if (this.regions.some((r) => langs.includes(r.vost))) audios.push((special.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zh' : 'ja');
+			for (const r of this.regions) {
+				if (langs.includes(r.dub)) audios.push(r.code);
+				if (langs.includes(r.vost) || langs.includes(r.dub)) subs.push(r.code);
+			}
+			if (audios.length > 0) console.info(`    - Versions: ${audios.join(', ')}`);
+			if (subs.length > 0) console.info(`    - Subtitles: ${subs.join(', ')}`);
 			show.value.videos.splice(
 				show.value.videos.findIndex((i) => i.id === special.id),
 				1
@@ -294,6 +321,16 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		}
 		for (const nc of ncs) {
 			console.info(` (NC) (${nc.id}) [${nc.shortNumber}] ${nc.number} - ${nc.name}`);
+			const langs = nc.languages ?? [];
+			const audios: string[] = [];
+			const subs: string[] = [];
+			if (this.regions.some((r) => langs.includes(r.vost))) audios.push((nc.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zh' : 'ja');
+			for (const r of this.regions) {
+				if (langs.includes(r.dub)) audios.push(r.code);
+				if (langs.includes(r.vost) || langs.includes(r.dub)) subs.push(r.code);
+			}
+			if (audios.length > 0) console.info(`    - Versions: ${audios.join(', ')}`);
+			if (subs.length > 0) console.info(`    - Subtitles: ${subs.join(', ')}`);
 			show.value.videos.splice(
 				show.value.videos.findIndex((i) => i.id === nc.id),
 				1
@@ -547,7 +584,10 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		for (const streamName in streams.links.streaming) {
 			let audDub: langsData.LanguageItem;
 			if (this.jpnStrings.includes(streamName)) {
-				audDub = langsData.languages.find((a) => a.code == 'jpn') as langsData.LanguageItem;
+				const originCode = (data.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zho' : 'jpn';
+				audDub = langsData.languages.find((a) => a.code == originCode) as langsData.LanguageItem;
+			} else if (this.polStrings.includes(streamName)) {
+				audDub = langsData.languages.find((a) => a.code == 'pol') as langsData.LanguageItem;
 			} else if (this.deuStrings.includes(streamName)) {
 				audDub = langsData.languages.find((a) => a.code == 'deu') as langsData.LanguageItem;
 			} else if (this.fraStrings.includes(streamName)) {
@@ -817,7 +857,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 					fs.writeFileSync(`${tsFile}.txt`, compiledChapters.join('\r\n'));
 					files.push({
 						path: `${tsFile}.txt`,
-						lang: langsData.languages.find((a) => a.code == 'jpn'),
+						lang: langsData.languages.find((a) => a.code == ((data.show.countryOfOrigin ?? '').toLowerCase() === 'chine' ? 'zho' : 'jpn')),
 						type: 'Chapters'
 					});
 				} catch {
@@ -865,7 +905,9 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 				}
 				for (const subName in subtitles) {
 					let subLang: langsData.LanguageItem;
-					if (this.deuSubStrings.includes(subName)) {
+					if (this.polSubStrings.includes(subName)) {
+						subLang = langsData.languages.find((a) => a.code == 'pol') as langsData.LanguageItem;
+					} else if (this.deuSubStrings.includes(subName)) {
 						subLang = langsData.languages.find((a) => a.code == 'deu') as langsData.LanguageItem;
 					} else if (this.fraSubStrings.includes(subName)) {
 						subLang = langsData.languages.find((a) => a.code == 'fra') as langsData.LanguageItem;
