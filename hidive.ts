@@ -907,17 +907,27 @@ export default class Hidive implements ServiceClass {
 		console.info('Stream URL:', chosenVideoSegments.segments[0].map.uri.split('/init.mp4')[0]);
 
 		if ((chosenAudios[0].pssh_wvd && cdm === 'widevine') || (chosenVideoSegments.pssh_wvd && cdm === 'widevine')) {
-			encryptionKeys = await getKeysWVD(chosenVideoSegments.pssh_wvd, 'https://shield-drm.imggaming.com/api/v2/license', {
-				Authorization: `Bearer ${selectedEpisode.jwtToken}`,
-				'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ=='
-			}, true);
+			encryptionKeys = await getKeysWVD(
+				chosenVideoSegments.pssh_wvd,
+				'https://shield-drm.imggaming.com/api/v2/license',
+				{
+					Authorization: `Bearer ${selectedEpisode.jwtToken}`,
+					'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ud2lkZXZpbmUuYWxwaGEifQ=='
+				},
+				true
+			);
 		}
 
 		if ((chosenAudios[0].pssh_prd && cdm === 'playready') || (chosenVideoSegments.pssh_prd && cdm === 'playready')) {
-			encryptionKeys = await getKeysPRD(chosenVideoSegments.pssh_prd, 'https://shield-drm.imggaming.com/api/v2/license', {
-				Authorization: `Bearer ${selectedEpisode.jwtToken}`,
-				'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ubWljcm9zb2Z0LnBsYXlyZWFkeSJ9'
-			}, true);
+			encryptionKeys = await getKeysPRD(
+				chosenVideoSegments.pssh_prd,
+				'https://shield-drm.imggaming.com/api/v2/license',
+				{
+					Authorization: `Bearer ${selectedEpisode.jwtToken}`,
+					'X-Drm-Info': 'eyJzeXN0ZW0iOiJjb20ubWljcm9zb2Z0LnBsYXlyZWFkeSJ9'
+				},
+				true
+			);
 		}
 
 		if (!options.novids) {
