@@ -79,7 +79,7 @@ You can run the code from native TypeScript, this requires tsx which you can ins
 Afterwords, you can run the application like this:
 
 * CLI: `tsx ./index.ts --help`
-* GUI: `tsx ./gui.ts` OR `pnpm gui`
+* GUI: `pnpm gui` OR `tsx ./gui.ts` (If already compiled)
 
 ### Run as JavaScript
 
