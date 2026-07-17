@@ -11,5 +11,5 @@
 		"removeComments": true,
 		"jsx": "react"
 	},
-	"exclude": ["./videos", "./tsc.ts", "lib/**/*", "gui/react/**/*"]
+	"exclude": ["./videos", "./fonts", "./tsc.ts", "lib/**/*", "gui/react/**/*"]
 }
