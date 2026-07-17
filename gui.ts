@@ -1,3 +1,6 @@
 process.env.isGUI = 'true';
-import './modules/log';
-import './gui/server/index';
+
+void (async () => {
+	await import('./modules/log');
+	await import('./gui/server/index');
+})();

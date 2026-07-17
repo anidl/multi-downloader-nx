@@ -11,7 +11,7 @@ const AddToQueue: React.FC = () => {
 	return (
 		<Box>
 			<EpisodeListing />
-			<Dialog open={isOpen} onClose={() => setOpen(false)} maxWidth="md" PaperProps={{ elevation: 4 }}>
+			<Dialog open={isOpen} onClose={() => setOpen(false)} maxWidth="md" slotProps={{ paper: { elevation: 4 } }}>
 				<Box>
 					<SearchBox />
 					<Divider variant="middle" />

@@ -33,7 +33,7 @@ const config: Configuration & DevServerConfig = {
 					loader: 'babel-loader',
 					options: {
 						presets: [
-							'@babel/typescript',
+							['@babel/typescript', { onlyRemoveTypeImports: false }],
 							'@babel/preset-react',
 							[
 								'@babel/preset-env',

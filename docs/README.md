@@ -74,11 +74,12 @@ First clone this repo `git clone https://github.com/anidl/multi-downloader-nx.gi
 
 ### Run from TypeScript
 
-You can run the code from native TypeScript, this requires ts-node which you can install with pnpm with the following command: `pnpm -g i ts-node`
+You can run the code from native TypeScript, this requires tsx which you can install with pnpm with the following command: `pnpm -g i tsx`
 
 Afterwords, you can run the application like this:
 
-* CLI: `ts-node -T ./index.ts --help`
+* CLI: `tsx ./index.ts --help`
+* GUI: `tsx ./gui.ts` OR `pnpm gui`
 
 ### Run as JavaScript
 
@@ -90,7 +91,6 @@ If you want to build the application into JavaScript code to run, you can do tha
 Then you can cd into the `lib` folder and you will be able to run the CLI or GUI as follows:
 
 * CLI: `node ./index.js --help`
-* GUI: `node ./gui.js`
 
 ### Build the application into an executable
 

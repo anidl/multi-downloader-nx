@@ -303,10 +303,12 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 										<InputLabel id="hsLabel">Hardsub Language</InputLabel>
 										<Select
 											MenuProps={{
-												PaperProps: {
-													style: {
-														maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-														width: 250
+												slotProps: {
+													paper: {
+														style: {
+															maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+															width: 250
+														}
 													}
 												}
 											}}
