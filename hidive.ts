@@ -1260,21 +1260,18 @@ export default class Hidive implements ServiceClass {
 		const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);
 		// collect fonts info
 		// mergers
-		let isMuxed = false;
 		if (options.syncTiming) {
 			await merger.createDelays();
 		}
 		if (bin.MKVmerge) {
 			await merger.merge('mkvmerge', bin.MKVmerge);
-			isMuxed = true;
 		} else if (bin.FFmpeg) {
 			await merger.merge('ffmpeg', bin.FFmpeg);
-			isMuxed = true;
 		} else {
 			console.info('\nDone!\n');
 			return;
 		}
-		if (isMuxed && !options.nocleanup) merger.cleanUp();
+		if (!options.nocleanup) merger.cleanUp();
 	}
 
 	public sleep(ms: number) {

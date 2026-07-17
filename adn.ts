@@ -447,21 +447,18 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);
 		// collect fonts info
 		// mergers
-		let isMuxed: boolean = false;
 		if (options.syncTiming) {
 			await merger.createDelays();
 		}
 		if (bin.MKVmerge) {
 			await merger.merge('mkvmerge', bin.MKVmerge);
-			isMuxed = true;
 		} else if (bin.FFmpeg) {
 			await merger.merge('ffmpeg', bin.FFmpeg);
-			isMuxed = true;
 		} else {
 			console.info('\nDone!\n');
 			return;
 		}
-		if (isMuxed && !options.nocleanup) merger.cleanUp();
+		if (!options.nocleanup) merger.cleanUp();
 	}
 
 	public async getEpisode(data: ADNVideo, options: yargs.ArgvType) {
@@ -625,8 +622,6 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 
 			console.info('Playlists URL: %s', streams.links.streaming[streamName].auto);
 
-			let tsFile = undefined;
-
 			if (!dlFailed && !options.novids) {
 				const streamPlaylistsLocationReq = await this.req.getData(streams.links.streaming[streamName].auto);
 				if (!streamPlaylistsLocationReq.ok || !streamPlaylistsLocationReq.res) {
@@ -777,7 +772,7 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 							const mathParts = Math.ceil(totalParts / options.partsize);
 							const mathMsg = `(${mathParts}*${options.partsize})`;
 							console.info('Total parts in stream:', totalParts, mathMsg);
-							tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
+							const tsFile = path.isAbsolute(outFile as string) ? outFile : path.join(this.cfg.dir.content, outFile);
 							const dirName = path.dirname(tsFile);
 							if (!fs.existsSync(dirName)) {
 								fs.mkdirSync(dirName, { recursive: true });

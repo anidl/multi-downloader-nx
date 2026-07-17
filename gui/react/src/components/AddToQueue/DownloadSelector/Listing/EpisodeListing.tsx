@@ -92,12 +92,7 @@ const EpisodeListing: React.FC = () => {
 									gridTemplateColumns: '25px 50px 1fr 5fr'
 								}}
 								onClick={() => {
-									let arr: string[] = [];
-									if (isSelected) {
-										arr = [...selected.filter((a) => a !== e.toString())];
-									} else {
-										arr = [...selected, e.toString()];
-									}
+									const arr = isSelected ? selected.filter((a) => a !== e.toString()) : [...selected, e.toString()];
 									setSelected(arr.filter((a) => a.length > 0));
 								}}
 							>

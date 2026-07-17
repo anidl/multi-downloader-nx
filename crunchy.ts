@@ -226,8 +226,6 @@ export default class Crunchy implements ServiceClass {
 				...api.crunchyDefHeader
 			}
 		};
-		// seasons list
-		let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
 		//get episode info
 		const reqEpsListOpts = [
 			api.cms_bucket,
@@ -250,7 +248,7 @@ export default class Crunchy implements ServiceClass {
 		}
 		//CrunchyEpisodeList
 		const episodeListAndroid = (await reqEpsList.res.json()) as CrunchyAndroidEpisodes;
-		episodeList = {
+		const episodeList: CrunchyEpisodeList = {
 			total: episodeListAndroid.total,
 			data: episodeListAndroid.items,
 			meta: {}
@@ -1086,7 +1084,7 @@ export default class Crunchy implements ServiceClass {
 		const showInfo = await showInfoReq.res.json();
 		await this.logObject(showInfo.data[0], 0);
 
-		let episodeList = { total: 0, data: [], meta: {} } as CrunchyEpisodeList;
+		let episodeList: CrunchyEpisodeList;
 		//get episode info CMS
 		const reqEpsCMSListOpts = [
 			api.cms_bucket,
@@ -1589,7 +1587,6 @@ export default class Crunchy implements ServiceClass {
 			};
 
 			//Get Media GUID
-			let mediaId = mMeta.mediaId;
 			if (mMeta.versions) {
 				if (mMeta.lang) {
 					currentVersion = mMeta.versions.find((a) => a.audio_locale == mMeta.lang?.cr_locale);
@@ -1604,11 +1601,7 @@ export default class Crunchy implements ServiceClass {
 					continue;
 				}
 				isPrimary = currentVersion.original;
-				mediaId = currentVersion?.media_guid;
 			}
-
-			// If for whatever reason mediaId has a :, return the ID only
-			if (mediaId.includes(':')) mediaId = mediaId.split(':')[1];
 
 			const compiledChapters: string[] = [];
 			if (options.chapters) {
@@ -3115,21 +3108,18 @@ export default class Crunchy implements ServiceClass {
 		const bin = Merger.checkMerger(this.cfg.bin, options.mp4, options.forceMuxer);
 		// collect fonts info
 		// mergers
-		let isMuxed = false;
 		if (options.syncTiming) {
 			await merger.createDelays();
 		}
 		if (bin.MKVmerge) {
 			await merger.merge('mkvmerge', bin.MKVmerge);
-			isMuxed = true;
 		} else if (bin.FFmpeg) {
 			await merger.merge('ffmpeg', bin.FFmpeg);
-			isMuxed = true;
 		} else {
 			console.info('\nDone!\n');
 			return;
 		}
-		if (isMuxed && !options.nocleanup) merger.cleanUp();
+		if (!options.nocleanup) merger.cleanUp();
 	}
 
 	public async listSeriesID(
