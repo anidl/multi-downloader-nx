@@ -70,7 +70,7 @@
 		"@typescript-eslint/parser": "^8.63.0",
 		"@typescript/native": "npm:typescript@^7.0.2",
 		"@yao-pkg/pkg": "^6.21.0",
-		"esbuild": "0.28.1",
+		"esbuild": "0.26.0",
 		"eslint": "^10.6.0",
 		"eslint-config-prettier": "^10.1.8",
 		"husky": "^9.1.7",
