@@ -2,7 +2,13 @@ import * as yamlCfg from './module.cfg-loader';
 import * as yargs from './module.app-args';
 import { console } from './log';
 import { argvC } from './module.app-args';
-import { ProxyAgent, fetch, RequestInit } from 'undici';
+import { Agent, ProxyAgent, fetch, RequestInit } from 'undici';
+
+const http1Agent = new Agent({ 
+	connections: 16,
+    connect: { ALPNProtocols: ['http/1.1'] },
+	allowH2: false
+ });
 
 export type FetchParams = Partial<RequestInit & CustomParams>;
 
@@ -63,10 +69,15 @@ export class Req {
 		}
 
 		// Proxy Handler
-		let dispatcher: ProxyAgent | undefined;
+		let dispatcher: Agent | ProxyAgent = http1Agent;
 		const validProxy = this.argv.proxy ? this.isValidProxyUrl(this.argv.proxy) : false;
 		if ((params.useProxy || this.argv.proxyAll) && this.argv.proxy && validProxy) {
-			dispatcher = new ProxyAgent(this.argv.proxy);
+			dispatcher = new ProxyAgent({ 
+				uri: this.argv.proxy, 
+				connections: 16,
+			    connect: { ALPNProtocols: ['http/1.1'] },
+				allowH2: false
+			});
 		} else if ((params.useProxy || this.argv.proxyAll) && this.argv.proxy && !validProxy) {
 			console.warn('[Fetch] Provided invalid Proxy URL, not proxying traffic.');
 		}
@@ -78,7 +89,7 @@ export class Req {
 		}
 
 		try {
-			const res = await fetch(durl, { ...options, dispatcher: dispatcher });
+			const res = await fetch(durl, { ...options, dispatcher });
 			if (!res.ok) {
 				console.error(`${res.status}: ${res.statusText}`);
 				const body = await res.text();
