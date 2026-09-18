@@ -2126,6 +2126,10 @@ export default class Crunchy implements ServiceClass {
 						});
 
 						videos.sort((a, b) => {
+							return a.bandwidth - b.bandwidth;
+						});
+
+						videos.sort((a, b) => {
 							return a.quality.width - b.quality.width;
 						});
 
