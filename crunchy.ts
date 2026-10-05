@@ -2392,25 +2392,26 @@ export default class Crunchy implements ServiceClass {
 						) {
 							console.info('Decryption Needed, attempting to decrypt');
 							if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
-								let commandBaseVideo = `--show-progress ${encryptionKeysVideo?.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
-								let commandBaseAudio = `--show-progress ${encryptionKeysAudio?.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
-								let commandVideo = commandBaseVideo + `"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
-								let commandAudio = commandBaseAudio + `"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
-
-								if (this.cfg.bin.shaka) {
-									commandBaseVideo = ` --enable_raw_key_decryption ${encryptionKeysVideo && encryptionKeysVideo.length > 0 ? `--keys "${encryptionKeysVideo.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"` : ''}`;
-									commandBaseAudio = ` --enable_raw_key_decryption ${encryptionKeysAudio && encryptionKeysAudio.length > 0 ? `--keys "${encryptionKeysAudio.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"` : ''}`;
-									commandVideo = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s"` + commandBaseVideo;
-									commandAudio = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s"` + commandBaseAudio;
-								}
+								const commandBaseVideo = `--show-progress ${encryptionKeysVideo?.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
+								const commandBaseAudio = `--show-progress ${encryptionKeysAudio?.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
+								const commandVideo = commandBaseVideo + `"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
+								const commandAudio = commandBaseAudio + `"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
 								if (videoDownloaded) {
 									console.info('Started decrypting video,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-									const decryptVideo = Helper.exec(
-										this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt',
-										this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`,
-										commandVideo
-									);
+									let decryptVideo: ReturnType<typeof Helper.exec>;
+									if (this.cfg.bin.shaka) {
+										const keys = encryptionKeysVideo ?? [];
+										const io = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s" --enable_raw_key_decryption`;
+										// shaka_decrypt-win-x64.exe / shaka_decrypt-linux-x64 style
+										decryptVideo = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`);
+										if (!decryptVideo.isOk && keys.length > 0) {
+											console.warn('Shaka decryption failed, retrying with vanilla-style --keys...');
+											decryptVideo = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`);
+										}
+									} else {
+										decryptVideo = Helper.exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+									}
 									if (!decryptVideo.isOk) {
 										console.error(decryptVideo.err);
 										console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
@@ -2437,11 +2438,19 @@ export default class Crunchy implements ServiceClass {
 
 								if (audioDownloaded) {
 									console.info('Started decrypting audio,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-									const decryptAudio = Helper.exec(
-										this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt',
-										this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`,
-										commandAudio
-									);
+									let decryptAudio: ReturnType<typeof Helper.exec>;
+									if (this.cfg.bin.shaka) {
+										const keys = encryptionKeysAudio ?? [];
+										const io = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s" --enable_raw_key_decryption`;
+										// shaka_decrypt-win-x64.exe / shaka_decrypt-linux-x64 style
+										decryptAudio = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`);
+										if (!decryptAudio.isOk && keys.length > 0) {
+											console.warn('Shaka decryption failed, retrying with vanilla-style --keys...');
+											decryptAudio = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`);
+										}
+									} else {
+										decryptAudio = Helper.exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+									}
 									if (!decryptAudio.isOk) {
 										console.error(decryptAudio.err);
 										console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);

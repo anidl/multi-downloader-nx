@@ -967,20 +967,23 @@ export default class Hidive implements ServiceClass {
 						return undefined;
 					}
 					if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
-						let commandBase = `--show-progress ${encryptionKeys.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
-						let commandVideo = commandBase + `"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
-
-						if (this.cfg.bin.shaka) {
-							commandBase = ` --enable_raw_key_decryption ${encryptionKeys && encryptionKeys.length > 0 ? `--keys "${encryptionKeys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"` : ''}`;
-							commandVideo = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s"` + commandBase;
-						}
+						const commandBase = `--show-progress ${encryptionKeys.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
+						const commandVideo = commandBase + `"${tempTsFile}.video.enc.m4s" "${tempTsFile}.video.m4s"`;
 
 						console.info('Started decrypting video,', this.cfg.bin.shaka ? 'using shaka' : 'using mp4decrypt');
-						const decryptVideo = Helper.exec(
-							this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt',
-							this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`,
-							commandVideo
-						);
+						let decryptVideo: ReturnType<typeof Helper.exec>;
+						if (this.cfg.bin.shaka) {
+							const keys = encryptionKeys ?? [];
+							const io = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s" --enable_raw_key_decryption`;
+							// stratumadev shaka_decrypt-win-x64.exe / shaka_decrypt-linux-x64 style
+							decryptVideo = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`);
+							if (!decryptVideo.isOk && keys.length > 0) {
+								console.warn('Shaka decryption failed, retrying with vanilla-style --keys...');
+								decryptVideo = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`);
+							}
+						} else {
+							decryptVideo = Helper.exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
+						}
 						if (!decryptVideo.isOk) {
 							console.error(decryptVideo.err);
 							console.error(`Decryption failed with exit code ${decryptVideo.err.code}`);
@@ -1062,20 +1065,23 @@ export default class Hidive implements ServiceClass {
 						return undefined;
 					}
 					if (this.cfg.bin.mp4decrypt || this.cfg.bin.shaka) {
-						let commandBase = `--show-progress ${encryptionKeys.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
-						let commandAudio = commandBase + `"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
-
-						if (this.cfg.bin.shaka) {
-							commandBase = ` --enable_raw_key_decryption ${encryptionKeys && encryptionKeys.length > 0 ? `--keys "${encryptionKeys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"` : ''}`;
-							commandAudio = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s"` + commandBase;
-						}
+						const commandBase = `--show-progress ${encryptionKeys.map((kb) => `--key ${kb.kid}:${kb.key}`).join(' ')} `;
+						const commandAudio = commandBase + `"${tempTsFile}.audio.enc.m4s" "${tempTsFile}.audio.m4s"`;
 
 						console.info('Started decrypting audio');
-						const decryptAudio = Helper.exec(
-							this.cfg.bin.shaka ? 'shaka-packager' : 'mp4decrypt',
-							this.cfg.bin.shaka ? `"${this.cfg.bin.shaka}"` : `"${this.cfg.bin.mp4decrypt}"`,
-							commandAudio
-						);
+						let decryptAudio: ReturnType<typeof Helper.exec>;
+						if (this.cfg.bin.shaka) {
+							const keys = encryptionKeys ?? [];
+							const io = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s" --enable_raw_key_decryption`;
+							// stratumadev shaka_decrypt-win-x64.exe / shaka_decrypt-linux-x64 style
+							decryptAudio = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`);
+							if (!decryptAudio.isOk && keys.length > 0) {
+								console.warn('Shaka decryption failed, retrying with vanilla-style --keys...');
+								decryptAudio = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`);
+							}
+						} else {
+							decryptAudio = Helper.exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
+						}
 						if (!decryptAudio.isOk) {
 							console.error(decryptAudio.err);
 							console.error(`Decryption failed with exit code ${decryptAudio.err.code}`);
