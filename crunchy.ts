@@ -2404,10 +2404,18 @@ export default class Crunchy implements ServiceClass {
 										const keys = encryptionKeysVideo ?? [];
 										const io = `input="${tempTsFile}.video.enc.m4s",stream=video,output="${tempTsFile}.video.m4s" --enable_raw_key_decryption`;
 										// shaka_decrypt-win-x64.exe / shaka_decrypt-linux-x64 style
-										decryptVideo = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`);
+										decryptVideo = Helper.exec(
+											'shaka-packager',
+											`"${this.cfg.bin.shaka}"`,
+											`${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`
+										);
 										if (!decryptVideo.isOk && keys.length > 0) {
 											console.warn('Shaka decryption failed, retrying with vanilla-style --keys...');
-											decryptVideo = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`);
+											decryptVideo = Helper.exec(
+												'shaka-packager',
+												`"${this.cfg.bin.shaka}"`,
+												`${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`
+											);
 										}
 									} else {
 										decryptVideo = Helper.exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandVideo);
@@ -2443,10 +2451,18 @@ export default class Crunchy implements ServiceClass {
 										const keys = encryptionKeysAudio ?? [];
 										const io = `input="${tempTsFile}.audio.enc.m4s",stream=audio,output="${tempTsFile}.audio.m4s" --enable_raw_key_decryption`;
 										// shaka_decrypt-win-x64.exe / shaka_decrypt-linux-x64 style
-										decryptAudio = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`);
+										decryptAudio = Helper.exec(
+											'shaka-packager',
+											`"${this.cfg.bin.shaka}"`,
+											`${io} ${keys.map((kb) => `--keys key_id=${kb.kid}:key=${kb.key}`).join(' ')}`
+										);
 										if (!decryptAudio.isOk && keys.length > 0) {
 											console.warn('Shaka decryption failed, retrying with vanilla-style --keys...');
-											decryptAudio = Helper.exec('shaka-packager', `"${this.cfg.bin.shaka}"`, `${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`);
+											decryptAudio = Helper.exec(
+												'shaka-packager',
+												`"${this.cfg.bin.shaka}"`,
+												`${io} --keys "${keys.map((kb, i) => `label=KEY${i + 1}:key_id=${kb.kid}:key=${kb.key}`).join(',')}"`
+											);
 										}
 									} else {
 										decryptAudio = Helper.exec('mp4decrypt', `"${this.cfg.bin.mp4decrypt}"`, commandAudio);
