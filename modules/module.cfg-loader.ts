@@ -155,6 +155,10 @@ const loadBinCfg = async () => {
 	};
 	const keys = Object.keys(defaultBin) as (keyof typeof defaultBin)[];
 	for (const dir of keys) {
+		if (binCfg[dir] === '') {
+			binCfg[dir] = undefined;
+			continue;
+		}
 		if (!Object.prototype.hasOwnProperty.call(binCfg, dir) || typeof binCfg[dir] != 'string') {
 			binCfg[dir] = defaultBin[dir];
 		}
