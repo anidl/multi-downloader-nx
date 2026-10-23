@@ -117,7 +117,7 @@ try {
 	canDecrypt = false;
 }
 
-export async function getKeysWVD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>): Promise<KeyContainer[]> {
+export async function getKeysWVD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>, useProxy: boolean = false): Promise<KeyContainer[]> {
 	if (!pssh || !canDecrypt || !widevine) return [];
 	// pssh found in the mpd manifest
 	const psshBuffer = Buffer.from(pssh, 'base64');
@@ -129,7 +129,8 @@ export async function getKeysWVD(pssh: string | undefined, licenseServer: string
 	const licReq = await req.getData(licenseServer, {
 		method: 'POST',
 		body: session.generateChallenge(),
-		headers: authData
+		headers: authData,
+		useProxy
 	});
 
 	if (!licReq.ok || !licReq.res) {
@@ -147,7 +148,7 @@ export async function getKeysWVD(pssh: string | undefined, licenseServer: string
 	}
 }
 
-export async function getKeysPRD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>): Promise<KeyContainer[]> {
+export async function getKeysPRD(pssh: string | undefined, licenseServer: string, authData: Record<string, string>, useProxy: boolean = false): Promise<KeyContainer[]> {
 	if (!pssh || !canDecrypt || !playready) return [];
 
 	// Generate Playready challenge
@@ -157,7 +158,8 @@ export async function getKeysPRD(pssh: string | undefined, licenseServer: string
 	const licReq = await req.getData(licenseServer, {
 		method: 'POST',
 		body: session,
-		headers: authData
+		headers: authData,
+		useProxy
 	});
 
 	if (!licReq.ok || !licReq.res) {
