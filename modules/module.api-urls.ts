@@ -48,7 +48,7 @@ const api: APIType = {
 	//
 	// Crunchyroll
 	// Crunchyroll API
-	basic_auth_token: 'dng1bThwOWZzYm16em15bnZnemo6Q2NjNXp6UkNxTDgtNWpVTDdJZFJRODU2Z0l6WlVZVk0=',
+	basic_auth_token: 'ZXI5bmdnMmtvNW9oaXJsYTUxaTI6VmwxVDBQbjhRWko2d3o0NnhYRGxIekRGUDV0Wlgxb3E=',
 	auth: `${domain.cr_api}/auth/v1/token`,
 	me: `${domain.cr_api}/accounts/v1/me`,
 	profile: `${domain.cr_api}/accounts/v1/me/profile`,
@@ -66,7 +66,7 @@ const api: APIType = {
 	cms_auth: `${domain.cr_api}/index/v2`,
 	//
 	// Crunchyroll Headers
-	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.71.0_22359 (Android 12; en-US; SHIELD Android TV Build/SR1A.220624.014)',
+	crunchyDefUserAgent: 'Crunchyroll/ANDROIDTV/3.76.0_22366 (Android 12; en-US; SHIELD Android TV Build/SR1A.220624.014)',
 	crunchyDefHeader: {},
 	crunchyAuthHeader: {},
 	crunchyAuthRefreshHeader: {},
