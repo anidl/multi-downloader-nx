@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import { Check, Close } from '@mui/icons-material';
 import React from 'react';
 import { messageChannelContext } from '../provider/MessageChannel';
@@ -64,16 +64,7 @@ const AuthButton: React.FC = () => {
 	return (
 		<Require value={messageChannel}>
 			<Dialog open={open}>
-				<Dialog open={!!error}>
-					<DialogTitle>Error during Authentication</DialogTitle>
-					<DialogContentText>
-						{error?.name}
-						{error?.message}
-					</DialogContentText>
-					<DialogActions>
-						<Button onClick={() => setError(undefined)}>Close</Button>
-					</DialogActions>
-				</Dialog>
+				{error && <Alert severity="error" onClose={() => setError(undefined)} sx={{ m: 2 }}>{error.message || 'Authentication failed.'}</Alert>}
 				<DialogTitle sx={{ flexGrow: 1 }}>Authentication</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
