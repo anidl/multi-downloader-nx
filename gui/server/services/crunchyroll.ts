@@ -50,7 +50,7 @@ class CrunchyHandler extends Base implements MessageHandler {
 		await this.crunchy.refreshToken(true);
 		console.debug(`Got resolve options: ${JSON.stringify(data)}`);
 		const res = await this.crunchy.downloadFromSeriesID(data.id, data);
-		if (!res.isOk) return res.isOk;
+		if (!res.isOk || !res.value?.length) return false;
 		this.addToQueue(
 			res.value.map((a) => {
 				return {

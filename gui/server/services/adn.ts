@@ -65,7 +65,7 @@ class ADNHandler extends Base implements MessageHandler {
 		if (isNaN(parse) || parse <= 0) return false;
 		console.debug(`Got resolve options: ${JSON.stringify(data)}`);
 		const res = await this.adn.selectShow(parseInt(data.id), data.e, data.but, data.all);
-		if (!res.isOk || !res.value) return res.isOk;
+		if (!res.isOk || !res.value?.length) return false;
 		this.addToQueue(
 			res.value.map((a) => {
 				return {

@@ -18,11 +18,11 @@ const ServiceProvider: FCWithChildren = ({ children }) => {
 	};
 
 	return service === undefined ? (
-		<Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', flexDirection: 'column', position: 'relative', top: '40vh' }}>
+		<Box sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex', flexDirection: 'column', minHeight: '75vh', px: 2 }}>
 			<Typography color="text.primary" variant="h3" sx={{ textAlign: 'center', mb: 5 }}>
 				Please select your service
 			</Typography>
-			<Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+			<Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
 				<Button
 					size="large"
 					variant="contained"
