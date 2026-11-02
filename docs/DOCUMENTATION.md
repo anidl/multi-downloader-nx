@@ -1,4 +1,4 @@
-# multi-downloader-nx (v5.8.7)
+# multi-downloader-nx (v5.8.8)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/Rafaellaerin/multi-downloader-nx/issues).
 
