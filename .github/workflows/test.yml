@@ -10,6 +10,20 @@ permissions:
     contents: read
 
 jobs:
+    gui-build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - uses: pnpm/action-setup@v5
+              with:
+                  version: latest
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+            - run: pnpm install
+              working-directory: gui/react
+            - run: pnpm run build
+              working-directory: gui/react
     tsc:
         runs-on: ubuntu-latest
         steps:

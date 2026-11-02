@@ -59,7 +59,7 @@ class HidiveHandler extends Base implements MessageHandler {
 		if (isNaN(parse) || parse <= 0) return false;
 		console.debug(`Got resolve options: ${JSON.stringify(data)}`);
 		const res = await this.hidive.selectSeries(parseInt(data.id), data.e, data.but, data.all);
-		if (!res.isOk || !res.value) return res.isOk;
+		if (!res.isOk || !res.value?.length) return false;
 		this.addToQueue(
 			res.value.map((item) => {
 				return {
@@ -111,7 +111,13 @@ class HidiveHandler extends Base implements MessageHandler {
 		console.debug(`Got download options: ${JSON.stringify(data)}`);
 		const _default = yargs.appArgv(this.hidive.cfg.cli, true);
 		const res = await this.hidive.selectSeries(parseInt(data.id), data.e, false, false);
-		if (!res.isOk || !res.showData) return this.alertError(new Error('Download failed upstream, check for additional logs'));
+		if (!res.isOk || !res.showData) {
+			this.alertError(new Error('Download failed upstream, check for additional logs'));
+			this.sendMessage({ name: 'finish', data: undefined });
+			this.setDownloading(false);
+			await this.onFinish();
+			return;
+		}
 
 		for (const ep of res.value) {
 			await this.hidive.downloadEpisode(ep, {

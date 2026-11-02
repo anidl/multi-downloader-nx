@@ -31,7 +31,7 @@ export type MessageTypes = {
 	openFolder: [FolderTypes, undefined];
 	changeProvider: [undefined, boolean];
 	type: [undefined, 'crunchy' | 'hidive' | 'adn' | undefined];
-	setup: ['crunchy' | 'hidive' | 'adn' | undefined, undefined];
+	setup: ['crunchy' | 'hidive' | 'adn' | undefined, boolean];
 	openFile: [[FolderTypes, string], undefined];
 	openURL: [string, undefined];
 	isSetup: [undefined, boolean];
