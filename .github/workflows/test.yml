@@ -20,7 +20,10 @@ jobs:
             - uses: actions/setup-node@v6
               with:
                   node-version: 24
-            - run: pnpm install
+            - name: Install root dependencies
+              run: pnpm install
+            - name: Install React dependencies
+              run: pnpm install
               working-directory: gui/react
             - run: pnpm run build
               working-directory: gui/react

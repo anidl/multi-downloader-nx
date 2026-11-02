@@ -54,7 +54,9 @@ export default class WebSocketHandler {
 				const listeners = this.events.listeners(request.name);
 				if (!listeners.length) return fail(new Error('Unknown request: ' + request.name));
 				for (const listener of listeners) {
-					void Promise.resolve().then(() => listener(request, reply)).catch(fail);
+					void Promise.resolve()
+						.then(() => listener(request, reply))
+						.catch(fail);
 				}
 			});
 		});

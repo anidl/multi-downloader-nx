@@ -22,11 +22,14 @@ const theme = createTheme({
 const Style: FCWithChildren = ({ children }) => (
 	<ThemeProvider theme={theme}>
 		<CssBaseline />
-		<Box sx={{
-			minHeight: '100vh',
-			background: 'radial-gradient(ellipse at 12% 0%, rgba(99,108,221,.19), transparent 42%), radial-gradient(ellipse at 96% 90%, rgba(50,154,159,.12), transparent 40%), #0b1020',
-			color: 'text.primary'
-		}}>
+		<Box
+			sx={{
+				minHeight: '100vh',
+				background:
+					'radial-gradient(ellipse at 12% 0%, rgba(99,108,221,.19), transparent 42%), radial-gradient(ellipse at 96% 90%, rgba(50,154,159,.12), transparent 40%), #0b1020',
+				color: 'text.primary'
+			}}
+		>
 			{children}
 		</Box>
 	</ThemeProvider>

@@ -139,7 +139,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 		});
 		wws.addEventListener('close', () => {
 			connecting.current = false;
-			setSocket((current) => current === wws ? undefined : current);
+			setSocket((current) => (current === wws ? undefined : current));
 			setServiceReady(false);
 		});
 		wws.addEventListener('error', (er) => {
@@ -201,7 +201,9 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 				if (!cancelled) enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
 			}
 		})();
-		return () => { cancelled = true; };
+		return () => {
+			cancelled = true;
+		};
 	}, [store.service, dispatch, socket]);
 
 	React.useEffect(() => {
@@ -227,31 +229,37 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 		};
 	}, [socket]);
 
-	const messageHandler = React.useMemo<FrontEndMessages | undefined>(() => !socket ? undefined : ({
-		name: 'default',
-		serviceReady,
-		auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,
-		version: async () => (await messageAndResponse(socket, { name: 'version', data: undefined })).data,
-		checkToken: async () => (await messageAndResponse(socket, { name: 'checkToken', data: undefined })).data,
-		search: async (data) => (await messageAndResponse(socket, { name: 'search', data })).data,
-		handleDefault: async (data) => (await messageAndResponse(socket, { name: 'default', data })).data,
-		availableDubCodes: async () => (await messageAndResponse(socket, { name: 'availableDubCodes', data: undefined })).data,
-		availableSubCodes: async () => (await messageAndResponse(socket, { name: 'availableSubCodes', data: undefined })).data,
-		resolveItems: async (data) => (await messageAndResponse(socket, { name: 'resolveItems', data })).data,
-		listEpisodes: async (data) => (await messageAndResponse(socket, { name: 'listEpisodes', data })).data,
-		randomEvents: randomEventHandler,
-		downloadItem: (data) => messageAndResponse(socket, { name: 'downloadItem', data }),
-		isDownloading: async () => (await messageAndResponse(socket, { name: 'isDownloading', data: undefined })).data,
-		openFolder: async (data) => messageAndResponse(socket, { name: 'openFolder', data }),
-		logout: async () => (await messageAndResponse(socket, { name: 'changeProvider', data: undefined })).data,
-		openFile: async (data) => await messageAndResponse(socket, { name: 'openFile', data }),
-		openURL: async (data) => await messageAndResponse(socket, { name: 'openURL', data }),
-		getQueue: async () => (await messageAndResponse(socket, { name: 'getQueue', data: undefined })).data,
-		removeFromQueue: async (data) => await messageAndResponse(socket, { name: 'removeFromQueue', data }),
-		clearQueue: async () => await messageAndResponse(socket, { name: 'clearQueue', data: undefined }),
-		setDownloadQueue: async (data) => await messageAndResponse(socket, { name: 'setDownloadQueue', data }),
-		getDownloadQueue: async () => (await messageAndResponse(socket, { name: 'getDownloadQueue', data: undefined })).data
-	}), [socket, serviceReady, randomEventHandler]);
+	const messageHandler = React.useMemo<FrontEndMessages | undefined>(
+		() =>
+			!socket
+				? undefined
+				: {
+						name: 'default',
+						serviceReady,
+						auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,
+						version: async () => (await messageAndResponse(socket, { name: 'version', data: undefined })).data,
+						checkToken: async () => (await messageAndResponse(socket, { name: 'checkToken', data: undefined })).data,
+						search: async (data) => (await messageAndResponse(socket, { name: 'search', data })).data,
+						handleDefault: async (data) => (await messageAndResponse(socket, { name: 'default', data })).data,
+						availableDubCodes: async () => (await messageAndResponse(socket, { name: 'availableDubCodes', data: undefined })).data,
+						availableSubCodes: async () => (await messageAndResponse(socket, { name: 'availableSubCodes', data: undefined })).data,
+						resolveItems: async (data) => (await messageAndResponse(socket, { name: 'resolveItems', data })).data,
+						listEpisodes: async (data) => (await messageAndResponse(socket, { name: 'listEpisodes', data })).data,
+						randomEvents: randomEventHandler,
+						downloadItem: (data) => messageAndResponse(socket, { name: 'downloadItem', data }),
+						isDownloading: async () => (await messageAndResponse(socket, { name: 'isDownloading', data: undefined })).data,
+						openFolder: async (data) => messageAndResponse(socket, { name: 'openFolder', data }),
+						logout: async () => (await messageAndResponse(socket, { name: 'changeProvider', data: undefined })).data,
+						openFile: async (data) => await messageAndResponse(socket, { name: 'openFile', data }),
+						openURL: async (data) => await messageAndResponse(socket, { name: 'openURL', data }),
+						getQueue: async () => (await messageAndResponse(socket, { name: 'getQueue', data: undefined })).data,
+						removeFromQueue: async (data) => await messageAndResponse(socket, { name: 'removeFromQueue', data }),
+						clearQueue: async () => await messageAndResponse(socket, { name: 'clearQueue', data: undefined }),
+						setDownloadQueue: async (data) => await messageAndResponse(socket, { name: 'setDownloadQueue', data }),
+						getDownloadQueue: async () => (await messageAndResponse(socket, { name: 'getDownloadQueue', data: undefined })).data
+					},
+		[socket, serviceReady, randomEventHandler]
+	);
 
 	if (usePassword === 'waiting') return <></>;
 
@@ -302,7 +310,6 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 			</Box>
 		);
 	}
-
 
 	return <messageChannelContext.Provider value={messageHandler}>{children}</messageChannelContext.Provider>;
 };

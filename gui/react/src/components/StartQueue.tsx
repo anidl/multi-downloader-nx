@@ -13,15 +13,16 @@ const StartQueueButton: React.FC = () => {
 
 	React.useEffect(() => {
 		if (!msg?.serviceReady) return;
-		void msg.getDownloadQueue().then(setStart).catch((error) =>
-			enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' })
-		);
+		void msg
+			.getDownloadQueue()
+			.then(setStart)
+			.catch((error) => enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' }));
 	}, [msg?.serviceReady]);
 
 	const change = async () => {
 		if (!msg?.serviceReady) return;
 		try {
-			if (start && await msg.isDownloading()) enqueueSnackbar('The current download will finish before the queue pauses.', { variant: 'info' });
+			if (start && (await msg.isDownloading())) enqueueSnackbar('The current download will finish before the queue pauses.', { variant: 'info' });
 			await msg.setDownloadQueue(!start);
 			setStart(!start);
 		} catch (error) {
