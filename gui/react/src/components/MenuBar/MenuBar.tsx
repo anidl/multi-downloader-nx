@@ -46,8 +46,8 @@ const MenuBar: React.FC = () => {
 	if (!msg) return <></>;
 
 	return (
-		<Box sx={{ display: 'flex', marginBottom: '1rem', width: '100%', alignItems: 'center' }}>
-			<Box sx={{ position: 'relative', left: '0%', width: '50%' }}>
+		<Box sx={{ display: 'flex', py: 2.5, mb: 1.5, width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+			<Box sx={{ display: 'flex', gap: 1 }}>
 				<Button onClick={(e) => handleClick(e, 'settings')}>Settings</Button>
 				<Button onClick={(e) => handleClick(e, 'help')}>Help</Button>
 			</Box>
@@ -126,7 +126,7 @@ const MenuBar: React.FC = () => {
 					Version: {store.version}
 				</MenuItem>
 			</Menu>
-			<Typography variant="h5" color="text.primary">
+			<Typography variant="subtitle1" color="text.secondary" fontWeight={700}>
 				{transformService(store.service)}
 			</Typography>
 		</Box>
