@@ -44,6 +44,7 @@ export default class Base {
 
 	alertError(error: Error) {
 		console.error(`${error}`);
+		this.sendMessage({ name: 'queueError', data: error.message });
 	}
 
 	makeProgressHandler(videoInfo: DownloadInfo) {
