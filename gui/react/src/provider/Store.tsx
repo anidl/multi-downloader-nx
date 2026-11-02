@@ -58,8 +58,47 @@ const initialState: StoreState = {
 	version: ''
 };
 
+const STORAGE_KEY = 'anidl.gui.preferences.v1';
+
+// Persist interface preferences, never passwords or account credentials.
+const restorePreferences = (): StoreState => {
+	try {
+		const raw = localStorage.getItem(STORAGE_KEY);
+		if (!raw) return initialState;
+		const saved = JSON.parse(raw) as Partial<StoreState>;
+		const service = ['crunchy', 'hidive', 'adn'].includes(saved.service ?? '') ? saved.service : undefined;
+		const options = saved.downloadOptions;
+		if (!options || typeof options !== 'object') return { ...initialState, service };
+		return {
+			...initialState,
+			service,
+			downloadOptions: {
+				...initialState.downloadOptions,
+				...options,
+				id: typeof options.id === 'string' ? options.id : '',
+				e: typeof options.e === 'string' ? options.e : '',
+				dubLang: Array.isArray(options.dubLang) ? options.dubLang : initialState.downloadOptions.dubLang,
+				dlsubs: Array.isArray(options.dlsubs) ? options.dlsubs : initialState.downloadOptions.dlsubs,
+				q: Number.isInteger(options.q) && options.q >= 0 && options.q <= 10 ? options.q : 0
+			}
+		};
+	} catch {
+		return initialState;
+	}
+};
+
 const Store: FCWithChildren = ({ children }) => {
-	const [state, dispatch] = React.useReducer(Reducer, initialState);
+	const [state, dispatch] = React.useReducer(Reducer, initialState, restorePreferences);
+	React.useEffect(() => {
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify({
+				service: state.service,
+				downloadOptions: state.downloadOptions
+			}));
+		} catch {
+			// Local storage may be disabled by the browser.
+		}
+	}, [state.service, state.downloadOptions]);
 	/*React.useEffect(() => {
     if (!state.unsavedChanges.has)
       return;

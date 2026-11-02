@@ -9,7 +9,7 @@ import { useSnackbar } from 'notistack';
 import { LockOutlined, PowerSettingsNew } from '@mui/icons-material';
 import { GUIConfig } from '../../../../modules/module.cfg-loader';
 
-export type FrontEndMessages = MessageHandler & { randomEvents: RandomEventHandler; logout: () => Promise<boolean> };
+export type FrontEndMessages = MessageHandler & { randomEvents: RandomEventHandler; logout: () => Promise<boolean>; serviceReady: boolean };
 
 export class RandomEventHandler {
 	private handler: {
@@ -18,6 +18,7 @@ export class RandomEventHandler {
 		progress: [],
 		finish: [],
 		queueChange: [],
+		queueError: [],
 		current: []
 	};
 
@@ -40,28 +41,53 @@ export class RandomEventHandler {
 
 export const messageChannelContext = React.createContext<FrontEndMessages | undefined>(undefined);
 
-async function messageAndResponse<T extends keyof MessageTypes>(socket: WebSocket, msg: WSMessage<T>): Promise<WSMessage<T, 1>> {
+async function messageAndResponse<T extends keyof MessageTypes>(socket: WebSocket, msg: WSMessage<T>, timeout = 120000): Promise<WSMessage<T, 1>> {
+	if (socket.readyState !== WebSocket.OPEN) throw new Error('Connection lost. Please reconnect or reload.');
 	const id = v4();
-	const ret = new Promise<WSMessage<T, 1>>((resolve) => {
-		const handler = function ({ data }: MessageEvent) {
-			const parsed = JSON.parse(data.toString()) as WSMessageWithID<T, 1>;
-			if (parsed.id === id) {
-				socket.removeEventListener('message', handler);
-				resolve(parsed);
-			}
+	return new Promise((resolve, reject) => {
+		const cleanup = () => {
+			clearTimeout(timer);
+			socket.removeEventListener('message', onMessage);
+			socket.removeEventListener('close', onClose);
+			socket.removeEventListener('error', onClose);
 		};
-		socket.addEventListener('message', handler);
+		const onClose = () => {
+			cleanup();
+			reject(new Error('Connection to server was interrupted. Please reload the page.'));
+		};
+		const onMessage = (event: MessageEvent) => {
+			let response: WSMessageWithID<T, 1> & { error?: string };
+			try {
+				response = JSON.parse(event.data.toString());
+			} catch {
+				return;
+			}
+			if (response?.id !== id) return;
+			cleanup();
+			if (response.error) reject(new Error(response.error));
+			else resolve(response);
+		};
+		const timer = setTimeout(() => {
+			cleanup();
+			reject(new Error('Request timed out. Check the server logs and retry.'));
+		}, timeout);
+		socket.addEventListener('message', onMessage);
+		socket.addEventListener('close', onClose);
+		socket.addEventListener('error', onClose);
+		try {
+			socket.send(JSON.stringify({ ...msg, id }));
+		} catch (error) {
+			cleanup();
+			reject(error);
+		}
 	});
-	const toSend = msg as WSMessageWithID<T>;
-	toSend.id = id;
-
-	socket.send(JSON.stringify(toSend));
-	return ret;
 }
 
 const MessageChannelProvider: FCWithChildren = ({ children }) => {
 	const [store, dispatch] = useStore();
 	const [socket, setSocket] = React.useState<undefined | WebSocket>();
+	const [serviceReady, setServiceReady] = React.useState(false);
+	const connecting = React.useRef(false);
 	const [publicWS, setPublicWS] = React.useState<undefined | WebSocket>();
 	const [usePassword, setUsePassword] = React.useState<'waiting' | 'yes' | 'no'>('waiting');
 	const [isSetup, setIsSetup] = React.useState<'waiting' | 'yes' | 'no'>('waiting');
@@ -93,7 +119,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 			const formData = new FormData(ev.currentTarget);
 			const password = formData.get('password')?.toString();
 			if (!password)
-				return enqueueSnackbar('Please provide both a username and password', {
+				return enqueueSnackbar('Please provide a password', {
 					variant: 'error'
 				});
 			search = new URLSearchParams({
@@ -101,14 +127,23 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 			});
 		}
 
+		if (connecting.current) return;
+		connecting.current = true;
 		const wws = new WebSocket(
 			`${location.protocol == 'https:' ? 'wss' : 'ws'}://${process.env.NODE_ENV === 'development' ? 'localhost:3000' : window.location.host}/private?${search}`
 		);
 		wws.addEventListener('open', () => {
 			console.log('[INFO] [WS] Connected');
 			setSocket(wws);
+			connecting.current = false;
+		});
+		wws.addEventListener('close', () => {
+			connecting.current = false;
+			setSocket((current) => current === wws ? undefined : current);
+			setServiceReady(false);
 		});
 		wws.addEventListener('error', (er) => {
+			connecting.current = false;
 			console.error('[ERROR] [WS]', er);
 			enqueueSnackbar('Unable to connect to server. Please check the password and try again.', {
 				variant: 'error'
@@ -121,12 +156,16 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 		if (!socket) return enqueueSnackbar('Invalid state: socket not found', { variant: 'error' });
 		const formData = new FormData(ev.currentTarget);
 		const password = formData.get('password');
+		const port = Number(formData.get('port'));
+		if (!Number.isInteger(port) || port < 1 || port > 65535) {
+			return enqueueSnackbar('Please enter a valid port (1–65535).', { variant: 'error' });
+		}
 		const data = {
-			port: parseInt(formData.get('port')?.toString() ?? '') ?? 3000,
+			port,
 			password: password ? password.toString() : undefined
 		} as GUIConfig;
 		await messageAndResponse(socket, { name: 'setupServer', data });
-		enqueueSnackbar(`The following settings have been set: Port=${data.port}, Password=${data.password ?? 'noPasswordRequired'}`, {
+		enqueueSnackbar(`The following settings have been set: Port=${data.port}, Password=${data.password ? 'configured' : 'not configured'}`, {
 			variant: 'success',
 			persist: true
 		});
@@ -139,20 +178,48 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 	const randomEventHandler = React.useMemo(() => new RandomEventHandler(), []);
 
 	React.useEffect(() => {
+		if (!socket || !store.service) {
+			setServiceReady(false);
+			return;
+		}
+		let cancelled = false;
+		setServiceReady(false);
 		(async () => {
-			if (!socket) return;
-			const currentService = await messageAndResponse(socket, { name: 'type', data: undefined });
-			if (currentService.data !== undefined) return dispatch({ type: 'service', payload: currentService.data });
-			if (store.service !== currentService.data) messageAndResponse(socket, { name: 'setup', data: store.service });
+			try {
+				const current = await messageAndResponse(socket, { name: 'type', data: undefined });
+				if (cancelled) return;
+				if (current.data && current.data !== store.service) {
+					dispatch({ type: 'service', payload: current.data });
+					return;
+				}
+				if (!current.data) {
+					const setup = await messageAndResponse(socket, { name: 'setup', data: store.service });
+					if (!setup.data) throw new Error('Unable to initialize the selected service.');
+				}
+				if (!cancelled) setServiceReady(true);
+			} catch (error) {
+				if (!cancelled) enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+			}
 		})();
+		return () => { cancelled = true; };
 	}, [store.service, dispatch, socket]);
+
+	React.useEffect(() => {
+		if (usePassword === 'no' && !socket && !connecting.current) connect();
+	}, [usePassword, socket]);
 
 	React.useEffect(() => {
 		if (!socket) return;
 		/* finish is a placeholder */
 		const listener = (initalData: MessageEvent<string>) => {
-			const data = JSON.parse(initalData.data) as RandomEvent<'finish'>;
-			randomEventHandler.emit(data.name, data);
+			try {
+				const data = JSON.parse(initalData.data) as RandomEvent<'finish'> & { id?: string };
+				if (!data.id && ['progress', 'finish', 'queueChange', 'current', 'queueError'].includes(data.name)) {
+					randomEventHandler.emit(data.name, data);
+				}
+			} catch (error) {
+				console.warn('Invalid server event', error);
+			}
 		};
 		socket.addEventListener('message', listener);
 		return () => {
@@ -160,13 +227,36 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 		};
 	}, [socket]);
 
+	const messageHandler = React.useMemo<FrontEndMessages | undefined>(() => !socket ? undefined : ({
+		name: 'default',
+		serviceReady,
+		auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,
+		version: async () => (await messageAndResponse(socket, { name: 'version', data: undefined })).data,
+		checkToken: async () => (await messageAndResponse(socket, { name: 'checkToken', data: undefined })).data,
+		search: async (data) => (await messageAndResponse(socket, { name: 'search', data })).data,
+		handleDefault: async (data) => (await messageAndResponse(socket, { name: 'default', data })).data,
+		availableDubCodes: async () => (await messageAndResponse(socket, { name: 'availableDubCodes', data: undefined })).data,
+		availableSubCodes: async () => (await messageAndResponse(socket, { name: 'availableSubCodes', data: undefined })).data,
+		resolveItems: async (data) => (await messageAndResponse(socket, { name: 'resolveItems', data })).data,
+		listEpisodes: async (data) => (await messageAndResponse(socket, { name: 'listEpisodes', data })).data,
+		randomEvents: randomEventHandler,
+		downloadItem: (data) => messageAndResponse(socket, { name: 'downloadItem', data }),
+		isDownloading: async () => (await messageAndResponse(socket, { name: 'isDownloading', data: undefined })).data,
+		openFolder: async (data) => messageAndResponse(socket, { name: 'openFolder', data }),
+		logout: async () => (await messageAndResponse(socket, { name: 'changeProvider', data: undefined })).data,
+		openFile: async (data) => await messageAndResponse(socket, { name: 'openFile', data }),
+		openURL: async (data) => await messageAndResponse(socket, { name: 'openURL', data }),
+		getQueue: async () => (await messageAndResponse(socket, { name: 'getQueue', data: undefined })).data,
+		removeFromQueue: async (data) => await messageAndResponse(socket, { name: 'removeFromQueue', data }),
+		clearQueue: async () => await messageAndResponse(socket, { name: 'clearQueue', data: undefined }),
+		setDownloadQueue: async (data) => await messageAndResponse(socket, { name: 'setDownloadQueue', data }),
+		getDownloadQueue: async () => (await messageAndResponse(socket, { name: 'getDownloadQueue', data: undefined })).data
+	}), [socket, serviceReady, randomEventHandler]);
+
 	if (usePassword === 'waiting') return <></>;
 
 	if (socket === undefined) {
-		if (usePassword === 'no') {
-			connect(undefined);
-			return <></>;
-		}
+		if (usePassword === 'no') return <></>;
 		return (
 			<Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', justifyItems: 'center', alignItems: 'center' }}>
 				<Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
@@ -213,30 +303,6 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 		);
 	}
 
-	const messageHandler: FrontEndMessages = {
-		name: 'default',
-		auth: async (data) => (await messageAndResponse(socket, { name: 'auth', data })).data,
-		version: async () => (await messageAndResponse(socket, { name: 'version', data: undefined })).data,
-		checkToken: async () => (await messageAndResponse(socket, { name: 'checkToken', data: undefined })).data,
-		search: async (data) => (await messageAndResponse(socket, { name: 'search', data })).data,
-		handleDefault: async (data) => (await messageAndResponse(socket, { name: 'default', data })).data,
-		availableDubCodes: async () => (await messageAndResponse(socket, { name: 'availableDubCodes', data: undefined })).data,
-		availableSubCodes: async () => (await messageAndResponse(socket, { name: 'availableSubCodes', data: undefined })).data,
-		resolveItems: async (data) => (await messageAndResponse(socket, { name: 'resolveItems', data })).data,
-		listEpisodes: async (data) => (await messageAndResponse(socket, { name: 'listEpisodes', data })).data,
-		randomEvents: randomEventHandler,
-		downloadItem: (data) => messageAndResponse(socket, { name: 'downloadItem', data }),
-		isDownloading: async () => (await messageAndResponse(socket, { name: 'isDownloading', data: undefined })).data,
-		openFolder: async (data) => messageAndResponse(socket, { name: 'openFolder', data }),
-		logout: async () => (await messageAndResponse(socket, { name: 'changeProvider', data: undefined })).data,
-		openFile: async (data) => await messageAndResponse(socket, { name: 'openFile', data }),
-		openURL: async (data) => await messageAndResponse(socket, { name: 'openURL', data }),
-		getQueue: async () => (await messageAndResponse(socket, { name: 'getQueue', data: undefined })).data,
-		removeFromQueue: async (data) => await messageAndResponse(socket, { name: 'removeFromQueue', data }),
-		clearQueue: async () => await messageAndResponse(socket, { name: 'clearQueue', data: undefined }),
-		setDownloadQueue: async (data) => await messageAndResponse(socket, { name: 'setDownloadQueue', data }),
-		getDownloadQueue: async () => (await messageAndResponse(socket, { name: 'getDownloadQueue', data: undefined })).data
-	};
 
 	return <messageChannelContext.Provider value={messageHandler}>{children}</messageChannelContext.Provider>;
 };

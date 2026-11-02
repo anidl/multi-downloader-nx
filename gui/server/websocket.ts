@@ -25,23 +25,37 @@ export default class WebSocketHandler {
 		this.wsServer.on('connection', (socket, req) => {
 			console.info(`[WS] Connection from '${req.socket.remoteAddress}'`);
 			socket.on('error', (er) => console.error(`[WS] ${er}`));
-			socket.on('message', (data) => {
-				const json = JSON.parse(data.toString()) as UnknownWSMessage;
-				this.events.emit(json.name, json as any, (data) => {
-					this.wsServer.clients.forEach((client) => {
-						if (client.readyState !== WebSocket.OPEN) return;
-						client.send(
-							JSON.stringify({
-								data,
-								id: json.id,
-								name: json.name
-							}),
-							(er) => {
-								if (er) console.error(`[WS] ${er}`);
-							}
-						);
+			socket.on('message', (raw) => {
+				let request: UnknownWSMessage;
+				try {
+					request = JSON.parse(raw.toString()) as UnknownWSMessage;
+					if (!request || typeof request.name !== 'string' || typeof request.id !== 'string') {
+						throw new Error('Malformed websocket request');
+					}
+				} catch (error) {
+					console.error('[WS] Invalid request:', error);
+					socket.close(1003, 'Invalid request');
+					return;
+				}
+
+				const reply = (data: unknown) => {
+					if (socket.readyState !== WebSocket.OPEN) return;
+					socket.send(JSON.stringify({ data, id: request.id, name: request.name }), (error) => {
+						if (error) console.error('[WS] Failed to send response:', error);
 					});
-				});
+				};
+				const fail = (error: unknown) => {
+					const message = error instanceof Error ? error.message : String(error);
+					console.error('[WS] Request failed:', message);
+					if (socket.readyState === WebSocket.OPEN) {
+						socket.send(JSON.stringify({ id: request.id, name: request.name, error: message }));
+					}
+				};
+				const listeners = this.events.listeners(request.name);
+				if (!listeners.length) return fail(new Error('Unknown request: ' + request.name));
+				for (const listener of listeners) {
+					void Promise.resolve().then(() => listener(request, reply)).catch(fail);
+				}
 			});
 		});
 
@@ -85,7 +99,13 @@ export class PublicWebSocket {
 			console.info(`[WS] Connection to public ws from '${req.socket.remoteAddress}'`);
 			socket.on('error', (er) => console.error(`[WS] ${er}`));
 			socket.on('message', (msg) => {
-				const data = JSON.parse(msg.toString()) as UnknownWSMessage;
+				let data: UnknownWSMessage;
+				try {
+					data = JSON.parse(msg.toString()) as UnknownWSMessage;
+					if (!data || typeof data.id !== 'string') return;
+				} catch {
+					return;
+				}
 				switch (data.name) {
 					case 'isSetup':
 						this.send(socket, data.id, data.name, this.state.setup);
