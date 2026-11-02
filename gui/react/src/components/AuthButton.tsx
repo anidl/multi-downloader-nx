@@ -23,12 +23,14 @@ const AuthButton: React.FC = () => {
 	const [authed, setAuthed] = React.useState(false);
 
 	const checkAuth = async () => {
-		setAuthed((await messageChannel?.checkToken())?.isOk ?? false);
+		if (!messageChannel?.serviceReady) return;
+		try { setAuthed((await messageChannel.checkToken())?.isOk ?? false); }
+		catch { setAuthed(false); }
 	};
 
 	React.useEffect(() => {
-		checkAuth();
-	}, []);
+		void checkAuth();
+	}, [messageChannel?.serviceReady]);
 
 	const handleSubmit = async () => {
 		if (!messageChannel) throw new Error('Invalid state'); //The components to confirm only render if the messageChannel is not undefinded
@@ -37,20 +39,26 @@ const AuthButton: React.FC = () => {
 		setUsernameError(false);
 		setPasswordError(false);
 		setLoading(true);
-
-		const res = await messageChannel.auth({ username, password });
-		if (res.isOk) {
-			setOpen(false);
-			snackbar.enqueueSnackbar('Logged in', {
-				variant: 'success'
-			});
-			setUsername('');
-			setPassword('');
-		} else {
-			setError(res.reason);
+		setError(undefined);
+		try {
+			const res = await messageChannel.auth({ username, password });
+			if (res.isOk) {
+				setOpen(false);
+				snackbar.enqueueSnackbar('Authenticated successfully. You can now add episodes to the queue.', { variant: 'success' });
+				setUsername('');
+				setPassword('');
+				setAuthed(true);
+			} else {
+				setError(new Error(res.reason?.message || 'Authentication failed.'));
+				setAuthed(false);
+			}
+		} catch (error) {
+			setError(error instanceof Error ? error : new Error(String(error)));
+			setAuthed(false);
+		} finally {
+			setLoading(false);
 		}
-		await checkAuth();
-		setLoading(false);
+
 	};
 
 	return (
@@ -110,7 +118,7 @@ const AuthButton: React.FC = () => {
 					</Button>
 				</DialogActions>
 			</Dialog>
-			<Button startIcon={authed ? <Check /> : <Close />} variant="contained" onClick={() => setOpen(true)}>
+			<Button startIcon={authed ? <Check /> : <Close />} variant="outlined" disabled={!messageChannel?.serviceReady} onClick={() => setOpen(true)}>
 				Authenticate
 			</Button>
 		</Require>
