@@ -1,0 +1,35 @@
+name: Format release branch (one-time)
+
+on:
+  push:
+    branches: ['fix/release-native-builds-v587']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v5
+        with:
+          version: latest
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: pnpm install
+      - name: Format repository source
+        run: pnpm run prettier:fix
+      - name: Commit formatting only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -u
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "style: normalize formatting after GUI refactor"
+            git push origin "HEAD:fix/release-native-builds-v587"
+          fi
