@@ -1,133 +1,142 @@
 name: Release Builds
 
 on:
-    push:
-        branches: [master]
-    workflow_dispatch:
-    release:
-        types: [published]
+  push:
+    branches: [master]
+    paths-ignore:
+      - '**/*.md'
+  workflow_dispatch:
 
 permissions:
-    contents: write
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-    build:
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - os: ubuntu-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+                    - os: windows-latest
                       build_type: windows
                       build_arch: x64
-                      gui: cli
-                    - os: macos-latest
-                      build_type: windows
-                      build_arch: arm64
-                      gui: cli
-                    - os: ubuntu-latest
+                      mode: gui
+                    - os: windows-latest
                       build_type: windows
                       build_arch: x64
-                      gui: gui
-                    - os: macos-latest
-                      build_type: windows
-                      build_arch: arm64
-                      gui: gui
-                    - os: ubuntu-latest
-                      build_type: macos
-                      build_arch: x64
-                      gui: cli
-                    - os: macos-latest
-                      build_type: macos
-                      build_arch: arm64
-                      gui: cli
-                    - os: ubuntu-latest
-                      build_type: macos
-                      build_arch: x64
-                      gui: gui
-                    - os: macos-latest
-                      build_type: macos
-                      build_arch: arm64
-                      gui: gui
+                      mode: cli
                     - os: ubuntu-latest
                       build_type: linux
                       build_arch: x64
-                      gui: cli
-                    - os: macos-latest
-                      build_type: linux
-                      build_arch: arm64
-                      gui: cli
+                      mode: gui
                     - os: ubuntu-latest
                       build_type: linux
                       build_arch: x64
-                      gui: gui
-                    - os: macos-latest
-                      build_type: linux
-                      build_arch: arm64
-                      gui: gui
-                    - os: ubuntu-latest
-                      build_type: alpine
+                      mode: cli
+                    - os: macos-15-intel
+                      build_type: macos
                       build_arch: x64
-                      gui: cli
-                    - os: macos-latest
-                      build_type: alpine
-                      build_arch: arm64
-                      gui: cli
-                    - os: ubuntu-latest
-                      build_type: alpine
+                      mode: gui
+                    - os: macos-15-intel
+                      build_type: macos
                       build_arch: x64
-                      gui: gui
+                      mode: cli
                     - os: macos-latest
-                      build_type: alpine
+                      build_type: macos
                       build_arch: arm64
-                      gui: gui
-        runs-on: ${{ matrix.os }}
-        steps:
-            - name: Checkout source
-              uses: actions/checkout@v6
-            - uses: pnpm/action-setup@v5
-              with:
-                  version: latest
-            - name: Set up Node.js
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 24
-                  check-latest: true
-            - name: Install dependencies
-              run: pnpm install
-            - name: Build distributable
-              run: pnpm run build-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}
-            - name: Upload package and checksum
-              uses: actions/upload-artifact@v4
-              with:
-                  name: package-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}
-                  path: |
-                      lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}.7z
-                      lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.gui }}.7z.sha256
-                  if-no-files-found: error
-                  retention-days: 14
+                      mode: gui
+                    - os: macos-latest
+                      build_type: macos
+                      build_arch: arm64
+                      mode: cli
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
+        with:
+          version: '10'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Install 7-Zip (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          if ! command -v 7z >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y p7zip-full
+          fi
+      - name: Install 7-Zip (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          if ! command -v 7z >/dev/null; then
+            brew install sevenzip
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$(brew --prefix)/bin/7zz" "$HOME/.local/bin/7z"
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Expose 7-Zip (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command 7z -ErrorAction SilentlyContinue)) {
+            Add-Content -Path $env:GITHUB_PATH -Value 'C:\Program Files\7-Zip'
+          }
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build package
+        run: pnpm run build-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.mode }}
+      - name: Validate release package
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.mode }}.7z"
+          test -s "$OUT"
+          test -s "$OUT.sha256"
+          cd lib/_builds
+          sha256sum -c "$(basename "$OUT").sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.mode }}
+          path: |
+            lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.mode }}.7z
+            lib/_builds/multi-downloader-nx-${{ matrix.build_type }}-${{ matrix.build_arch }}-${{ matrix.mode }}.7z.sha256
+          if-no-files-found: error
+          retention-days: 30
 
-    publish:
-        needs: build
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        steps:
-            - uses: actions/checkout@v6
-            - uses: actions/download-artifact@v4
-              with:
-                  pattern: package-*
-                  path: dist
-                  merge-multiple: true
-            - name: Publish all successful binaries as a GitHub Release
-              env:
-                  GH_TOKEN: ${{ github.token }}
-                  EVENT_NAME: ${{ github.event_name }}
-                  EVENT_TAG: ${{ github.event.release.tag_name }}
-              run: |
-                  set -euo pipefail
-                  TAG="${EVENT_TAG:-v$(node -p "require('./package.json').version")}"
-                  if gh release view "$TAG" >/dev/null 2>&1; then
-                    gh release upload "$TAG" dist/*.7z dist/*.7z.sha256 --clobber
-                  else
-                    gh release create "$TAG" dist/*.7z dist/*.7z.sha256 --target "$GITHUB_SHA" --title "Multi Downloader NX $TAG" --generate-notes
-                  fi
+  publish:
+    name: Publish GitHub Release after all builds pass
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: multi-downloader-nx-*
+          merge-multiple: true
+          path: dist
+      - name: Check all packages are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find dist -type f -name '*.7z' | wc -l)" -eq 8
+          test "$(find dist -type f -name '*.sha256' | wc -l)" -eq 8
+      - name: Publish v5.8.7 release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v$(node -p "require('./package.json').version")"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.7z dist/*.7z.sha256 --clobber
+          else
+            gh release create "$TAG" dist/*.7z dist/*.7z.sha256 --target "$GITHUB_SHA" --title "Multi Downloader NX $TAG" --generate-notes
+          fi
