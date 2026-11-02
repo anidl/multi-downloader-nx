@@ -36,19 +36,19 @@ jobs:
                       build_type: linux
                       build_arch: x64
                       mode: cli
-                    - os: macos-15-intel
+                    - os: ubuntu-latest
                       build_type: macos
                       build_arch: x64
                       mode: gui
-                    - os: macos-15-intel
+                    - os: ubuntu-latest
                       build_type: macos
                       build_arch: x64
                       mode: cli
-                    - os: macos-15-intel
+                    - os: ubuntu-latest
                       build_type: macos
                       build_arch: arm64
                       mode: gui
-                    - os: macos-15-intel
+                    - os: ubuntu-latest
                       build_type: macos
                       build_arch: arm64
                       mode: cli
