@@ -22,62 +22,84 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 	const ITEM_PADDING_TOP = 8;
 
 	React.useEffect(() => {
+		if (!messageHandler?.serviceReady) return;
+		let cancelled = false;
 		(async () => {
-			/* If we don't wait the response is undefined? */
-			await new Promise((resolve) => setTimeout(() => resolve(undefined), 100));
-			const dubLang = messageHandler?.handleDefault('dubLang');
-			const subLang = messageHandler?.handleDefault('dlsubs');
-			const q = messageHandler?.handleDefault('q');
-			const fileName = messageHandler?.handleDefault('fileName');
-			const dlVideoOnce = messageHandler?.handleDefault('dlVideoOnce');
-			const result = await Promise.all([dubLang, subLang, q, fileName, dlVideoOnce]);
-			dispatch({
-				type: 'downloadOptions',
-				payload: {
-					...store.downloadOptions,
-					dubLang: result[0],
-					dlsubs: result[1],
-					q: result[2],
-					fileName: result[3],
-					dlVideoOnce: result[4]
+			try {
+				const defaults = await Promise.all([
+					messageHandler.handleDefault('dubLang'),
+					messageHandler.handleDefault('dlsubs'),
+					messageHandler.handleDefault('q'),
+					messageHandler.handleDefault('fileName'),
+					messageHandler.handleDefault('dlVideoOnce')
+				]);
+				// Respect browser-persisted choices instead of resetting them on every dialog open.
+				if (!cancelled && !localStorage.getItem('anidl.gui.preferences.v1')) {
+					dispatch({ type: 'downloadOptions', payload: {
+						...store.downloadOptions, dubLang: defaults[0], dlsubs: defaults[1],
+						q: defaults[2], fileName: defaults[3], dlVideoOnce: defaults[4]
+					} });
 				}
-			});
-			setAvailableDubs((await messageHandler?.availableDubCodes()) ?? []);
-			setAvailableSubs((await messageHandler?.availableSubCodes()) ?? []);
+				const [dubs, subs] = await Promise.all([
+					messageHandler.availableDubCodes(), messageHandler.availableSubCodes()
+				]);
+				if (!cancelled) {
+					setAvailableDubs(dubs);
+					setAvailableSubs(subs);
+				}
+			} catch (error) {
+				if (!cancelled) enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+			}
 		})();
-	}, []);
+		return () => { cancelled = true; };
+	}, [messageHandler?.serviceReady, store.service]);
 
 	const addToQueue = async () => {
+		if (!messageHandler?.serviceReady) {
+			return enqueueSnackbar('The service is still initializing. Please try again.', { variant: 'warning' });
+		}
+		if (!store.downloadOptions.id.trim()) {
+			return enqueueSnackbar('Enter or select a show ID first.', { variant: 'warning' });
+		}
+		if (!store.downloadOptions.all && !store.downloadOptions.e.trim()) {
+			return enqueueSnackbar('Select episodes or enable Download All.', { variant: 'warning' });
+		}
 		setLoading(true);
-		const res = await messageHandler?.resolveItems(store.downloadOptions);
-		if (!res)
-			return enqueueSnackbar('The request failed. Please check if the ID is correct.', {
-				variant: 'error'
-			});
-		setLoading(false);
-		if (onFinish) onFinish();
+		try {
+			const added = await messageHandler.resolveItems(store.downloadOptions);
+			if (!added) {
+				enqueueSnackbar('No episodes were added. Verify the ID, episode selection and authentication.', { variant: 'error' });
+				return;
+			}
+			enqueueSnackbar('Episodes added to the queue successfully.', { variant: 'success' });
+			onFinish?.();
+		} catch (error) {
+			enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	const listEpisodes = async () => {
-		if (!store.downloadOptions.id) {
-			return enqueueSnackbar('Please enter a ID', {
-				variant: 'error'
-			});
-		}
+		if (!store.downloadOptions.id.trim()) return enqueueSnackbar('Enter a show ID first.', { variant: 'warning' });
+		if (!messageHandler?.serviceReady) return enqueueSnackbar('Service is still initializing.', { variant: 'warning' });
 		setLoading(true);
-		const res = await messageHandler?.listEpisodes(store.downloadOptions.id);
-		if (!res || !res.isOk) {
+		try {
+			const result = await messageHandler.listEpisodes(store.downloadOptions.id);
+			if (!result.isOk) {
+				enqueueSnackbar(result.reason?.message || 'Could not list episodes for this ID.', { variant: 'error' });
+				return;
+			}
+			if (!result.value.length) {
+				enqueueSnackbar('No episodes found for this ID.', { variant: 'info' });
+				return;
+			}
+			dispatch({ type: 'episodeListing', payload: result.value });
+		} catch (error) {
+			enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+		} finally {
 			setLoading(false);
-			return enqueueSnackbar('The request failed. Please check if the ID is correct.', {
-				variant: 'error'
-			});
-		} else {
-			dispatch({
-				type: 'episodeListing',
-				payload: res.value
-			});
 		}
-		setLoading(false);
 	};
 
 	return (
@@ -85,8 +107,11 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 			<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '5px' }}>
 				<Box
 					sx={{
-						width: '50rem',
-						height: '21rem',
+						width: '100%',
+						maxWidth: '50rem',
+						minHeight: '21rem',
+						flexWrap: 'wrap',
+						gap: '1.5rem',
 						margin: '10px',
 						display: 'flex',
 						justifyContent: 'space-between'
@@ -326,7 +351,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 											<MenuItem value="">No Hardsub</MenuItem>
 											{availableSubs.map((lang) => {
 												if (lang === 'all' || lang === 'none') return undefined;
-												return <MenuItem value={lang}>{lang}</MenuItem>;
+												return <MenuItem key={lang} value={lang}>{lang}</MenuItem>;
 											})}
 										</Select>
 									</FormControl>
@@ -397,7 +422,7 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 			</Box>
 			<Box sx={{ width: '95%', height: '0.3rem', backgroundColor: '#ffffff50', borderRadius: '10px', marginTop: '10px' }} />
 
-			<LoadingButton sx={{ margin: '15px', textTransform: 'none' }} loading={loading} onClick={addToQueue} variant="contained">
+			<LoadingButton sx={{ margin: '15px', textTransform: 'none' }} disabled={!messageHandler?.serviceReady} loading={loading} onClick={() => void addToQueue()} variant="contained">
 				Add to Queue
 			</LoadingButton>
 		</Box>
