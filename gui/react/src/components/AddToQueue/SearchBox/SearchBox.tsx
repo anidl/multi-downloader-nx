@@ -30,17 +30,29 @@ const SearchBox: React.FC = () => {
 	};
 
 	React.useEffect(() => {
-		if (search.trim().length === 0) return setSearchResult({ isOk: true, value: [] });
-
-		const timeOutId = setTimeout(async () => {
-			if (search.trim().length > 3) {
-				const s = await messageHandler?.search({ search });
-				if (s && s.isOk) s.value = s.value.slice(0, 10);
-				setSearchResult(s);
-			}
+		let cancelled = false;
+		if (search.trim().length < 4 || !messageHandler?.serviceReady) {
+			setSearchResult({ isOk: true, value: [] });
+			return;
+		}
+		const timeOutId = setTimeout(() => {
+			void (async () => {
+				try {
+					const results = await messageHandler.search({ search: search.trim() });
+					if (!cancelled) {
+						setSearchResult(results.isOk ? { isOk: true, value: results.value.slice(0, 10) } : results);
+						if (!results.isOk) enqueueSnackbar(results.reason?.message || 'Search failed.', { variant: 'error' });
+					}
+				} catch (error) {
+					if (!cancelled) enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+				}
+			})();
 		}, 500);
-		return () => clearTimeout(timeOutId);
-	}, [search]);
+		return () => {
+			cancelled = true;
+			clearTimeout(timeOutId);
+		};
+	}, [search, messageHandler?.serviceReady]);
 
 	const anchorBounding = anchor.current?.getBoundingClientRect();
 	return (
