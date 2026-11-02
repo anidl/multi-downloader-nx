@@ -26,7 +26,8 @@ export default class ServiceHandler {
 			this.state.setup = true;
 			setState(this.state);
 			respond(true);
-			process.exit(0);
+			// Allow the acknowledgement to reach the browser before restarting.
+			setTimeout(() => process.exit(0), 250);
 		});
 
 		this.ws.events.on('setup', ({ data }, respond) => {
