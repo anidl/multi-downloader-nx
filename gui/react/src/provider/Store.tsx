@@ -79,7 +79,7 @@ const restorePreferences = (): StoreState => {
 				e: typeof options.e === 'string' ? options.e : '',
 				dubLang: Array.isArray(options.dubLang) ? options.dubLang : initialState.downloadOptions.dubLang,
 				dlsubs: Array.isArray(options.dlsubs) ? options.dlsubs : initialState.downloadOptions.dlsubs,
-				q: Number.isInteger(options.q) && options.q >= 0 && options.q <= 10 ? options.q : 0
+				q: typeof options.q === 'number' && Number.isInteger(options.q) && options.q >= 0 && options.q <= 10 ? options.q : 0
 			}
 		};
 	} catch {
