@@ -29,14 +29,14 @@ export default class ServiceHandler {
 			process.exit(0);
 		});
 
-		this.ws.events.on('setup', ({ data }) => {
-			if (data === 'crunchy') {
-				this.service = new CrunchyHandler(this.ws);
-			} else if (data === 'hidive') {
-				this.service = new HidiveHandler(this.ws);
-			} else if (data === 'adn') {
-				this.service = new ADNHandler(this.ws);
-			}
+		this.ws.events.on('setup', ({ data }, respond) => {
+			if (data !== 'crunchy' && data !== 'hidive' && data !== 'adn') return respond(false);
+			if (this.service?.name === data) return respond(true);
+			if (this.service) return respond(false);
+			if (data === 'crunchy') this.service = new CrunchyHandler(this.ws);
+			else if (data === 'hidive') this.service = new HidiveHandler(this.ws);
+			else this.service = new ADNHandler(this.ws);
+			respond(true);
 		});
 
 		this.ws.events.on('changeProvider', async (_, respond) => {
@@ -82,7 +82,8 @@ export default class ServiceHandler {
 			respond(await this.service.listEpisodes(data));
 		});
 		this.ws.events.on('downloadItem', async ({ data }, respond) => {
-			this.service?.downloadItem(data);
+			if (!this.service) throw new Error('No service selected');
+			await this.service.downloadItem(data);
 			respond(undefined);
 		});
 		this.ws.events.on('openFolder', async ({ data }, respond) => {
