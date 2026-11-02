@@ -21,9 +21,7 @@ export default class Base {
 	private workOnQueue = false;
 
 	version(): Promise<string> {
-		return new Promise(() => {
-			return packageJson.version;
-		});
+		return Promise.resolve(packageJson.version);
 	}
 
 	initState() {
