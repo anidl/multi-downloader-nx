@@ -46,11 +46,14 @@ export { ignore };
 
 (async () => {
 	const waitForProcess = async (proc: ChildProcess) => {
-		return new Promise((resolve, reject) => {
-			proc.stdout?.on('data', console.log);
-			proc.stderr?.on('data', console.error);
-			proc.on('close', resolve);
-			proc.on('error', reject);
+		return new Promise<void>((resolve, reject) => {
+			proc.stdout?.on('data', (data) => process.stdout.write(data));
+			proc.stderr?.on('data', (data) => process.stderr.write(data));
+			proc.once('close', (code, signal) => {
+				if (code === 0) resolve();
+				else reject(new Error(`Build command failed (exit ${code ?? signal ?? 'unknown'})`));
+			});
+			proc.once('error', reject);
 		});
 	};
 
@@ -87,7 +90,7 @@ export { ignore };
 
 	process.stdout.write('✓\nCopying files... ');
 	if (!isTest && isGUI) {
-		copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'server', 'build'));
+		await copyDir(path.join(__dirname, 'gui', 'react', 'build'), path.join(__dirname, 'lib', 'gui', 'server', 'build'));
 	}
 
 	const files = readDir(__dirname);
@@ -109,7 +112,10 @@ export { ignore };
 	}
 
 	process.stdout.write('✓\n');
-})();
+})().catch((error) => {
+	console.error(error);
+	process.exitCode = 1;
+});
 
 function readDir(dir: string): {
 	path: string;
