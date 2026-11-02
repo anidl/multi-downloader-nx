@@ -14,6 +14,12 @@ import { useSnackbar } from 'notistack';
 const Layout: React.FC = () => {
 	const messageHandler = React.useContext(messageChannelContext);
 	const queue = React.useContext(queueContext);
+	React.useEffect(() => {
+		if (!messageHandler) return;
+		const onQueueError = (event: { data: string }) => enqueueSnackbar(event.data || 'Download failed. See server logs.', { variant: 'error' });
+		messageHandler.randomEvents.on('queueError', onQueueError);
+		return () => messageHandler.randomEvents.removeListener('queueError', onQueueError);
+	}, [messageHandler]);
 	const { enqueueSnackbar } = useSnackbar();
 	const clear = async () => {
 		if (!queue.length || !window.confirm('Clear all pending downloads?')) return;
