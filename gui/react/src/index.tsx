@@ -11,9 +11,9 @@ import Store from './provider/Store';
 import ErrorHandler from './provider/ErrorHandler';
 import QueueProvider from './provider/QueueProvider';
 
-document.body.style.backgroundColor = 'rgb(0, 30, 60)';
-document.body.style.display = 'flex';
-document.body.style.justifyContent = 'center';
+document.body.style.margin = '0';
+document.body.style.minWidth = '320px';
+document.body.style.width = '100%';
 
 const notistackRef = React.createRef<SnackbarProvider>();
 const onClickDismiss = (key: SnackbarKey | undefined) => () => {
