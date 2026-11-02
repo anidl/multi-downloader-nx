@@ -18,6 +18,7 @@ export class RandomEventHandler {
 		progress: [],
 		finish: [],
 		queueChange: [],
+		queueError: [],
 		current: []
 	};
 
@@ -155,12 +156,16 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 		if (!socket) return enqueueSnackbar('Invalid state: socket not found', { variant: 'error' });
 		const formData = new FormData(ev.currentTarget);
 		const password = formData.get('password');
+		const port = Number(formData.get('port'));
+		if (!Number.isInteger(port) || port < 1 || port > 65535) {
+			return enqueueSnackbar('Please enter a valid port (1–65535).', { variant: 'error' });
+		}
 		const data = {
-			port: parseInt(formData.get('port')?.toString() ?? '') ?? 3000,
+			port,
 			password: password ? password.toString() : undefined
 		} as GUIConfig;
 		await messageAndResponse(socket, { name: 'setupServer', data });
-		enqueueSnackbar(`The following settings have been set: Port=${data.port}, Password=${data.password ?? 'noPasswordRequired'}`, {
+		enqueueSnackbar(`The following settings have been set: Port=${data.port}, Password=${data.password ? 'configured' : 'not configured'}`, {
 			variant: 'success',
 			persist: true
 		});
@@ -209,7 +214,7 @@ const MessageChannelProvider: FCWithChildren = ({ children }) => {
 		const listener = (initalData: MessageEvent<string>) => {
 			try {
 				const data = JSON.parse(initalData.data) as RandomEvent<'finish'> & { id?: string };
-				if (!data.id && ['progress', 'finish', 'queueChange', 'current'].includes(data.name)) {
+				if (!data.id && ['progress', 'finish', 'queueChange', 'current', 'queueError'].includes(data.name)) {
 					randomEventHandler.emit(data.name, data);
 				}
 			} catch (error) {
