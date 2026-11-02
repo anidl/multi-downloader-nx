@@ -24,8 +24,11 @@ const AuthButton: React.FC = () => {
 
 	const checkAuth = async () => {
 		if (!messageChannel?.serviceReady) return;
-		try { setAuthed((await messageChannel.checkToken())?.isOk ?? false); }
-		catch { setAuthed(false); }
+		try {
+			setAuthed((await messageChannel.checkToken())?.isOk ?? false);
+		} catch {
+			setAuthed(false);
+		}
 	};
 
 	React.useEffect(() => {
@@ -58,13 +61,16 @@ const AuthButton: React.FC = () => {
 		} finally {
 			setLoading(false);
 		}
-
 	};
 
 	return (
 		<Require value={messageChannel}>
 			<Dialog open={open}>
-				{error && <Alert severity="error" onClose={() => setError(undefined)} sx={{ m: 2 }}>{error.message || 'Authentication failed.'}</Alert>}
+				{error && (
+					<Alert severity="error" onClose={() => setError(undefined)} sx={{ m: 2 }}>
+						{error.message || 'Authentication failed.'}
+					</Alert>
+				)}
 				<DialogTitle sx={{ flexGrow: 1 }}>Authentication</DialogTitle>
 				<DialogContent>
 					<DialogContentText>

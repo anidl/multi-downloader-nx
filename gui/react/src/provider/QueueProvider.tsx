@@ -22,11 +22,14 @@ const QueueProvider: FCWithChildren = ({ children }) => {
 		};
 		// Listen first: a queue event must never be overwritten by a stale initial fetch.
 		msg.randomEvents.on('queueChange', listener);
-		void msg.getQueue().then((items) => {
-			if (active && !updatedByEvent) setQueue(items);
-		}).catch((error) => {
-			if (active) enqueueSnackbar(error instanceof Error ? error.message : 'Unable to load queue', { variant: 'error' });
-		});
+		void msg
+			.getQueue()
+			.then((items) => {
+				if (active && !updatedByEvent) setQueue(items);
+			})
+			.catch((error) => {
+				if (active) enqueueSnackbar(error instanceof Error ? error.message : 'Unable to load queue', { variant: 'error' });
+			});
 		return () => {
 			active = false;
 			msg.randomEvents.removeListener('queueChange', listener);

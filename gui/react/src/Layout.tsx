@@ -36,8 +36,12 @@ const Layout: React.FC = () => {
 			<Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, mb: 3, bgcolor: 'rgba(21,29,48,.85)', borderColor: 'divider' }}>
 				<Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ sm: 'center' }} spacing={1.5} sx={{ mb: 2.5 }}>
 					<Box>
-						<Typography variant="h5" fontWeight={800}>Download dashboard</Typography>
-						<Typography variant="body2" color="text.secondary">Manage episodes and follow your downloads in one place.</Typography>
+						<Typography variant="h5" fontWeight={800}>
+							Download dashboard
+						</Typography>
+						<Typography variant="body2" color="text.secondary">
+							Manage episodes and follow your downloads in one place.
+						</Typography>
 					</Box>
 					<Chip icon={<PlaylistPlay />} label={`${queue.length} pending`} variant="outlined" />
 				</Stack>
@@ -46,8 +50,12 @@ const Layout: React.FC = () => {
 					<AuthButton />
 					<AddToQueue />
 					<StartQueueButton />
-					<Button variant="outlined" startIcon={<FolderOpen />} onClick={() => void messageHandler?.openFolder('content')}>Output folder</Button>
-					<Button color="error" variant="outlined" disabled={!queue.length} startIcon={<ClearAll />} onClick={() => void clear()}>Clear queue</Button>
+					<Button variant="outlined" startIcon={<FolderOpen />} onClick={() => void messageHandler?.openFolder('content')}>
+						Output folder
+					</Button>
+					<Button color="error" variant="outlined" disabled={!queue.length} startIcon={<ClearAll />} onClick={() => void clear()}>
+						Clear queue
+					</Button>
 				</Stack>
 			</Paper>
 			<MainFrame />

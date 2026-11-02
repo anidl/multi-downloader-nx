@@ -126,11 +126,13 @@ export default class Base {
 			const next = this.queue.shift()!;
 			this.setDownloading(true);
 			this.sendMessage({ name: 'current', data: next });
-			void Promise.resolve().then(() => this.downloadItem(next)).catch((error) => {
-				this.alertError(error instanceof Error ? error : new Error(String(error)));
-				this.setDownloading(false);
-				void this.onFinish();
-			});
+			void Promise.resolve()
+				.then(() => this.downloadItem(next))
+				.catch((error) => {
+					this.alertError(error instanceof Error ? error : new Error(String(error)));
+					this.setDownloading(false);
+					void this.onFinish();
+				});
 		}
 		this.state.services[this.name].queue = this.queue;
 		setState(this.state);

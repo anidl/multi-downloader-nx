@@ -91,10 +91,13 @@ const Store: FCWithChildren = ({ children }) => {
 	const [state, dispatch] = React.useReducer(Reducer, initialState, restorePreferences);
 	React.useEffect(() => {
 		try {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify({
-				service: state.service,
-				downloadOptions: state.downloadOptions
-			}));
+			localStorage.setItem(
+				STORAGE_KEY,
+				JSON.stringify({
+					service: state.service,
+					downloadOptions: state.downloadOptions
+				})
+			);
 		} catch {
 			// Local storage may be disabled by the browser.
 		}

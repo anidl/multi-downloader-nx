@@ -35,14 +35,19 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 				]);
 				// Respect browser-persisted choices instead of resetting them on every dialog open.
 				if (!cancelled && !localStorage.getItem('anidl.gui.preferences.v1')) {
-					dispatch({ type: 'downloadOptions', payload: {
-						...store.downloadOptions, dubLang: defaults[0], dlsubs: defaults[1],
-						q: defaults[2], fileName: defaults[3], dlVideoOnce: defaults[4]
-					} });
+					dispatch({
+						type: 'downloadOptions',
+						payload: {
+							...store.downloadOptions,
+							dubLang: defaults[0],
+							dlsubs: defaults[1],
+							q: defaults[2],
+							fileName: defaults[3],
+							dlVideoOnce: defaults[4]
+						}
+					});
 				}
-				const [dubs, subs] = await Promise.all([
-					messageHandler.availableDubCodes(), messageHandler.availableSubCodes()
-				]);
+				const [dubs, subs] = await Promise.all([messageHandler.availableDubCodes(), messageHandler.availableSubCodes()]);
 				if (!cancelled) {
 					setAvailableDubs(dubs);
 					setAvailableSubs(subs);
@@ -51,7 +56,9 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 				if (!cancelled) enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
 			}
 		})();
-		return () => { cancelled = true; };
+		return () => {
+			cancelled = true;
+		};
 	}, [messageHandler?.serviceReady, store.service]);
 
 	const addToQueue = async () => {
@@ -351,7 +358,11 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 											<MenuItem value="">No Hardsub</MenuItem>
 											{availableSubs.map((lang) => {
 												if (lang === 'all' || lang === 'none') return undefined;
-												return <MenuItem key={lang} value={lang}>{lang}</MenuItem>;
+												return (
+													<MenuItem key={lang} value={lang}>
+														{lang}
+													</MenuItem>
+												);
 											})}
 										</Select>
 									</FormControl>
@@ -422,7 +433,13 @@ const DownloadSelector: React.FC<DownloadSelectorProps> = ({ onFinish }) => {
 			</Box>
 			<Box sx={{ width: '95%', height: '0.3rem', backgroundColor: '#ffffff50', borderRadius: '10px', marginTop: '10px' }} />
 
-			<LoadingButton sx={{ margin: '15px', textTransform: 'none' }} disabled={!messageHandler?.serviceReady} loading={loading} onClick={() => void addToQueue()} variant="contained">
+			<LoadingButton
+				sx={{ margin: '15px', textTransform: 'none' }}
+				disabled={!messageHandler?.serviceReady}
+				loading={loading}
+				onClick={() => void addToQueue()}
+				variant="contained"
+			>
 				Add to Queue
 			</LoadingButton>
 		</Box>
