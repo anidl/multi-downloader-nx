@@ -1,42 +1,47 @@
-import { PauseCircleFilled, PlayCircleFilled } from '@mui/icons-material';
-import { Button } from '@mui/material';
-import { useSnackbar } from 'notistack';
 import React from 'react';
+import { Button } from '@mui/material';
+import { PauseRounded, PlayArrowRounded } from '@mui/icons-material';
+import { useSnackbar } from 'notistack';
 import { messageChannelContext } from '../provider/MessageChannel';
-import Require from './Require';
 
 const StartQueueButton: React.FC = () => {
-	const messageChannel = React.useContext(messageChannelContext);
-	const [start, setStart] = React.useState(false);
 	const msg = React.useContext(messageChannelContext);
+	const [started, setStarted] = React.useState(false);
+	const [pending, setPending] = React.useState(false);
 	const { enqueueSnackbar } = useSnackbar();
-
 	React.useEffect(() => {
+		setStarted(false);
 		if (!msg?.serviceReady) return;
+		let active = true;
 		void msg
 			.getDownloadQueue()
-			.then(setStart)
-			.catch((error) => enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' }));
-	}, [msg?.serviceReady]);
-
+			.then((value) => {
+				if (active) setStarted(value);
+			})
+			.catch((error) => {
+				if (active) enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+			});
+		return () => {
+			active = false;
+		};
+	}, [msg?.service, msg?.serviceReady]);
 	const change = async () => {
-		if (!msg?.serviceReady) return;
+		if (!msg?.serviceReady || pending) return;
+		setPending(true);
 		try {
-			if (start && (await msg.isDownloading())) enqueueSnackbar('The current download will finish before the queue pauses.', { variant: 'info' });
-			await msg.setDownloadQueue(!start);
-			setStart(!start);
+			await msg.setDownloadQueue(!started);
+			setStarted(!started);
+			if (started && (await msg.isDownloading())) enqueueSnackbar('Current download will finish before the queue pauses.', { variant: 'info' });
 		} catch (error) {
 			enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+		} finally {
+			setPending(false);
 		}
 	};
-
 	return (
-		<Require value={messageChannel}>
-			<Button startIcon={start ? <PauseCircleFilled /> : <PlayCircleFilled />} variant="contained" disabled={!msg?.serviceReady} onClick={() => void change()}>
-				{start ? 'Stop Queue' : 'Start Queue'}
-			</Button>
-		</Require>
+		<Button disabled={!msg?.serviceReady || pending} variant="outlined" startIcon={started ? <PauseRounded /> : <PlayArrowRounded />} onClick={() => void change()}>
+			{started ? 'Pause queue' : 'Start queue'}
+		</Button>
 	);
 };
-
 export default StartQueueButton;

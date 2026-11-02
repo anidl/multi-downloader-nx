@@ -10,33 +10,31 @@ const QueueProvider: FCWithChildren = ({ children }) => {
 	const msg = React.useContext(messageChannelContext);
 	const { enqueueSnackbar } = useSnackbar();
 	const [queue, setQueue] = React.useState<QueueItem[]>([]);
-
 	React.useEffect(() => {
 		setQueue([]);
-		if (!msg?.serviceReady) return;
+		if (!msg?.serviceReady || !msg.service) return;
 		let active = true;
-		let updatedByEvent = false;
+		let receivedEvent = false;
+		const service = msg.service;
 		const listener = (event: RandomEvent<'queueChange'>) => {
-			updatedByEvent = true;
+			if (event.service !== service) return;
+			receivedEvent = true;
 			if (active) setQueue(event.data);
 		};
-		// Listen first: a queue event must never be overwritten by a stale initial fetch.
 		msg.randomEvents.on('queueChange', listener);
 		void msg
 			.getQueue()
 			.then((items) => {
-				if (active && !updatedByEvent) setQueue(items);
+				if (active && !receivedEvent) setQueue(items);
 			})
 			.catch((error) => {
-				if (active) enqueueSnackbar(error instanceof Error ? error.message : 'Unable to load queue', { variant: 'error' });
+				if (active) enqueueSnackbar(error instanceof Error ? error.message : 'Could not load the queue', { variant: 'error' });
 			});
 		return () => {
 			active = false;
 			msg.randomEvents.removeListener('queueChange', listener);
 		};
-	}, [msg, enqueueSnackbar]);
-
+	}, [msg?.service, msg?.serviceReady, msg?.randomEvents, enqueueSnackbar]);
 	return <queueContext.Provider value={queue}>{children}</queueContext.Provider>;
 };
-
 export default QueueProvider;

@@ -185,6 +185,9 @@ export default class AnimationDigitalNetwork implements ServiceClass {
 		};
 	}
 
+	public isAuthenticated(): boolean {
+		return !!this.token.accessToken;
+	}
 	public async doAuth(data: AuthData): Promise<AuthResponse> {
 		const authData = JSON.stringify({
 			username: data.username,

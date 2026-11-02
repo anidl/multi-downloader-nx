@@ -18,109 +18,106 @@ export type DownloadOptions = {
 	noaudio: boolean;
 };
 
+export type ServiceName = 'crunchy' | 'hidive' | 'adn';
 export type StoreState = {
 	episodeListing: Episode[];
 	downloadOptions: DownloadOptions;
-	service: 'crunchy' | 'hidive' | 'adn' | undefined;
+	optionsByService: Partial<Record<ServiceName, DownloadOptions>>;
+	service: ServiceName | undefined;
 	version: string;
 };
-
 export type StoreAction<T extends keyof StoreState> = {
 	type: T;
 	payload: StoreState[T];
 	extraInfo?: Record<string, unknown>;
 };
 
-const Reducer = <T extends keyof StoreState>(state: StoreState, action: StoreAction<T>): StoreState => {
-	switch (action.type) {
-		default:
-			return { ...state, [action.type]: action.payload };
-	}
+const defaultOptions: DownloadOptions = {
+	id: '',
+	q: 0,
+	e: '',
+	dubLang: ['jpn'],
+	dlsubs: ['all'],
+	fileName: '',
+	dlVideoOnce: false,
+	all: false,
+	but: false,
+	noaudio: false,
+	novids: false,
+	simul: false
 };
-
 const initialState: StoreState = {
-	downloadOptions: {
-		id: '',
-		q: 0,
-		e: '',
-		dubLang: ['jpn'],
-		dlsubs: ['all'],
-		fileName: '',
-		dlVideoOnce: false,
-		all: false,
-		but: false,
-		noaudio: false,
-		novids: false,
-		simul: false
-	},
 	service: undefined,
 	episodeListing: [],
+	downloadOptions: { ...defaultOptions },
+	optionsByService: {},
 	version: ''
 };
+const STORAGE_KEY = 'anidl.gui.preferences.v2';
 
-const STORAGE_KEY = 'anidl.gui.preferences.v1';
-
-// Persist interface preferences, never passwords or account credentials.
-const restorePreferences = (): StoreState => {
+const restored = (): StoreState => {
 	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
-		if (!raw) return initialState;
-		const saved = JSON.parse(raw) as Partial<StoreState>;
-		const service = ['crunchy', 'hidive', 'adn'].includes(saved.service ?? '') ? saved.service : undefined;
-		const options = saved.downloadOptions;
-		if (!options || typeof options !== 'object') return { ...initialState, service };
+		const savedV2 = localStorage.getItem(STORAGE_KEY);
+		const stored = JSON.parse(savedV2 || localStorage.getItem('anidl.gui.preferences.v1') || '{}') as Partial<StoreState>;
+		const service = (['crunchy', 'hidive', 'adn'] as string[]).includes(stored.service || '') ? stored.service : undefined;
+		const legacy = stored as Partial<StoreState>;
+		const optionsByService: Partial<Record<ServiceName, DownloadOptions>> =
+			stored.optionsByService && typeof stored.optionsByService === 'object'
+				? stored.optionsByService
+				: service && legacy.downloadOptions
+					? { [service]: { ...defaultOptions, ...legacy.downloadOptions } }
+					: {};
 		return {
 			...initialState,
 			service,
-			downloadOptions: {
-				...initialState.downloadOptions,
-				...options,
-				id: typeof options.id === 'string' ? options.id : '',
-				e: typeof options.e === 'string' ? options.e : '',
-				dubLang: Array.isArray(options.dubLang) ? options.dubLang : initialState.downloadOptions.dubLang,
-				dlsubs: Array.isArray(options.dlsubs) ? options.dlsubs : initialState.downloadOptions.dlsubs,
-				q: typeof options.q === 'number' && Number.isInteger(options.q) && options.q >= 0 && options.q <= 10 ? options.q : 0
-			}
+			optionsByService,
+			downloadOptions: { ...defaultOptions, ...(service ? optionsByService[service] : {}) }
 		};
 	} catch {
 		return initialState;
 	}
 };
 
+const Reducer = <T extends keyof StoreState>(state: StoreState, action: StoreAction<T>): StoreState => {
+	if (action.type === 'service') {
+		const next = action.payload as ServiceName | undefined;
+		if (next === state.service) return state;
+		const optionsByService = { ...state.optionsByService };
+		if (state.service) optionsByService[state.service] = state.downloadOptions;
+		return {
+			...state,
+			service: next,
+			optionsByService,
+			downloadOptions: { ...defaultOptions, ...(next ? optionsByService[next] : {}) },
+			episodeListing: []
+		};
+	}
+	if (action.type === 'downloadOptions') {
+		const downloadOptions = action.payload as DownloadOptions;
+		return {
+			...state,
+			downloadOptions,
+			optionsByService: state.service ? { ...state.optionsByService, [state.service]: downloadOptions } : state.optionsByService
+		};
+	}
+	return { ...state, [action.type]: action.payload };
+};
+
 const Store: FCWithChildren = ({ children }) => {
-	const [state, dispatch] = React.useReducer(Reducer, initialState, restorePreferences);
+	const [state, dispatch] = React.useReducer(Reducer, initialState, restored);
 	React.useEffect(() => {
 		try {
 			localStorage.setItem(
 				STORAGE_KEY,
 				JSON.stringify({
 					service: state.service,
-					downloadOptions: state.downloadOptions
+					optionsByService: state.optionsByService
 				})
 			);
 		} catch {
-			// Local storage may be disabled by the browser.
+			// Private browsing can disable localStorage.
 		}
-	}, [state.service, state.downloadOptions]);
-	/*React.useEffect(() => {
-    if (!state.unsavedChanges.has)
-      return;
-    const unsavedChanges = (ev: BeforeUnloadEvent, lang: LanguageContextType) => {
-      ev.preventDefault();
-      ev.returnValue = lang.getLang('unsaved_changes');
-      return lang.getLang('unsaved_changes');
-    };
-
-
-    const windowListener = (ev: BeforeUnloadEvent) => {
-      return unsavedChanges(ev, state.lang);
-    };
-
-    window.addEventListener('beforeunload', windowListener);
-
-    return () => window.removeEventListener('beforeunload', windowListener);
-  }, [state.unsavedChanges.has]);*/
-
+	}, [state.service, state.optionsByService]);
 	return <StoreContext.Provider value={[state, dispatch]}>{children}</StoreContext.Provider>;
 };
 

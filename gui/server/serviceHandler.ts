@@ -1,23 +1,44 @@
-import { ServerResponse } from 'http';
-import { Server } from 'http';
-import { IncomingMessage } from 'http';
+import { ServerResponse, Server, IncomingMessage } from 'http';
 import { MessageHandler, GuiState } from '../../@types/messageHandler';
+import { ServiceName, ServiceOverview } from '../../@types/ws';
 import { setState, getState, writeYamlCfgFile } from '../../modules/module.cfg-loader';
 import CrunchyHandler from './services/crunchyroll';
 import HidiveHandler from './services/hidive';
 import ADNHandler from './services/adn';
+import Base from './services/base';
 import WebSocketHandler from './websocket';
 import packageJson from '../../package.json';
 
+type Service = Base & MessageHandler;
+const SERVICE_NAMES: ServiceName[] = ['crunchy', 'hidive', 'adn'];
+
 export default class ServiceHandler {
-	private service: MessageHandler | undefined = undefined;
+	private services: Partial<Record<ServiceName, Service>> = {};
 	private ws: WebSocketHandler;
 	private state: GuiState;
 
 	constructor(server: Server<typeof IncomingMessage, typeof ServerResponse>) {
+		this.state = getState();
 		this.ws = new WebSocketHandler(server);
 		this.handleMessages();
-		this.state = getState();
+	}
+
+	private serviceFor(name?: ServiceName): Service {
+		if (!name || !SERVICE_NAMES.includes(name)) throw new Error('Select a download service first.');
+		if (!this.services[name]) {
+			switch (name) {
+				case 'crunchy':
+					this.services[name] = new CrunchyHandler(this.ws);
+					break;
+				case 'hidive':
+					this.services[name] = new HidiveHandler(this.ws);
+					break;
+				case 'adn':
+					this.services[name] = new ADNHandler(this.ws);
+					break;
+			}
+		}
+		return this.services[name]!;
 	}
 
 	private handleMessages() {
@@ -26,97 +47,94 @@ export default class ServiceHandler {
 			this.state.setup = true;
 			setState(this.state);
 			respond(true);
-			// Allow the acknowledgement to reach the browser before restarting.
 			setTimeout(() => process.exit(0), 250);
 		});
 
 		this.ws.events.on('setup', ({ data }, respond) => {
-			if (data !== 'crunchy' && data !== 'hidive' && data !== 'adn') return respond(false);
-			if (this.service?.name === data) return respond(true);
-			if (this.service) return respond(false);
-			if (data === 'crunchy') this.service = new CrunchyHandler(this.ws);
-			else if (data === 'hidive') this.service = new HidiveHandler(this.ws);
-			else this.service = new ADNHandler(this.ws);
+			this.serviceFor(data);
 			respond(true);
 		});
+		this.ws.events.on('type', (_, respond) => respond(undefined));
+		this.ws.events.on('changeProvider', (_, respond) => respond(true));
+		this.ws.events.on('version', (_, respond) => respond(packageJson.version));
 
-		this.ws.events.on('changeProvider', async (_, respond) => {
-			if (await this.service?.isDownloading()) return respond(false);
-			this.service = undefined;
-			respond(true);
+		this.ws.events.on('overview', async (_, respond) => {
+			const saved = getState();
+			const overview = {} as Record<ServiceName, ServiceOverview>;
+			for (const name of SERVICE_NAMES) {
+				const service = this.services[name];
+				overview[name] = {
+					queue: service ? await service.getQueue() : (saved.services?.[name]?.queue ?? []),
+					current: service?.getCurrent(),
+					downloading: service ? await service.isDownloading() : false,
+					autoStart: service ? await service.getDownloadQueue() : false
+				};
+			}
+			respond(overview);
 		});
 
-		this.ws.events.on('auth', async ({ data }, respond) => {
-			if (this.service === undefined) return respond({ isOk: false, reason: new Error('No service selected') });
-			respond(await this.service.auth(data));
-		});
-		this.ws.events.on('version', async (_, respond) => {
-			respond(packageJson.version);
-		});
-		this.ws.events.on('type', async (_, respond) => respond(this.service === undefined ? undefined : (this.service.name as 'hidive' | 'crunchy' | 'adn')));
-		this.ws.events.on('checkToken', async (_, respond) => {
-			if (this.service === undefined) return respond({ isOk: false, reason: new Error('No service selected') });
-			respond(await this.service.checkToken());
-		});
-		this.ws.events.on('search', async ({ data }, respond) => {
-			if (this.service === undefined) return respond({ isOk: false, reason: new Error('No service selected') });
-			respond(await this.service.search(data));
-		});
-		this.ws.events.on('default', async ({ data }, respond) => {
-			if (this.service === undefined) return respond({ isOk: false, reason: new Error('No service selected') });
-			respond(await this.service.handleDefault(data));
-		});
-		this.ws.events.on('availableDubCodes', async (_, respond) => {
-			if (this.service === undefined) return respond([]);
-			respond(await this.service.availableDubCodes());
-		});
-		this.ws.events.on('availableSubCodes', async (_, respond) => {
-			if (this.service === undefined) return respond([]);
-			respond(await this.service.availableSubCodes());
-		});
-		this.ws.events.on('resolveItems', async ({ data }, respond) => {
-			if (this.service === undefined) return respond(false);
-			respond(await this.service.resolveItems(data));
-		});
-		this.ws.events.on('listEpisodes', async ({ data }, respond) => {
-			if (this.service === undefined) return respond({ isOk: false, reason: new Error('No service selected') });
-			respond(await this.service.listEpisodes(data));
-		});
-		this.ws.events.on('downloadItem', async ({ data }, respond) => {
-			if (!this.service) throw new Error('No service selected');
-			await this.service.downloadItem(data);
+		this.ws.events.on('auth', async ({ data, service }, respond) => respond(await this.serviceFor(service).auth(data)));
+		this.ws.events.on('checkToken', async ({ service }, respond) => respond(await this.serviceFor(service).checkToken()));
+		this.ws.events.on('search', async ({ data, service }, respond) => respond(await this.serviceFor(service).search(data)));
+		this.ws.events.on('default', async ({ data, service }, respond) => respond(await this.serviceFor(service).handleDefault(data)));
+		this.ws.events.on('availableDubCodes', async ({ service }, respond) => respond(await this.serviceFor(service).availableDubCodes()));
+		this.ws.events.on('availableSubCodes', async ({ service }, respond) => respond(await this.serviceFor(service).availableSubCodes()));
+
+		const resolve = async (name: ServiceName | undefined, data: Parameters<MessageHandler['resolveItems']>[0]) => {
+			const service = this.serviceFor(name);
+			const before = service.getAddedCount();
+			const ok = await service.resolveItems(data);
+			const added = service.getAddedCount() - before;
+			return {
+				ok: !!ok && added > 0,
+				added,
+				message: added
+					? undefined
+					: 'No matching episodes found for this show and selected audio/episodes. Check your selection using “List episodes”, or choose Download all.'
+			};
+		};
+		this.ws.events.on('resolveItems', async ({ data, service }, respond) => respond((await resolve(service, data)).ok));
+		this.ws.events.on('resolveDetailed', async ({ data, service }, respond) => respond(await resolve(service, data)));
+
+		this.ws.events.on('listEpisodes', async ({ data, service }, respond) => respond(await this.serviceFor(service).listEpisodes(data)));
+		this.ws.events.on('downloadItem', async ({ data, service }, respond) => {
+			const handler = this.serviceFor(service);
+			// A direct download should not block a websocket request for hours.
+			void Promise.resolve()
+				.then(() => handler.downloadItem(data))
+				.catch((error) => {
+					handler.alertError(error instanceof Error ? error : new Error(String(error)));
+					handler.setDownloading(false);
+					void handler.onFinish();
+				});
 			respond(undefined);
 		});
-		this.ws.events.on('openFolder', async ({ data }, respond) => {
-			this.service?.openFolder(data);
+		this.ws.events.on('openFolder', async ({ data, service }, respond) => {
+			await this.serviceFor(service).openFolder(data);
 			respond(undefined);
 		});
-		this.ws.events.on('openFile', async ({ data }, respond) => {
-			this.service?.openFile(data);
+		this.ws.events.on('openFile', async ({ data, service }, respond) => {
+			await this.serviceFor(service).openFile(data);
 			respond(undefined);
 		});
-		this.ws.events.on('openURL', async ({ data }, respond) => {
-			this.service?.openURL(data);
+		this.ws.events.on('openURL', async ({ data, service }, respond) => {
+			await this.serviceFor(service).openURL(data);
 			respond(undefined);
 		});
-		this.ws.events.on('getQueue', async (_, respond) => {
-			respond((await this.service?.getQueue()) ?? []);
-		});
-		this.ws.events.on('removeFromQueue', async ({ data }, respond) => {
-			this.service?.removeFromQueue(data);
+		this.ws.events.on('getQueue', async ({ service }, respond) => respond(await this.serviceFor(service).getQueue()));
+		this.ws.events.on('removeFromQueue', async ({ data, service }, respond) => {
+			await this.serviceFor(service).removeFromQueue(data);
 			respond(undefined);
 		});
-		this.ws.events.on('clearQueue', async (_, respond) => {
-			this.service?.clearQueue();
+		this.ws.events.on('clearQueue', async ({ service }, respond) => {
+			await this.serviceFor(service).clearQueue();
 			respond(undefined);
 		});
-		this.ws.events.on('setDownloadQueue', async ({ data }, respond) => {
-			this.service?.setDownloadQueue(data);
+		this.ws.events.on('setDownloadQueue', async ({ data, service }, respond) => {
+			this.serviceFor(service).setDownloadQueue(data);
 			respond(undefined);
 		});
-		this.ws.events.on('getDownloadQueue', async (_, respond) => {
-			respond((await this.service?.getDownloadQueue()) ?? false);
-		});
-		this.ws.events.on('isDownloading', async (_, respond) => respond((await this.service?.isDownloading()) ?? false));
+		this.ws.events.on('getDownloadQueue', async ({ service }, respond) => respond(await this.serviceFor(service).getDownloadQueue()));
+		this.ws.events.on('isDownloading', async ({ service }, respond) => respond(await this.serviceFor(service).isDownloading()));
 	}
 }

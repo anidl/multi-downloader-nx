@@ -21,8 +21,7 @@ class HidiveHandler extends Base implements MessageHandler {
 	}
 
 	public async checkToken(): Promise<CheckTokenResponse> {
-		//TODO: implement proper method to check token
-		return { isOk: true, value: undefined };
+		return this.hidive.isAuthenticated() ? { isOk: true, value: undefined } : { isOk: false, reason: new Error('Authentication required') };
 	}
 
 	public async search(data: SearchData): Promise<SearchResponse> {
@@ -59,7 +58,8 @@ class HidiveHandler extends Base implements MessageHandler {
 		if (isNaN(parse) || parse <= 0) return false;
 		console.debug(`Got resolve options: ${JSON.stringify(data)}`);
 		const res = await this.hidive.selectSeries(parseInt(data.id), data.e, data.but, data.all);
-		if (!res.isOk || !res.value?.length) return false;
+		if (!res.isOk) throw new Error('HIDIVE could not resolve this series. Check your account, region and show ID.');
+		if (!res.value?.length) return false;
 		this.addToQueue(
 			res.value.map((item) => {
 				return {

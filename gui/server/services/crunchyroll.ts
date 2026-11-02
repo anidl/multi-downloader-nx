@@ -13,7 +13,6 @@ class CrunchyHandler extends Base implements MessageHandler {
 	constructor(ws: WebSocketHandler) {
 		super(ws);
 		this.crunchy = new Crunchy();
-		this.crunchy.refreshToken();
 		this.initState();
 		this.getDefaults();
 	}
@@ -50,7 +49,8 @@ class CrunchyHandler extends Base implements MessageHandler {
 		await this.crunchy.refreshToken(true);
 		console.debug(`Got resolve options: ${JSON.stringify(data)}`);
 		const res = await this.crunchy.downloadFromSeriesID(data.id, data);
-		if (!res.isOk || !res.value?.length) return false;
+		if (!res.isOk) throw res.reason;
+		if (!res.value?.length) return false;
 		this.addToQueue(
 			res.value.map((a) => {
 				return {
@@ -85,6 +85,7 @@ class CrunchyHandler extends Base implements MessageHandler {
 	}
 
 	public async checkToken(): Promise<CheckTokenResponse> {
+		await this.crunchy.refreshToken(true);
 		if (await this.crunchy.getProfile()) {
 			return { isOk: true, value: undefined };
 		} else {
@@ -92,8 +93,15 @@ class CrunchyHandler extends Base implements MessageHandler {
 		}
 	}
 
-	public auth(data: AuthData) {
-		return this.crunchy.doAuth(data);
+	public async auth(data: AuthData) {
+		const result = await this.crunchy.doAuth(data);
+		if (!result.isOk) return result;
+		// Login tokens are available immediately, but CMS permissions must be fetched
+		// before resolving episodes. This is the first-login queue failure.
+		await this.crunchy.getCMStoken(true);
+		if (!this.crunchy.checkToken())
+			return { isOk: false as const, reason: new Error('Logged in, but Crunchyroll catalog access could not be initialized. Please retry authentication.') };
+		return result;
 	}
 
 	public async downloadItem(data: DownloadData) {

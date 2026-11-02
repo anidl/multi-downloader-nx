@@ -1,3 +1,4 @@
+import type { ServiceName } from './ws';
 import { ExtendedProgress, QueueItem } from './messageHandler';
 
 export type RandomEvents = {
@@ -9,6 +10,7 @@ export type RandomEvents = {
 };
 
 export interface RandomEvent<T extends keyof RandomEvents> {
+	service?: ServiceName;
 	name: T;
 	data: RandomEvents[T];
 }
