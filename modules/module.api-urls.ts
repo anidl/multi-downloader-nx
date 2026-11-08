@@ -31,6 +31,10 @@ export type APIType = {
 	crunchyDefHeader: Record<string, any>;
 	crunchyAuthHeader: Record<string, string>;
 	crunchyAuthRefreshHeader: Record<string, string>;
+	// Crunchyroll Web client (etp_rt cookie login)
+	web_basic_auth_token: string;
+	crunchyWebUserAgent: string;
+	crunchyWebAuthHeader: Record<string, string>;
 	// Hidive
 	hd_apikey: string;
 	hd_devName: string;
@@ -71,6 +75,11 @@ const api: APIType = {
 	crunchyAuthHeader: {},
 	crunchyAuthRefreshHeader: {},
 	//
+	// Crunchyroll Web client (etp_rt cookie login, used by --token)
+	web_basic_auth_token: 'bm9haWhkZXZtXzZpeWcwYThsMHE6',
+	crunchyWebUserAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36',
+	crunchyWebAuthHeader: {},
+	//
 	//
 	// Hidive
 	// Hidive API
@@ -108,6 +117,17 @@ api.crunchyAuthRefreshHeader = {
 	'Accept-Charset': 'UTF-8',
 	'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 	...api.crunchyDefHeader
+};
+
+// set header (web client, etp_rt_cookie grant)
+api.crunchyWebAuthHeader = {
+	Authorization: `Basic ${api.web_basic_auth_token}`,
+	Accept: 'application/json',
+	'Accept-Charset': 'UTF-8',
+	'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+	'User-Agent': api.crunchyWebUserAgent,
+	Origin: domain.cr_api,
+	Referer: `${domain.cr_api}/`
 };
 
 export { domain, api };
