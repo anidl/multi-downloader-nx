@@ -368,6 +368,10 @@ export default class Crunchy implements ServiceClass {
 	}
 
 	public async doAuth(data: AuthData): Promise<AuthResponse> {
+		// GUI workaround: a UUID-shaped username is treated as an etp_rt cookie and logged in like --token
+		if (/^(etp_rt=)?[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(data.username.trim())) {
+			return (await this.loginWithToken(data.username)) ? { isOk: true, value: undefined } : { isOk: false, reason: new Error('Token Authentication failed') };
+		}
 		const basic = atob(api.basic_auth_token);
 		const client = basic.split(':');
 
@@ -393,7 +397,9 @@ export default class Crunchy implements ServiceClass {
 		if (!authReq.ok || !authReq.res) {
 			console.error('Authentication failed!');
 			if (authReq.res?.status === 400) {
-				console.warn('Crunchyroll may no longer accept username/password login. Log in with --token and the etp_rt cookie from your browser instead.');
+				console.warn(
+					'Crunchyroll may no longer accept username/password login. Log in with --token and the etp_rt cookie from your browser instead (GUI: paste it as the username).'
+				);
 			}
 			return { isOk: false, reason: new Error('Authentication failed') };
 		}
@@ -528,13 +534,14 @@ export default class Crunchy implements ServiceClass {
 	public async loginWithToken(refreshToken: string) {
 		const token = await this.requestWebToken(refreshToken.trim().replace(/^etp_rt=/, ''), randomUUID(), 'Token Authentication failed!');
 		if (!token) {
-			return;
+			return false;
 		}
 
 		this.token = token;
 		yamlCfg.saveCRToken(this.token);
 		await this.getProfile(false);
 		await this.getCMStoken(true);
+		return true;
 	}
 
 	public async refreshToken(ifNeeded = false, silent = false) {
