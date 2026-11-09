@@ -1,4 +1,4 @@
-# multi-downloader-nx (v5.8.7)
+# multi-downloader-nx (v5.8.8)
 
 If you find any bugs in this documentation or in the program itself please report it [over on GitHub](https://github.com/anidl/multi-downloader-nx/issues).
 
@@ -193,19 +193,19 @@ Select the server to use
 #### `--cstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **cli-default Entry**
 | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`androidtv`, `android`, `androidtab`, `none`] | `NaN` |
+| Crunchyroll | `--cstream ${device}` | `string` | `No`| `--cs` | [`androidtv`, `android`, `androidtab`, `chrome`, `firefox`, `none`] | `NaN` |
 
 (Please use --vstream and --astream instead, this will deprecate soon)
 #### `--vstream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--vstream ${device}` | `string` | `No`| `--vs` | [`androidtv`, `android`, `androidtab`, `none`] | `androidtv`| `vstream: ` |
+| Crunchyroll | `--vstream ${device}` | `string` | `No`| `--vs` | [`androidtv`, `android`, `androidtab`, `chrome`, `firefox`, `none`] | `androidtv`| `vstream: ` |
 
 Select a specific Crunchyroll video playback endpoint by device. androidtv provides the best video (CBR).
 #### `--astream`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** | **Choices** | **Default** |**cli-default Entry**
 | --- | --- | --- | --- | --- | --- | --- | ---| 
-| Crunchyroll | `--astream ${device}` | `string` | `No`| `--as` | [`androidtv`, `android`, `androidtab`, `none`] | `android`| `astream: ` |
+| Crunchyroll | `--astream ${device}` | `string` | `No`| `--as` | [`androidtv`, `android`, `androidtab`, `chrome`, `firefox`, `none`] | `android`| `astream: ` |
 
 Select a specific Crunchyroll audio playback endpoint by device. android provides the best audio (192 kbps).
 #### `--tsd`
