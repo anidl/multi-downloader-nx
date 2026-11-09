@@ -1585,12 +1585,14 @@ export default class Crunchy implements ServiceClass {
 
 			//Make sure token is up-to-date
 			await this.refreshToken(true, true);
+			// Web logins (--token) only work with a browser user agent
+			const clientHeaders = this.token.auth_type === 'web' ? { ...api.crunchyDefHeader, 'User-Agent': api.crunchyWebUserAgent } : api.crunchyDefHeader;
 			let currentVersion;
 			let isPrimary = mMeta.isSubbed;
 			const AuthHeaders: FetchParams = {
 				headers: {
 					Authorization: `Bearer ${this.token.access_token}`,
-					...api.crunchyDefHeader
+					...clientHeaders
 				}
 			};
 
@@ -1784,7 +1786,7 @@ export default class Crunchy implements ServiceClass {
 			}
 
 			const videoPlaybackReq = await this.req.getData(
-				`https://cr-play-service.prd.crunchyrollsvc.com/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams['androidtv']}/play?queue=0`,
+				`https://cr-play-service.prd.crunchyrollsvc.com/v3/${currentVersion ? currentVersion.guid : currentMediaId}/${CrunchyVideoPlayStreams[this.token.auth_type === 'web' ? 'chrome' : 'androidtv']}/play?queue=0`,
 				AuthHeaders
 			);
 			if (!videoPlaybackReq.ok || !videoPlaybackReq.res) {
@@ -2220,7 +2222,7 @@ export default class Crunchy implements ServiceClass {
 							if (cdm === 'widevine') {
 								encryptionKeysVideo = await getKeysWVD(chosenVideoSegments.pssh_wvd, api.drm_widevine, {
 									Authorization: `Bearer ${this.token.access_token}`,
-									...api.crunchyDefHeader,
+									...clientHeaders,
 									Pragma: 'no-cache',
 									'Cache-Control': 'no-cache',
 									'content-type': 'application/octet-stream',
@@ -2232,12 +2234,12 @@ export default class Crunchy implements ServiceClass {
 								if (chosenAudioSegments.pssh_wvd && chosenAudioSegments.pssh_wvd !== chosenVideoSegments.pssh_wvd) {
 									encryptionKeysAudio = await getKeysWVD(chosenAudioSegments.pssh_wvd, api.drm_widevine, {
 										Authorization: `Bearer ${this.token.access_token}`,
-										...api.crunchyDefHeader,
+										...clientHeaders,
 										Pragma: 'no-cache',
 										'Cache-Control': 'no-cache',
 										'content-type': 'application/octet-stream',
 										'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
-										'x-cr-video-token': audioStream!.token
+										'x-cr-video-token': (audioStream ?? videoStream)!.token
 									});
 								} else {
 									encryptionKeysAudio = encryptionKeysVideo;
@@ -2248,7 +2250,7 @@ export default class Crunchy implements ServiceClass {
 							if (cdm === 'playready') {
 								encryptionKeysVideo = await getKeysPRD(chosenVideoSegments.pssh_prd, api.drm_playready, {
 									Authorization: `Bearer ${this.token.access_token}`,
-									...api.crunchyDefHeader,
+									...clientHeaders,
 									Pragma: 'no-cache',
 									'Cache-Control': 'no-cache',
 									'content-type': 'application/octet-stream',
@@ -2260,12 +2262,12 @@ export default class Crunchy implements ServiceClass {
 								if (chosenAudioSegments.pssh_prd && chosenAudioSegments.pssh_prd !== chosenVideoSegments.pssh_prd) {
 									encryptionKeysAudio = await getKeysPRD(chosenAudioSegments.pssh_prd, api.drm_playready, {
 										Authorization: `Bearer ${this.token.access_token}`,
-										...api.crunchyDefHeader,
+										...clientHeaders,
 										Pragma: 'no-cache',
 										'Cache-Control': 'no-cache',
 										'content-type': 'application/octet-stream',
 										'x-cr-content-id': currentVersion ? currentVersion.guid : currentMediaId,
-										'x-cr-video-token': audioStream!.token
+										'x-cr-video-token': (audioStream ?? videoStream)!.token
 									});
 								} else {
 									encryptionKeysAudio = encryptionKeysVideo;
