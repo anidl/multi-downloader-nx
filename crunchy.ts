@@ -42,6 +42,7 @@ import { CrunchyPlayStream } from './@types/crunchyPlayStreams';
 import { CrunchyVideoPlayStreams, CrunchyAudioPlayStreams } from './@types/enums';
 import { randomUUID } from 'node:crypto';
 import { FetchParams } from './modules/module.fetch';
+import { CrunchyTokenInputError, parseCrunchyTokenInput } from './modules/module.crunchy-token';
 
 export type sxItem = {
 	language: langsData.LanguageItem;
@@ -98,8 +99,10 @@ export default class Crunchy implements ServiceClass {
 				username: argv.username ?? (await Helper.question('[Q] LOGIN/EMAIL: ')),
 				password: argv.password ?? (await Helper.question('[Q] PASSWORD: '))
 			});
-		} else if (argv.token) {
-			await this.loginWithToken(argv.token);
+		} else if (argv.token !== undefined) {
+			if (!(await this.loginWithToken(argv.token))) {
+				process.exitCode = 1;
+			}
 		} else if (argv.cmsindex) {
 			await this.refreshToken();
 			await this.getCmsData();
@@ -531,17 +534,40 @@ export default class Crunchy implements ServiceClass {
 		return token;
 	}
 
-	public async loginWithToken(refreshToken: string) {
-		const token = await this.requestWebToken(refreshToken.trim().replace(/^etp_rt=/, ''), randomUUID(), 'Token Authentication failed!');
-		if (!token) {
+	public async loginWithToken(input: string): Promise<boolean> {
+		let tokenInput;
+		try {
+			tokenInput = parseCrunchyTokenInput(input);
+		} catch (error) {
+			const source = error instanceof CrunchyTokenInputError ? error.source : 'direct token';
+			const message = error instanceof Error ? error.message : 'Invalid token input.';
+			console.error(`Token authentication failed (${source}): ${message}`);
 			return false;
 		}
 
-		this.token = token;
-		yamlCfg.saveCRToken(this.token);
-		await this.getProfile(false);
-		await this.getCMStoken(true);
-		return true;
+		const source = tokenInput.source;
+		try {
+			const token = await this.requestWebToken(tokenInput.refreshToken, randomUUID(), `Token authentication failed (${source})!`);
+			if (!token) {
+				return false;
+			}
+
+			this.token = token;
+			yamlCfg.saveCRToken(this.token);
+			if (!(await this.getProfile(false))) {
+				console.error(`Token authentication failed (${source}): profile lookup failed.`);
+				return false;
+			}
+			if (!(await this.getCMStoken())) {
+				console.error(`Token authentication failed (${source}): CMS authentication failed.`);
+				return false;
+			}
+			console.info(`Token authentication succeeded (${source}); token refreshed.`);
+			return true;
+		} catch {
+			console.error(`Token authentication failed (${source}).`);
+			return false;
+		}
 	}
 
 	public async refreshToken(ifNeeded = false, silent = false) {
@@ -619,15 +645,15 @@ export default class Crunchy implements ServiceClass {
 		await this.getCMStoken(ifNeeded);
 	}
 
-	public async getCMStoken(ifNeeded = false) {
+	public async getCMStoken(ifNeeded = false): Promise<boolean> {
 		if (!this.token.access_token) {
 			console.error('No access token!');
-			return;
+			return false;
 		}
 
 		if (ifNeeded && this.cmsToken.cms) {
 			if (!(Date.now() >= new Date(this.cmsToken.cms.expires).getTime())) {
-				return;
+				return true;
 			}
 		}
 
@@ -640,10 +666,11 @@ export default class Crunchy implements ServiceClass {
 		const cmsTokenReq = await this.req.getData(api.cms_auth, cmsTokenReqOpts);
 		if (!cmsTokenReq.ok || !cmsTokenReq.res) {
 			console.error('Authentication CMS token failed!');
-			return;
+			return false;
 		}
 		this.cmsToken = await cmsTokenReq.res.json();
 		console.info('Your Country: %s\n', this.cmsToken.cms?.bucket.split('/')[1]);
+		return this.checkToken();
 	}
 
 	public async getCmsData() {

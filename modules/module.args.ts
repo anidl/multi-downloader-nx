@@ -851,8 +851,9 @@ const args: TAppArg<boolean | number | string | unknown[]>[] = [
 	},
 	{
 		name: 'token',
-		describe: 'Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)',
-		docDescribe: true,
+		describe: 'Login with a Crunchyroll UUID-shaped etp_rt cookie directly or a file containing the raw token or a Netscape cookies export',
+		docDescribe:
+			'Log in to Crunchyroll with the UUID-shaped etp_rt cookie value (optionally prefixed with etp_rt=), or the path to a file containing the raw token or a Netscape cookies export. The file may have any name or extension.',
 		group: 'auth',
 		service: ['crunchy'],
 		type: 'string',
