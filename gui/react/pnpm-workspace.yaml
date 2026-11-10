@@ -1,2 +1,4 @@
 dangerouslyAllowAllBuilds: true
 minimumReleaseAge: 10080
+overrides:
+  esbuild: 0.26.0
