@@ -46,7 +46,7 @@ Authenticate every time the script runs. Use at your own risk.
 | --- | --- | --- | --- | --- | --- | ---| 
 | Crunchyroll | `--token ${token}` | `string` | `No`| `NaN` | `undefined`| `token: ` |
 
-Allows you to login with your token (Example on crunchy is Refresh Token/etp-rt cookie)
+Log in to Crunchyroll with the UUID-shaped etp_rt cookie value (optionally prefixed with etp_rt=), or the path to a file containing the raw token or a Netscape cookies export. The file may have any name or extension.
 ### Fonts
 #### `--dlFonts`
 | **Service** | **Usage** | **Type** | **Required** | **Alias** |  **cli-default Entry**
