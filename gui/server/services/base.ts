@@ -6,6 +6,7 @@ import { cfg } from '..';
 import path from 'path';
 import { console } from '../../../modules/log';
 import { getState, setState } from '../../../modules/module.cfg-loader';
+import type { ServiceName } from '../../../@types/ws';
 import packageJson from '../../../package.json';
 
 export default class Base {
@@ -18,23 +19,20 @@ export default class Base {
 	private downloading = false;
 
 	private queue: QueueItem[] = [];
+	private current?: QueueItem;
+	private addedTotal = 0;
 	private workOnQueue = false;
 
 	version(): Promise<string> {
-		return new Promise(() => {
-			return packageJson.version;
-		});
+		return Promise.resolve(packageJson.version);
 	}
 
 	initState() {
-		if (this.state.services[this.name]) {
-			this.queue = this.state.services[this.name].queue;
-			this.queueChange();
-		} else {
-			this.state.services[this.name] = {
-				queue: []
-			};
-		}
+		if (!this.state.services || typeof this.state.services !== 'object') this.state.services = {};
+		const saved = this.state.services[this.name];
+		this.queue = Array.isArray(saved?.queue) ? saved.queue : [];
+		this.state.services[this.name] = { queue: this.queue };
+		void this.queueChange();
 	}
 
 	setDownloading(downloading: boolean) {
@@ -47,6 +45,7 @@ export default class Base {
 
 	alertError(error: Error) {
 		console.error(`${error}`);
+		this.sendMessage({ name: 'queueError', data: error.message });
 	}
 
 	makeProgressHandler(videoInfo: DownloadInfo) {
@@ -62,7 +61,7 @@ export default class Base {
 	}
 
 	sendMessage<T extends keyof RandomEvents>(data: RandomEvent<T>) {
-		this.ws.sendMessage(data);
+		this.ws.sendMessage({ ...data, service: this.name as ServiceName });
 	}
 
 	async isDownloading() {
@@ -95,27 +94,36 @@ export default class Base {
 	}
 
 	public async getQueue(): Promise<QueueItem[]> {
-		return this.queue;
+		return [...this.queue];
+	}
+	public getCurrent(): QueueItem | undefined {
+		return this.current;
+	}
+	public getAddedCount(): number {
+		return this.addedTotal;
 	}
 
 	public async removeFromQueue(index: number) {
+		if (!Number.isInteger(index) || index < 0 || index >= this.queue.length) return;
 		this.queue.splice(index, 1);
-		this.queueChange();
+		void this.queueChange();
 	}
 
 	public async clearQueue() {
 		this.queue = [];
-		this.queueChange();
+		void this.queueChange();
 	}
 
 	public addToQueue(data: QueueItem[]) {
-		this.queue = this.queue.concat(...data);
-		this.queueChange();
+		if (!data.length) return;
+		this.addedTotal += data.length;
+		this.queue = this.queue.concat(data);
+		void this.queueChange();
 	}
 
 	public setDownloadQueue(data: boolean) {
 		this.workOnQueue = data;
-		this.queueChange();
+		void this.queueChange();
 	}
 
 	public async getDownloadQueue(): Promise<boolean> {
@@ -123,21 +131,32 @@ export default class Base {
 	}
 
 	private async queueChange() {
-		this.sendMessage({ name: 'queueChange', data: this.queue });
-		if (this.workOnQueue && this.queue.length > 0 && !(await this.isDownloading())) {
+		// Persist the same snapshot that is shown to clients.
+		if (this.workOnQueue && this.queue.length > 0 && !this.downloading) {
+			const next = this.queue.shift()!;
+			this.current = next;
 			this.setDownloading(true);
-			this.sendMessage({ name: 'current', data: this.queue[0] });
-			this.downloadItem(this.queue[0]);
-			this.queue = this.queue.slice(1);
-			this.queueChange();
+			this.sendMessage({ name: 'current', data: next });
+			void Promise.resolve()
+				.then(() => this.downloadItem(next))
+				.catch((error) => {
+					this.alertError(error instanceof Error ? error : new Error(String(error)));
+					this.setDownloading(false);
+					void this.onFinish();
+				});
 		}
-		this.state.services[this.name].queue = this.queue;
-		setState(this.state);
+		// Re-read the latest state: different services may be downloading concurrently.
+		const latest = getState();
+		if (!latest.services) latest.services = {};
+		latest.services[this.name] = { queue: [...this.queue] };
+		setState(latest);
+		this.sendMessage({ name: 'queueChange', data: this.queue });
 	}
 
 	public async onFinish() {
+		this.current = undefined;
 		this.sendMessage({ name: 'current', data: undefined });
-		this.queueChange();
+		void this.queueChange();
 	}
 
 	//Overriten

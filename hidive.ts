@@ -203,6 +203,9 @@ export default class Hidive implements ServiceClass {
 		};
 	}
 
+	public isAuthenticated(): boolean {
+		return !!this.token.authorisationToken && !!this.token.refreshToken && this.token.guest !== true;
+	}
 	public async doAuth(data: AuthData): Promise<AuthResponse> {
 		if (!this.token.refreshToken || !this.token.authorisationToken) {
 			await this.doAnonymousAuth();

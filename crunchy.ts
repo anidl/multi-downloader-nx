@@ -420,7 +420,10 @@ export default class Crunchy implements ServiceClass {
 		this.token.device_id = uuid;
 		this.token.expires = new Date(Date.now() + this.token.expires_in * 1000);
 		yamlCfg.saveCRToken(this.token);
+		// Discard anonymous CMS credentials before initializing this user session.
+		this.cmsToken = {};
 		await this.getProfile();
+		await this.getCMStoken(true);
 		console.info('Your Country: %s', this.token.country);
 		return { isOk: true, value: undefined };
 	}
@@ -551,6 +554,8 @@ export default class Crunchy implements ServiceClass {
 			/*if (ifNeeded)
         return;*/
 			if (!(Date.now() > new Date(this.token.expires).getTime()) && ifNeeded) {
+				// A valid token can still lack CMS authorization after interactive login.
+				await this.getCMStoken(true);
 				return;
 			} else {
 				//console.info('[WARN] The token has expired compleatly. I will try to refresh the token anyway, but you might have to reauth.');

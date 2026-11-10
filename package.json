@@ -30,13 +30,13 @@
 			"name": "AnidlSupport <AnidlSupport@users.noreply.github.com>"
 		}
 	],
-	"homepage": "https://github.com/anidl/multi-downloader-nx",
+	"homepage": "https://github.com/Rafaellaerin/multi-downloader-nx",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/anidl/multi-downloader-nx.git"
+		"url": "https://github.com/Rafaellaerin/multi-downloader-nx.git"
 	},
 	"bugs": {
-		"url": "https://github.com/anidl/multi-downloader-nx/issues"
+		"url": "https://github.com/Rafaellaerin/multi-downloader-nx/issues"
 	},
 	"license": "MIT",
 	"dependencies": {

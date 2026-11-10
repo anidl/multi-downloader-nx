@@ -1,151 +1,110 @@
-import React, { RefObject } from 'react';
-import { Box, ClickAwayListener, Divider, List, ListItem, Paper, TextField, Typography } from '@mui/material';
-import { SearchResponse } from '../../../../../../@types/messageHandler';
+import React from 'react';
+import { Box, CircularProgress, InputAdornment, List, ListItemButton, Paper, Stack, TextField, Typography } from '@mui/material';
+import { SearchRounded } from '@mui/icons-material';
+import { SearchResponseItem } from '../../../../../../@types/messageHandler';
 import useStore from '../../../hooks/useStore';
 import { messageChannelContext } from '../../../provider/MessageChannel';
-import './SearchBox.css';
-import ContextMenu from '../../reusable/ContextMenu';
 import { useSnackbar } from 'notistack';
 
 const SearchBox: React.FC = () => {
 	const messageHandler = React.useContext(messageChannelContext);
 	const [store, dispatch] = useStore();
 	const [search, setSearch] = React.useState('');
-
-	const [focus, setFocus] = React.useState(false);
-
-	const [searchResult, setSearchResult] = React.useState<undefined | SearchResponse>();
-	const anchor = React.useRef<HTMLDivElement>(null);
-
+	const [results, setResults] = React.useState<SearchResponseItem[]>([]);
+	const [loading, setLoading] = React.useState(false);
 	const { enqueueSnackbar } = useSnackbar();
 
-	const selectItem = (id: string) => {
-		dispatch({
-			type: 'downloadOptions',
-			payload: {
-				...store.downloadOptions,
-				id
-			}
-		});
-	};
-
 	React.useEffect(() => {
-		if (search.trim().length === 0) return setSearchResult({ isOk: true, value: [] });
+		let cancelled = false;
+		const term = search.trim();
+		if (term.length < 3 || !messageHandler?.serviceReady) {
+			setResults([]);
+			setLoading(false);
+			return;
+		}
+		setLoading(true);
+		const timer = window.setTimeout(() => {
+			void messageHandler
+				.search({ search: term })
+				.then((response) => {
+					if (cancelled) return;
+					if (!response.isOk) throw new Error(response.reason.message || 'Search failed');
+					setResults(response.value.slice(0, 8));
+				})
+				.catch((error) => {
+					if (!cancelled) {
+						setResults([]);
+						enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: 'error' });
+					}
+				})
+				.finally(() => {
+					if (!cancelled) setLoading(false);
+				});
+		}, 450);
+		return () => {
+			cancelled = true;
+			window.clearTimeout(timer);
+		};
+	}, [search, messageHandler?.service, messageHandler?.serviceReady]);
 
-		const timeOutId = setTimeout(async () => {
-			if (search.trim().length > 3) {
-				const s = await messageHandler?.search({ search });
-				if (s && s.isOk) s.value = s.value.slice(0, 10);
-				setSearchResult(s);
-			}
-		}, 500);
-		return () => clearTimeout(timeOutId);
-	}, [search]);
-
-	const anchorBounding = anchor.current?.getBoundingClientRect();
 	return (
-		<ClickAwayListener onClickAway={() => setFocus(false)}>
-			<Box sx={{ m: 2 }}>
-				<TextField ref={anchor} value={search} onClick={() => setFocus(true)} onChange={(e) => setSearch(e.target.value)} variant="outlined" label="Search" fullWidth />
-				{searchResult !== undefined && searchResult.isOk && searchResult.value.length > 0 && focus && (
-					<Paper
-						sx={{
-							position: 'fixed',
-							maxHeight: '50%',
-							width: `${anchorBounding?.width}px`,
-							left: anchorBounding?.x,
-							top: (anchorBounding?.y ?? 0) + (anchorBounding?.height ?? 0),
-							zIndex: 99,
-							overflowY: 'scroll'
-						}}
-					>
-						<List>
-							{searchResult && searchResult.isOk ? (
-								searchResult.value.map((a, ind, arr) => {
-									const imageRef = React.createRef<HTMLImageElement>();
-									const summaryRef = React.createRef<HTMLParagraphElement>();
-									return (
-										<Box key={a.id}>
-											<ListItem
-												className="listitem-hover"
-												onClick={() => {
-													selectItem(a.id);
-													setFocus(false);
-												}}
-											>
-												<Box sx={{ display: 'flex' }}>
-													<Box sx={{ width: '20%', height: '100%', pr: 2 }}>
-														<img ref={imageRef} src={a.image} style={{ width: '100%', height: 'auto' }} alt="thumbnail" />
-													</Box>
-													<Box sx={{ display: 'flex', flexDirection: 'column', maxWidth: '70%' }}>
-														<Typography variant="h6" component="h6" color="text.primary" sx={{}}>
-															{a.name}
-														</Typography>
-														{a.desc && (
-															<Typography variant="caption" component="p" color="text.primary" sx={{ pt: 1, pb: 1 }} ref={summaryRef}>
-																{a.desc}
-															</Typography>
-														)}
-														{a.lang && (
-															<Typography variant="caption" component="p" color="text.primary" sx={{}}>
-																Languages: {a.lang.join(', ')}
-															</Typography>
-														)}
-														<Typography variant="caption" component="p" color="text.primary" sx={{}}>
-															ID: {a.id}
-														</Typography>
-													</Box>
-												</Box>
-											</ListItem>
-											<ContextMenu
-												options={[
-													{
-														text: 'Copy image URL',
-														onClick: async () => {
-															await navigator.clipboard.writeText(a.image);
-															enqueueSnackbar('Copied URL to clipboard', {
-																variant: 'info'
-															});
-														}
-													},
-													{
-														text: 'Open image in new tab',
-														onClick: () => {
-															window.open(a.image);
-														}
-													}
-												]}
-												popupItem={imageRef as RefObject<HTMLElement>}
-											/>
-											{a.desc && (
-												<ContextMenu
-													options={[
-														{
-															onClick: async () => {
-																await navigator.clipboard.writeText(a.desc!);
-																enqueueSnackbar('Copied summary to clipboard', {
-																	variant: 'info'
-																});
-															},
-															text: 'Copy summary to clipboard'
-														}
-													]}
-													popupItem={summaryRef as RefObject<HTMLElement>}
-												/>
-											)}
-											{ind < arr.length - 1 && <Divider />}
-										</Box>
-									);
-								})
-							) : (
-								<></>
-							)}
-						</List>
-					</Paper>
-				)}
-			</Box>
-		</ClickAwayListener>
+		<Box sx={{ mb: 2 }}>
+			<TextField
+				fullWidth
+				size="small"
+				value={search}
+				placeholder="Search the catalog by title…"
+				label="Search series"
+				onChange={(event) => setSearch(event.target.value)}
+				InputProps={{
+					startAdornment: (
+						<InputAdornment position="start">
+							<SearchRounded color="action" />
+						</InputAdornment>
+					),
+					endAdornment: loading ? (
+						<InputAdornment position="end">
+							<CircularProgress size={18} />
+						</InputAdornment>
+					) : null
+				}}
+			/>
+			{search.trim().length >= 3 && !loading && results.length === 0 && (
+				<Typography variant="caption" sx={{ display: 'block', mt: 1 }} color="text.secondary">
+					No results yet. You can enter the series ID manually below.
+				</Typography>
+			)}
+			{results.length > 0 && (
+				<Paper variant="outlined" sx={{ mt: 1, maxHeight: 260, overflowY: 'auto' }}>
+					<List disablePadding>
+						{results.map((item) => (
+							<ListItemButton
+								key={item.id}
+								divider
+								onClick={() => {
+									dispatch({ type: 'downloadOptions', payload: { ...store.downloadOptions, id: item.id, e: '', all: false } });
+									setSearch('');
+									setResults([]);
+								}}
+							>
+								<Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%' }}>
+									{item.image && <Box component="img" alt="" src={item.image} sx={{ width: 58, height: 54, borderRadius: 1, objectFit: 'cover' }} />}
+									<Box sx={{ flex: 1, minWidth: 0 }}>
+										<Typography variant="body2" fontWeight={750} noWrap>
+											{item.name}
+										</Typography>
+										<Typography variant="caption" color="text.secondary">
+											ID: {item.id}
+											{item.lang?.length ? ` · ${item.lang.join(', ')}` : ''}
+										</Typography>
+									</Box>
+								</Stack>
+							</ListItemButton>
+						))}
+					</List>
+				</Paper>
+			)}
+		</Box>
 	);
 };
-
 export default SearchBox;
